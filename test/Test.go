@@ -26,3 +26,21 @@ func SlicesMatch[T any](actual []T, generated []T, t *testing.T){
         ),t);
     }
 }
+
+func Panics(action func(), base string, t *testing.T){
+    defer func() {
+        if r:=recover(); r==nil {
+            t.Errorf("The tested code did not panic: %s",base);
+        }
+    }()
+    action()
+}
+
+func NoPanic(action func(), base string, t *testing.T){
+    defer func() {
+        if r:=recover(); r!=nil {
+            t.Errorf("The tested code did panic: %s",base);
+        }
+    }()
+    action()
+}

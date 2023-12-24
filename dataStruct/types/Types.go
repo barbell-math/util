@@ -31,3 +31,10 @@ type Variant[T any, U any] interface {
     ValAOr(_default T) T;
     ValBOr(_default U) U;
 };
+
+type Pair[T any, U any] interface {
+    GetA() T
+    SetA(v T)
+    GetB() U
+    SetB(v U)
+}

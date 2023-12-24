@@ -16,7 +16,9 @@ func sequenceGenerator(start float64, end float64, step float64) Iter[float64] {
 
 //Find the area under the function y=5cos(2pi/5(x-5))+5 between [-100,100]
 // using a Riemann sum with a given step size
-val,err:=sequenceGenerator(-100.0,100.0,step).Map(func(index int, val float64) (float64,error) {
+var step float64=0.0001
+
+total,err:=sequenceGenerator(-100.0,100.0,step).Map(func(index int, val float64) (float64,error) {
     height:=amp*math.Cos(2*math.Pi/period*(val-hShift))+vShift;
     return height*step,nil;
 }).Reduce(0.0, func(accum *float64, iter float64) error {
@@ -37,13 +39,13 @@ This library takes advantage of the fact that functions can have methods in go-l
 
 There are three parts to any iterator chain, with the middle part being optional:
 
-1. Producer: The producer is responsible for creating a stream of values to pass to the rest os the iterator stream. The source can be a slice, channel, or single value.
+1. Producer: The producer is responsible for creating a stream of values to pass to the rest of the iterator stream. The source can be a slice, channel, or single value.
 1. Intermediary: An Intermediary is responsible for taking it's parent iterators values, mutating and/or filtering them, and passing them down to it's child iterator.
 1. Consumer: The consumer is what collects all of the final values and either saves them or performs some aggregate function with them.
 
 The intermediaries and consumers can be further sub-categorized:
 
-1. Non-Pseudo: All iterators in the parent category (i.e. Intermediary or consumer) can be expressed using a non-pseudo iterator. For intermediaries the non-pseudo iterator is ```Next``` and for consumers the non-pseudo iterators are ```ForEach``` and ```Stop```.
+1. Non-Pseudo: All iterators in the parent category (i.e. Intermediary or consumer) can be expressed using a non-pseudo iterator. For intermediaries the non-pseudo iterators are ```Next``` and ```Inject```. For consumers the non-pseudo iterators are ```ForEach``` and ```Stop```.
 1. Pseudo: Any iterator in the parent category that can be expressed using the appropriate categories non-pseudo iterator.
 
 If you are looking to extend this library and add more iterators, it is highly recommended that any new intermediary or consumer iterators are created _using the non-pseudo iterators_. This will reduce errors and time spent needlessly banging your head against a wall.

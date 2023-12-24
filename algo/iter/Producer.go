@@ -50,9 +50,25 @@ func StrElems(s string) Iter[byte] {
     }
 }
 
-//func MapElems[K comparable, V any](s map[K]V) Iter[T] {
-//
-//}
+func MapElems[K comparable, V any](m map[K]V, v types.Pair[K,V]) Iter[types.Pair[K,V]] {
+    c:=make(chan K)
+    go func(){
+        for k,_:=range(m) {
+            c <- k
+        }
+    }()
+    i:=-1;
+    return func(f IteratorFeedback) (types.Pair[K,V],error,bool) {
+        i++;
+        if i<len(m) && f!=Break {
+            v.SetA(<-c)
+            v.SetB(m[v.GetA()])
+            return v,nil,true;
+        }
+        close(c)
+        return nil,nil,false
+    }
+}
 
 func ChanElems[T any](c <-chan T) Iter[T] {
     return func(f IteratorFeedback) (T,error,bool) {
