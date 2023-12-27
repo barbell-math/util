@@ -1,7 +1,7 @@
 package dataStruct;
 
 import (
-	"github.com/barbell-math/util/dataStruct/types"
+	staticType "github.com/barbell-math/util/dataStruct/types/static"
 )
 
 type VariantFlag int;
@@ -19,13 +19,13 @@ type Variant[T any, U any] struct {
 // is what the interface expects. The interface cannot use a specific return 
 //value because that would require the interface to import this module, creating 
 //circular imports.
-func (v Variant[T,U])SetValA(newVal T) types.Variant[T,U] {
+func (v Variant[T,U])SetValA(newVal T) staticType.Variant[T,U] {
     v.val=newVal;
     v.aOrB=A;
     return v;
 }
 
-func (v Variant[T,U])SetValB(newVal U) types.Variant[T,U] {
+func (v Variant[T,U])SetValB(newVal U) staticType.Variant[T,U] {
     v.val=newVal;
     v.aOrB=B;
     return v;

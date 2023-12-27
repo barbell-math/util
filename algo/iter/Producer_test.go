@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/barbell-math/util/dataStruct"
 	"github.com/barbell-math/util/test"
 )
 

@@ -3,38 +3,61 @@ package types;
 //This file should never import anything other than the std library. If anything
 // else is imported the risk of import loops is very high.
 
-type Vector[T any] interface {
+type Capacity[T any] interface {
+    Length() int;
+    Capacity() int;
+}
+
+type DynCapacity[T any] interface {
+    Capacity[T]
+    SetCapacity(s int) error
+}
+
+type StaticCapacity[T any] interface {
+    Capacity[T]
+    Full() bool
+}
+
+type RandomRead[T any] interface {
     Get(idx int) (T,error);
     GetPntr(idx int) (*T,error);
-    Set(idx int) (T,error);
-    Append(v T) error;
+}
+
+type RandomWrite[T any] interface {
+    Set(v T, idx int) error;
     Insert(v T, idx int) error;
-    Length() int;
-};
+    Append(v T) error
+}
 
-type Queue[T any] interface {
-    Pop() (T,error);
-    Peek(idx int) (T,error);
-    PeekPntr(idx int) (*T,error);
-    Push(v T) (error);
-    Capacity() int;
-    Length() int;
-};
+type RandomDelete[T any] interface {
+    Delete(idx int) error
+    Clear()
+}
 
-type Variant[T any, U any] interface {
-    SetValA(newVal T) Variant[T,U];
-    SetValB(newVal U) Variant[T,U];
-    HasA() bool;
-    HasB() bool;
-    ValA() T;
-    ValB() U;
-    ValAOr(_default T) T;
-    ValBOr(_default U) U;
-};
+type FirstElemRead[T any] interface {
+    PeekFront() (T,error);
+    PeekPntrFront() (*T,error);
+}
 
-type Pair[T any, U any] interface {
-    GetA() T
-    SetA(v T)
-    GetB() U
-    SetB(v U)
+type FirstElemWrite[T any] interface {
+    PushFront(v T) error;
+    ForcePushFront(v T)
+}
+
+type FirstElemRemove[T any] interface {
+    PopFront() (T,error);
+}
+
+type LastElemRead[T any] interface {
+    PeekBack() (T,error);
+    PeekPntrBack() (*T,error);
+}
+
+type LastElemWrite[T any] interface {
+    PushBack(v T) (error);
+    ForcePushBack(v T)
+}
+
+type LastElemRemove[T any] interface {
+    PopBack() (T,error);
 }

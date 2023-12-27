@@ -4,8 +4,6 @@ import (
     "fmt"
     "testing"
     "github.com/barbell-math/util/test"
-    //"github.com/barbell-math/util/dataStruct"
-    //"github.com/barbell-math/util/dataStruct/types"
 )
 
 func TestTake(t *testing.T) {
@@ -115,14 +113,3 @@ func TestFilter(t *testing.T){
     test.BasicTest(0,cntr,"Filter did not work appropriately.",t);
     test.BasicTest(nil,err,"Filter returned an error when it should not have",t);
 }
-
-//func testWindowIterHelper[T any](vals []T, size int, t *testing.T){
-//    q,_:=dataStruct.NewCircularQueue[T](size);
-//    Window(SliceElems(vals),q,false,
-//    func(index int, q *types.Queue[T]) (IteratorFeedback, error) {
-//
-//    }).ForEach()
-//}
-//func TestWindow(t *testing.T){
-//
-//}

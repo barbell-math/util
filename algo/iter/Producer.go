@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/barbell-math/util/dataStruct/types"
+	staticType "github.com/barbell-math/util/dataStruct/types/static"
 	customerr "github.com/barbell-math/util/err"
 )
 
@@ -50,7 +50,7 @@ func StrElems(s string) Iter[byte] {
     }
 }
 
-func MapElems[K comparable, V any](m map[K]V, v types.Pair[K,V]) Iter[types.Pair[K,V]] {
+func MapElems[K comparable, V any](m map[K]V, v staticType.Pair[K,V]) Iter[staticType.Pair[K,V]] {
     c:=make(chan K)
     go func(){
         for k,_:=range(m) {
@@ -58,7 +58,7 @@ func MapElems[K comparable, V any](m map[K]V, v types.Pair[K,V]) Iter[types.Pair
         }
     }()
     i:=-1;
-    return func(f IteratorFeedback) (types.Pair[K,V],error,bool) {
+    return func(f IteratorFeedback) (staticType.Pair[K,V],error,bool) {
         i++;
         if i<len(m) && f!=Break {
             v.SetA(<-c)
@@ -67,6 +67,44 @@ func MapElems[K comparable, V any](m map[K]V, v types.Pair[K,V]) Iter[types.Pair
         }
         close(c)
         return nil,nil,false
+    }
+}
+
+func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
+    c:=make(chan K)
+    go func(){
+        for k,_:=range(m) {
+            c <- k
+        }
+    }()
+    i:=-1;
+    return func(f IteratorFeedback) (K,error,bool) {
+        i++;
+        if i<len(m) && f!=Break {
+            return (<-c),nil,true;
+        }
+        close(c)
+        var tmp K
+        return tmp,nil,false
+    }
+}
+
+func MapVals[K comparable, V any](m map[K]V) Iter[V] {
+    c:=make(chan V)
+    go func(){
+        for _,v:=range(m) {
+            c <- v
+        }
+    }()
+    i:=-1;
+    return func(f IteratorFeedback) (V,error,bool) {
+        i++;
+        if i<len(m) && f!=Break {
+            return (<-c),nil,true;
+        }
+        close(c)
+        var tmp V
+        return tmp,nil,false
     }
 }
 
@@ -99,14 +137,14 @@ func FileLines(path string) Iter[string] {
 
 func Join[T any, U any](i1 Iter[T],
         i2 Iter[U],
-        v types.Variant[T,U],
-        decider func(left T, right U) bool) Iter[types.Variant[T,U]] {
+        v staticType.Variant[T,U],
+        decider func(left T, right U) bool) Iter[staticType.Variant[T,U]] {
     var i1Val T;
     var i2Val U;
     var err1, err2 error;
     cont1, cont2:=true, true;
     getI1Val, getI2Val:=true, true;
-    return func(f IteratorFeedback) (types.Variant[T,U], error, bool) {
+    return func(f IteratorFeedback) (staticType.Variant[T,U], error, bool) {
         if f==Break {
             return v, customerr.AppendError(i1.Stop(),i2.Stop()), false;
         }
@@ -142,7 +180,7 @@ func Join[T any, U any](i1 Iter[T],
 
 func JoinSame[T any](i1 Iter[T],
         i2 Iter[T],
-        v types.Variant[T,T],
+        v staticType.Variant[T,T],
         decider func(left T, right T) bool) Iter[T] {
     var tmp T;
     realJoiner:=Join(i1,i2,v,decider);

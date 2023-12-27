@@ -1,7 +1,7 @@
 package iter;
 
 import (
-	"github.com/barbell-math/util/dataStruct/types"
+    staticType "github.com/barbell-math/util/dataStruct/types/static"
 )
 
 func (i Iter[T])Take(num int) Iter[T] {
@@ -66,18 +66,17 @@ func (i Iter[T])Filter(op func(index int, val T) bool) Iter[T] {
 //of a queue. Using the types interface definition is the only thing preventing
 //a circular import now.
 func Window[T any](i Iter[T],
-        q types.Queue[T],
-        allowPartials bool) Iter[types.Queue[T]] {
+    q interface{ staticType.Queue[T]; staticType.Vector[T] },
+    allowPartials bool,
+) Iter[staticType.Vector[T]] {
     return Next(i,
-    func(index int, val T, status IteratorFeedback) (IteratorFeedback, types.Queue[T], error) {
+    func(
+        index int, val T, status IteratorFeedback,
+    ) (IteratorFeedback, staticType.Vector[T], error) {
         if status==Break {
             return Break,q,nil;
         }
-        if q.Length()==q.Capacity() {
-            q.Pop(); //Ignoring potential queue empty error because of if stmt
-        }
-        //Ignoring potential queue full error because of if stmt
-        q.Push(val);
+        q.ForcePushBack(val);
         if !allowPartials && q.Length()!=q.Capacity() {
             return Iterate,q,nil;
         }

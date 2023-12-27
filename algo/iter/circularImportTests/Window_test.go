@@ -2,10 +2,10 @@ package circularImportTests;
 
 import (
     "testing"
-	"github.com/barbell-math/util/dataStruct/types"
-	"github.com/barbell-math/util/dataStruct"
-	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/test"
+    staticType "github.com/barbell-math/util/dataStruct/types/static"
+    "github.com/barbell-math/util/dataStruct"
+    "github.com/barbell-math/util/algo/iter"
+    "github.com/barbell-math/util/test"
 )
 
 
@@ -42,15 +42,15 @@ func TestWindowNoPartials(t *testing.T){
         vals[i]=i;
     }
     err:=iter.Window[int](iter.SliceElems(vals),&q,false).ForEach(
-    func(index int, val types.Queue[int]) (iter.IteratorFeedback, error) {
+    func(index int, val staticType.Vector[int]) (iter.IteratorFeedback, error) {
         cntr++;
         test.BasicTest(2,q.Length(),
             "Partials were returned when they should not have.",t,
         );
-        if v,err:=q.Peek(0); err==nil {
+        if v,err:=q.PeekFront(); err==nil {
             test.BasicTest(index,v,"Window values were out of order.",t);
         }
-        if v,err:=q.Peek(1); err==nil {
+        if v,err:=q.Get(1); err==nil {
             test.BasicTest(index+1,v,"Window values were out of order.",t);
         }
         return iter.Continue,nil;
@@ -71,23 +71,23 @@ func TestWindowPartials(t *testing.T){
         vals[i]=i;
     }
     err:=iter.Window[int](iter.SliceElems(vals),&q,true).ForEach(
-    func(index int, val types.Queue[int]) (iter.IteratorFeedback, error) {
+    func(index int, val staticType.Vector[int]) (iter.IteratorFeedback, error) {
         cntr++;
         if index==0 || index==100 {
             test.BasicTest(1,q.Length(),
                 "Partials were returned when they should not have.",t,
             );
-            if v,err:=q.Peek(0); err==nil {
+            if v,err:=q.PeekFront(); err==nil {
                 test.BasicTest(index,v,"Window values were out of order.",t);
             }
         } else {
             test.BasicTest(2,q.Length(),
                 "Partials were returned when they should not have.",t,
             );
-            if v,err:=q.Peek(0); err==nil {
+            if v,err:=q.PeekFront(); err==nil {
                 test.BasicTest(index-1,v,"Window values were out of order.",t);
             }
-            if v,err:=q.Peek(1); err==nil {
+            if v,err:=q.Get(1); err==nil {
                 test.BasicTest(index,v,"Window values were out of order.",t);
             }
         }

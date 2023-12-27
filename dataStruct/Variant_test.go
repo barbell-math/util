@@ -3,7 +3,7 @@ package dataStruct
 import (
 	"testing"
 
-	"github.com/barbell-math/util/dataStruct/types"
+	"github.com/barbell-math/util/dataStruct/types/static"
 	"github.com/barbell-math/util/test"
 )
 
@@ -33,7 +33,7 @@ func TestVariantB(t *testing.T){
     );
 }
 
-func interfaceTestHelper[T any, U any](v types.Variant[T,U]){}
+func interfaceTestHelper[T any, U any](v static.Variant[T,U]){}
 func TestVariantInterface(t *testing.T){
     tmp:=5;
     v:=Variant[int,float64]{};

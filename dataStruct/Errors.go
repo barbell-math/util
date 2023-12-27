@@ -11,3 +11,7 @@ var QueueFull,IsQueueFull=customerr.ErrorFactory(
 var QueueEmpty,IsQueueEmpty=customerr.ErrorFactory(
     "The queue is empty.",
 );
+
+var IndexOutOfBounds,IsIndexOutOfBounds=customerr.ErrorFactory(
+    "Index is out of bounds.",
+)

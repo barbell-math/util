@@ -1,6 +1,6 @@
 package dataStruct
 
-type Tree[N interface{}] struct {
-    Data N
+type Tree[N any] struct {
+    Val N
     Children []Tree[N]
 }
