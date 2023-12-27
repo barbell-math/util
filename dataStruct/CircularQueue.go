@@ -184,7 +184,6 @@ func (c *CircularBuffer[T])insertMoveBack(v *T, idx int) {
 func (c *CircularBuffer[T])Append(v T) error {
     return c.PushBack(v)
 }
-//ToDO -rename to CircularBuffer
 // Static Vector (Array?)
 // Dynamic Vector (name?)
 // wtf to do about the decrepid double linked list?

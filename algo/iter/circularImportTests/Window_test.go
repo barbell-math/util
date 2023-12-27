@@ -10,7 +10,7 @@ import (
 
 
 func TestWindowEmpty(t *testing.T){
-    q,_:=dataStruct.NewCircularQueue[int](2)
+    q,_:=dataStruct.NewCircularBuffer[int](2)
     cnt,err:=iter.Window[int](iter.SliceElems([]int{}),&q,true).Count();
     test.BasicTest(0,cnt,"Window returned values from empty parent iterator.",t);
     test.BasicTest(nil,err,
@@ -20,7 +20,7 @@ func TestWindowEmpty(t *testing.T){
 
 func TestWindowNoPartialsNoWindowValues(t *testing.T){
     cntr:=0;
-    q,_:=dataStruct.NewCircularQueue[int](101);
+    q,_:=dataStruct.NewCircularBuffer[int](101);
     vals:=make([]int,100);
     for i:=0; i<len(vals); i++ {
         vals[i]=i;
@@ -36,7 +36,7 @@ func TestWindowNoPartialsNoWindowValues(t *testing.T){
 
 func TestWindowNoPartials(t *testing.T){
     cntr:=0;
-    q,_:=dataStruct.NewCircularQueue[int](2);
+    q,_:=dataStruct.NewCircularBuffer[int](2);
     vals:=make([]int,100);
     for i:=0; i<len(vals); i++ {
         vals[i]=i;
@@ -65,7 +65,7 @@ func TestWindowNoPartials(t *testing.T){
 
 func TestWindowPartials(t *testing.T){
     cntr:=0;
-    q,_:=dataStruct.NewCircularQueue[int](2);
+    q,_:=dataStruct.NewCircularBuffer[int](2);
     vals:=make([]int,100);
     for i:=0; i<len(vals); i++ {
         vals[i]=i;
