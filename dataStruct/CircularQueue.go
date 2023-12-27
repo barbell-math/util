@@ -237,7 +237,11 @@ func (c *CircularBuffer[T])deleteMoveBack(idx int) {
 }
 
 func (c *CircularBuffer[T])Clear() {
-    
+    c.m.Lock()
+    defer c.m.Unlock()
+    c.vals=make([]T,len(c.vals))
+    c.numElems=0
+    c.startEnd=Pair[int, int]{A: 0, B: len(c.vals)-1}
 }
 
 func (c *CircularBuffer[T])Elems() iter.Iter[T] {

@@ -734,6 +734,31 @@ func TestCircularBufferPop(t *testing.T){
     }
 }
 
+func TestCircularQueueClear(t *testing.T){
+    tmp,_:=NewCircularBuffer[int](5)
+    for i:=0; i<5; i++ {
+        tmp.PushBack(i)
+    }
+    tmp.Clear()
+    test.BasicTest(0,tmp.numElems,
+        "Clear did not reset num elems",t,
+    )
+    test.BasicTest(0,tmp.startEnd.A,
+        "Clear did not reset the start index.",t,
+    )
+    test.BasicTest(len(tmp.vals)-1,tmp.startEnd.B,
+        "Clear did not reset the end index.",t,
+    )
+    test.BasicTest(5,len(tmp.vals),
+        "Clear did not change the underlying slice.",t,
+    )
+    for i:=0; i<5; i++ {
+        test.BasicTest(0,tmp.vals[i],
+            "Clear did not clear the underlying slice.",t,
+        )
+    }
+}
+
 func testCircularBufferElemsHelper(c CircularBuffer[int], t *testing.T){
     for i:=0; i<len(c.vals); i++ {
         c.PushBack(i);
