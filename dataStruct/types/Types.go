@@ -3,34 +3,41 @@ package types;
 //This file should never import anything other than the std library. If anything
 // else is imported the risk of import loops is very high.
 
-type Capacity[T any] interface {
+type SyncPassThrough interface {
+    Lock()
+    Unlock()
+    RLock()
+    RUnlock()
+}
+
+type Capacity interface {
     Length() int;
     Capacity() int;
 }
 
-type DynCapacity[T any] interface {
-    Capacity[T]
+type DynCapacity interface {
+    Capacity
     SetCapacity(s int) error
 }
 
-type StaticCapacity[T any] interface {
-    Capacity[T]
+type StaticCapacity interface {
+    Capacity
     Full() bool
 }
 
-type RandomRead[T any] interface {
-    Get(idx int) (T,error);
-    GetPntr(idx int) (*T,error);
+type Read[T any, U any] interface {
+    Get(idx U) (T,error);
+    GetPntr(idx U) (*T,error);
 }
 
-type RandomWrite[T any] interface {
-    Set(v T, idx int) error;
-    Insert(v T, idx int) error;
-    Append(v T) error
+type Write[T any, U any] interface {
+    Set(v T, idx U) error;
+    Insert(v T, idx U) error;
+    Append(vals ...T) error
 }
 
-type RandomDelete[T any] interface {
-    Delete(idx int) error
+type Delete[T any, U any] interface {
+    Delete(idx U) error
     Clear()
 }
 

@@ -9,13 +9,14 @@ import "github.com/barbell-math/util/dataStruct/types"
 // All types in this file must support the static capacity interface, except for
 // the Variant and Pair types.
 type ReadVector[T any] interface {
-    types.StaticCapacity[T]
-    types.RandomRead[T]
+    types.StaticCapacity
+    types.Read[T,int]
 }
 type WriteVector[T any] interface {
-    types.StaticCapacity[T]
-    types.RandomWrite[T]
-    types.RandomDelete[T]
+    types.SyncPassThrough
+    types.StaticCapacity
+    types.Write[T,int]
+    types.Delete[T,int]
 }
 type Vector[T any] interface {
     ReadVector[T]
@@ -23,11 +24,12 @@ type Vector[T any] interface {
 };
 
 type ReadQueue[T any] interface {
-    types.StaticCapacity[T]
+    types.StaticCapacity
     types.FirstElemRead[T]
 }
 type WriteQueue[T any] interface {
-    types.StaticCapacity[T]
+    types.SyncPassThrough
+    types.StaticCapacity
     types.FirstElemRemove[T]
     types.LastElemWrite[T]
 }
@@ -37,11 +39,12 @@ type Queue[T any] interface {
 };
 
 type ReadStack[T any] interface {
-    types.StaticCapacity[T]
+    types.StaticCapacity
     types.FirstElemRead[T]
 }
 type WriteStack[T any] interface {
-    types.StaticCapacity[T]
+    types.SyncPassThrough
+    types.StaticCapacity
     types.FirstElemWrite[T]
     types.FirstElemRemove[T]
 }
@@ -61,6 +64,21 @@ type WriteDeque[T any] interface {
 type Deque[T any] interface {
     ReadDeque[T]
     WriteDeque[T]
+}
+
+type ReadMap[T any, U any] interface {
+    types.StaticCapacity
+    types.Read[T,U]
+}
+type WriteMap[T any, U any] interface {
+    types.SyncPassThrough
+    types.StaticCapacity
+    types.Write[T,U]
+    types.Delete[T,U]
+}
+type Map[T any, U any] interface {
+    ReadMap[T,U]
+    WriteMap[T,U]
 }
 
 type Variant[T any, U any] interface {

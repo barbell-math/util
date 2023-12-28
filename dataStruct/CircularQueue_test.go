@@ -817,7 +817,12 @@ func TestCircularBufferStaticQueueTypeInterface(t *testing.T) {
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
+    tmp2,err:=NewSyncedCircularBuffer[int](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
     staticQueueInterfaceTypeCheck[int](&tmp);
+    staticQueueInterfaceTypeCheck[int](&tmp2);
 }
 
 func TestCircularBufferStaticStackTypeInterface(t *testing.T){
@@ -825,7 +830,25 @@ func TestCircularBufferStaticStackTypeInterface(t *testing.T){
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
+    tmp2,err:=NewSyncedCircularBuffer[int](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
     staticStackInterfaceTypeCheck[int](&tmp);
+    staticStackInterfaceTypeCheck[int](&tmp2);
+}
+
+func TestCircularBufferStaticDequeTypeInterface(t *testing.T){
+    tmp,err:=NewCircularBuffer[int](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    tmp2,err:=NewSyncedCircularBuffer[int](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    staticDequeInterfaceTypeCheck[int](&tmp);
+    staticDequeInterfaceTypeCheck[int](&tmp2);
 }
 
 func TestCircularBufferStaticVectorTypeInterface(t *testing.T) {
@@ -833,7 +856,12 @@ func TestCircularBufferStaticVectorTypeInterface(t *testing.T) {
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
+    tmp2,err:=NewSyncedCircularBuffer[int](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
     staticVectorInterfaceTypeCheck[int](&tmp);
+    staticVectorInterfaceTypeCheck[int](&tmp2);
 }
 
 func TestCircularBufferDynQueueTypeInterface(t *testing.T){
@@ -849,6 +877,15 @@ func TestCircularBufferDynQueueTypeInterface(t *testing.T){
     test.Panics(
         func () {
             var c any
+            c,_=NewSyncedCircularBuffer[int](5)
+            c2:=c.(dynamic.Queue[int])
+            _=c2
+        }, 
+        "Code did not panic when casting a synced circular queue to a dynamic queue.",t,
+    )
+    test.Panics(
+        func () {
+            var c any
             c,_=NewCircularBuffer[int](5)
             c2:=c.(dynamic.ReadQueue[int])
             _=c2
@@ -858,10 +895,28 @@ func TestCircularBufferDynQueueTypeInterface(t *testing.T){
     test.Panics(
         func () {
             var c any
+            c,_=NewSyncedCircularBuffer[int](5)
+            c2:=c.(dynamic.ReadQueue[int])
+            _=c2
+        }, 
+        "Code did not panic when casting a synced circular queue to a dynamic queue.",t,
+    )
+    test.Panics(
+        func () {
+            var c any
             c,_=NewCircularBuffer[int](5)
             c2:=c.(dynamic.WriteQueue[int])
             _=c2
         }, 
         "Code did not panic when casting a circular queue to a dynamic queue.",t,
+    )
+    test.Panics(
+        func () {
+            var c any
+            c,_=NewSyncedCircularBuffer[int](5)
+            c2:=c.(dynamic.WriteQueue[int])
+            _=c2
+        }, 
+        "Code did not panic when casting a synced circular queue to a dynamic queue.",t,
     )
 }

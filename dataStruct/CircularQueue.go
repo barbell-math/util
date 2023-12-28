@@ -8,11 +8,15 @@ import (
 )
 
 type CircularBuffer[T any] struct {
-    m *sync.RWMutex
     vals []T;
     numElems int;
     startEnd Pair[int,int];
 };
+
+type SyncedCircularBuffer[T any] struct {
+    *sync.RWMutex
+    CircularBuffer[T]
+}
 
 func NewCircularBuffer[T any](size int) (CircularBuffer[T],error) {
     if size<=0 {
@@ -29,17 +33,34 @@ func NewCircularBuffer[T any](size int) (CircularBuffer[T],error) {
     return CircularBuffer[T]{
         vals: make([]T,size),
         startEnd: Pair[int, int]{A: 0, B: size-1},
-        m: &sync.RWMutex{},
     },nil;
 }
+
+func NewSyncedCircularBuffer[T any](size int) (SyncedCircularBuffer[T],error) {
+    rv,err:=NewCircularBuffer[T](size)
+    return SyncedCircularBuffer[T]{
+        CircularBuffer: rv,
+        RWMutex: &sync.RWMutex{},
+    }, err
+}
+
+func (c *CircularBuffer[T])Lock() { }
+func (c *CircularBuffer[T])Unlock() { }
+func (c *CircularBuffer[T])RLock() { }
+func (c *CircularBuffer[T])RUnlock() { }
+
+func (c *SyncedCircularBuffer[T])Lock() { c.RWMutex.Lock() }
+func (c *SyncedCircularBuffer[T])Unlock() { c.RWMutex.Unlock() }
+func (c *SyncedCircularBuffer[T])RLock() { c.RWMutex.RLock() }
+func (c *SyncedCircularBuffer[T])RUnlock() { c.RWMutex.RUnlock() }
 
 func (c *CircularBuffer[T])Full() bool {
     return c.Length()==c.Capacity()
 }
 
 func (c *CircularBuffer[T])Length() int {
-    c.m.RLock()
-    defer c.m.RUnlock()
+    c.RLock()
+    defer c.RUnlock()
     return c.numElems;
 }
 
@@ -48,8 +69,8 @@ func (c *CircularBuffer[T])Capacity() int {
 }
 
 func (c *CircularBuffer[T])PushFront(v T) error {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if c.numElems<len(c.vals) {
         c.numElems++;
         c.startEnd.A=c.decIndex(c.startEnd.A);
@@ -60,8 +81,8 @@ func (c *CircularBuffer[T])PushFront(v T) error {
 }
 
 func (c *CircularBuffer[T])PushBack(v T) error {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if c.numElems<len(c.vals) {
         c.numElems++;
         c.startEnd.B=c.incIndex(c.startEnd.B);
@@ -72,8 +93,8 @@ func (c *CircularBuffer[T])PushBack(v T) error {
 }
 
 func (c *CircularBuffer[T])ForcePushBack(v T) {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if c.numElems==len(c.vals) {
         c.startEnd.A=c.incIndex(c.startEnd.A);
         c.numElems--;
@@ -84,8 +105,8 @@ func (c *CircularBuffer[T])ForcePushBack(v T) {
 }
 
 func (c *CircularBuffer[T])ForcePushFront(v T) {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if c.numElems==len(c.vals) {
         c.startEnd.B=c.decIndex(c.startEnd.B);
         c.numElems--;
@@ -105,8 +126,8 @@ func (c *CircularBuffer[T])PeekFront() (T,error) {
 }
 
 func (c *CircularBuffer[T])PeekPntrFront() (*T,error) {
-    c.m.RLock()
-    defer c.m.RUnlock()
+    c.RLock()
+    defer c.RUnlock()
     if c.numElems>0 {
         return &c.vals[c.startEnd.A],nil
     }
@@ -123,8 +144,8 @@ func (c *CircularBuffer[T])Get(idx int) (T,error){
 }
 
 func (c *CircularBuffer[T])GetPntr(idx int) (*T,error) {
-    c.m.RLock()
-    defer c.m.RUnlock()
+    c.RLock()
+    defer c.RUnlock()
     if idx>=0 && idx<c.numElems && c.numElems>0 {
         properIndex:=c.getProperIndex(idx)
         return &c.vals[properIndex],nil;
@@ -133,8 +154,8 @@ func (c *CircularBuffer[T])GetPntr(idx int) (*T,error) {
 }
 
 func (c *CircularBuffer[T])Set(v T, idx int) error {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if idx>=0 && idx<c.numElems && c.numElems>0 {
         properIndex:=c.getProperIndex(idx)
         c.vals[properIndex]=v
@@ -144,8 +165,8 @@ func (c *CircularBuffer[T])Set(v T, idx int) error {
 }
 
 func (c *CircularBuffer[T])Insert(v T, idx int) error {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if idx<0 || idx>c.numElems {
         return c.getIndexOutOfBoundsError(idx)
     } else if c.numElems==len(c.vals) {
@@ -181,17 +202,18 @@ func (c *CircularBuffer[T])insertMoveBack(v *T, idx int) {
     c.vals[c.getProperIndex(idx)]=*v
 }
 
-func (c *CircularBuffer[T])Append(v T) error {
-    return c.PushBack(v)
+// TODO - bad sync :(
+func (c *CircularBuffer[T])Append(v ...T) error {
+    var err error
+    for i:=0; i<len(v) && err==nil; i++ {
+        err=c.PushBack(v[i])
+    }
+    return err
 }
-// Static Vector (Array?)
-// Dynamic Vector (name?)
-// wtf to do about the decrepid double linked list?
-// Dynamic Deque
 
 func (c *CircularBuffer[T])PopFront() (T,error) {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if c.numElems>0 {
         rv:=c.vals[c.startEnd.A];
         c.startEnd.A=c.incIndex(c.startEnd.A);
@@ -203,8 +225,8 @@ func (c *CircularBuffer[T])PopFront() (T,error) {
 }
 
 func (c *CircularBuffer[T])Delete(idx int) error {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     if idx<0 || idx>=c.numElems {
         return c.getIndexOutOfBoundsError(idx)
     }
@@ -236,8 +258,8 @@ func (c *CircularBuffer[T])deleteMoveBack(idx int) {
 }
 
 func (c *CircularBuffer[T])Clear() {
-    c.m.Lock()
-    defer c.m.Unlock()
+    c.Lock()
+    defer c.Unlock()
     c.vals=make([]T,len(c.vals))
     c.numElems=0
     c.startEnd=Pair[int, int]{A: 0, B: len(c.vals)-1}
@@ -250,7 +272,7 @@ func (c *CircularBuffer[T])Elems() iter.Iter[T] {
         var rv T;
         if i<c.numElems && f!=iter.Break {
             if i==0 {
-                c.m.RLock()
+                c.RLock()
             }
             v,err:=c.Get(i);
             return v,err,true;
@@ -258,7 +280,7 @@ func (c *CircularBuffer[T])Elems() iter.Iter[T] {
             return rv,nil,false;
         }
         if i>0 {
-            c.m.RUnlock()
+            c.RUnlock()
         }
         return rv,nil,false;
     }
@@ -270,7 +292,7 @@ func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
         i++;
         if i<c.numElems && f!=iter.Break {
             if i==0 {
-                c.m.RLock()
+                c.RLock()
             }
             v,err:=c.GetPntr(i);
             return v,err,true;
@@ -278,7 +300,7 @@ func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
             return nil,nil,false;
         }
         if i>0 {
-            c.m.RUnlock()
+            c.RUnlock()
         }
         return nil,nil,false;
     }
