@@ -7,21 +7,23 @@ import (
     customerr "github.com/barbell-math/util/err"
 )
 
-type CircularBuffer[T any] struct {
-    vals []T;
-    numElems int;
-    startEnd Pair[int,int];
-};
-
-type SyncedCircularBuffer[T any] struct {
-    *sync.RWMutex
-    CircularBuffer[T]
-}
+type (
+    CircularBuffer[T any] struct {
+        vals []T;
+        numElems int;
+        startEnd Pair[int,int];
+    };
+    
+    SyncedCircularBuffer[T any] struct {
+        *sync.RWMutex
+        CircularBuffer[T]
+    }
+)
 
 func NewCircularBuffer[T any](size int) (CircularBuffer[T],error) {
     if size<=0 {
         return CircularBuffer[T]{},customerr.ValOutsideRange(
-            fmt.Sprintf("Size of queue must be >=0 | Have: %d",size),
+            fmt.Sprintf("Size of queue must be >0 | Have: %d",size),
         );
     }
     // B will always inc when adding values to the end
@@ -55,7 +57,9 @@ func (c *SyncedCircularBuffer[T])RLock() { c.RWMutex.RLock() }
 func (c *SyncedCircularBuffer[T])RUnlock() { c.RWMutex.RUnlock() }
 
 func (c *CircularBuffer[T])Full() bool {
-    return c.Length()==c.Capacity()
+    c.RLock()
+    defer c.RUnlock()
+    return c.numElems==len(c.vals)
 }
 
 func (c *CircularBuffer[T])Length() int {
@@ -65,6 +69,8 @@ func (c *CircularBuffer[T])Length() int {
 }
 
 func (c *CircularBuffer[T])Capacity() int {
+    c.RLock()
+    defer c.RUnlock()
     return len(c.vals);
 }
 
@@ -73,7 +79,7 @@ func (c *CircularBuffer[T])PushFront(v T) error {
     defer c.Unlock()
     if c.numElems<len(c.vals) {
         c.numElems++;
-        c.startEnd.A=c.decIndex(c.startEnd.A);
+        c.startEnd.A=c.decIndex(c.startEnd.A,1);
         c.vals[c.startEnd.A]=v;
         return nil;
     }
@@ -85,7 +91,7 @@ func (c *CircularBuffer[T])PushBack(v T) error {
     defer c.Unlock()
     if c.numElems<len(c.vals) {
         c.numElems++;
-        c.startEnd.B=c.incIndex(c.startEnd.B);
+        c.startEnd.B=c.incIndex(c.startEnd.B,1);
         c.vals[c.startEnd.B]=v;
         return nil;
     }
@@ -96,11 +102,11 @@ func (c *CircularBuffer[T])ForcePushBack(v T) {
     c.Lock()
     defer c.Unlock()
     if c.numElems==len(c.vals) {
-        c.startEnd.A=c.incIndex(c.startEnd.A);
+        c.startEnd.A=c.incIndex(c.startEnd.A,1);
         c.numElems--;
     }
     c.numElems++;
-    c.startEnd.B=c.incIndex(c.startEnd.B);
+    c.startEnd.B=c.incIndex(c.startEnd.B,1);
     c.vals[c.startEnd.B]=v;
 }
 
@@ -108,11 +114,11 @@ func (c *CircularBuffer[T])ForcePushFront(v T) {
     c.Lock()
     defer c.Unlock()
     if c.numElems==len(c.vals) {
-        c.startEnd.B=c.decIndex(c.startEnd.B);
+        c.startEnd.B=c.decIndex(c.startEnd.B,1);
         c.numElems--;
     }
     c.numElems++;
-    c.startEnd.A=c.decIndex(c.startEnd.A);
+    c.startEnd.A=c.decIndex(c.startEnd.A,1);
     c.vals[c.startEnd.A]=v;
 }
 
@@ -131,7 +137,7 @@ func (c *CircularBuffer[T])PeekPntrFront() (*T,error) {
     if c.numElems>0 {
         return &c.vals[c.startEnd.A],nil
     }
-    return nil,c.getIndexOutOfBoundsError(0)
+    return nil,getIndexOutOfBoundsError(0,c.numElems)
 }
 
 func (c *CircularBuffer[T])Get(idx int) (T,error){
@@ -150,7 +156,7 @@ func (c *CircularBuffer[T])GetPntr(idx int) (*T,error) {
         properIndex:=c.getProperIndex(idx)
         return &c.vals[properIndex],nil;
     }
-    return nil,c.getIndexOutOfBoundsError(idx)
+    return nil,getIndexOutOfBoundsError(idx,c.numElems)
 }
 
 func (c *CircularBuffer[T])Set(v T, idx int) error {
@@ -161,54 +167,69 @@ func (c *CircularBuffer[T])Set(v T, idx int) error {
         c.vals[properIndex]=v
         return nil
     }
-    return c.getIndexOutOfBoundsError(idx)
+    return getIndexOutOfBoundsError(idx,c.numElems)
 }
 
-func (c *CircularBuffer[T])Insert(v T, idx int) error {
+func (c *CircularBuffer[T])Insert(idx int, v ...T) error {
     c.Lock()
     defer c.Unlock()
     if idx<0 || idx>c.numElems {
-        return c.getIndexOutOfBoundsError(idx)
+        return getIndexOutOfBoundsError(idx,c.numElems)
     } else if c.numElems==len(c.vals) {
         return c.getQueueFullError()
     }
-    if c.numElems==0 && idx==0 {
-        c.numElems++;
-        c.startEnd.B=c.incIndex(c.startEnd.B);
-        c.vals[c.startEnd.B]=v;
-    } else if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
-        c.insertMoveFront(&v,idx)
+    maxVals:=len(v)
+    if c.numElems+maxVals>len(c.vals) {
+        maxVals=len(c.vals)-c.numElems
+    }
+    if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
+        c.insertMoveFront(v,idx,maxVals)
     } else {
-        c.insertMoveBack(&v,idx)
+        c.insertMoveBack(v,idx,maxVals)
+    }
+    if maxVals<len(v) {
+        return c.getQueueFullError()
     }
     return nil
 }
 
-func (c *CircularBuffer[T])insertMoveFront(v *T, idx int) {
-    c.numElems++;
-    c.startEnd.A=c.decIndex(c.startEnd.A);
-    for i:=0; i<=idx-1; i++ { 
-        c.vals[c.getProperIndex(i)]=c.vals[c.getProperIndex(i+1)]
+func (c *CircularBuffer[T])insertMoveFront(v []T, idx int, maxVals int) {
+    c.numElems+=maxVals;
+    c.startEnd.A=c.decIndex(c.startEnd.A,maxVals);
+    for j,i:=0,maxVals-1; i<idx+maxVals; i++ {
+        c.vals[c.getProperIndex(j)]=c.vals[c.getProperIndex(i)]
+        j++
     }
-    c.vals[c.getProperIndex(idx)]=*v
+    for i:=idx; i<idx+maxVals; i++ {
+        c.vals[c.getProperIndex(i)]=v[i-idx]
+    }
 }
 
-func (c *CircularBuffer[T])insertMoveBack(v *T, idx int) {
-    c.numElems++;
-    c.startEnd.B=c.incIndex(c.startEnd.B);
-    for i:=c.numElems-2; i>=idx; i-- { 
-        c.vals[c.getProperIndex(i+1)]=c.vals[c.getProperIndex(i)]
+func (c *CircularBuffer[T])insertMoveBack(v []T, idx int, maxVals int) {
+    c.numElems+=maxVals
+    c.startEnd.B=c.incIndex(c.startEnd.B,maxVals)
+    for j,i:=c.numElems-1,c.numElems-maxVals-1; i>=idx; i-- {
+        c.vals[c.getProperIndex(j)]=c.vals[c.getProperIndex(i)]
+        j--
     }
-    c.vals[c.getProperIndex(idx)]=*v
+    for i:=idx; i<idx+maxVals; i++ {
+        c.vals[c.getProperIndex(i)]=v[i-idx]
+    }
 }
 
-// TODO - bad sync :(
 func (c *CircularBuffer[T])Append(v ...T) error {
-    var err error
-    for i:=0; i<len(v) && err==nil; i++ {
-        err=c.PushBack(v[i])
+    c.Lock()
+    defer c.Unlock()
+    for i:=0; i<len(v); i++ {
+        if c.numElems<len(c.vals) {
+            c.numElems++;
+            c.startEnd.B=c.incIndex(c.startEnd.B,1);
+            c.vals[c.startEnd.B]=v[i];
+        } else {
+            return c.getQueueFullError()
+        }
     }
-    return err
+    return nil
 }
 
 func (c *CircularBuffer[T])PopFront() (T,error) {
@@ -216,23 +237,23 @@ func (c *CircularBuffer[T])PopFront() (T,error) {
     defer c.Unlock()
     if c.numElems>0 {
         rv:=c.vals[c.startEnd.A];
-        c.startEnd.A=c.incIndex(c.startEnd.A);
+        c.startEnd.A=c.incIndex(c.startEnd.A,1);
         c.numElems--;
         return rv,nil;
     }
     var tmp T;
-    return tmp,QueueEmpty("Nothing to pop!");
+    return tmp,Empty("Nothing to pop!");
 }
 
 func (c *CircularBuffer[T])Delete(idx int) error {
     c.Lock()
     defer c.Unlock()
     if idx<0 || idx>=c.numElems {
-        return c.getIndexOutOfBoundsError(idx)
+        return getIndexOutOfBoundsError(idx,c.numElems)
     }
     if c.numElems==1 && idx==0 {
         c.numElems--;
-        c.startEnd.B=c.decIndex(c.startEnd.B);
+        c.startEnd.B=c.decIndex(c.startEnd.B,1);
     } else if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
         c.deleteMoveFront(idx)
     } else {
@@ -242,19 +263,19 @@ func (c *CircularBuffer[T])Delete(idx int) error {
 }
 
 func (c *CircularBuffer[T])deleteMoveFront(idx int) {
-    c.numElems--;
-    c.startEnd.A=c.incIndex(c.startEnd.A);
-    for i:=0; i<=idx-1; i++ { 
+    for i:=idx-1; i>=0; i-- {
         c.vals[c.getProperIndex(i+1)]=c.vals[c.getProperIndex(i)]
     }
+    c.numElems--;
+    c.startEnd.A=c.incIndex(c.startEnd.A,1);
 }
 
 func (c *CircularBuffer[T])deleteMoveBack(idx int) {
-    c.numElems--;
-    c.startEnd.B=c.decIndex(c.startEnd.B);
-    for i:=c.numElems-2; i>=idx; i-- { 
+    for i:=idx; i<c.numElems; i++ {
         c.vals[c.getProperIndex(i)]=c.vals[c.getProperIndex(i+1)]
     }
+    c.numElems--;
+    c.startEnd.B=c.decIndex(c.startEnd.B,1);
 }
 
 func (c *CircularBuffer[T])Clear() {
@@ -306,18 +327,24 @@ func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
     }
 }
 
-func (c *CircularBuffer[T])incIndex(idx int) int {
-    if idx+1>=len(c.vals) {
-        return 0
+// This function only works for an index that is <2n when n is the capacity of 
+// the underlying array
+func (c *CircularBuffer[T])incIndex(idx int, amnt int) int {
+    rv:=idx+amnt
+    if rv>=len(c.vals) {
+        rv-=len(c.vals)
     }
-    return idx+1;
+    return rv
 }
 
-func (c *CircularBuffer[T])decIndex(idx int) int {
-    if idx-1<0 {
-        return len(c.vals)-1;
+// This function only works for an index that is <2n when n is the capacity of 
+// the underlying array
+func (c *CircularBuffer[T])decIndex(idx int, amnt int) int {
+    rv:=idx-amnt
+    if rv<0 {
+        rv+=len(c.vals)
     }
-    return idx-1
+    return rv
 }
 
 func (c *CircularBuffer[T])getProperIndex(idx int) int {
@@ -335,15 +362,6 @@ func (c *CircularBuffer[T])distanceFromBack(idx int) int{
     return c.numElems-idx
 }
 
-func (c *CircularBuffer[T])getIndexOutOfBoundsError(idx int) error {
-    return customerr.ValOutsideRange(fmt.Sprintf(
-        "Index out of bounds. | NumElems: %d Index: %d",
-        c.numElems,idx,
-    ));
-}
 func (c *CircularBuffer[T])getQueueFullError() error {
     return QueueFull(fmt.Sprintf("Queue size: %d",len(c.vals)));
-}
-func (c *CircularBuffer[T])getQueueEmptyError() error {
-    return QueueEmpty(fmt.Sprintf("Queue size: %d",len(c.vals)));
 }

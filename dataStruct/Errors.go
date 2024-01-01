@@ -1,6 +1,7 @@
 package dataStruct;
 
 import (
+    "fmt"
     customerr "github.com/barbell-math/util/err"
 )
 
@@ -8,10 +9,13 @@ var QueueFull,IsQueueFull=customerr.ErrorFactory(
     "The capacity of the queue has been reached.",
 );
 
-var QueueEmpty,IsQueueEmpty=customerr.ErrorFactory(
-    "The queue is empty.",
+var Empty,IsEmpty=customerr.ErrorFactory(
+    "The container is empty.",
 );
 
-var IndexOutOfBounds,IsIndexOutOfBounds=customerr.ErrorFactory(
-    "Index is out of bounds.",
-)
+func getIndexOutOfBoundsError(idx int, _len int) error {
+    return customerr.ValOutsideRange(fmt.Sprintf(
+        "Index out of bounds. | NumElems: %d Index: %d",
+        _len,idx,
+    ));
+}

@@ -31,8 +31,8 @@ type Read[T any, U any] interface {
 }
 
 type Write[T any, U any] interface {
-    Set(v T, idx U) error;
-    Insert(v T, idx U) error;
+    Set(idx U, v T) error;
+    Insert(idx U, v ...T) error;
     Append(vals ...T) error
 }
 

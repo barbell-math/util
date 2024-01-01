@@ -1,12 +1,12 @@
 package dataStruct
 
 import (
-    "testing"
+	"testing"
 
-    "github.com/barbell-math/util/algo/iter"
-    customerr "github.com/barbell-math/util/err"
-    "github.com/barbell-math/util/test"
-    "github.com/barbell-math/util/dataStruct/types/dynamic"
+	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/dataStruct/types/dynamic"
+	customerr "github.com/barbell-math/util/err"
+	"github.com/barbell-math/util/test"
 )
 
 func TestNewCircularBuffer(t *testing.T) {
@@ -149,7 +149,7 @@ func TestCircularBufferInsertFront(t *testing.T){
     test.BasicTest(5,tmp.Length(),
         "Insert incremented the number of elements when it shouldn't have.",t,
     )
-    err=tmp.Insert(5,6)
+    err=tmp.Insert(6,5)
     if !customerr.IsValOutsideRange(err) {
         test.FormatError(customerr.ValOutsideRange(""),err,
             "Insert returned the wrong error.",t,
@@ -163,7 +163,7 @@ func TestCircularBufferInsertFront(t *testing.T){
 func TestCircularBufferInsertBack(t *testing.T) {
     tmp,_:=NewCircularBuffer[int](5)
     for i:=0; i<5; i++ {
-        err:=tmp.Insert(i,0)
+        err:=tmp.Insert(0,i)
         test.BasicTest(nil,err,
             "Insert returned an error when it shouldn't have.",t,
         )
@@ -177,7 +177,7 @@ func TestCircularBufferInsertBack(t *testing.T) {
             "Insert did not set the values correctly.",t,
         )
     }
-    err:=tmp.Insert(5,0)
+    err:=tmp.Insert(0,5)
     if !IsQueueFull(err) {
         test.FormatError(QueueFull(""),err,
             "Insert did not detect the queue was full.",t,
@@ -186,7 +186,7 @@ func TestCircularBufferInsertBack(t *testing.T) {
     test.BasicTest(5,tmp.Length(),
         "Insert incremented the number of elements when it shouldn't have.",t,
     )
-    err=tmp.Insert(5,6)
+    err=tmp.Insert(6,5)
     if !customerr.IsValOutsideRange(err) {
         test.FormatError(customerr.ValOutsideRange(""),err,
             "Insert returned the wrong error.",t,
@@ -202,7 +202,7 @@ func circularBufferInsertHelper(idx int, l int, t *testing.T){
     for i:=0; i<l-1; i++ {
         tmp.PushBack(i)
     }
-    err:=tmp.Insert(l-1,idx)
+    err:=tmp.Insert(idx,l-1)
     test.BasicTest(nil,err,
         "Insert returned an error when it shouldn't have.",t,
     )
@@ -227,6 +227,50 @@ func circularBufferInsertHelper(idx int, l int, t *testing.T){
 func TestCircularBufferRandomInsert(t *testing.T){
     for i:=0; i<5; i++ {
         circularBufferInsertHelper(i,5,t)
+    }
+}
+
+func TestCircularBufferInsert(t *testing.T){
+    tmp,_:=NewCircularBuffer[int](5)
+    err:=tmp.Insert(0,1,2,3)
+    test.BasicTest(nil,err,
+        "Insert returned an error when it shouldn't have.",t,
+    )
+    for i:=0; i<3; i++ {
+        v,_:=tmp.Get(i)
+        test.BasicTest(i+1,v,
+            "Inserting many values did not work correctly.",t,
+        )
+    }
+    err=tmp.Insert(3,4,5)
+    test.BasicTest(nil,err,
+        "Insert returned an error when it shouldn't have.",t,
+    )
+    for i:=0; i<5; i++ {
+        v,_:=tmp.Get(i)
+        test.BasicTest(i+1,v,
+            "Inserting many values did not work correctly.",t,
+        )
+    }
+    err=tmp.Insert(5,6)
+    if !IsQueueFull(err) {
+        test.FormatError(QueueFull(""),err,
+            "Insert returned the wrong error.",t,
+        )
+    }
+    tmp,_=NewCircularBuffer[int](5)
+    tmp.Insert(0,1,2)
+    err=tmp.Insert(2,3,4,5,6)
+    for i:=0; i<5; i++ {
+        v,_:=tmp.Get(i)
+        test.BasicTest(i+1,v,
+            "Insert did not put the values in the right position.",t,
+        )
+    }
+    if !IsQueueFull(err) {
+        test.FormatError(QueueFull(""),err,
+            "Insert returned the wrong error.",t,
+        )
     }
 }
 
@@ -306,7 +350,7 @@ func TestCircularBufferDeleteBack(t *testing.T) {
 
 func circularBufferDeleteHelper(idx int, l int, t *testing.T){
     tmp,_:=NewCircularBuffer[int](l)
-    for i:=0; i<l-1; i++ {
+    for i:=0; i<l; i++ {
         tmp.PushBack(i)
     }
     err:=tmp.Delete(idx)
@@ -318,12 +362,12 @@ func circularBufferDeleteHelper(idx int, l int, t *testing.T){
     )
     for i:=0; i<l-1; i++ {
         var exp int
-        v,_:=tmp.Get(i)
         if i<idx {
             exp=i
-        } else if i>idx {
-            exp=i-1
+        } else if i>=idx {
+            exp=i+1
         }
+        v,_:=tmp.Get(i)
         test.BasicTest(exp,v,
             "Delete did not remove the value in the correct place.",t,
         )
@@ -331,7 +375,7 @@ func circularBufferDeleteHelper(idx int, l int, t *testing.T){
 }
 func TestCircularBufferRandomDelete(t *testing.T){
     for i:=0; i<5; i++ {
-        circularBufferInsertHelper(i,5,t)
+        circularBufferDeleteHelper(i,5,t)
     }
 }
 
@@ -727,8 +771,8 @@ func TestCircularBufferPop(t *testing.T){
     );
     test.BasicTest(20,v,"Pop did not return correct value.",t);
     _,err=tmp.PopFront();
-    if !IsQueueEmpty(err) {
-        test.FormatError(QueueEmpty(""),err,
+    if !IsEmpty(err) {
+        test.FormatError(Empty(""),err,
             "Pop did not return correct error.",t,
         );
     }
