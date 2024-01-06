@@ -30,8 +30,10 @@ func (i Iter[T])Skip(num int) Iter[T] {
     return i.Filter(FilterToIndex[T](num));
 }
 
-func Map[T any, U any](i Iter[T],
-        op func(index int, val T) (U,error)) Iter[U] {
+func Map[T any, U any](
+    i Iter[T],
+    op func(index int, val T) (U,error),
+) Iter[U] {
     return Next(i,
     func(index int, val T, status IteratorFeedback) (IteratorFeedback, U, error) {
         if status==Break {

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/barbell-math/util/algo/iter"
 	customerr "github.com/barbell-math/util/err"
 )
 
@@ -220,4 +221,40 @@ func (v *Vector[T])ForcePushFront(val T) {
     v.Lock()
     defer v.Unlock()
     *v=append(Vector[T]{val}, (*v)...)
+}
+
+func (v *Vector[T])Elems() iter.Iter[T] {
+    i:=-1;
+    return func(f iter.IteratorFeedback) (T,error,bool) {
+        var rv T;
+        i++;
+        if i<len(*v) && f!=iter.Break {
+            if i==0 {
+                v.RLock()
+            }
+            return (*v)[i],nil,true;
+        }
+        if i>0 {
+            v.RUnlock()
+        }
+        return rv,nil,false;
+    }
+}
+
+func (v *Vector[T])PntrElems() iter.Iter[*T] {
+    i:=-1;
+    return func(f iter.IteratorFeedback) (*T,error,bool) {
+        var rv T;
+        i++;
+        if i<len(*v) && f!=iter.Break {
+            if i==0 {
+                v.RLock()
+            }
+            return &(*v)[i],nil,true;
+        }
+        if i>0 {
+            v.RUnlock()
+        }
+        return &rv,nil,false;
+    }
 }

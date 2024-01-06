@@ -10,6 +10,6 @@ func (s String)ToVal() string {
     return string(s)
 }
 
-func (f Flag)NumArgs() int {
+func (f String)NumArgs() int {
     return 1
 }

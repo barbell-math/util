@@ -52,7 +52,7 @@ type Token struct {
     Line,Char int
 }
 
-type Parser struct {
+type Lexer struct {
     tokens map[TokenType]TokenMatcher
     line, char int
     leftoverChars dataStruct.Deque[byte]
@@ -60,16 +60,16 @@ type Parser struct {
     matchingToken TokenType
 }
 
-func NewParser() Parser {
-    return Parser{
+func NewParser() Lexer {
+    return Lexer{
         tokens: make(map[TokenType]TokenMatcher,0),
     }
 }
 
-func (p Parser)TokenStream(charStream iter.Iter[byte]) iter.Iter[Token] {
+func (l *Lexer)TokenStream(charStream iter.Iter[byte]) iter.Iter[Token] {
     return iter.Map[byte,Token](
         charStream.Inject(func(idx int, val byte) (byte, bool) {
-            if v,err:=p.leftoverChars.PopFront(); err==nil {
+            if v,err:=l.leftoverChars.PopFront(); err==nil {
                 return v,true
             }
             return byte(0),false
@@ -78,32 +78,32 @@ func (p Parser)TokenStream(charStream iter.Iter[byte]) iter.Iter[Token] {
         ) (iter.IteratorFeedback, byte, error) {
             if status==iter.Break {
                 var err error
-                if p.leftoverChars.Length()>0 || len(p.curToken)>0 {
+                if l.leftoverChars.Length()>0 || len(l.curToken)>0 {
                     err=SyntaxError(fmt.Sprintf(
                         "Line: %d Char: %d | Enf of stream reached without completing last token.",
-                        p.line,p.char,
+                        l.line,l.char,
                     ))
                 }
                 return iter.Break,byte(0),err
             }
-            p.curToken=append(p.curToken, iterChar)
-            num,err:=p.runMatchers(iterChar)
-            return p.interpretResult(iterChar,num,err)
+            l.curToken=append(l.curToken, iterChar)
+            num,err:=l.runMatchers(iterChar)
+            return l.interpretResult(iterChar,num,err)
         }),
         func(index int, val byte) (Token, error) {
             return Token{
-                Data: string(p.curToken),
-                Line: p.line,
-                Char: p.char,
-                Type: p.matchingToken,
+                Data: string(l.curToken),
+                Line: l.line,
+                Char: l.char,
+                Type: l.matchingToken,
             }, nil
         },
     )
 }
 
-func (p Parser)runMatchers(iterChar byte) (int,error) {
+func (l *Lexer)runMatchers(iterChar byte) (int,error) {
     return iter.MapVals[TokenType,TokenMatcher](
-        p.tokens,
+        l.tokens,
     ).Filter(func(index int, val TokenMatcher) bool {
         if val.match==NoMatch {
             return false
@@ -123,7 +123,7 @@ func (p Parser)runMatchers(iterChar byte) (int,error) {
     }).Count();
 }
 
-func (p Parser)interpretResult(
+func (l *Lexer)interpretResult(
     iterChar byte, 
     curMatches int, 
     err error,
@@ -134,27 +134,27 @@ func (p Parser)interpretResult(
     if curMatches>0 {  // Multiple regexp matches, continue with next char
         return iter.Iterate, byte(0), nil
     }
-    _,maxMatchCount:=p.getMaxMatch()
+    _,maxMatchCount:=l.getMaxMatch()
     if maxMatchCount==1 {   // Single regexp matched, return token
-        p.setTokenAndLeftovers()
-        p.resetTokenState()
+        l.setTokenAndLeftovers()
+        l.resetTokenState()
         return iter.Continue, iterChar, nil
     } else {    // Multiple or no regexp matched, return error
         return iter.Break, iterChar, SyntaxError(fmt.Sprintf(
             "Line: %d Char %d | No regular expression matched the supplied sequence.",
-            p.line, p.char,
+            l.line, l.char,
         ))
     }
 }
 
-func (p Parser)getMaxMatch() (int,int) {
+func (l *Lexer)getMaxMatch() (int,int) {
     maxMatch:=0
     maxMatchCount:=0
-    for k,v:=range(p.tokens) {
+    for k,v:=range(l.tokens) {
         if v.totalChars>maxMatch {
             maxMatch=v.totalChars
             maxMatchCount=1
-            p.matchingToken=k
+            l.matchingToken=k
         } else if v.totalChars==maxMatch {
             maxMatchCount+=1
         }
@@ -162,24 +162,24 @@ func (p Parser)getMaxMatch() (int,int) {
     return maxMatch,maxMatchCount
 }
 
-func (p Parser)setTokenAndLeftovers() {
-    curTok:=[]byte(p.tokens[p.matchingToken].re.FindString(string(p.curToken)))
-    p.leftoverChars.SetCapacity(
-        p.leftoverChars.Length()+len(p.curToken)-len(curTok),
+func (l *Lexer)setTokenAndLeftovers() {
+    curTok:=[]byte(l.tokens[l.matchingToken].re.FindString(string(l.curToken)))
+    l.leftoverChars.SetCapacity(
+        l.leftoverChars.Length()+len(l.curToken)-len(curTok),
     )
-    for i:=len(p.curToken)-1; i>=len(curTok); i-- {
+    for i:=len(l.curToken)-1; i>=len(curTok); i-- {
     // for i:=len(curTok); i<len(p.curToken); i++ {
-        p.leftoverChars.PushFront(p.curToken[i])
+        l.leftoverChars.PushFront(l.curToken[i])
     }
-    p.curToken=curTok
-    p.line=p.tokens[p.matchingToken].endLine
-    p.char=p.tokens[p.matchingToken].endChar
+    l.curToken=curTok
+    l.line=l.tokens[l.matchingToken].endLine
+    l.char=l.tokens[l.matchingToken].endChar
 }
 
-func (p Parser)resetTokenState() {
-    for _,t:=range(p.tokens) {
-        t.endLine=p.line
-        t.endChar=p.char
+func (l *Lexer)resetTokenState() {
+    for _,t:=range(l.tokens) {
+        t.endLine=l.line
+        t.endChar=l.char
         t.totalChars=0
         t.match=Match
     }

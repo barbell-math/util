@@ -1,11 +1,11 @@
 package iter
 
 import (
-	"bufio"
-	"os"
+    "bufio"
+    "os"
 
-	staticType "github.com/barbell-math/util/dataStruct/types/static"
-	customerr "github.com/barbell-math/util/err"
+    staticType "github.com/barbell-math/util/dataStruct/types/static"
+    customerr "github.com/barbell-math/util/err"
 )
 
 func NoElem[T any]() Iter[T] {
@@ -135,10 +135,33 @@ func FileLines(path string) Iter[string] {
     }
 }
 
-func Join[T any, U any](i1 Iter[T],
-        i2 Iter[U],
-        v staticType.Variant[T,U],
-        decider func(left T, right U) bool) Iter[staticType.Variant[T,U]] {
+func Zip[T any, U any](
+    i1 Iter[T], 
+    i2 Iter[U], 
+    factory func() staticType.Pair[T,U],
+) Iter[staticType.Pair[T,U]] {
+    return func(f IteratorFeedback) (staticType.Pair[T, U], error, bool) {
+        if f==Break {
+            return nil,nil,false
+        }
+        iVal1,err1,cont1:=i1(f)
+        iVal2,err2,cont2:=i2(f)
+        p:=factory()
+        p.SetA(iVal1)
+        p.SetB(iVal2)
+        if err1!=nil || err2!=nil {
+            return nil,customerr.AppendError(err1,err2), false
+        }
+        return p, nil, (cont1 && cont2)
+    }
+}
+
+func Join[T any, U any](
+    i1 Iter[T],
+    i2 Iter[U],
+    factory func() staticType.Variant[T,U],
+    decider func(left T, right U) bool,
+) Iter[staticType.Variant[T,U]] {
     var i1Val T;
     var i2Val U;
     var err1, err2 error;
@@ -146,7 +169,7 @@ func Join[T any, U any](i1 Iter[T],
     getI1Val, getI2Val:=true, true;
     return func(f IteratorFeedback) (staticType.Variant[T,U], error, bool) {
         if f==Break {
-            return v, customerr.AppendError(i1.Stop(),i2.Stop()), false;
+            return nil, customerr.AppendError(i1.Stop(),i2.Stop()), false;
         }
         if getI1Val && cont1 && err1==nil {
             i1Val,err1,cont1=i1(f);
@@ -154,36 +177,38 @@ func Join[T any, U any](i1 Iter[T],
         if getI2Val && cont2 && err2==nil {
             i2Val,err2,cont2=i2(f);
         }
-        if err1==nil && err2==nil {
-            if cont1 && cont2 {
-                d:=decider(i1Val,i2Val);
-                getI1Val=d;
-                getI2Val=!d;
-                if d {
-                    return v.SetValA(i1Val),err1,cont1 && cont2;
-                } else {
-                    return v.SetValB(i2Val),err2,cont1 && cont2;
-                }
-            } else if cont1 && !cont2 {
-                getI1Val=true;
-                getI2Val=false;
-                return v.SetValA(i1Val),err1,cont1;
-            } else if !cont1 && cont2 {
-                getI1Val=false;
-                getI2Val=true;
-                return v.SetValB(i2Val),err2,cont2;
-            }
+        if err1!=nil || err2!=nil {
+            return nil,customerr.AppendError(err1,err2),false;
         }
-        return v,customerr.AppendError(err1,err2),false;
+        if cont1 && cont2 {
+            d:=decider(i1Val,i2Val);
+            getI1Val=d;
+            getI2Val=!d;
+            if d {
+                return factory().SetValA(i1Val),err1,cont1 && cont2;
+            } else {
+                return factory().SetValB(i2Val),err2,cont1 && cont2;
+            }
+        } else if cont1 && !cont2 {
+            getI1Val=true;
+            getI2Val=false;
+            return factory().SetValA(i1Val),err1,cont1;
+        } else { // !cont1 && cont2
+            getI1Val=false;
+            getI2Val=true;
+            return factory().SetValB(i2Val),err2,cont2;
+        }
     }
 }
 
-func JoinSame[T any](i1 Iter[T],
-        i2 Iter[T],
-        v staticType.Variant[T,T],
-        decider func(left T, right T) bool) Iter[T] {
+func JoinSame[T any](
+    i1 Iter[T],
+    i2 Iter[T],
+    factory func() staticType.Variant[T,T],
+    decider func(left T, right T) bool,
+) Iter[T] {
     var tmp T;
-    realJoiner:=Join(i1,i2,v,decider);
+    realJoiner:=Join(i1,i2,factory,decider);
     return func(f IteratorFeedback) (T, error, bool) {
         val,err,cont:=realJoiner(f);
         if cont && err==nil {
