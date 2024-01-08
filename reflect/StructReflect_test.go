@@ -1051,23 +1051,175 @@ func TestRecursiveStructFieldInfo2(t *testing.T){
     )
 }
 
-// func TestGetStructNameFromReflectVal(t *testing.T){
-//     var s testStruct;
-//     s2:=reflect.ValueOf(s)
-//     name,err:=GetStructName[reflect.Value](s2);
-//     test.BasicTest(nil,err,
-//         "Getting name of struct returned error when it was not supposed to.",t,
-//     );
-//     test.BasicTest("testStruct",name,"Name of the struct was not correct.",t);
-// }
-// 
-// func TestGetStructNameFromReflectValPntr(t *testing.T){
-//     var s testStruct;
-//     s2:=reflect.ValueOf(&s)
-//     name,err:=GetStructName[reflect.Value](s2);
-//     test.BasicTest(nil,err,
-//         "Getting name of struct returned error when it was not supposed to.",t,
-//     );
-//     test.BasicTest("testStruct",name,"Name of the struct was not correct.",t);
-// }
-// 
+func TestRecursiveStructFieldInfo2FromReflectValue(t *testing.T){
+    var s testStruct2=testStruct2{
+        Four: 4.0, 
+        Five: testStruct{One: 1, Two: "2", Three: "3"},
+    }
+    v2:=reflect.ValueOf(s)
+    vals,err:=RecursiveStructFieldInfo[reflect.Value](v2).Collect()
+    if !IsInAddressableField(err) {
+        test.FormatError(InAddressableField(""),err,
+            "Recursive struct field did not return the correct error.",t,
+        )
+    }
+    test.BasicTest(2,len(vals),
+        "Recursive struct field info returned the wrong number of values.",t,     
+    )
+    test.BasicTest("Four",vals[0].Name,
+        "First struct name was not correct.",t,
+    )
+    test.BasicTest("Five",vals[1].Name,
+        "Second struct name was not correct.",t,
+    )
+    test.BasicTest(4.0,vals[0].Val.(float64),
+        "First struct val was not correct.",t,
+    )
+    test.BasicTest(
+        testStruct{One: 1, Two: "2", Three: "3"},
+        vals[1].Val.(testStruct),
+        "Second struct val was not correct.",t,
+    )
+    test.BasicTest(reflect.TypeOf(s.Four),vals[0].Type,
+        "First struct type was not correct.",t,
+    )
+    test.BasicTest(reflect.TypeOf(s.Five),vals[1].Type,
+        "Second struct type was not correct.",t,
+    )
+    test.BasicTest(reflect.Float64,vals[0].Kind,
+        "First struct kind was not correct.",t,
+    )
+    test.BasicTest(reflect.Struct,vals[1].Kind,
+        "Second struct kind was not correct.",t,
+    )
+    p,err:=vals[0].Pntr()
+    test.BasicTest(nil,p,
+        "First struct pntr was not correct.",t,
+    )
+    if !IsInAddressableField(err) {
+        test.FormatError(InAddressableField(""),err,
+            "Recursive struct field did not return the correct error.",t,
+        )
+    }
+    p,err=vals[1].Pntr()
+    test.BasicTest(nil,p,
+        "First struct pntr was not correct.",t,
+    )
+    if !IsInAddressableField(err) {
+        test.FormatError(InAddressableField(""),err,
+            "Recursive struct field did not return the correct error.",t,
+        )
+    }
+}
+
+func TestRecursiveStructFieldInfo2FromReflectValuePntr(t *testing.T){
+    var s testStruct2=testStruct2{
+        Four: 4.0, 
+        Five: testStruct{One: 1, Two: "2", Three: "3"},
+    }
+    s2:=reflect.ValueOf(&s)
+    vals,err:=RecursiveStructFieldInfo[reflect.Value](s2).Collect()
+    test.BasicTest(nil,err,
+        "Recursive struct field info returned error when it was not supposed to.",t,
+    );
+    test.BasicTest(5,len(vals),
+        "Recursive struct field info returned the wrong number of values.",t,     
+    )
+    test.BasicTest("Four",vals[0].Name,
+        "First struct name was not correct.",t,
+    )
+    test.BasicTest("Five",vals[1].Name,
+        "Second struct name was not correct.",t,
+    )
+    test.BasicTest("One",vals[2].Name,
+        "Third struct name was not correct.",t,
+    )
+    test.BasicTest("Two",vals[3].Name,
+        "Third struct name was not correct.",t,
+    )
+    test.BasicTest("Three",vals[4].Name,
+        "Third struct name was not correct.",t,
+    )
+    test.BasicTest(4.0,vals[0].Val.(float64),
+        "First struct val was not correct.",t,
+    )
+    test.BasicTest(
+        testStruct{One: 1, Two: "2", Three: "3"},
+        vals[1].Val.(testStruct),
+        "Second struct val was not correct.",t,
+    )
+    test.BasicTest(1,vals[2].Val.(int),
+        "First sub-struct val was not correct.",t,
+    )
+    test.BasicTest("2",vals[3].Val.(string),
+        "Second sub-struct val was not correct.",t,
+    )
+    test.BasicTest(customString("3"),vals[4].Val.(customString),
+        "Third sub-struct val was not correct.",t,
+    )
+    test.BasicTest(reflect.TypeOf(s.Four),vals[0].Type,
+        "First struct type was not correct.",t,
+    )
+    test.BasicTest(reflect.TypeOf(s.Five),vals[1].Type,
+        "Second struct type was not correct.",t,
+    )
+    test.BasicTest(reflect.TypeOf(s.Five.One),vals[2].Type,
+        "First sub-struct type was not correct.",t,
+    )
+    test.BasicTest(reflect.TypeOf(s.Five.Two),vals[3].Type,
+        "Second sub-struct type was not correct.",t,
+    )
+    test.BasicTest(reflect.TypeOf(s.Five.Three),vals[4].Type,
+        "Third sub-struct type was not correct.",t,
+    )
+    test.BasicTest(reflect.Float64,vals[0].Kind,
+        "First struct kind was not correct.",t,
+    )
+    test.BasicTest(reflect.Struct,vals[1].Kind,
+        "Second struct kind was not correct.",t,
+    )
+    test.BasicTest(reflect.Int,vals[2].Kind,
+        "First sub-struct kind was not correct.",t,
+    )
+    test.BasicTest(reflect.String,vals[3].Kind,
+        "Second sub-struct kind was not correct.",t,
+    )
+    test.BasicTest(reflect.String,vals[4].Kind,
+        "Third sub-struct kind was not correct.",t,
+    )
+    p,err:=vals[0].Pntr()
+    test.BasicTest(&s.Four,p.(*float64),
+        "First struct pntr was not correct.",t,
+    )
+    test.BasicTest(nil,err,
+        "First struct pntr returned an error when it should not have.",t,
+    )
+    p,err=vals[1].Pntr()
+    test.BasicTest(&s.Five,p.(*testStruct),
+        "First struct pntr was not correct.",t,
+    )
+    test.BasicTest(nil,err,
+        "Second struct pntr returned an error when it should not have.",t,
+    )
+    p,err=vals[2].Pntr()
+    test.BasicTest(&s.Five.One,p.(*int),
+        "First sub-struct pntr was not correct.",t,
+    )
+    test.BasicTest(nil,err,
+        "First sub-struct pntr returned an error when it should not have.",t,
+    )
+    p,err=vals[3].Pntr()
+    test.BasicTest(&s.Five.Two,p.(*string),
+        "Second sub-struct pntr was not correct.",t,
+    )
+    test.BasicTest(nil,err,
+        "Second sub-struct pntr returned an error when it should not have.",t,
+    )
+    p,err=vals[4].Pntr()
+    test.BasicTest(&s.Five.Three,p.(*customString),
+        "Third sub-struct pntr was not correct.",t,
+    )
+    test.BasicTest(nil,err,
+        "Third sub-struct pntr returned an error when it should not have.",t,
+    )
+}
