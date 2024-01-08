@@ -155,3 +155,100 @@ func TestFileLines(t *testing.T){
     testFileLinesHelper(1,"oneLine.txt",t);
     testFileLinesHelper(3,"threeLines.txt",t);
 }
+
+func TestRecurseEmpty(t *testing.T){
+    v,err:=Recurse[int](
+        NoElem[int](),
+        func(v int) bool { return true },
+        func(v int) Iter[int] { return  NoElem[int]() },
+    ).Collect()
+    test.BasicTest(0,len(v),
+        "Recurse returned elements when it should not have.",t,
+    )
+    test.BasicTest(nil,err,
+        "Recurse returned an error when it should not have.",t,
+    )
+}
+
+func TestRecurseSingleValue(t *testing.T){
+    v,err:=Recurse[int](
+        ValElem[int](0,nil,1),
+        func(v int) bool { return false },
+        func(v int) Iter[int] { return  NoElem[int]() },
+    ).Collect()
+    test.BasicTest(1,len(v),
+        "Recurse returned elements when it should not have.",t,
+    )
+    test.BasicTest(0,v[0],
+        "Recurse returned an incorrect element.",t,
+    )
+    test.BasicTest(nil,err,
+        "Recurse returned an error when it should not have.",t,
+    )
+}
+
+func TestRecurseSingleValueWithEmptyRecurse(t *testing.T){
+    v,err:=Recurse[int](
+        ValElem[int](0,nil,1),
+        func(v int) bool { return true },
+        func(v int) Iter[int] { return  NoElem[int]() },
+    ).Collect()
+    test.BasicTest(1,len(v),
+        "Recurse returned elements when it should not have.",t,
+    )
+    test.BasicTest(0,v[0],
+        "Recurse returned an incorrect element.",t,
+    )
+    test.BasicTest(nil,err,
+        "Recurse returned an error when it should not have.",t,
+    )
+}
+
+func TestRecurseSingleValueWithSingleValueRecurse(t *testing.T){
+    v,err:=Recurse[int](
+        ValElem[int](0,nil,1),
+        func(v int) bool { return v==0 },
+        func(v int) Iter[int] { return ValElem[int](1,nil,1) },
+    ).Collect()
+    test.BasicTest(2,len(v),
+        "Recurse returned elements when it should not have.",t,
+    )
+    test.BasicTest(0,v[0],
+        "Recurse returned an incorrect element.",t,
+    )
+    test.BasicTest(1,v[1],
+        "Recurse returned an incorrect element.",t,
+    )
+    test.BasicTest(nil,err,
+        "Recurse returned an error when it should not have.",t,
+    )
+}
+
+func TestRecurse(t *testing.T){
+    vals,err:=Recurse[int](
+        SliceElems[int]([]int{0,1,2}),
+        func(v int) bool { return v==0 || v==1 || v==3 },
+        func(v int) Iter[int] {
+            if v==0 {
+                return SliceElems[int]([]int{3,5})
+            } else if v==1 {
+                return SliceElems[int]([]int{7,9})
+            } else if v==3 {
+                return SliceElems[int]([]int{11,13})
+            }
+            return NoElem[int]()
+        },
+    ).Collect()
+    exp:=[]int{0,3,11,13,5,1,7,9,2}
+    test.BasicTest(len(exp),len(vals),
+        "Recurse returned elements when it should not have.",t,
+    )
+    for i,v:=range(vals) {
+        test.BasicTest(v,exp[i],
+            "Recurse produced the wrong sequence of values.",t,
+        )
+    }
+    test.BasicTest(nil,err,
+        "Recurse returned an error when it should not have.",t,
+    )
+}

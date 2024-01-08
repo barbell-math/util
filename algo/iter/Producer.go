@@ -221,3 +221,45 @@ func JoinSame[T any](
         return tmp,err,cont;
     }
 }
+
+func Recurse[T any](
+    root Iter[T],
+    shouldRecurse func(v T) bool,
+    iterValToIter func (v T) Iter[T],
+) Iter[T] {
+    levels:=make([]Iter[T],1)
+    levels[0]=root
+    levelsBreakOp:=func() (T,error,bool) {
+        var err error
+        for _,v:=range(levels) {
+            _,err2,_:=v(Break)
+            err=customerr.AppendError(err,err2)
+        }
+        var tmp T
+        return tmp, err, false
+    }
+    return func(f IteratorFeedback) (T, error, bool) {
+        if f==Break {
+            return levelsBreakOp()
+        }
+        for len(levels)>0 {
+            v,err,cont:=levels[len(levels)-1](Continue)
+            if !cont {
+                levels=levels[0:len(levels)-1]
+                continue
+            }
+            if err!=nil {
+                var tmp T
+                return  tmp,err,false
+            }
+            if shouldRecurse(v) {
+                levels = append(levels, iterValToIter(v))
+                return v,nil,true
+            } else {
+                return v,nil,true
+            }
+        }
+        var tmp T
+        return tmp, nil, false
+    }
+}

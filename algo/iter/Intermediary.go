@@ -43,7 +43,8 @@ func Next[T any, U any](i Iter[T],
     }
 }
 func (i Iter[T])Next(
-        op func(index int, val T, status IteratorFeedback) (IteratorFeedback,T,error)) Iter[T] {
+    op func(index int, val T, status IteratorFeedback) (IteratorFeedback,T,error),
+) Iter[T] {
     return Next(i,op);
 }
 
