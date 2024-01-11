@@ -102,6 +102,39 @@ func TestStringElems(t *testing.T){
     sliceElemsIterHelper([]int{},t);
 }
 
+func sequentialElemsIterHelper[T any](vals []T, t *testing.T){
+    sIter:=SequentialElems(len(vals),func(i int) (T,error) { return vals[i],nil });
+    for i:=0; i<len(vals); i++ {
+        sV,sErr,sBool:=sIter(Continue);
+        test.BasicTest(vals[i],sV,
+            "SequentialElems iteration does not match actual values.",t,
+        );
+        test.BasicTest(nil,sErr,
+            "SequentialElems iteration produced an error when it shouldn't have.",t,
+        );
+        test.BasicTest(true,sBool,
+            "SequentialElems iteration did not stop when it should have.",t,
+        );
+    }
+    var tmp T;
+    sV,sErr,sBool:=sIter(Continue);
+    test.BasicTest(tmp,sV,
+        "SequentialElems iteration does not match actual values.",t,
+    );
+    test.BasicTest(nil,sErr,
+        "SequentialElems iteration produced an error when it shouldn't have.",t,
+    );
+    test.BasicTest(false,sBool,
+        "SequentialElems iteration did not stop when it should have.",t,
+    );
+}
+func TestSequentialElems(t *testing.T){
+    sequentialElemsIterHelper([]string{"one","two","three"},t);
+    sequentialElemsIterHelper([]int{1,2,3},t);
+    sequentialElemsIterHelper([]int{1},t);
+    sequentialElemsIterHelper([]int{},t);
+}
+
 func testChanIterHelper(chanNum int, t *testing.T){
     c:=make(chan int);
     go func(c chan int, numElems int){

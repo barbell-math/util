@@ -57,7 +57,7 @@ func (d *Deque[T])Length() int {
 func (d *Deque[T])Capacity() int {
     d.RLock()
     defer d.RUnlock()
-    return 0
+    return cap(d.vals)
 }
 
 func (d *Deque[T])SetCapacity(c int) error {

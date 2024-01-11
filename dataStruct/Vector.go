@@ -1,4 +1,5 @@
-// Static Vector (Array?)
+// Array/slice reflect
+// Static Vector (Array?) - no way to dynamically represent, probably no?
 // Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New
 // Tree, graph...
 // Precompiled nfa/dfa - use go:generate comments!
@@ -223,38 +224,37 @@ func (v *Vector[T])ForcePushFront(val T) {
     *v=append(Vector[T]{val}, (*v)...)
 }
 
+// TODO -test
 func (v *Vector[T])Elems() iter.Iter[T] {
-    i:=-1;
-    return func(f iter.IteratorFeedback) (T,error,bool) {
-        var rv T;
-        i++;
-        if i<len(*v) && f!=iter.Break {
-            if i==0 {
-                v.RLock()
-            }
-            return (*v)[i],nil,true;
-        }
-        if i>0 {
-            v.RUnlock()
-        }
-        return rv,nil,false;
-    }
+    return iter.SetupTeardownSequentialElems[T](
+        len(*v),
+        func(i int) (T, error) { return (*v)[i],nil },
+        func() error { v.RLock(); return nil },
+        func() error { v.RUnlock(); return nil },
+    )
 }
 
+// TODO -test
 func (v *Vector[T])PntrElems() iter.Iter[*T] {
-    i:=-1;
-    return func(f iter.IteratorFeedback) (*T,error,bool) {
-        var rv T;
-        i++;
-        if i<len(*v) && f!=iter.Break {
-            if i==0 {
-                v.RLock()
-            }
-            return &(*v)[i],nil,true;
-        }
-        if i>0 {
-            v.RUnlock()
-        }
-        return &rv,nil,false;
-    }
+    return iter.SetupTeardownSequentialElems[*T](
+        len(*v),
+        func(i int) (*T, error) { return &(*v)[i],nil },
+        func() error { v.RLock(); return nil },
+        func() error { v.RUnlock(); return nil },
+    )
+    // i:=-1;
+    // return func(f iter.IteratorFeedback) (*T,error,bool) {
+    //     var rv T;
+    //     i++;
+    //     if i<len(*v) && f!=iter.Break {
+    //         if i==0 {
+    //             v.RLock()
+    //         }
+    //         return &(*v)[i],nil,true;
+    //     }
+    //     if i>0 {
+    //         v.RUnlock()
+    //     }
+    //     return &rv,nil,false;
+    // }
 }

@@ -50,7 +50,52 @@ func StrElems(s string) Iter[byte] {
     }
 }
 
-func MapElems[K comparable, V any](m map[K]V, v staticType.Pair[K,V]) Iter[staticType.Pair[K,V]] {
+func SequentialElems[T any](_len int, get func(i int) (T,error)) Iter[T] {
+    i:=-1
+    return func(f IteratorFeedback) (T, error, bool) {
+        i++;
+        if i<_len && f!=Break {
+            v,err:=get(i)
+            return v,err,(err==nil);
+        }
+        var tmp T
+        return tmp,nil,false;
+    }
+}
+
+// TODO -test
+func SetupTeardownSequentialElems[T any](
+    _len int,
+    get func(i int) (T,error),
+    setup func() error,
+    teardown func() error,
+) Iter[T] {
+    i:=-1
+    return func(f IteratorFeedback) (T, error, bool) {
+        i++;
+        if i>=_len || f==Break {
+            var err error
+            if i>0 {
+                err=teardown()
+            }
+            var tmp T
+            return tmp,err,false;
+        }
+        if i==0 {
+            if err:=setup(); err!=nil {
+                var tmp T
+                return tmp,err,false
+            }
+        }
+        v,err:=get(i)
+        return v,err,(err==nil);
+    }
+}
+
+func MapElems[K comparable, V any](
+    m map[K]V, 
+    v staticType.Pair[K,V],
+) Iter[staticType.Pair[K,V]] {
     c:=make(chan K)
     go func(){
         for k,_:=range(m) {

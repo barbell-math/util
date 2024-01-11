@@ -28,7 +28,7 @@ func TestIsStructVal(t *testing.T){
     test.BasicTest(false,IsStructVal(&v2),
         "IsStructVal returned a false positive.",t,
     )
-    v2=reflect.ValueOf(v)
+    v2=reflect.ValueOf(&v)
     test.BasicTest(false,IsStructVal(&v2),
         "IsStructVal returned a false positive.",t,
     )

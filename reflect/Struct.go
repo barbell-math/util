@@ -31,69 +31,12 @@ type FieldInfo struct {
 // case, if a reflect.Value is passed to this function it will return true if 
 // that reflect value either contains a struct or contains a pointer to a struct.
 func IsStructVal[S any](s *S) bool {
-    switch reflect.TypeOf(s) {
-        case reflect.TypeOf(&reflect.Value{}):
-            if refVal:=any(s).(*reflect.Value); refVal.Kind()==reflect.Ptr {
-                return refVal.Elem().Kind()==reflect.Struct
-            } else {
-                return refVal.Kind()==reflect.Struct
-            }
-        default: return reflect.ValueOf(s).Elem().Kind()==reflect.Struct
-    }
+    return isKindOrReflectValKind[S](s,reflect.Struct)
 }
 
 func structValError[S any](s *S) error {
-    if IsStructVal(s) {
-        return nil;
-    }
-    var fString string
-    switch reflect.TypeOf(s) {
-        case reflect.TypeOf(&reflect.Value{}):
-            if refVal:=any(s).(*reflect.Value); refVal.Kind()==reflect.Ptr {
-                fString=fmt.Sprintf(
-                    "Got a reflect.Value pointer to: %s",
-                    refVal.Elem().Kind().String(),
-                )
-            } else {
-                fString=fmt.Sprintf(
-                    "Got a reflect.Value containing: %s",
-                    refVal.Kind().String(),
-                )
-            }
-        default:
-            fString=fmt.Sprintf(
-                "Got a pointer to: %s",
-                reflect.ValueOf(s).Elem().Kind().String(),
-            )
-    }
-    return NonStructValue(fmt.Sprintf(
-        "Function requires a struct as target. | %s",
-        fString,
-    ));
+    return valError[S](s, reflect.Struct, IsStructVal[S])
 }
-
-// // Returns true if the supplied value is a pointer to a pointer to a struct.
-// func IsStructPntr[S any](s **S) bool {
-//     switch reflect.TypeOf(s) {
-//         case reflect.TypeOf(&reflect.Value{}):
-//             return any(s).(*reflect.Value).Elem().Kind()==reflect.Struct
-//         default: return reflect.ValueOf(s).Elem().Elem().Kind()==reflect.Struct
-//     }
-// }
-// 
-// // func IsStructPntr[S any](s **S) bool {
-// //     return reflect.ValueOf(s).Elem().Elem().Kind()==reflect.Struct
-// // }
-// 
-// func structPntrError[S any](s **S) error {
-//     if !IsStructPntr(s) {
-//         return NonStructValue(fmt.Sprintf(
-//             "Function requires a struct as target. | Got: %s",
-//             reflect.ValueOf(s).Kind().String(),
-//         ));
-//     }
-//     return nil;
-// }
 
 func getStructVal[T any, S reflect.Value | *T](s S) (reflect.Value,error) {
     switch reflect.TypeOf(s) {
@@ -137,14 +80,12 @@ func StructFieldNames[T any, S reflect.Value | *T](s S) iter.Iter[string] {
     if err!=nil {
         return iter.ValElem[string]("",err,1)
     }
-    i:=-1
-    return func(f iter.IteratorFeedback) (string, error, bool) {
-        i++
-        if f!=iter.Break && i<structVal.NumField() {
-            return structVal.Type().Field(i).Name, nil, true
-        }
-        return "", nil, false
-    }
+    return iter.SequentialElems[string](
+        structVal.NumField(),
+        func(i int) (string,error) {
+            return structVal.Type().Field(i).Name,nil
+        },
+    )
 }
 
 // Returns an iterator that provides the struct field values if a struct is
@@ -157,14 +98,12 @@ func StructFieldVals[T any, S reflect.Value | *T](s S) iter.Iter[any] {
     if err!=nil {
         return iter.ValElem[any](nil,err,1)
     }
-    i:=-1
-    return func(f iter.IteratorFeedback) (any, error, bool) {
-        i++
-        if f!=iter.Break && i<structVal.NumField() {
-            return reflect.ValueOf(structVal.Field(i).Interface()).Interface(), nil, true
-        }
-        return reflect.Value{}, nil, false
-    }
+    return iter.SequentialElems[any](
+        structVal.NumField(),
+        func(i int) (any,error) {
+            return structVal.Field(i).Interface(),nil
+        },
+    )
 }
 
 // Returns an iterator that provides pointers to the struct field values if a
@@ -181,20 +120,18 @@ func StructFieldPntrs[T any, S reflect.Value | *T](s S) iter.Iter[any] {
     if err!=nil {
         return iter.ValElem[any](nil,err,1)
     }
-    i:=-1
-    return func(f iter.IteratorFeedback) (any, error, bool) {
-        i++
-        if f!=iter.Break && i<structVal.NumField() {
+    return iter.SequentialElems[any](
+        structVal.NumField(),
+        func(i int) (any,error) {
             f:=structVal.Field(i)
             if f.CanAddr() {
-                return f.Addr().Interface(), nil, true
+                return f.Addr().Interface(), nil
             }
             return reflect.Value{},InAddressableField(fmt.Sprintf(
                 "Field Name: %s",structVal.Type().Field(i).Name,
-            )),false
-        }
-        return reflect.Value{}, nil, false
-    }
+            ))
+        },
+    )
 }
 
 // Returns an iterator that provides the struct field types if a struct is
@@ -207,14 +144,12 @@ func StructFieldTypes[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Type] 
     if err!=nil {
         return iter.ValElem[reflect.Type](nil,err,1)
     }
-    i:=-1
-    return func(f iter.IteratorFeedback) (reflect.Type, error, bool) {
-        i++
-        if f!=iter.Break && i<structVal.NumField() {
-            return structVal.Field(i).Type(),nil,true
-        }
-        return nil, nil, false
-    }
+    return iter.SequentialElems[reflect.Type](
+        structVal.NumField(),
+        func(i int) (reflect.Type,error) {
+            return structVal.Field(i).Type(),nil
+        },
+    )
 }
 
 // Returns an iterator that provides the struct field kinds if a struct is
@@ -227,14 +162,12 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
     if err!=nil {
         return iter.ValElem[reflect.Kind](0,err,1)
     }
-    i:=-1
-    return func(f iter.IteratorFeedback) (reflect.Kind, error, bool) {
-        i++
-        if f!=iter.Break && i<structVal.NumField() {
-            return structVal.Field(i).Kind(),nil,true
-        }
-        return 0, nil, false
-    }
+    return iter.SequentialElems[reflect.Kind](
+        structVal.NumField(),
+        func(i int) (reflect.Kind,error) {
+            return structVal.Field(i).Kind(),nil
+        },
+    )
 }
 
 // Returns an iterator that provides the struct field info if a struct is
@@ -251,15 +184,14 @@ func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
     if err!=nil {
         return iter.ValElem[FieldInfo](FieldInfo{},err,1)
     }
-    i:=-1
-    return func(f iter.IteratorFeedback) (FieldInfo, error, bool) {
-        i++
-        if f!=iter.Break && i<structVal.NumField() {
+    return iter.SequentialElems[FieldInfo](
+        structVal.NumField(),
+        func(i int) (FieldInfo, error) {
             n:=structVal.Type().Field(i).Name
             f:=structVal.Field(i)
             return FieldInfo{
                 Name: n,
-                Val: reflect.ValueOf(f.Interface()).Interface(),
+                Val: f.Interface(),
                 Type: f.Type(),
                 Kind: f.Kind(),
                 Pntr: func() (any, error) {
@@ -270,10 +202,9 @@ func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
                         "Field Name: %s",n,
                     ))
                 },
-            }, nil, true
-        }
-        return FieldInfo{}, nil, false
-    }
+            }, nil
+        },
+    )
 }
 
 // Returns an iterator that recursively provides the struct field info if a 

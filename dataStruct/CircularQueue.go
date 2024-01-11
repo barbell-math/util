@@ -287,44 +287,21 @@ func (c *CircularBuffer[T])Clear() {
 }
 
 func (c *CircularBuffer[T])Elems() iter.Iter[T] {
-    i:=-1;
-    return func(f iter.IteratorFeedback) (T,error,bool) {
-        i++;
-        var rv T;
-        if i<c.numElems && f!=iter.Break {
-            if i==0 {
-                c.RLock()
-            }
-            v,err:=c.Get(i);
-            return v,err,true;
-        } else if i==c.numElems && f!=iter.Break {
-            return rv,nil,false;
-        }
-        if i>0 {
-            c.RUnlock()
-        }
-        return rv,nil,false;
-    }
+    return iter.SetupTeardownSequentialElems[T](
+        c.numElems,
+        c.Get,
+        func() error { c.RLock(); return nil },
+        func() error { c.RUnlock(); return nil },
+    )
 }
 
 func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
-    i:=-1;
-    return func(f iter.IteratorFeedback) (*T,error,bool) {
-        i++;
-        if i<c.numElems && f!=iter.Break {
-            if i==0 {
-                c.RLock()
-            }
-            v,err:=c.GetPntr(i);
-            return v,err,true;
-        } else if i==c.numElems && f!=iter.Break {
-            return nil,nil,false;
-        }
-        if i>0 {
-            c.RUnlock()
-        }
-        return nil,nil,false;
-    }
+    return iter.SetupTeardownSequentialElems[*T](
+        c.numElems,
+        c.GetPntr,
+        func() error { c.RLock(); return nil },
+        func() error { c.RUnlock(); return nil },
+    )
 }
 
 // This function only works for an index that is <2n when n is the capacity of 

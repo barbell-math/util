@@ -807,10 +807,15 @@ func testCircularBufferElemsHelper(c CircularBuffer[int], t *testing.T){
     for i:=0; i<len(c.vals); i++ {
         c.PushBack(i);
     }
+    cnt:=0
     c.Elems().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+        cnt++
         test.BasicTest(index,val,"Element was skipped while iterating.",t);
         return iter.Continue,nil;
     });
+    test.BasicTest(cnt,len(c.vals),
+        "All the elements were not iterated over.",t,
+    )
 }
 func TestCircularBufferElems(t *testing.T){
     tmp,err:=NewCircularBuffer[int](5);
@@ -831,7 +836,9 @@ func testCircularBufferPntrElemsHelper(c CircularBuffer[int], t *testing.T){
     for i:=0; i<len(c.vals); i++ {
         c.PushBack(i);
     }
+    cnt:=0
     c.PntrElems().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
+        cnt++
         test.BasicTest(index,*val,"Element was skipped while iterating.",t);
         *val=100;
         return iter.Continue,nil;
@@ -840,6 +847,9 @@ func testCircularBufferPntrElemsHelper(c CircularBuffer[int], t *testing.T){
         test.BasicTest(100,val,"Element was not updated while iterating.",t);
         return iter.Continue,nil;
     });
+    test.BasicTest(cnt,len(c.vals),
+        "All the elements were not iterated over.",t,
+    )
 }
 func TestCircularBufferPntrElems(t *testing.T){
     tmp,err:=NewCircularBuffer[int](5);
