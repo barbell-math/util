@@ -8,6 +8,8 @@ import (
     customerr "github.com/barbell-math/util/err"
 )
 
+// NoElem provides an iterator that returns no elements. NoElem returns an empty
+// iterator.
 func NoElem[T any]() Iter[T] {
     return func(f IteratorFeedback) (T,error,bool) {
         var tmp T;
@@ -15,6 +17,11 @@ func NoElem[T any]() Iter[T] {
     }
 }
 
+// ValElem returns an iterator that produces the supplied value and error the 
+// supplied number of times. The same value and error will be returned so any
+// modifications made to the value and error will be visible on subsiquent
+// iterations. Any error other than nil will cause iteration to stop after the
+// first value due to how the intermediaries and consumers are implemented.
 func ValElem[T any](val T, err error, repeat int) Iter[T] {
     cntr:=0;
     return func(f IteratorFeedback) (T,error,bool) {
@@ -27,6 +34,13 @@ func ValElem[T any](val T, err error, repeat int) Iter[T] {
     }
 }
 
+// SliceElems returns an iterator that iterates over the supplied slices 
+// elements. No error will ever be returned by this producer. This producer is 
+// not thread safe. If the underlying slice is modified while it is being 
+// iterated over the behavior will be undefined and there are no order 
+// guarantees if this function is passed to multiple threads. For a thread safe 
+// implementation of SliceElems use the Vector.Elems method from the datastruct
+// package.
 func SliceElems[T any](s []T) Iter[T] {
     i:=-1;
     return func(f IteratorFeedback) (T,error,bool) {
@@ -39,6 +53,8 @@ func SliceElems[T any](s []T) Iter[T] {
     }
 }
 
+// StrElems returns an iterator that iterates over the supplied strings 
+// characters. No error will ever be returned by this producer.
 func StrElems(s string) Iter[byte] {
     i:=-1;
     return func(f IteratorFeedback) (byte,error,bool) {
@@ -50,6 +66,10 @@ func StrElems(s string) Iter[byte] {
     }
 }
 
+// SequentialElems returns an iterator that iterates over a general container 
+// using the get function in combination with the length function. Note that
+// unlike the SliceElems and StrElems producers this producer can return an 
+// error.
 func SequentialElems[T any](_len int, get func(i int) (T,error)) Iter[T] {
     i:=-1
     return func(f IteratorFeedback) (T, error, bool) {
@@ -63,35 +83,10 @@ func SequentialElems[T any](_len int, get func(i int) (T,error)) Iter[T] {
     }
 }
 
-// TODO -test
-func SetupTeardownSequentialElems[T any](
-    _len int,
-    get func(i int) (T,error),
-    setup func() error,
-    teardown func() error,
-) Iter[T] {
-    i:=-1
-    return func(f IteratorFeedback) (T, error, bool) {
-        i++;
-        if i>=_len || f==Break {
-            var err error
-            if i>0 {
-                err=teardown()
-            }
-            var tmp T
-            return tmp,err,false;
-        }
-        if i==0 {
-            if err:=setup(); err!=nil {
-                var tmp T
-                return tmp,err,false
-            }
-        }
-        v,err:=get(i)
-        return v,err,(err==nil);
-    }
-}
-
+// MapElems returns an iterator that iterates over a maps key,value pairs. Do
+// not confuse this with the Map intermediary function. This producer will never
+// return an error. This producer is not thread safe. If the underlying map value
+// it changed while being iterated over behavior is undefined.
 func MapElems[K comparable, V any](
     m map[K]V, 
     v staticType.Pair[K,V],
@@ -115,6 +110,10 @@ func MapElems[K comparable, V any](
     }
 }
 
+// MapElems returns an iterator that iterates over a maps key values. Do not 
+// confuse this with the Map intermediary function. This producer will never
+// return an error. This producer is not thread safe. If the underlying map value
+// it changed while being iterated over behavior is undefined.
 func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
     c:=make(chan K)
     go func(){
@@ -134,6 +133,10 @@ func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
     }
 }
 
+// MapElems returns an iterator that iterates over a maps values. Do not confuse
+// this with the Map intermediary function. This producer will never return an
+// error. This producer is not thread safe. If the underlying map value it
+// changed while being iterated over behavior is undefined.
 func MapVals[K comparable, V any](m map[K]V) Iter[V] {
     c:=make(chan V)
     go func(){
@@ -153,6 +156,9 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
     }
 }
 
+// ChanElems returns an iterator that iterates over the elements in an unbuffered
+// channel. Calling this function will block until the channel receives a value.
+// This producer will never return an error.
 func ChanElems[T any](c <-chan T) Iter[T] {
     return func(f IteratorFeedback) (T,error,bool) {
         if f!=Break {
@@ -164,6 +170,9 @@ func ChanElems[T any](c <-chan T) Iter[T] {
     }
 }
 
+// FileLines returns an iterator that iterates over the lines in a file. If an
+// error occurs opening the file then no lines will be iterated over and the
+// error will be returned upon the first iteration of the producer.
 func FileLines(path string) Iter[string] {
     var scanner *bufio.Scanner;
     file,err:=os.Open(path);
@@ -180,6 +189,12 @@ func FileLines(path string) Iter[string] {
     }
 }
 
+// Zip will take two iterators and return an iterator that iterates over pairs
+// of values where each pair contains a value from each supplied iterator. The
+// number of values returned by this iterator will equal the number of elements
+// from the supplied iterator that produces the least number values. Excess 
+// values will be ignored. Errors from the supplied iterators will be returned 
+// from this iterator.
 func Zip[T any, U any](
     i1 Iter[T], 
     i2 Iter[U], 
@@ -187,20 +202,28 @@ func Zip[T any, U any](
 ) Iter[staticType.Pair[T,U]] {
     return func(f IteratorFeedback) (staticType.Pair[T, U], error, bool) {
         if f==Break {
-            return nil,nil,false
+            return nil,customerr.AppendError(i1.Stop(),i2.Stop()),false
         }
         iVal1,err1,cont1:=i1(f)
+        if err1!=nil {
+            return nil,err1,false
+        }
         iVal2,err2,cont2:=i2(f)
+        if err2!=nil {
+            return nil,err2,false
+        }
         p:=factory()
         p.SetA(iVal1)
         p.SetB(iVal2)
-        if err1!=nil || err2!=nil {
-            return nil,customerr.AppendError(err1,err2), false
-        }
         return p, nil, (cont1 && cont2)
     }
 }
 
+// Join takes two iterators and a decider function and returns an iterator that
+// consumes both supplied iterators, returning a single value at a time based on
+// the return value from the decider function. The number of values returned will
+// equal the total number of values returned from both of the supplied iterators.
+// Errors from the supplied iterators will be returned by this iterator.
 func Join[T any, U any](
     i1 Iter[T],
     i2 Iter[U],
@@ -246,6 +269,12 @@ func Join[T any, U any](
     }
 }
 
+// JoinSame takes two iterators and a decider function and returns an iterator 
+// that consumes both supplied iterators, returning a single value at a time 
+// based on the return value from the decider function. The number of values 
+// returned will equal the total number of values returned from both of the 
+// supplied iterators. Errors from the supplied iterators will be returned by 
+// this iterator.
 func JoinSame[T any](
     i1 Iter[T],
     i2 Iter[T],
@@ -267,6 +296,20 @@ func JoinSame[T any](
     }
 }
 
+// Recurse will return an iterator that recursively returns values from the 
+// supplied iterator. This iterator will enforce root-left-right traversal. This
+// order is the only available order because once an iterator has produced a 
+// value there is no way to "push" it back.
+// 
+// Recurse takes a root iterator where the recursion begins. This iterator can 
+// return as many values as it needs, there is no limitation holding to only 
+// produce one value. 
+//
+// The shouldRecurse function should return true if the current value needs to 
+// be recursed upon. 
+//
+// The iterValToIter takes a value from an iterator and returns an iterator over
+// that value. This is where the recursion happens.
 func Recurse[T any](
     root Iter[T],
     shouldRecurse func(v T) bool,
@@ -277,8 +320,7 @@ func Recurse[T any](
     levelsBreakOp:=func() (T,error,bool) {
         var err error
         for _,v:=range(levels) {
-            _,err2,_:=v(Break)
-            err=customerr.AppendError(err,err2)
+            err=customerr.AppendError(err,v.Stop())
         }
         var tmp T
         return tmp, err, false

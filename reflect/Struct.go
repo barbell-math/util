@@ -12,19 +12,8 @@ import (
 type FieldInfo struct {
     // The name of the field.
     Name string
-    // The concreete value of the field. This is a copy of the value, not the
-    // original value contained in the struct. To access the original value
-    // use the Pntr field of this struct.
-    Val any
-    // The type of the field.
-    Type reflect.Type
-    // The kind of the field.
-    Kind reflect.Kind
-    // Returns a pointer to the struct field, if possible. Note that the Pntr 
-    // field of this struct is a function that may return an error. This is 
-    // because, depending on the value that is passed to the iterator function, 
-    // not all struct fields will be addressable.
-    Pntr func() (any,error)
+    // The value information for the field.
+    ValInfo
 }
 
 // Returns true if the supplied value is a pointer to a struct. As a special
@@ -49,6 +38,15 @@ func getStructVal[T any, S reflect.Value | *T](s S) (reflect.Value,error) {
             } else {
                 return refVal,nil
             }
+        case reflect.TypeOf(&reflect.Value{}):
+            if err:=structValError(any(s).(*reflect.Value)); err!=nil {
+                return reflect.Value{},err
+            }
+            if refVal:=any(s).(*reflect.Value); refVal.Kind()==reflect.Ptr {
+                return refVal.Elem(),nil
+            } else {
+                return *refVal,nil
+            }
         default:
             if err:=structValError(any(s).(*T)); err!=nil {
                 return reflect.Value{},err
@@ -59,7 +57,7 @@ func getStructVal[T any, S reflect.Value | *T](s S) (reflect.Value,error) {
 
 // Retrieves the struct name if a struct is supplied as an argument, returns 
 // an error otherwise. As a special case, if a reflect.Value is passed to this 
-// function it will return get the name of the struct it contains or the name of
+// function it will return the name of the struct it contains or the name of
 // the struct that it points to if the reflect.Value contains a pointer to a 
 // struct.
 func GetStructName[T any, S reflect.Value | *T](s S) (string,error) {
@@ -191,16 +189,18 @@ func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
             f:=structVal.Field(i)
             return FieldInfo{
                 Name: n,
-                Val: f.Interface(),
-                Type: f.Type(),
-                Kind: f.Kind(),
-                Pntr: func() (any, error) {
-                    if f.CanAddr() {
-                        return f.Addr().Interface(),nil
-                    }
-                    return nil,InAddressableField(fmt.Sprintf(
-                        "Field Name: %s",n,
-                    ))
+                ValInfo: ValInfo{
+                    Val: f.Interface(),
+                    Type: f.Type(),
+                    Kind: f.Kind(),
+                    Pntr: func() (any, error) {
+                        if f.CanAddr() {
+                            return f.Addr().Interface(),nil
+                        }
+                        return nil,InAddressableField(fmt.Sprintf(
+                            "Field Name: %s",n,
+                        ))
+                    },
                 },
             }, nil
         },

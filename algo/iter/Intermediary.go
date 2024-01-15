@@ -4,25 +4,13 @@ import (
 	customerr "github.com/barbell-math/util/err"
 )
 
-//Intermediaries sit between producers and consumers. They are responsible for
-//ensuring all iter feedback messages get passed up the call chain to from the
-//source of the message to the producer. This allows for resources to be managed
-//properly.
-//Rules:
-//  1. Errors are propagated down to the consumer. The consumer will then call
-//     it's parent iterator with the Break flag.
-//  2. All Break flags will be passed up to the producer. This allows resources
-//     to be destroyed in a top down fashion.
-//  3. If a Break flag is generated in a intermediary, it should not clean up
-//     its parents, but should return the command to not continue. The consumer
-//     will start the destruction process once it sees the command to not continue.
-
-//Next is the only true intermediary, all other intermediaries can be
-//expressed using Next making them pseudo-intermediaries. By using this pattern
-//all pseudo-intermediaries are abstracted away from the complex looping logic
-//and do not need to worry about iter feedback message passing.
+// Next will take it's parent iterator and consume its values. As it does this 
+// it will apply the operation (op) function to the value before passing on the
+// transformed value to it's child iterator. If an error is generated iteration
+// will stop.
 func Next[T any, U any](i Iter[T],
-        op func(index int, val T, status IteratorFeedback) (IteratorFeedback,U,error)) Iter[U] {
+    op func(index int, val T, status IteratorFeedback) (IteratorFeedback,U,error),
+) Iter[U] {
     j:=0;
     return func(f IteratorFeedback) (U,error,bool) {
         var tmp U;
@@ -42,13 +30,54 @@ func Next[T any, U any](i Iter[T],
         return tmp,err,cont;
     }
 }
+
+// Next will take it's parent iterator and consume its values. As it does this 
+// it will apply the operation (op) function to the value before passing on the
+// transformed value to it's child iterator. If an error is generated iteration
+// will stop. This is equivalent to calling the previous Next function and 
+// providing it with the same types.
 func (i Iter[T])Next(
     op func(index int, val T, status IteratorFeedback) (IteratorFeedback,T,error),
 ) Iter[T] {
     return Next(i,op);
 }
 
-func (i Iter[T])Inject(op func(idx int, val T) (T,bool)) Iter[T] {
+// SetupTeardown provides a way to have setup and teardown procedures. These 
+// setup and teardown procedures will be called once before the parent iterator
+// is ever called and after once after the parent iterator has completed. The 
+// teardown procedure will always be called even if the parent iterator returned
+// an error.
+func (i Iter[T])SetupTeardown(setup func() error, teardown func() error) Iter[T] {
+    j:=-1
+    return func(f IteratorFeedback) (T, error, bool) {
+        j++
+        if f!=Break && j==0 {
+            if err:=setup(); err!=nil {
+                var tmp T
+                return tmp, err, false
+            }
+        }
+        if f==Break {
+            val, err, cont:=i(f)
+            if j>0 {
+                err=customerr.AppendError(err,teardown())
+            }
+            return val,err,cont
+        }
+        return i(f)
+    }
+}
+
+// Inject will inject values into the iterator stream based on the operation (op)
+// functions return values. If the operation function returns true then the value
+// will be injected and the parent iterators current value will be cached to be
+// returned as soon as the operation function returns false. This provides a way
+// to arbitrarily change the sequence of values that is output. If an error is 
+// returned from either the parent iterator or the operation function 
+// then iteration will stop.
+func (i Iter[T])Inject(
+    op func(idx int, val T, injectedPrev bool) (T,error,bool),
+) Iter[T] {
     j:=-1;
     injected:=false;
     var prevErr error;
@@ -60,18 +89,26 @@ func (i Iter[T])Inject(op func(idx int, val T) (T,bool)) Iter[T] {
             return tmp,nil,false;
         }
         j++;
+        var next T
+        var err error
+        var cont bool
         if injected {
-            injected=false;
-            return prevVal,prevErr,prevCont;
-        }
-        next,err,cont:=i(f);
-        if v,status:=op(j,next); status {
-            injected=true;
-            prevVal=next;
-            prevCont=cont;
-            prevErr=err;
-            return v,nil,true;
+            next=prevVal
+            err=prevErr
+            cont=prevCont
         } else {
+            next,err,cont=i(f);
+        }
+        if v,opErr,status:=op(j,next,injected); status {
+            if !injected {
+                prevVal=next;
+                prevCont=cont;
+                prevErr=err;
+                injected=true;
+            }
+            return v,opErr,(opErr==nil);
+        } else {
+            injected=false
             return next,err,cont;
         }
     }

@@ -803,7 +803,7 @@ func TestCircularQueueClear(t *testing.T){
     }
 }
 
-func testCircularBufferElemsHelper(c CircularBuffer[int], t *testing.T){
+func testCircularBufferElemsHelper(c SyncedCircularBuffer[int], t *testing.T){
     for i:=0; i<len(c.vals); i++ {
         c.PushBack(i);
     }
@@ -813,17 +813,17 @@ func testCircularBufferElemsHelper(c CircularBuffer[int], t *testing.T){
         test.BasicTest(index,val,"Element was skipped while iterating.",t);
         return iter.Continue,nil;
     });
-    test.BasicTest(cnt,len(c.vals),
+    test.BasicTest(len(c.vals),cnt,
         "All the elements were not iterated over.",t,
     )
 }
 func TestCircularBufferElems(t *testing.T){
-    tmp,err:=NewCircularBuffer[int](5);
+    tmp,err:=NewSyncedCircularBuffer[int](5);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     testCircularBufferElemsHelper(tmp,t);
-    tmp,err=NewCircularBuffer[int](5);
+    tmp,err=NewSyncedCircularBuffer[int](5);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
@@ -847,17 +847,17 @@ func testCircularBufferPntrElemsHelper(c CircularBuffer[int], t *testing.T){
         test.BasicTest(100,val,"Element was not updated while iterating.",t);
         return iter.Continue,nil;
     });
-    test.BasicTest(cnt,len(c.vals),
+    test.BasicTest(len(c.vals),cnt,
         "All the elements were not iterated over.",t,
     )
 }
 func TestCircularBufferPntrElems(t *testing.T){
-    tmp,err:=NewCircularBuffer[int](5);
+    tmp,err:=NewSyncedCircularBuffer[int](5);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     testCircularBufferElemsHelper(tmp,t);
-    tmp,err=NewCircularBuffer[int](5);
+    tmp,err=NewSyncedCircularBuffer[int](5);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );

@@ -50,6 +50,32 @@ The intermediaries and consumers can be further sub-categorized:
 
 If you are looking to extend this library and add more iterators, it is highly recommended that any new intermediary or consumer iterators are created _using the non-pseudo iterators_. This will reduce errors and time spent needlessly banging your head against a wall.
 
+### Producers
+
+Producers can be any function that returns an iterator. They are responsible for producing the stream of values that the rest of the iterator chain consumes. There are several rules that a consumer must obey:
+1. Errors are returned from the producer. 
+1. When an error is returned the value of the iterator element that is returned does not have to be valid.
+1. When an error is returned the continue flag must be set to false.
+1. A producer will only perform resource management when it recieves the break flag, not when it returns the initial error.
+
+### Intermediaries
+Intermediaries sit between producers and consumers. They are responsible for ensuring all iter feedback messages get passed up the call chain to from the source of the message to the producer. This allows for resources to be managed properly. There are several rules that an intermediary must obey:
+1. Errors are propagated down to the consumer. The consumer will then call it's parent iterator with the Break flag.
+1. When an error is returned the continue flag must be set to false.
+1. All Break flags will be passed up to the producer. This allows resources to be destroyed in a top down fashion.
+1. If an itermediary produces a continue flag that tells the next iterator to stop, it should not clean up its parents or itself, but should return the command to not continue. The consumer will start the destruction process once it sees the command to not continue.
+
+Next is a very ubiquitous intermediary, most other intermediaries can be expressed using Next making them pseudo-intermediaries. By using this pattern all pseudo-intermediaries are abstracted away from the complex looping logic and do not need to worry about iterator feedback and message passing.
+
+### Consumers
+
+Consumers are the final stage in a iterator sequence. Without a consumer any iterator chain will not be consumed due to the iterator chain being lazily evaluated. There are several rules that a consumer must obey:
+1. When an error is generated no further values should be consumed and the ```Break``` command should be passed to the consumers parent iterator.
+1. When all elements have been consumed iteration should stopa nd the ```Break``` command should be passed to the consumers parent iterator.
+1. All errors generated from a consumers parent iterator chain should be propogated to the calling code.
+
+ForEach is a very ubiquitous consumer. Most other consumers can be represented using ForEach, making them pseudo-intermediaries. By using this pattern all pseudo-intermediaries are abstracted away from the complex looping logic and do not need to work about iterator feedback and message passing.
+
 ## Reverse Message Passing
 
 The iterators can be in three possible states:
@@ -60,11 +86,11 @@ The iterators can be in three possible states:
 
 These states are managed for each individual iterator, and are passed between the child and parent iterators.
 
-If any iterator produces an error or signals its child iterator to stop iterating, a ```Break``` command is generated. This ```Break``` command is passed down to the consumer with no action being taken by the intermediaries. The consumer then calls its parent iterator with the ```Break``` command which is propagated all the way to the producer, which performs it's resource management. Once done, the producer returns any errors and it's child iterator is allowed to perform resource management and the pattern continues all the way down to the consumer. This allows for resources to be properly destroyed in a top-down fashion.
+Any iterator can produce an error or signal its child iterator to stop iterating. When this happens, the command to stop iterating is passed down to the consumer with no action being taken by the intermediaries. The consumer then calls its parent iterator with the ```Break``` command which is propagated all the way to the producer, which performs it's resource management. Once done, the producer returns any errors and it's child iterator is allowed to perform resource management and the pattern continues all the way down to the consumer. This allows for resources to be properly destroyed in a top-down fashion.
 
 ## Benchmarking
 
-Obviously there will be overhead when using this library instead of using plain for loops. The ```example_test.go``` not only showcases the example at the top of this readme, but contains benchmarks for three different scenarios. These scenarios are shown below for convince.
+Obviously there will be overhead when using this library instead of using plain for loops. The ```example_test.go``` not only showcases the example at the top of this readme, but contains benchmarks for three different scenarios. These scenarios are shown below for convenience.
 
 
 ##### Scenario 1: A 'typical' functional implementation

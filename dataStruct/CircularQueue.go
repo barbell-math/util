@@ -287,18 +287,20 @@ func (c *CircularBuffer[T])Clear() {
 }
 
 func (c *CircularBuffer[T])Elems() iter.Iter[T] {
-    return iter.SetupTeardownSequentialElems[T](
+    return iter.SequentialElems[T](
         c.numElems,
         c.Get,
+    ).SetupTeardown(
         func() error { c.RLock(); return nil },
         func() error { c.RUnlock(); return nil },
     )
 }
 
 func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
-    return iter.SetupTeardownSequentialElems[*T](
+    return iter.SequentialElems[*T](
         c.numElems,
         c.GetPntr,
+    ).SetupTeardown(
         func() error { c.RLock(); return nil },
         func() error { c.RUnlock(); return nil },
     )

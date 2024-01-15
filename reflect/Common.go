@@ -5,7 +5,6 @@ import (
 	"reflect"
 )
 
-
 func isKindOrReflectValKind[T any](t *T, expType reflect.Kind) bool {
     switch reflect.TypeOf(t) {
         case reflect.TypeOf(&reflect.Value{}):
@@ -46,7 +45,7 @@ func valError[T any](
                 reflect.ValueOf(t).Elem().Kind().String(),
             )
     }
-    return NonStructValue(fmt.Sprintf(
+    return IncorrectType(fmt.Sprintf(
         "Function requires a %s as target. | %s",
         expKind.String(),fString,
     ));

@@ -226,9 +226,10 @@ func (v *Vector[T])ForcePushFront(val T) {
 
 // TODO -test
 func (v *Vector[T])Elems() iter.Iter[T] {
-    return iter.SetupTeardownSequentialElems[T](
+    return iter.SequentialElems[T](
         len(*v),
         func(i int) (T, error) { return (*v)[i],nil },
+    ).SetupTeardown(
         func() error { v.RLock(); return nil },
         func() error { v.RUnlock(); return nil },
     )
@@ -236,9 +237,10 @@ func (v *Vector[T])Elems() iter.Iter[T] {
 
 // TODO -test
 func (v *Vector[T])PntrElems() iter.Iter[*T] {
-    return iter.SetupTeardownSequentialElems[*T](
+    return iter.SequentialElems[*T](
         len(*v),
         func(i int) (*T, error) { return &(*v)[i],nil },
+    ).SetupTeardown(
         func() error { v.RLock(); return nil },
         func() error { v.RUnlock(); return nil },
     )

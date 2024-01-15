@@ -4,8 +4,8 @@ import (
     customerr "github.com/barbell-math/util/err"
 )
 
-var NonStructValue,IsNonStructValue=customerr.ErrorFactory(
-    "A struct value was expected but was not recieved.",
+var IncorrectType,IsIncorrectType=customerr.ErrorFactory(
+    "An incorrect type was recieved.",
 );
 
 var InAddressableField,IsInAddressableField=customerr.ErrorFactory(

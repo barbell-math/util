@@ -185,9 +185,93 @@ func TestNextReachesBreakParentErrAndCleanUpErr(t *testing.T){
     }
 }
 
-func injectIterHelper[T any](initialVals []T,
-        desiredSeq []T, 
-        op func(idx int, val T) (T,bool), t *testing.T){
+func TestSetupTeardownNoElems(t *testing.T) {
+    setupRan:=false
+    teardownRan:=false
+    setup:=func() error { setupRan=true; return nil }
+    teardown:=func() error { teardownRan=true; return nil }
+    cnt,err:=NoElem[int]().SetupTeardown(setup,teardown).Count()
+    test.BasicTest(true,setupRan,
+        "Setup was not run when it was supposed to be.",t,
+    )
+    test.BasicTest(true,teardownRan,
+        "Teardown was not run when it was supposed to be.",t,
+    )
+    test.BasicTest(0,cnt,
+        "SetupTeardown iterated the wrong number of times.",t,
+    )
+    test.BasicTest(nil,err,
+        "SetupTeardown returned an error when it should not have.",t,
+    )
+}
+
+func TestSetupTeardownWithElems(t *testing.T) {
+    setupRan:=false
+    teardownRan:=false
+    setup:=func() error { setupRan=true; return nil }
+    teardown:=func() error { teardownRan=true; return nil }
+    cnt,err:=SliceElems[int]([]int{0,1,2,3}).SetupTeardown(setup,teardown).Count()
+    test.BasicTest(true,setupRan,
+        "Setup was not run when it was supposed to be.",t,
+    )
+    test.BasicTest(true,teardownRan,
+        "Teardown was not run when it was supposed to be.",t,
+    )
+    test.BasicTest(4,cnt,
+        "SetupTeardown iterated the wrong number of times.",t,
+    )
+    test.BasicTest(nil,err,
+        "SetupTeardown returned an error when it should not have.",t,
+    )
+}
+
+func TestSetupTeardownWithSetupError(t *testing.T){
+    setupRan:=false
+    teardownRan:=false
+    setup:=func() error { setupRan=true; return errors.New("ERROR") }
+    teardown:=func() error { teardownRan=true; return nil }
+    cnt,err:=SliceElems[int]([]int{0,1,2,3}).SetupTeardown(setup,teardown).Count()
+    test.BasicTest(true,setupRan,
+        "Setup was not run when it was supposed to be.",t,
+    )
+    test.BasicTest(true,teardownRan,
+        "Teardown was not run when it was supposed to be.",t,
+    )
+    test.BasicTest(0,cnt,
+        "SetupTeardown iterated the wrong number of times.",t,
+    )
+    if err.Error()!="ERROR" {
+        test.FormatError(errors.New("ERROR"),err,
+            "Setupteardown did not return the correct error.",t,
+        )
+    }
+}
+
+func TestSetupTeardownWithTeardownError(t *testing.T){
+    setupRan:=false
+    teardownRan:=false
+    setup:=func() error { setupRan=true; return nil }
+    teardown:=func() error { teardownRan=true; return errors.New("ERROR") }
+    err:=SliceElems[int]([]int{0,1,2,3}).SetupTeardown(setup,teardown).Consume()
+    test.BasicTest(true,setupRan,
+        "Setup was not run when it was supposed to be.",t,
+    )
+    test.BasicTest(true,teardownRan,
+        "Teardown was not run when it was supposed to be.",t,
+    )
+    if err.Error()!="ERROR" {
+        test.FormatError(errors.New("ERROR"),err,
+            "Setupteardown did not return the correct error.",t,
+        )
+    }
+}
+
+func injectIterHelper[T any](
+    initialVals []T,
+    desiredSeq []T, 
+    op func(idx int, val T, injectedPrev bool) (T,error,bool), 
+    t *testing.T,
+){
     result,err:=SliceElems(initialVals).Inject(op).Collect();
     test.BasicTest(nil,err,"Inject created an error when it should not have.",t);
     test.BasicTest(len(desiredSeq),len(result),
@@ -201,29 +285,61 @@ func injectIterHelper[T any](initialVals []T,
         }
     }
 }
-func TestInject(t *testing.T) {
+func TestInjectSingleValue(t *testing.T) {
     injectIterHelper([]int{},[]int{},
-        func(idx, val int) (int, bool) { return 0,idx==1; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==1; },t,
     );
     injectIterHelper([]int{1,2,3,4},[]int{1,2,3,4},
-        func(idx, val int) (int, bool) { return 0,idx==5; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==5; },t,
     );
     injectIterHelper([]int{},[]int{0},
-        func(idx, val int) (int, bool) { return 0,idx==0; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==0; },t,
     );
     injectIterHelper([]int{1},[]int{0,1},
-        func(idx, val int) (int, bool) { return 0,idx==0; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==0; },t,
     );
     injectIterHelper([]int{1,2,3,4},[]int{0,1,2,3,4},
-        func(idx, val int) (int, bool) { return 0,idx==0; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==0; },t,
     );
     injectIterHelper([]int{1},[]int{1,0},
-        func(idx, val int) (int, bool) { return 0,idx==1; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==1; },t,
     );
     injectIterHelper([]int{1,2,3,4},[]int{1,2,3,4,0},
-        func(idx, val int) (int, bool) { return 0,idx==4; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==4; },t,
     );
     injectIterHelper([]int{1,2,3,4},[]int{1,2,0,3,4},
-        func(idx, val int) (int, bool) { return 0,idx==2; },t,
+        func(idx, val int, injectedPrev bool) (int, error, bool) { return 0,nil,idx==2; },t,
     );
+}
+
+func multiValueInjectHelper[T any](
+    initialVals []T, 
+    injectables []T,
+    startIdx int,
+    exp []T, 
+    t *testing.T,
+){
+    op:=func(idx int, val T, injectedPrev bool) (T, error, bool) {
+        if idx>=startIdx && len(injectables)>0 {
+            v:=injectables[0]
+            injectables=injectables[1:]
+            return v,nil,true
+        }
+        var tmp T
+        return tmp,nil,false
+    }
+    injectIterHelper[T](initialVals, exp, op, t)
+}
+func TestInjectMultiValue(t *testing.T){
+    multiValueInjectHelper[int]([]int{},[]int{},0,[]int{},t)
+    multiValueInjectHelper[int]([]int{},[]int{1,2},0,[]int{1,2},t)
+    multiValueInjectHelper[int]([]int{1},[]int{2,3,4},2,[]int{1},t)
+    multiValueInjectHelper[int]([]int{3},[]int{1,2},0,[]int{1,2,3},t)
+    multiValueInjectHelper[int]([]int{4},[]int{1,2,3},0,[]int{1,2,3,4},t)
+    multiValueInjectHelper[int]([]int{1},[]int{2,3,4},1,[]int{1,2,3,4},t)
+    multiValueInjectHelper[int]([]int{1,2},[]int{3,4},2,[]int{1,2,3,4},t)
+    multiValueInjectHelper[int]([]int{1,2,3},[]int{4},3,[]int{1,2,3,4},t)
+    multiValueInjectHelper[int]([]int{1,2,3,4},[]int{},4,[]int{1,2,3,4},t)
+    multiValueInjectHelper[int]([]int{1,2,3,4},[]int{5},4,[]int{1,2,3,4,5},t)
+    multiValueInjectHelper[int]([]int{1,2,3,4},[]int{5,6},4,[]int{1,2,3,4,5,6},t)
 }
