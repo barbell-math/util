@@ -48,11 +48,11 @@ func IsSliceVal[T any, S reflect.Value | *T](s S) bool {
 }
 
 func sliceValError[T any, S reflect.Value | *T](s S) error {
-    return valError[T,S](s, reflect.Array, IsSliceVal[T,S])
+    return valError[T,S](s, reflect.Slice, IsSliceVal[T,S])
 }
 
 func homogonizeSliceVal[T any, S reflect.Value | *T](s S) (reflect.Value,error) {
-    return homogonizeValue[T,S](s,arrayValError[T,S])
+    return homogonizeValue[T,S](s,sliceValError[T,S])
 }
 
 // Returns an iterator that will iterate over the array elements returning the
@@ -115,7 +115,7 @@ func elemPntrs[T any, U reflect.Value | *T](
     u U,
     homoginizer func(a U) (reflect.Value,error),
 ) iter.Iter[any] {
-    arrayVal,err:=homogonizeArrayVal[T,U](u)
+    arrayVal,err:=homoginizer(u)
     if err!=nil {
         return iter.ValElem[any](nil,err,1)
     }
@@ -207,7 +207,7 @@ func ArrayElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
 // elements then make sure you either pass a pointer to a slice or a
 // reflect.Value that contains a pointer to a slice.
 func SliceElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
-    return elemInfo[T,A](a,homogonizeArrayVal[T,A])
+    return elemInfo[T,A](a,homogonizeSliceVal[T,A])
 }
 
 func elemInfo[T any, U reflect.Value | *T](
