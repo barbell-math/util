@@ -21,47 +21,30 @@ type testStruct2 struct {
 
 func TestIsStructVal(t *testing.T){
     v:=0
-    test.BasicTest(false,IsStructVal(&v),
+    test.BasicTest(false,IsStructVal[int](&v),
         "IsStructVal returned a false positive.",t,
     )
     v2:=reflect.ValueOf(v)
-    test.BasicTest(false,IsStructVal(&v2),
+    test.BasicTest(false,IsStructVal[int](v2),
         "IsStructVal returned a false positive.",t,
     )
     v2=reflect.ValueOf(&v)
-    test.BasicTest(false,IsStructVal(&v2),
+    test.BasicTest(false,IsStructVal[int](v2),
         "IsStructVal returned a false positive.",t,
     )
     s:=testStruct{}
-    test.BasicTest(true,IsStructVal(&s),
-        "IsStructVal returned a false positive.",t,
+    test.BasicTest(true,IsStructVal[testStruct](&s),
+        "IsStructVal returned a false negative.",t,
     )
     s2:=reflect.ValueOf(s)
-    test.BasicTest(true,IsStructVal(&s2),
-        "IsStructVal returned a false positive.",t,
+    test.BasicTest(true,IsStructVal[testStruct](s2),
+        "IsStructVal returned a false negative.",t,
     )
     s2=reflect.ValueOf(&s)
-    test.BasicTest(true,IsStructVal(&s2),
-        "IsStructVal returned a false positive.",t,
+    test.BasicTest(true,IsStructVal[testStruct](s2),
+        "IsStructVal returned a false negative.",t,
     )
 }
-
-// func TestIsStructPntr(t *testing.T){
-//     v:=0
-//     v2:=&v
-//     test.BasicTest(false,IsStructPntr(&v2),
-//         "IsStructVal returned a false positive.",t,
-//     )
-//     v3:=reflect.ValueOf(v2)
-//     test.BasicTest(false,IsStructPntr(&v3),
-//         "IsStructVal returned a false positive.",t,
-//     )
-//     s:=testStruct{}
-//     s2:=&s
-//     test.BasicTest(true,IsStructPntr(&s2),
-//         "IsStructVal returned a false positive.",t,
-//     )
-// }
 
 func TestNonStructGetName(t *testing.T){
     v:=0;

@@ -9,27 +9,27 @@ import (
 
 func TestIsArrayVal(t *testing.T){
     v:=[]int{}
-    test.BasicTest(false,IsArrayVal(&v),
+    test.BasicTest(false,IsArrayVal[[]int](&v),
         "IsArrayVal returned false positive.",t,
     )
     v2:=reflect.ValueOf(v)
-    test.BasicTest(false,IsArrayVal(&v2),
+    test.BasicTest(false,IsArrayVal[int](v2),
         "IsArrayVal returned false positive.",t,
     )
     v2=reflect.ValueOf(&v)
-    test.BasicTest(false,IsArrayVal(&v2),
+    test.BasicTest(false,IsArrayVal[int](v2),
         "IsArrayVal returned false positive.",t,
     )
     a:=[3]int{}
-    test.BasicTest(true,IsArrayVal(&a),
+    test.BasicTest(true,IsArrayVal[[3]int](&a),
         "IsArrayVal returned false negative.",t,
     )
     a2:=reflect.ValueOf(a)
-    test.BasicTest(true,IsArrayVal(&a2),
+    test.BasicTest(true,IsArrayVal[[3]int](a2),
         "IsArrayVal returned false negative.",t,
     )
     a2=reflect.ValueOf(&a)
-    test.BasicTest(true,IsArrayVal(&a2),
+    test.BasicTest(true,IsArrayVal[[3]int](a2),
         "IsArrayVal returned false negative.",t,
     )
 }
@@ -94,7 +94,7 @@ func TestArrayElemVals(t *testing.T){
 func TestArrayElemValsReflectVal(t *testing.T){
     v:=[3]int{0,1,2}
     v2:=reflect.ValueOf(v)
-    vals,err:=ArrayElemVals[reflect.Value](&v2).Collect()
+    vals,err:=ArrayElemVals[reflect.Value](v2).Collect()
     test.BasicTest(3,len(vals),
         "ArrayElemVals the incorrect number of values.",t,
     )
@@ -408,27 +408,227 @@ func TestArrayElemInfo(t *testing.T){
     }
 }
 
-// TODO -complete elem info testing
-// func TestArrayElemKindReflectVal(t *testing.T){
-//     v:=[3]int{0,1,2}
-//     v2:=reflect.ValueOf(v)
-//     _type,err:=ArrayElemKind[[3]int](v2)
-//     test.BasicTest(reflect.Int,_type,
-//         "ArrayElemVals the incorrect number of values.",t,
-//     )
-//     test.BasicTest(nil,err,
-//         "ArrayElemVals returned an error when it should not have.",t,    
-//     )
-// }
-// 
-// func TestArrayElemKindReflectValPntr(t *testing.T){
-//     v:=[3]int{0,1,2}
-//     v2:=reflect.ValueOf(&v)
-//     _type,err:=ArrayElemKind[[3]int](v2)
-//     test.BasicTest(reflect.Int,_type,
-//         "ArrayElemVals the incorrect number of values.",t,
-//     )
-//     test.BasicTest(nil,err,
-//         "ArrayElemVals returned an error when it should not have.",t,    
-//     )
-// }
+func TestArrayElemInfoReflectVal(t *testing.T){
+    v:=[3]int{0,1,2}
+    v2:=reflect.ValueOf(v)
+    info,err:=ArrayElemInfo[[3]int](v2).Collect()
+    test.BasicTest(nil,err,
+        "ArrayElemVals returned an error when it should not have.",t,    
+    )
+    test.BasicTest(3,len(info),
+        "ArrayElemVals returned the wrong number of elements.",t,
+    )
+    for i,iterV:=range(v) {
+        test.BasicTest(iterV,info[i].Val.(int),
+            "ArrayElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
+            "ArrayElemInfo returned an incorrect type.",t,
+        )
+        test.BasicTest(reflect.Int,info[i].Kind,
+            "ArrayElemInfo returned an incorrect type.",t,
+        )
+        pntr,err:=info[i].Pntr()
+        test.BasicTest(nil,pntr,
+            "ArrayElemInfo returned an incorrect pntr.",t,
+        )
+        if !IsInAddressableField(err) {
+            test.FormatError(InAddressableField(""),err,
+                "Getting a pointer to an inadressable field returned the wrong error.",t,
+            )
+        }
+    }
+}
+
+func TestArrayElemInfoReflectValPntr(t *testing.T){
+    v:=[3]int{0,1,2}
+    v2:=reflect.ValueOf(&v)
+    info,err:=ArrayElemInfo[[3]int](v2).Collect()
+    test.BasicTest(nil,err,
+        "ArrayElemVals returned an error when it should not have.",t,    
+    )
+    test.BasicTest(3,len(info),
+        "ArrayElemVals returned the wrong number of elements.",t,
+    )
+    for i,iterV:=range(v) {
+        test.BasicTest(iterV,info[i].Val.(int),
+            "ArrayElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
+            "ArrayElemInfo returned an incorrect type.",t,
+        )
+        test.BasicTest(reflect.Int,info[i].Kind,
+            "ArrayElemInfo returned an incorrect type.",t,
+        )
+        pntr,err:=info[i].Pntr()
+        test.BasicTest(&v[i],pntr.(*int),
+            "ArrayElemInfo returned an incorrect pntr.",t,
+        )
+        test.BasicTest(nil,err,
+            "ArrayElemInfo returned an error when accessing a pointer value when it should not have.",t,    
+        )
+    }
+}
+
+func TestNonArrayRecursiveElemInfo(t *testing.T){
+    v:=0
+    _,err:=RecursiveArrayElemInfo[int](&v).Collect()
+    if !IsIncorrectType(err) {
+        test.FormatError(IncorrectType(""),err,
+            "ArrayElemVals returned an incorrect error.",t,
+        )
+    }
+}
+
+func TestNonArrayRecursiveElemInfoReflectVal(t *testing.T){
+    v:=0
+    v2:=reflect.ValueOf(v)
+    _,err:=RecursiveArrayElemInfo[reflect.Value](v2).Collect()
+    if !IsIncorrectType(err) {
+        test.FormatError(IncorrectType(""),err,
+            "ArrayElemVals returned an incorrect error.",t,
+        )
+    }
+}
+
+func TestNonArrayRecursiveElemInfoReflectValPntr(t *testing.T){
+    v:=0
+    v2:=reflect.ValueOf(&v)
+    _,err:=RecursiveArrayElemInfo[reflect.Value](v2).Collect()
+    if !IsIncorrectType(err) {
+        test.FormatError(IncorrectType(""),err,
+            "ArrayElemVals returned an incorrect error.",t,
+        )
+    }
+}
+
+func TestRecursiveArrayElemInfo(t *testing.T){
+    v:=[3][3]int{[3]int{1,2,3},[3]int{5,6,7},[3]int{9,10,11}}
+    vals,err:=RecursiveArrayElemInfo[[3][3]int](&v).Collect()
+    test.BasicTest(nil,err,
+        "RecursiveArrayElemInfo returned an error when it should not have.",t,
+    )
+    test.BasicTest(12,len(vals),
+        "The wrong number of values were returned.",t,
+    )
+    for i,iterV:=range(vals) {
+        if i==0 || i==4 || i==8 {
+            test.BasicTest([3]int{i+1,i+2,i+3},iterV.Val.([3]int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(reflect.TypeOf([3]int{}),iterV.Type,
+                "Recurse did not return the proper type of a root node.",t,
+            )
+            test.BasicTest(reflect.Array,iterV.Kind,
+                "Recurse did not return the proper kind of a root node.",t,
+            )
+            p,err:=iterV.Pntr()
+            test.BasicTest(nil,err,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+            test.BasicTest(&v[i/4],p,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+        } else {
+            test.BasicTest(i,iterV.Val.(int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(reflect.TypeOf(int(0)),iterV.Type,
+                "Recurse did not return the proper type of a root node.",t,
+            )
+            test.BasicTest(reflect.Int,iterV.Kind,
+                "Recurse did not return the proper kind of a root node.",t,
+            )
+            p,err:=iterV.Pntr()
+            test.BasicTest(nil,err,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+            test.BasicTest(&v[i/4][i%4-1],p,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+        }
+    }
+}
+
+func TestRecursiveArrayElemInfoReflectVal(t *testing.T){
+    v:=[3][3]int{[3]int{1,2,3},[3]int{5,6,7},[3]int{9,10,11}}
+    v2:=reflect.ValueOf(v)
+    vals,err:=RecursiveArrayElemInfo[[3][3]int](v2).Collect()
+    test.BasicTest(1,len(vals),
+        "The wrong number of values were returned.",t,
+    )
+    if !IsInAddressableField(err) {
+        test.FormatError(InAddressableField(""),err,
+            "Field was not inadressable when it should have been.",t,
+        )
+    }
+    for i,iterV:=range(vals) {
+        test.BasicTest([3]int{4*i+1,4*i+2,4*i+3},iterV.Val.([3]int),
+            "Recurse did not return the proper root node.",t,
+        )
+        test.BasicTest(reflect.TypeOf([3]int{}),iterV.Type,
+            "Recurse did not return the proper type of a root node.",t,
+        )
+        test.BasicTest(reflect.Array,iterV.Kind,
+            "Recurse did not return the proper kind of a root node.",t,
+        )
+        p,err:=iterV.Pntr()
+        test.BasicTest(nil,p,
+            "Pointer to a root node did not return the correct value.",t,
+        )
+        if !IsInAddressableField(err) {
+            test.FormatError(InAddressableField(""),err,
+                "Field was not inadressable when it should have been.",t,
+            )
+        }
+    }
+}
+
+func TestRecursiveArrayElemInfoReflectValPntr(t *testing.T){
+    v:=[3][3]int{[3]int{1,2,3},[3]int{5,6,7},[3]int{9,10,11}}
+    v2:=reflect.ValueOf(&v)
+    vals,err:=RecursiveArrayElemInfo[[3][3]int](v2).Collect()
+    test.BasicTest(nil,err,
+        "RecursiveArrayElemInfo returned an error when it should not have.",t,
+    )
+    test.BasicTest(12,len(vals),
+        "The wrong number of values were returned.",t,
+    )
+    for i,iterV:=range(vals) {
+        if i==0 || i==4 || i==8 {
+            test.BasicTest([3]int{i+1,i+2,i+3},iterV.Val.([3]int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(reflect.TypeOf([3]int{}),iterV.Type,
+                "Recurse did not return the proper type of a root node.",t,
+            )
+            test.BasicTest(reflect.Array,iterV.Kind,
+                "Recurse did not return the proper kind of a root node.",t,
+            )
+            p,err:=iterV.Pntr()
+            test.BasicTest(nil,err,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+            test.BasicTest(&v[i/4],p,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+        } else {
+            test.BasicTest(i,iterV.Val.(int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(reflect.TypeOf(int(0)),iterV.Type,
+                "Recurse did not return the proper type of a root node.",t,
+            )
+            test.BasicTest(reflect.Int,iterV.Kind,
+                "Recurse did not return the proper kind of a root node.",t,
+            )
+            p,err:=iterV.Pntr()
+            test.BasicTest(nil,err,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+            test.BasicTest(&v[i/4][i%4-1],p,
+                "Pointer to a root node did not return the correct value.",t,
+            )
+        }
+    }
+}

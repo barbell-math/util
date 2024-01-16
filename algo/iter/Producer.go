@@ -8,6 +8,8 @@ import (
     customerr "github.com/barbell-math/util/err"
 )
 
+// This function is a Producer.
+// 
 // NoElem provides an iterator that returns no elements. NoElem returns an empty
 // iterator.
 func NoElem[T any]() Iter[T] {
@@ -17,6 +19,8 @@ func NoElem[T any]() Iter[T] {
     }
 }
 
+// This function is a Producer.
+// 
 // ValElem returns an iterator that produces the supplied value and error the 
 // supplied number of times. The same value and error will be returned so any
 // modifications made to the value and error will be visible on subsiquent
@@ -34,6 +38,8 @@ func ValElem[T any](val T, err error, repeat int) Iter[T] {
     }
 }
 
+// This function is a Producer.
+// 
 // SliceElems returns an iterator that iterates over the supplied slices 
 // elements. No error will ever be returned by this producer. This producer is 
 // not thread safe. If the underlying slice is modified while it is being 
@@ -53,6 +59,8 @@ func SliceElems[T any](s []T) Iter[T] {
     }
 }
 
+// This function is a Producer.
+// 
 // StrElems returns an iterator that iterates over the supplied strings 
 // characters. No error will ever be returned by this producer.
 func StrElems(s string) Iter[byte] {
@@ -66,6 +74,8 @@ func StrElems(s string) Iter[byte] {
     }
 }
 
+// This function is a Producer.
+// 
 // SequentialElems returns an iterator that iterates over a general container 
 // using the get function in combination with the length function. Note that
 // unlike the SliceElems and StrElems producers this producer can return an 
@@ -83,6 +93,8 @@ func SequentialElems[T any](_len int, get func(i int) (T,error)) Iter[T] {
     }
 }
 
+// This function is a Producer.
+// 
 // MapElems returns an iterator that iterates over a maps key,value pairs. Do
 // not confuse this with the Map intermediary function. This producer will never
 // return an error. This producer is not thread safe. If the underlying map value
@@ -110,6 +122,8 @@ func MapElems[K comparable, V any](
     }
 }
 
+// This function is a Producer.
+// 
 // MapElems returns an iterator that iterates over a maps key values. Do not 
 // confuse this with the Map intermediary function. This producer will never
 // return an error. This producer is not thread safe. If the underlying map value
@@ -133,6 +147,8 @@ func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
     }
 }
 
+// This function is a Producer.
+// 
 // MapElems returns an iterator that iterates over a maps values. Do not confuse
 // this with the Map intermediary function. This producer will never return an
 // error. This producer is not thread safe. If the underlying map value it
@@ -156,6 +172,8 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
     }
 }
 
+// This function is a Producer.
+// 
 // ChanElems returns an iterator that iterates over the elements in an unbuffered
 // channel. Calling this function will block until the channel receives a value.
 // This producer will never return an error.
@@ -170,6 +188,8 @@ func ChanElems[T any](c <-chan T) Iter[T] {
     }
 }
 
+// This function is a Producer.
+// 
 // FileLines returns an iterator that iterates over the lines in a file. If an
 // error occurs opening the file then no lines will be iterated over and the
 // error will be returned upon the first iteration of the producer.
@@ -189,6 +209,8 @@ func FileLines(path string) Iter[string] {
     }
 }
 
+// This function is a Producer.
+// 
 // Zip will take two iterators and return an iterator that iterates over pairs
 // of values where each pair contains a value from each supplied iterator. The
 // number of values returned by this iterator will equal the number of elements
@@ -219,6 +241,8 @@ func Zip[T any, U any](
     }
 }
 
+// This function is a Producer.
+// 
 // Join takes two iterators and a decider function and returns an iterator that
 // consumes both supplied iterators, returning a single value at a time based on
 // the return value from the decider function. The number of values returned will
@@ -269,6 +293,8 @@ func Join[T any, U any](
     }
 }
 
+// This function is a Producer.
+// 
 // JoinSame takes two iterators and a decider function and returns an iterator 
 // that consumes both supplied iterators, returning a single value at a time 
 // based on the return value from the decider function. The number of values 
@@ -296,6 +322,8 @@ func JoinSame[T any](
     }
 }
 
+// This function is a Producer.
+// 
 // Recurse will return an iterator that recursively returns values from the 
 // supplied iterator. This iterator will enforce root-left-right traversal. This
 // order is the only available order because once an iterator has produced a 

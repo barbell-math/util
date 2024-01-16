@@ -19,40 +19,16 @@ type FieldInfo struct {
 // Returns true if the supplied value is a pointer to a struct. As a special
 // case, if a reflect.Value is passed to this function it will return true if 
 // that reflect value either contains a struct or contains a pointer to a struct.
-func IsStructVal[S any](s *S) bool {
-    return isKindOrReflectValKind[S](s,reflect.Struct)
+func IsStructVal[T any, S reflect.Value | *T](s S) bool {
+    return isKindOrReflectValKind[T,S](s,reflect.Struct)
 }
 
-func structValError[S any](s *S) error {
-    return valError[S](s, reflect.Struct, IsStructVal[S])
+func structValError[T any, S reflect.Value | *T](s S) error {
+    return valError[T,S](s, reflect.Struct, IsStructVal[T,S])
 }
 
-func getStructVal[T any, S reflect.Value | *T](s S) (reflect.Value,error) {
-    switch reflect.TypeOf(s) {
-        case reflect.TypeOf(reflect.Value{}):
-            if err:=structValError(&s); err!=nil {
-                return reflect.Value{},err
-            }
-            if refVal:=any(s).(reflect.Value); refVal.Kind()==reflect.Ptr {
-                return refVal.Elem(),nil
-            } else {
-                return refVal,nil
-            }
-        case reflect.TypeOf(&reflect.Value{}):
-            if err:=structValError(any(s).(*reflect.Value)); err!=nil {
-                return reflect.Value{},err
-            }
-            if refVal:=any(s).(*reflect.Value); refVal.Kind()==reflect.Ptr {
-                return refVal.Elem(),nil
-            } else {
-                return *refVal,nil
-            }
-        default:
-            if err:=structValError(any(s).(*T)); err!=nil {
-                return reflect.Value{},err
-            }
-            return reflect.ValueOf(any(s).(*T)).Elem(),nil
-    }
+func homogonizeStructVal[T any, S reflect.Value | *T](s S) (reflect.Value,error) {
+    return homogonizeValue[T,S](s,structValError[T,S])
 }
 
 // Retrieves the struct name if a struct is supplied as an argument, returns 
@@ -61,7 +37,7 @@ func getStructVal[T any, S reflect.Value | *T](s S) (reflect.Value,error) {
 // the struct that it points to if the reflect.Value contains a pointer to a 
 // struct.
 func GetStructName[T any, S reflect.Value | *T](s S) (string,error) {
-    if structVal,err:=getStructVal[T,S](s); err==nil {
+    if structVal,err:=homogonizeStructVal[T,S](s); err==nil {
         return structVal.Type().Name(),nil
     } else {
         return "",err
@@ -74,7 +50,7 @@ func GetStructName[T any, S reflect.Value | *T](s S) (string,error) {
 // names of the struct it contains or the field names of the struct that it
 // points to if the reflect.Value contains a pointer to a struct.
 func StructFieldNames[T any, S reflect.Value | *T](s S) iter.Iter[string] {
-    structVal,err:=getStructVal[T,S](s)
+    structVal,err:=homogonizeStructVal[T,S](s)
     if err!=nil {
         return iter.ValElem[string]("",err,1)
     }
@@ -92,7 +68,7 @@ func StructFieldNames[T any, S reflect.Value | *T](s S) iter.Iter[string] {
 // values of the struct it contains or the field values of the struct that it
 // points to if the reflect.Value contains a pointer to a struct.
 func StructFieldVals[T any, S reflect.Value | *T](s S) iter.Iter[any] {
-    structVal,err:=getStructVal[T,S](s)
+    structVal,err:=homogonizeStructVal[T,S](s)
     if err!=nil {
         return iter.ValElem[any](nil,err,1)
     }
@@ -114,7 +90,7 @@ func StructFieldVals[T any, S reflect.Value | *T](s S) iter.Iter[any] {
 // addressable. This means that in most scenarios any reflect.Value passed to
 // this function will need to contain a pointer to a struct.
 func StructFieldPntrs[T any, S reflect.Value | *T](s S) iter.Iter[any] {
-    structVal,err:=getStructVal[T,S](s)
+    structVal,err:=homogonizeStructVal[T,S](s)
     if err!=nil {
         return iter.ValElem[any](nil,err,1)
     }
@@ -138,7 +114,7 @@ func StructFieldPntrs[T any, S reflect.Value | *T](s S) iter.Iter[any] {
 // types of the struct it contains or the field types of the struct that it
 // points to if the reflect.Value contains a pointer to a struct.
 func StructFieldTypes[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Type] {
-    structVal,err:=getStructVal[T,S](s)
+    structVal,err:=homogonizeStructVal[T,S](s)
     if err!=nil {
         return iter.ValElem[reflect.Type](nil,err,1)
     }
@@ -156,7 +132,7 @@ func StructFieldTypes[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Type] 
 // kinds of the struct it contains or the field kinds of the struct that it
 // points to if the reflect.Value contains a pointer to a struct.
 func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] {
-    structVal,err:=getStructVal[T,S](s)
+    structVal,err:=homogonizeStructVal[T,S](s)
     if err!=nil {
         return iter.ValElem[reflect.Kind](0,err,1)
     }
@@ -178,7 +154,7 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
 // fields then make sure you either pass a pointer to a struct or a 
 // reflect.Value that contains a pointer to a struct.
 func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
-    structVal,err:=getStructVal[T,S](s)
+    structVal,err:=homogonizeStructVal[T,S](s)
     if err!=nil {
         return iter.ValElem[FieldInfo](FieldInfo{},err,1)
     }
@@ -221,7 +197,7 @@ func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
 func RecursiveStructFieldInfo[T any, S reflect.Value | *T](
     s S,
 ) iter.Iter[FieldInfo] {
-    if _,err:=getStructVal[T,S](s); err!=nil {
+    if err:=structValError[T,S](s); err!=nil {
         return iter.ValElem[FieldInfo](FieldInfo{},err,1)
     }
     return iter.Recurse[FieldInfo](

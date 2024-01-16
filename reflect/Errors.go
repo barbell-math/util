@@ -9,5 +9,5 @@ var IncorrectType,IsIncorrectType=customerr.ErrorFactory(
 );
 
 var InAddressableField,IsInAddressableField=customerr.ErrorFactory(
-    "The address could not be calculated of a field in the given struct.",
+    "The address could not be calculated of a field in the given value.",
 )
