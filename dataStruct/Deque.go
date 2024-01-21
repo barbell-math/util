@@ -2,6 +2,7 @@ package dataStruct
 
 import (
 	"fmt"
+	"math"
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
@@ -9,7 +10,10 @@ import (
 )
 
 type (
+    FBRatio int8
+
     Deque[T any] struct {
+        fbRatio FBRatio
         vals []T
     }
 
@@ -17,6 +21,11 @@ type (
         *sync.RWMutex
         Deque[T]
     }
+)
+
+const (
+    AllFront FBRatio=math.MinInt8
+    AllBack FBRatio=math.MaxInt8
 )
 
 func NewDeque[T any](size int) (Deque[T],error) {

@@ -13,11 +13,11 @@ func TestIsArrayVal(t *testing.T){
         "IsArrayVal returned false positive.",t,
     )
     v2:=reflect.ValueOf(v)
-    test.BasicTest(false,IsArrayVal[int](v2),
+    test.BasicTest(false,IsArrayVal[[]int](v2),
         "IsArrayVal returned false positive.",t,
     )
     v2=reflect.ValueOf(&v)
-    test.BasicTest(false,IsArrayVal[int](v2),
+    test.BasicTest(false,IsArrayVal[[]int](v2),
         "IsArrayVal returned false positive.",t,
     )
     a:=[3]int{}

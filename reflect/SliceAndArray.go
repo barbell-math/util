@@ -104,9 +104,6 @@ func ArrayElemPntrs[T any, A reflect.Value | *T](a A) iter.Iter[any] {
 // otherwise. As a special case, if a reflect.Value is passed to this function 
 // it will return an iterator over the slice it contains or an iterator over 
 // the slice it points to if the reflect.Value contains a pointer to a slice.
-// Note that this function requires any reflect.Value handed to it to be 
-// addressable. This means that in most scenarios any reflect.Value passed to
-// this function will need to contain a pointer to a slice.
 func SliceElemPntrs[T any, A reflect.Value | *T](a A) iter.Iter[any] {
     return elemPntrs[T,A](a,homogonizeSliceVal[T,A])
 }
@@ -202,10 +199,6 @@ func ArrayElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
 // otherwise. As a special case if a reflect.Value is passed to this function 
 // then the iterator will iterate over the elements in the slice it either 
 // contains or points to.
-// Note that the field info Pntr field may not be able to be populated if the
-// passed in value is not addressable. If you need the pointers to the slice 
-// elements then make sure you either pass a pointer to a slice or a
-// reflect.Value that contains a pointer to a slice.
 func SliceElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
     return elemInfo[T,A](a,homogonizeSliceVal[T,A])
 }
@@ -271,10 +264,6 @@ func RecursiveArrayElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo]
 // found val info of the slice that it points to if the reflect.Value 
 // contains a pointer to a slice. Any field that is a slice value will be 
 // recursed on, pointers to slices will not be recursed on.
-// Note that in order to recursively access the fields the slice needs to be 
-// addressable, as the fields that are slices will be referenced through 
-// pointers. This is done to prevent excess memory use that would be caused by
-// copying all sub-slices by value.
 func RecursiveSliceElemInfo[T any, S reflect.Value | *T](s S) iter.Iter[ValInfo] {
     if err:=sliceValError[T,S](s); err!=nil {
         return iter.ValElem[ValInfo](ValInfo{},err,1)

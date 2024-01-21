@@ -11,7 +11,9 @@ func isKindOrReflectValKind[T any, U reflect.Value | *T](
 ) bool {
     switch reflect.TypeOf(t) {
         case reflect.TypeOf(reflect.Value{}):
-            if refVal:=any(t).(reflect.Value); refVal.Kind()==reflect.Ptr {
+            if refVal:=any(t).(reflect.Value); (
+                refVal.Kind()==reflect.Ptr || 
+                refVal.Kind()==reflect.Interface ){
                 return refVal.Elem().Kind()==expType
             } else {
                 return refVal.Kind()==expType
@@ -31,7 +33,9 @@ func valError[T any, U reflect.Value | *T](
     var fString string
     switch reflect.TypeOf(t) {
         case reflect.TypeOf(reflect.Value{}):
-            if refVal:=any(t).(reflect.Value); refVal.Kind()==reflect.Ptr {
+            if refVal:=any(t).(reflect.Value); (
+                refVal.Kind()==reflect.Ptr || 
+                refVal.Kind()==reflect.Interface ){
                 fString=fmt.Sprintf(
                     "Got a reflect.Value pointer to: %s",
                     refVal.Elem().Kind().String(),
@@ -63,7 +67,9 @@ func homogonizeValue[T any, U reflect.Value | *T](
             if err:=valError(t); err!=nil {
                 return reflect.Value{},err
             }
-            if refVal:=any(t).(reflect.Value); refVal.Kind()==reflect.Ptr {
+            if refVal:=any(t).(reflect.Value); (
+                refVal.Kind()==reflect.Ptr || 
+                refVal.Kind()==reflect.Interface ){
                 return refVal.Elem(),nil
             } else {
                 return refVal,nil

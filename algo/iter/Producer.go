@@ -1,15 +1,15 @@
 package iter
 
 import (
-    "bufio"
-    "os"
+	"bufio"
+	"os"
 
-    staticType "github.com/barbell-math/util/dataStruct/types/static"
-    customerr "github.com/barbell-math/util/err"
+	staticType "github.com/barbell-math/util/dataStruct/types/static"
+	customerr "github.com/barbell-math/util/err"
 )
 
 // This function is a Producer.
-// 
+//
 // NoElem provides an iterator that returns no elements. NoElem returns an empty
 // iterator.
 func NoElem[T any]() Iter[T] {
@@ -93,6 +93,23 @@ func SequentialElems[T any](_len int, get func(i int) (T,error)) Iter[T] {
     }
 }
 
+func mapOp[K comparable, V any](
+    cont <-chan bool,
+    m map[K]V,
+) (<-chan K) {
+    c:=make(chan K)
+    go func() {
+        for k,_:=range(m) {
+            if _cont,ok:=<-cont; !_cont || !ok {
+                close(c)
+                return
+            }
+            c <- k
+        }
+    }()
+    return c
+}
+
 // This function is a Producer.
 // 
 // MapElems returns an iterator that iterates over a maps key,value pairs. Do
@@ -101,23 +118,21 @@ func SequentialElems[T any](_len int, get func(i int) (T,error)) Iter[T] {
 // it changed while being iterated over behavior is undefined.
 func MapElems[K comparable, V any](
     m map[K]V, 
-    v staticType.Pair[K,V],
+    factory func() staticType.Pair[K,V],
 ) Iter[staticType.Pair[K,V]] {
-    c:=make(chan K)
-    go func(){
-        for k,_:=range(m) {
-            c <- k
-        }
-    }()
+    cont:=make(chan bool)
+    c:=mapOp(cont,m)
     i:=-1;
     return func(f IteratorFeedback) (staticType.Pair[K,V],error,bool) {
         i++;
         if i<len(m) && f!=Break {
+            cont <- true
+            v:=factory()
             v.SetA(<-c)
             v.SetB(m[v.GetA()])
             return v,nil,true;
         }
-        close(c)
+        close(cont)
         return nil,nil,false
     }
 }
@@ -129,19 +144,16 @@ func MapElems[K comparable, V any](
 // return an error. This producer is not thread safe. If the underlying map value
 // it changed while being iterated over behavior is undefined.
 func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
-    c:=make(chan K)
-    go func(){
-        for k,_:=range(m) {
-            c <- k
-        }
-    }()
+    cont:=make(chan bool)
+    c:=mapOp(cont,m)
     i:=-1;
     return func(f IteratorFeedback) (K,error,bool) {
         i++;
         if i<len(m) && f!=Break {
+            cont <- true
             return (<-c),nil,true;
         }
-        close(c)
+        close(cont)
         var tmp K
         return tmp,nil,false
     }
@@ -154,19 +166,16 @@ func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
 // error. This producer is not thread safe. If the underlying map value it
 // changed while being iterated over behavior is undefined.
 func MapVals[K comparable, V any](m map[K]V) Iter[V] {
-    c:=make(chan V)
-    go func(){
-        for _,v:=range(m) {
-            c <- v
-        }
-    }()
+    cont:=make(chan bool)
+    c:=mapOp(cont,m)
     i:=-1;
     return func(f IteratorFeedback) (V,error,bool) {
         i++;
         if i<len(m) && f!=Break {
-            return (<-c),nil,true;
+            cont <- true
+            return m[<-c],nil,true;
         }
-        close(c)
+        close(cont)
         var tmp V
         return tmp,nil,false
     }
@@ -176,7 +185,10 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
 // 
 // ChanElems returns an iterator that iterates over the elements in an unbuffered
 // channel. Calling this function will block until the channel receives a value.
-// This producer will never return an error.
+// This producer will never return an error. This funciton does not close the 
+// channel once it is done iterating. The channel may still have values present
+// in it once iteration is complete depending on if any other functions in the
+// iterator chain stop iteration early.
 func ChanElems[T any](c <-chan T) Iter[T] {
     return func(f IteratorFeedback) (T,error,bool) {
         if f!=Break {
