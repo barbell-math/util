@@ -349,7 +349,7 @@ func TestArrayElemKindReflectValPntr(t *testing.T){
 
 func TestNonArrayElemInfo(t *testing.T){
     v:=0
-    _,err:=ArrayElemInfo[int](&v).Collect()
+    _,err:=ArrayElemInfo[int](&v,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
@@ -360,7 +360,7 @@ func TestNonArrayElemInfo(t *testing.T){
 func TestNonArrayElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
-    _,err:=ArrayElemInfo[reflect.Value](v2).Collect()
+    _,err:=ArrayElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
@@ -371,7 +371,7 @@ func TestNonArrayElemInfoReflectVal(t *testing.T){
 func TestNonArrayElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
-    _,err:=ArrayElemInfo[reflect.Value](v2).Collect()
+    _,err:=ArrayElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
@@ -381,7 +381,7 @@ func TestNonArrayElemInfoReflectValPntr(t *testing.T){
 
 func TestArrayElemInfo(t *testing.T){
     v:=[3]int{0,1,2}
-    info,err:=ArrayElemInfo[[3]int](&v).Collect()
+    info,err:=ArrayElemInfo[[3]int](&v,true).Collect()
     test.BasicTest(nil,err,
         "ArrayElemVals returned an error when it should not have.",t,    
     )
@@ -389,7 +389,11 @@ func TestArrayElemInfo(t *testing.T){
         "ArrayElemVals returned the wrong number of elements.",t,
     )
     for i,iterV:=range(v) {
-        test.BasicTest(iterV,info[i].Val.(int),
+        _v,ok:=info[i].Val()
+        test.BasicTest(iterV,_v.(int),
+            "ArrayElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(true,ok,
             "ArrayElemInfo returned an incorrect value.",t,
         )
         test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
@@ -411,7 +415,7 @@ func TestArrayElemInfo(t *testing.T){
 func TestArrayElemInfoReflectVal(t *testing.T){
     v:=[3]int{0,1,2}
     v2:=reflect.ValueOf(v)
-    info,err:=ArrayElemInfo[[3]int](v2).Collect()
+    info,err:=ArrayElemInfo[[3]int](v2,true).Collect()
     test.BasicTest(nil,err,
         "ArrayElemVals returned an error when it should not have.",t,    
     )
@@ -419,7 +423,11 @@ func TestArrayElemInfoReflectVal(t *testing.T){
         "ArrayElemVals returned the wrong number of elements.",t,
     )
     for i,iterV:=range(v) {
-        test.BasicTest(iterV,info[i].Val.(int),
+        _v,ok:=info[i].Val()
+        test.BasicTest(iterV,_v.(int),
+            "ArrayElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(true,ok,
             "ArrayElemInfo returned an incorrect value.",t,
         )
         test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
@@ -443,7 +451,7 @@ func TestArrayElemInfoReflectVal(t *testing.T){
 func TestArrayElemInfoReflectValPntr(t *testing.T){
     v:=[3]int{0,1,2}
     v2:=reflect.ValueOf(&v)
-    info,err:=ArrayElemInfo[[3]int](v2).Collect()
+    info,err:=ArrayElemInfo[[3]int](v2,true).Collect()
     test.BasicTest(nil,err,
         "ArrayElemVals returned an error when it should not have.",t,    
     )
@@ -451,7 +459,11 @@ func TestArrayElemInfoReflectValPntr(t *testing.T){
         "ArrayElemVals returned the wrong number of elements.",t,
     )
     for i,iterV:=range(v) {
-        test.BasicTest(iterV,info[i].Val.(int),
+        _v,ok:=info[i].Val()
+        test.BasicTest(iterV,_v.(int),
+            "ArrayElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(true,ok,
             "ArrayElemInfo returned an incorrect value.",t,
         )
         test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
@@ -472,7 +484,7 @@ func TestArrayElemInfoReflectValPntr(t *testing.T){
 
 func TestNonArrayRecursiveElemInfo(t *testing.T){
     v:=0
-    _,err:=RecursiveArrayElemInfo[int](&v).Collect()
+    _,err:=RecursiveArrayElemInfo[int](&v,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
@@ -483,7 +495,7 @@ func TestNonArrayRecursiveElemInfo(t *testing.T){
 func TestNonArrayRecursiveElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
-    _,err:=RecursiveArrayElemInfo[reflect.Value](v2).Collect()
+    _,err:=RecursiveArrayElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
@@ -494,7 +506,7 @@ func TestNonArrayRecursiveElemInfoReflectVal(t *testing.T){
 func TestNonArrayRecursiveElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
-    _,err:=RecursiveArrayElemInfo[reflect.Value](v2).Collect()
+    _,err:=RecursiveArrayElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
@@ -504,7 +516,7 @@ func TestNonArrayRecursiveElemInfoReflectValPntr(t *testing.T){
 
 func TestRecursiveArrayElemInfo(t *testing.T){
     v:=[3][3]int{[3]int{1,2,3},[3]int{5,6,7},[3]int{9,10,11}}
-    vals,err:=RecursiveArrayElemInfo[[3][3]int](&v).Collect()
+    vals,err:=RecursiveArrayElemInfo[[3][3]int](&v,true).Collect()
     test.BasicTest(nil,err,
         "RecursiveArrayElemInfo returned an error when it should not have.",t,
     )
@@ -513,7 +525,11 @@ func TestRecursiveArrayElemInfo(t *testing.T){
     )
     for i,iterV:=range(vals) {
         if i==0 || i==4 || i==8 {
-            test.BasicTest([3]int{i+1,i+2,i+3},iterV.Val.([3]int),
+            _v,ok:=iterV.Val()
+            test.BasicTest([3]int{i+1,i+2,i+3},_v.([3]int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(true,ok,
                 "Recurse did not return the proper root node.",t,
             )
             test.BasicTest(reflect.TypeOf([3]int{}),iterV.Type,
@@ -530,7 +546,11 @@ func TestRecursiveArrayElemInfo(t *testing.T){
                 "Pointer to a root node did not return the correct value.",t,
             )
         } else {
-            test.BasicTest(i,iterV.Val.(int),
+            _v,ok:=iterV.Val()
+            test.BasicTest(i,_v.(int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(true,ok,
                 "Recurse did not return the proper root node.",t,
             )
             test.BasicTest(reflect.TypeOf(int(0)),iterV.Type,
@@ -553,7 +573,7 @@ func TestRecursiveArrayElemInfo(t *testing.T){
 func TestRecursiveArrayElemInfoReflectVal(t *testing.T){
     v:=[3][3]int{[3]int{1,2,3},[3]int{5,6,7},[3]int{9,10,11}}
     v2:=reflect.ValueOf(v)
-    vals,err:=RecursiveArrayElemInfo[[3][3]int](v2).Collect()
+    vals,err:=RecursiveArrayElemInfo[[3][3]int](v2,true).Collect()
     test.BasicTest(1,len(vals),
         "The wrong number of values were returned.",t,
     )
@@ -563,7 +583,11 @@ func TestRecursiveArrayElemInfoReflectVal(t *testing.T){
         )
     }
     for i,iterV:=range(vals) {
-        test.BasicTest([3]int{4*i+1,4*i+2,4*i+3},iterV.Val.([3]int),
+        v,ok:=iterV.Val()
+        test.BasicTest([3]int{4*i+1,4*i+2,4*i+3},v.([3]int),
+            "Recurse did not return the proper root node.",t,
+        )
+        test.BasicTest(true,ok,
             "Recurse did not return the proper root node.",t,
         )
         test.BasicTest(reflect.TypeOf([3]int{}),iterV.Type,
@@ -587,7 +611,7 @@ func TestRecursiveArrayElemInfoReflectVal(t *testing.T){
 func TestRecursiveArrayElemInfoReflectValPntr(t *testing.T){
     v:=[3][3]int{[3]int{1,2,3},[3]int{5,6,7},[3]int{9,10,11}}
     v2:=reflect.ValueOf(&v)
-    vals,err:=RecursiveArrayElemInfo[[3][3]int](v2).Collect()
+    vals,err:=RecursiveArrayElemInfo[[3][3]int](v2,true).Collect()
     test.BasicTest(nil,err,
         "RecursiveArrayElemInfo returned an error when it should not have.",t,
     )
@@ -596,7 +620,11 @@ func TestRecursiveArrayElemInfoReflectValPntr(t *testing.T){
     )
     for i,iterV:=range(vals) {
         if i==0 || i==4 || i==8 {
-            test.BasicTest([3]int{i+1,i+2,i+3},iterV.Val.([3]int),
+            _v,ok:=iterV.Val()
+            test.BasicTest([3]int{i+1,i+2,i+3},_v.([3]int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(true,ok,
                 "Recurse did not return the proper root node.",t,
             )
             test.BasicTest(reflect.TypeOf([3]int{}),iterV.Type,
@@ -613,7 +641,11 @@ func TestRecursiveArrayElemInfoReflectValPntr(t *testing.T){
                 "Pointer to a root node did not return the correct value.",t,
             )
         } else {
-            test.BasicTest(i,iterV.Val.(int),
+            _v,ok:=iterV.Val()
+            test.BasicTest(i,_v.(int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(true,ok,
                 "Recurse did not return the proper root node.",t,
             )
             test.BasicTest(reflect.TypeOf(int(0)),iterV.Type,

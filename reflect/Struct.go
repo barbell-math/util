@@ -153,7 +153,10 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
 // passed in value is not addressable. If you need the pointers to the struct 
 // fields then make sure you either pass a pointer to a struct or a 
 // reflect.Value that contains a pointer to a struct.
-func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
+func StructFieldInfo[T any, S reflect.Value | *T](
+    s S, 
+    keepVal bool,
+) iter.Iter[FieldInfo] {
     structVal,err:=homogonizeStructVal[T,S](s)
     if err!=nil {
         return iter.ValElem[FieldInfo](FieldInfo{},err,1)
@@ -166,9 +169,14 @@ func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
             return FieldInfo{
                 Name: n,
                 ValInfo: ValInfo{
-                    Val: f.Interface(),
                     Type: f.Type(),
                     Kind: f.Kind(),
+                    Val: func() (any, bool) {
+                        if keepVal {
+                            return f.Interface(),true
+                        }
+                        return nil,false
+                    },
                     Pntr: func() (any, error) {
                         if f.CanAddr() {
                             return f.Addr().Interface(),nil
@@ -195,17 +203,18 @@ func StructFieldInfo[T any, S reflect.Value | *T](s S) iter.Iter[FieldInfo] {
 // pointers. This is done to prevent excess memory use that would be caused by
 // copying all sub-structs by value.
 func RecursiveStructFieldInfo[T any, S reflect.Value | *T](
-    s S,
+    s S, 
+    keepVal bool,
 ) iter.Iter[FieldInfo] {
     if err:=structValError[T,S](s); err!=nil {
         return iter.ValElem[FieldInfo](FieldInfo{},err,1)
     }
     return iter.Recurse[FieldInfo](
-        StructFieldInfo[T,S](s),
+        StructFieldInfo[T,S](s,keepVal),
         func(v FieldInfo) bool { return v.Kind==reflect.Struct },
         func(v FieldInfo) iter.Iter[FieldInfo] {
             if p,err:=v.Pntr(); err==nil {
-                return StructFieldInfo[reflect.Value](reflect.ValueOf(p))
+                return StructFieldInfo[T,reflect.Value](reflect.ValueOf(p),keepVal)
             } else {
                 return iter.ValElem[FieldInfo](FieldInfo{},err,1)
             }

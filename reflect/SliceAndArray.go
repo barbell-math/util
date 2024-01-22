@@ -7,23 +7,6 @@ import (
 	"github.com/barbell-math/util/algo/iter"
 )
 
-// This struct has fields that contain all the possible relevant information
-// about a value.
-type ValInfo struct {
-    // The concreete value of the field. This is a copy of the value, not the
-    // original value contained in the struct. To access the original value
-    // use the Pntr field of this struct.
-    Val any
-    // The type of the field.
-    Type reflect.Type
-    // The kind of the field.
-    Kind reflect.Kind
-    // Returns a pointer to the struct field, if possible. Note that the Pntr 
-    // field of this struct is a function that may return an error. This is 
-    // because, depending on the value that is passed to the iterator function, 
-    // not all struct fields will be addressable.
-    Pntr func() (any,error)
-}
 
 // Returns true if the supplied value is a pointer to an array. As a special
 // case, if a reflect.Value is passed to this function it will return true if
@@ -190,8 +173,8 @@ func elemKind[T any, U reflect.Value | *T](
 // passed in value is not addressable. If you need the pointers to the array 
 // elements then make sure you either pass a pointer to an array or a
 // reflect.Value that contains a pointer to an array.
-func ArrayElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
-    return elemInfo[T,A](a,homogonizeArrayVal[T,A])
+func ArrayElemInfo[T any, A reflect.Value | *T](a A, keepVal bool) iter.Iter[ValInfo] {
+    return elemInfo[T,A](a,homogonizeArrayVal[T,A],keepVal)
 }
 
 // Returns an iterator that provides the value information for each element in
@@ -199,13 +182,14 @@ func ArrayElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
 // otherwise. As a special case if a reflect.Value is passed to this function 
 // then the iterator will iterate over the elements in the slice it either 
 // contains or points to.
-func SliceElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
-    return elemInfo[T,A](a,homogonizeSliceVal[T,A])
+func SliceElemInfo[T any, A reflect.Value | *T](a A, keepVal bool) iter.Iter[ValInfo] {
+    return elemInfo[T,A](a,homogonizeSliceVal[T,A],keepVal)
 }
 
 func elemInfo[T any, U reflect.Value | *T](
     u U,
     homoginizer func(a U) (reflect.Value,error),
+    keepVal bool,
 ) iter.Iter[ValInfo] {
     arrayVal,err:=homoginizer(u)
     if err!=nil {
@@ -215,9 +199,14 @@ func elemInfo[T any, U reflect.Value | *T](
         arrayVal.Len(),
         func(i int) (ValInfo, error) {
             return ValInfo{
-                Val: arrayVal.Index(i).Interface(),
                 Type: arrayVal.Index(i).Type(),
                 Kind: arrayVal.Index(i).Kind(),
+                Val: func() (any, bool) {
+                    if keepVal {
+                        return arrayVal.Index(i).Interface(),true
+                    }
+                    return nil,false
+                },
                 Pntr: func() (any, error) {
                     if arrayVal.Index(i).CanAddr() {
                         return arrayVal.Index(i).Addr().Interface(),nil
@@ -230,7 +219,7 @@ func elemInfo[T any, U reflect.Value | *T](
 }
 
 // Returns an iterator that recursively provides the array elements val info if 
-// an array is is supplied as an argument, returns an error otherwise. As a 
+// an array is supplied as an argument, returns an error otherwise. As a 
 // special case, if a reflect.Value is passed to this function it will return 
 // the recursively found val info of the arrays it contains or the recursively
 // found val info of the array that it points to if the reflect.Value 
@@ -240,16 +229,19 @@ func elemInfo[T any, U reflect.Value | *T](
 // addressable, as the fields that are arrays will be referenced through 
 // pointers. This is done to prevent excess memory use that would be caused by
 // copying all sub-arrays by value.
-func RecursiveArrayElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo] {
+func RecursiveArrayElemInfo[T any, A reflect.Value | *T](
+    a A,
+    keepVal bool,
+) iter.Iter[ValInfo] {
     if err:=arrayValError[T,A](a); err!=nil {
         return iter.ValElem[ValInfo](ValInfo{},err,1)
     }
     return iter.Recurse[ValInfo](
-        ArrayElemInfo[T,A](a),
+        ArrayElemInfo[T,A](a,keepVal),
         func(v ValInfo) bool { return v.Kind==reflect.Array },
         func(v ValInfo) iter.Iter[ValInfo] {
             if v,err:=v.Pntr(); err==nil {
-                return ArrayElemInfo[reflect.Value](reflect.ValueOf(v))
+                return ArrayElemInfo[T,reflect.Value](reflect.ValueOf(v),keepVal)
             } else {
                 return iter.ValElem[ValInfo](ValInfo{},err,1)
             }
@@ -258,22 +250,25 @@ func RecursiveArrayElemInfo[T any, A reflect.Value | *T](a A) iter.Iter[ValInfo]
 }
 
 // Returns an iterator that recursively provides the slice elements val info if 
-// a slice is is supplied as an argument, returns an error otherwise. As a 
+// a slice is supplied as an argument, returns an error otherwise. As a 
 // special case, if a reflect.Value is passed to this function it will return 
 // the recursively found val info of the slices it contains or the recursively
 // found val info of the slice that it points to if the reflect.Value 
 // contains a pointer to a slice. Any field that is a slice value will be 
 // recursed on, pointers to slices will not be recursed on.
-func RecursiveSliceElemInfo[T any, S reflect.Value | *T](s S) iter.Iter[ValInfo] {
+func RecursiveSliceElemInfo[T any, S reflect.Value | *T](
+    s S, 
+    keepVal bool,
+) iter.Iter[ValInfo] {
     if err:=sliceValError[T,S](s); err!=nil {
         return iter.ValElem[ValInfo](ValInfo{},err,1)
     }
     return iter.Recurse[ValInfo](
-        SliceElemInfo[T,S](s),
+        SliceElemInfo[T,S](s,keepVal),
         func(v ValInfo) bool { return v.Kind==reflect.Slice },
         func(v ValInfo) iter.Iter[ValInfo] {
             if v,err:=v.Pntr(); err==nil {
-                return SliceElemInfo[reflect.Value](reflect.ValueOf(v))
+                return SliceElemInfo[T,reflect.Value](reflect.ValueOf(v),keepVal)
             } else {
                 return iter.ValElem[ValInfo](ValInfo{},err,1)
             }

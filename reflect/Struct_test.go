@@ -575,7 +575,7 @@ func TestStructFieldKindsFromReflectValPntr(t *testing.T){
 
 func TestNonStructStructFieldInfo(t *testing.T){
     v:=0
-    err:=StructFieldInfo[int](&v).Consume()
+    err:=StructFieldInfo[int](&v,true).Consume()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
@@ -586,7 +586,7 @@ func TestNonStructStructFieldInfo(t *testing.T){
 func TestNonStructStructFieldInfoFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
-    err:=StructFieldInfo[reflect.Value](v2).Consume()
+    err:=StructFieldInfo[reflect.Value](v2,true).Consume()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
@@ -597,7 +597,7 @@ func TestNonStructStructFieldInfoFromReflectVal(t *testing.T){
 func TestNonStructStructFieldInfoFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
-    err:=StructFieldInfo[reflect.Value](v2).Consume()
+    err:=StructFieldInfo[reflect.Value](v2,true).Consume()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
@@ -607,7 +607,7 @@ func TestNonStructStructFieldInfoFromReflectValPntr(t *testing.T){
 
 func TestStructFieldInfo(t *testing.T){
     var s testStruct=testStruct{One: 1, Two: "2", Three: "3"}
-    vals,err:=StructFieldInfo[testStruct](&s).Collect()
+    vals,err:=StructFieldInfo[testStruct](&s,true).Collect()
     test.BasicTest(nil,err,
         "Getting struct field types returned error when it was not supposed to.",t,
     );
@@ -623,13 +623,25 @@ func TestStructFieldInfo(t *testing.T){
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
     )
-    test.BasicTest(1,vals[0].Val.(int),
+    v,ok:=vals[0].Val()
+    test.BasicTest(1,v.(int),
         "First struct val was not correct.",t,
     )
-    test.BasicTest("2",vals[1].Val.(string),
+    test.BasicTest(true,ok,
+        "First struct val was not correct.",t,
+    )
+    v,ok=vals[1].Val()
+    test.BasicTest("2",v.(string),
         "Second struct val was not correct.",t,
     )
-    test.BasicTest(customString("3"),vals[2].Val.(customString),
+    test.BasicTest(true,ok,
+        "Second struct val was not correct.",t,
+    )
+    v,ok=vals[2].Val()
+    test.BasicTest(customString("3"),v.(customString),
+        "Third struct val was not correct.",t,
+    )
+    test.BasicTest(true,ok,
         "Third struct val was not correct.",t,
     )
     test.BasicTest(reflect.TypeOf(s.One),vals[0].Type,
@@ -676,7 +688,7 @@ func TestStructFieldInfo(t *testing.T){
 func TestStructFieldInfoFromReflectVal(t *testing.T){
     var s testStruct=testStruct{One: 1, Two: "2", Three: "3"}
     s2:=reflect.ValueOf(s)
-    vals,err:=StructFieldInfo[reflect.Value](s2).Collect()
+    vals,err:=StructFieldInfo[reflect.Value](s2,true).Collect()
     test.BasicTest(nil,err,
         "Getting struct field types returned error when it was not supposed to.",t,
     );
@@ -692,13 +704,25 @@ func TestStructFieldInfoFromReflectVal(t *testing.T){
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
     )
-    test.BasicTest(1,vals[0].Val.(int),
+    v,ok:=vals[0].Val()
+    test.BasicTest(1,v.(int),
         "First struct val was not correct.",t,
     )
-    test.BasicTest("2",vals[1].Val.(string),
+    test.BasicTest(true,ok,
+        "First struct val was not correct.",t,
+    )
+    v,ok=vals[1].Val()
+    test.BasicTest("2",v.(string),
         "Second struct val was not correct.",t,
     )
-    test.BasicTest(customString("3"),vals[2].Val.(customString),
+    test.BasicTest(true,ok,
+        "Second struct val was not correct.",t,
+    )
+    v,ok=vals[2].Val()
+    test.BasicTest(customString("3"),v.(customString),
+        "Third struct val was not correct.",t,
+    )
+    test.BasicTest(true,ok,
         "Third struct val was not correct.",t,
     )
     test.BasicTest(reflect.TypeOf(s.One),vals[0].Type,
@@ -751,7 +775,7 @@ func TestStructFieldInfoFromReflectVal(t *testing.T){
 func TestStructFieldInfoFromReflectValPntr(t *testing.T){
     var s testStruct=testStruct{One: 1, Two: "2", Three: "3"}
     s2:=reflect.ValueOf(&s)
-    vals,err:=StructFieldInfo[reflect.Value](s2).Collect()
+    vals,err:=StructFieldInfo[reflect.Value](s2,true).Collect()
     test.BasicTest(nil,err,
         "Getting struct field types returned error when it was not supposed to.",t,
     );
@@ -767,13 +791,25 @@ func TestStructFieldInfoFromReflectValPntr(t *testing.T){
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
     )
-    test.BasicTest(1,vals[0].Val.(int),
+    v,ok:=vals[0].Val()
+    test.BasicTest(1,v.(int),
         "First struct val was not correct.",t,
     )
-    test.BasicTest("2",vals[1].Val.(string),
+    test.BasicTest(true,ok,
+        "First struct val was not correct.",t,
+    )
+    v,ok=vals[1].Val()
+    test.BasicTest("2",v.(string),
         "Second struct val was not correct.",t,
     )
-    test.BasicTest(customString("3"),vals[2].Val.(customString),
+    test.BasicTest(true,ok,
+        "Second struct val was not correct.",t,
+    )
+    v,ok=vals[2].Val()
+    test.BasicTest(customString("3"),v.(customString),
+        "Third struct val was not correct.",t,
+    )
+    test.BasicTest(true,ok,
         "Third struct val was not correct.",t,
     )
     test.BasicTest(reflect.TypeOf(s.One),vals[0].Type,
@@ -816,7 +852,7 @@ func TestStructFieldInfoFromReflectValPntr(t *testing.T){
 
 func TestNonStructRecursiveStructFieldInfo(t *testing.T){
     v:=0;
-    vals,err:=RecursiveStructFieldInfo[int](&v).Collect();
+    vals,err:=RecursiveStructFieldInfo[int](&v,true).Collect();
     test.BasicTest(0,len(vals),
         "Recursive struct field info returned values when it should not have.",t,
     )
@@ -830,7 +866,7 @@ func TestNonStructRecursiveStructFieldInfo(t *testing.T){
 func TestNonStructRecursiveStructFieldInfoFromReflectVal(t *testing.T){
     v:=0;
     v2:=reflect.ValueOf(v)
-    vals,err:=RecursiveStructFieldInfo[reflect.Value](v2).Collect()
+    vals,err:=RecursiveStructFieldInfo[reflect.Value](v2,true).Collect()
     test.BasicTest(0,len(vals),
         "Recursive struct field info returned values when it should not have.",t,
     )
@@ -844,7 +880,7 @@ func TestNonStructRecursiveStructFieldInfoFromReflectVal(t *testing.T){
 func TestNonStructRecursiveStructFieldInfoFromReflectValPntr(t *testing.T){
     v:=0;
     v2:=reflect.ValueOf(&v)
-    vals,err:=RecursiveStructFieldInfo[reflect.Value](v2).Collect()
+    vals,err:=RecursiveStructFieldInfo[reflect.Value](v2,true).Collect()
     test.BasicTest(0,len(vals),
         "Recursive struct field info returned values when it should not have.",t,
     )
@@ -857,7 +893,7 @@ func TestNonStructRecursiveStructFieldInfoFromReflectValPntr(t *testing.T){
 
 func TestRecursiveStructFieldInfo(t *testing.T){
     var s testStruct=testStruct{One: 1, Two: "2", Three: "3"};
-    vals,err:=RecursiveStructFieldInfo[testStruct](&s).Collect()
+    vals,err:=RecursiveStructFieldInfo[testStruct](&s,true).Collect()
     test.BasicTest(nil,err,
         "Recursive struct field info returned error when it was not supposed to.",t,
     );
@@ -873,13 +909,25 @@ func TestRecursiveStructFieldInfo(t *testing.T){
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
     )
-    test.BasicTest(1,vals[0].Val.(int),
+    v,ok:=vals[0].Val()
+    test.BasicTest(1,v.(int),
         "First struct val was not correct.",t,
     )
-    test.BasicTest("2",vals[1].Val.(string),
+    test.BasicTest(true,ok,
+        "First struct val was not correct.",t,
+    )
+    v,ok=vals[1].Val()
+    test.BasicTest("2",v.(string),
         "Second struct val was not correct.",t,
     )
-    test.BasicTest(customString("3"),vals[2].Val.(customString),
+    test.BasicTest(true,ok,
+        "Second struct val was not correct.",t,
+    )
+    v,ok=vals[2].Val()
+    test.BasicTest(customString("3"),v.(customString),
+        "Third struct val was not correct.",t,
+    )
+    test.BasicTest(true,ok,
         "Third struct val was not correct.",t,
     )
     test.BasicTest(reflect.TypeOf(s.One),vals[0].Type,
@@ -928,7 +976,7 @@ func TestRecursiveStructFieldInfo2(t *testing.T){
         Four: 4.0, 
         Five: testStruct{One: 1, Two: "2", Three: "3"},
     }
-    vals,err:=RecursiveStructFieldInfo[testStruct2](&s).Collect()
+    vals,err:=RecursiveStructFieldInfo[testStruct2](&s,true).Collect()
     test.BasicTest(nil,err,
         "Recursive struct field info returned error when it was not supposed to.",t,
     );
@@ -950,21 +998,36 @@ func TestRecursiveStructFieldInfo2(t *testing.T){
     test.BasicTest("Three",vals[4].Name,
         "Third struct name was not correct.",t,
     )
-    test.BasicTest(4.0,vals[0].Val.(float64),
+    v,ok:=vals[0].Val()
+    test.BasicTest(4.0,v.(float64),
         "First struct val was not correct.",t,
     )
-    test.BasicTest(
-        testStruct{One: 1, Two: "2", Three: "3"},
-        vals[1].Val.(testStruct),
+    test.BasicTest(true,ok,
+        "First struct val was not correct.",t,
+    )
+    v,ok=vals[1].Val()
+    test.BasicTest(testStruct{One: 1, Two: "2", Three: "3"}, v.(testStruct),
         "Second struct val was not correct.",t,
     )
-    test.BasicTest(1,vals[2].Val.(int),
+    test.BasicTest(true,ok,
+        "Second struct val was not correct.",t,
+    )
+    v,ok=vals[2].Val()
+    test.BasicTest(1,v.(int),
         "First sub-struct val was not correct.",t,
     )
-    test.BasicTest("2",vals[3].Val.(string),
+    v,ok=vals[3].Val()
+    test.BasicTest("2",v.(string),
         "Second sub-struct val was not correct.",t,
     )
-    test.BasicTest(customString("3"),vals[4].Val.(customString),
+    test.BasicTest(true,ok,
+        "Second sub-struct val was not correct.",t,
+    )
+    v,ok=vals[4].Val()
+    test.BasicTest(customString("3"),v.(customString),
+        "Third sub-struct val was not correct.",t,
+    )
+    test.BasicTest(true,ok,
         "Third sub-struct val was not correct.",t,
     )
     test.BasicTest(reflect.TypeOf(s.Four),vals[0].Type,
@@ -1040,7 +1103,7 @@ func TestRecursiveStructFieldInfo2FromReflectValue(t *testing.T){
         Five: testStruct{One: 1, Two: "2", Three: "3"},
     }
     v2:=reflect.ValueOf(s)
-    vals,err:=RecursiveStructFieldInfo[reflect.Value](v2).Collect()
+    vals,err:=RecursiveStructFieldInfo[reflect.Value](v2,true).Collect()
     if !IsInAddressableField(err) {
         test.FormatError(InAddressableField(""),err,
             "Recursive struct field did not return the correct error.",t,
@@ -1055,12 +1118,18 @@ func TestRecursiveStructFieldInfo2FromReflectValue(t *testing.T){
     test.BasicTest("Five",vals[1].Name,
         "Second struct name was not correct.",t,
     )
-    test.BasicTest(4.0,vals[0].Val.(float64),
+    v,ok:=vals[0].Val()
+    test.BasicTest(4.0,v.(float64),
         "First struct val was not correct.",t,
     )
-    test.BasicTest(
-        testStruct{One: 1, Two: "2", Three: "3"},
-        vals[1].Val.(testStruct),
+    test.BasicTest(true,ok,
+        "First struct val was not correct.",t,
+    )
+    v,ok=vals[1].Val()
+    test.BasicTest(testStruct{One: 1, Two: "2", Three: "3"}, v.(testStruct),
+        "Second struct val was not correct.",t,
+    )
+    test.BasicTest(true,ok,
         "Second struct val was not correct.",t,
     )
     test.BasicTest(reflect.TypeOf(s.Four),vals[0].Type,
@@ -1101,7 +1170,7 @@ func TestRecursiveStructFieldInfo2FromReflectValuePntr(t *testing.T){
         Five: testStruct{One: 1, Two: "2", Three: "3"},
     }
     s2:=reflect.ValueOf(&s)
-    vals,err:=RecursiveStructFieldInfo[reflect.Value](s2).Collect()
+    vals,err:=RecursiveStructFieldInfo[reflect.Value](s2,true).Collect()
     test.BasicTest(nil,err,
         "Recursive struct field info returned error when it was not supposed to.",t,
     );
@@ -1123,21 +1192,39 @@ func TestRecursiveStructFieldInfo2FromReflectValuePntr(t *testing.T){
     test.BasicTest("Three",vals[4].Name,
         "Third struct name was not correct.",t,
     )
-    test.BasicTest(4.0,vals[0].Val.(float64),
+    v,ok:=vals[0].Val()
+    test.BasicTest(4.0,v.(float64),
         "First struct val was not correct.",t,
     )
-    test.BasicTest(
-        testStruct{One: 1, Two: "2", Three: "3"},
-        vals[1].Val.(testStruct),
+    test.BasicTest(true,ok,
+        "First struct val was not correct.",t,
+    )
+    v,ok=vals[1].Val()
+    test.BasicTest(testStruct{One: 1, Two: "2", Three: "3"}, v.(testStruct),
         "Second struct val was not correct.",t,
     )
-    test.BasicTest(1,vals[2].Val.(int),
+    test.BasicTest(true,ok,
+        "Second struct val was not correct.",t,
+    )
+    v,ok=vals[2].Val()
+    test.BasicTest(1,v.(int),
         "First sub-struct val was not correct.",t,
     )
-    test.BasicTest("2",vals[3].Val.(string),
+    test.BasicTest(true,ok,
+        "First sub-struct val was not correct.",t,
+    )
+    v,ok=vals[3].Val()
+    test.BasicTest("2",v.(string),
         "Second sub-struct val was not correct.",t,
     )
-    test.BasicTest(customString("3"),vals[4].Val.(customString),
+    test.BasicTest(true,ok,
+        "Second sub-struct val was not correct.",t,
+    )
+    v,ok=vals[4].Val()
+    test.BasicTest(customString("3"),v.(customString),
+        "Third sub-struct val was not correct.",t,
+    )
+    test.BasicTest(true,ok,
         "Third sub-struct val was not correct.",t,
     )
     test.BasicTest(reflect.TypeOf(s.Four),vals[0].Type,

@@ -352,7 +352,7 @@ func TestSliceElemKindReflectValPntr(t *testing.T){
 
 func TestNonSliceElemInfo(t *testing.T){
     v:=0
-    _,err:=SliceElemInfo[int](&v).Collect()
+    _,err:=SliceElemInfo[int](&v,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
@@ -363,7 +363,7 @@ func TestNonSliceElemInfo(t *testing.T){
 func TestNonSliceElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
-    _,err:=SliceElemInfo[reflect.Value](v2).Collect()
+    _,err:=SliceElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
@@ -374,7 +374,7 @@ func TestNonSliceElemInfoReflectVal(t *testing.T){
 func TestNonSliceElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
-    _,err:=SliceElemInfo[reflect.Value](v2).Collect()
+    _,err:=SliceElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
@@ -384,7 +384,7 @@ func TestNonSliceElemInfoReflectValPntr(t *testing.T){
 
 func TestSliceElemInfo(t *testing.T){
     v:=[]int{0,1,2}
-    info,err:=SliceElemInfo[[]int](&v).Collect()
+    info,err:=SliceElemInfo[[]int](&v,true).Collect()
     test.BasicTest(nil,err,
         "SliceElemVals returned an error when it should not have.",t,    
     )
@@ -392,7 +392,11 @@ func TestSliceElemInfo(t *testing.T){
         "SliceElemVals returned the wrong number of elements.",t,
     )
     for i,iterV:=range(v) {
-        test.BasicTest(iterV,info[i].Val.(int),
+        _v,ok:=info[i].Val()
+        test.BasicTest(iterV,_v.(int),
+            "SliceElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(true,ok,
             "SliceElemInfo returned an incorrect value.",t,
         )
         test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
@@ -414,7 +418,7 @@ func TestSliceElemInfo(t *testing.T){
 func TestSliceElemInfoReflectVal(t *testing.T){
     v:=[]int{0,1,2}
     v2:=reflect.ValueOf(v)
-    info,err:=SliceElemInfo[[]int](v2).Collect()
+    info,err:=SliceElemInfo[[]int](v2,true).Collect()
     test.BasicTest(nil,err,
         "SliceElemVals returned an error when it should not have.",t,    
     )
@@ -422,7 +426,11 @@ func TestSliceElemInfoReflectVal(t *testing.T){
         "SliceElemVals returned the wrong number of elements.",t,
     )
     for i,iterV:=range(v) {
-        test.BasicTest(iterV,info[i].Val.(int),
+        _v,ok:=info[i].Val()
+        test.BasicTest(iterV,_v.(int),
+            "SliceElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(true,ok,
             "SliceElemInfo returned an incorrect value.",t,
         )
         test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
@@ -444,7 +452,7 @@ func TestSliceElemInfoReflectVal(t *testing.T){
 func TestSliceElemInfoReflectValPntr(t *testing.T){
     v:=[]int{0,1,2}
     v2:=reflect.ValueOf(&v)
-    info,err:=SliceElemInfo[[]int](v2).Collect()
+    info,err:=SliceElemInfo[[]int](v2,true).Collect()
     test.BasicTest(nil,err,
         "SliceElemVals returned an error when it should not have.",t,    
     )
@@ -452,7 +460,11 @@ func TestSliceElemInfoReflectValPntr(t *testing.T){
         "SliceElemVals returned the wrong number of elements.",t,
     )
     for i,iterV:=range(v) {
-        test.BasicTest(iterV,info[i].Val.(int),
+        _v,ok:=info[i].Val()
+        test.BasicTest(iterV,_v.(int),
+            "SliceElemInfo returned an incorrect value.",t,
+        )
+        test.BasicTest(true,ok,
             "SliceElemInfo returned an incorrect value.",t,
         )
         test.BasicTest(reflect.TypeOf(int(0)),info[i].Type,
@@ -473,7 +485,7 @@ func TestSliceElemInfoReflectValPntr(t *testing.T){
 
 func TestNonSliceRecursiveElemInfo(t *testing.T){
     v:=0
-    _,err:=RecursiveSliceElemInfo[int](&v).Collect()
+    _,err:=RecursiveSliceElemInfo[int](&v,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
@@ -484,7 +496,7 @@ func TestNonSliceRecursiveElemInfo(t *testing.T){
 func TestNonSliceRecursiveElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
-    _,err:=RecursiveSliceElemInfo[reflect.Value](v2).Collect()
+    _,err:=RecursiveSliceElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
@@ -495,7 +507,7 @@ func TestNonSliceRecursiveElemInfoReflectVal(t *testing.T){
 func TestNonSliceRecursiveElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
-    _,err:=RecursiveSliceElemInfo[reflect.Value](v2).Collect()
+    _,err:=RecursiveSliceElemInfo[reflect.Value](v2,true).Collect()
     if !IsIncorrectType(err) {
         test.FormatError(IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
@@ -505,7 +517,7 @@ func TestNonSliceRecursiveElemInfoReflectValPntr(t *testing.T){
 
 func TestRecursiveSliceElemInfo(t *testing.T){
     v:=[][]int{[]int{1,2,3},[]int{5,6,7},[]int{9,10,11}}
-    vals,err:=RecursiveSliceElemInfo[[][]int](&v).Collect()
+    vals,err:=RecursiveSliceElemInfo[[][]int](&v,true).Collect()
     test.BasicTest(nil,err,
         "RecursiveSliceElemInfo returned an error when it should not have.",t,
     )
@@ -516,7 +528,11 @@ func TestRecursiveSliceElemInfo(t *testing.T){
         if i==0 || i==4 || i==8 {
             tmp:=[]int{i+1,i+2,i+3}
             for j,tmpV:=range(tmp) {
-                test.BasicTest(tmpV,iterV.Val.([]int)[j],
+                _v,ok:=iterV.Val()
+                test.BasicTest(tmpV,_v.([]int)[j],
+                    "Recurse did not return the proper root node.",t,
+                )
+                test.BasicTest(true,ok,
                     "Recurse did not return the proper root node.",t,
                 )
             }
@@ -534,7 +550,11 @@ func TestRecursiveSliceElemInfo(t *testing.T){
                 "Pointer to a root node did not return the correct value.",t,
             )
         } else {
-            test.BasicTest(i,iterV.Val.(int),
+            _v,ok:=iterV.Val()
+            test.BasicTest(i,_v.(int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(true,ok,
                 "Recurse did not return the proper root node.",t,
             )
             test.BasicTest(reflect.TypeOf(int(0)),iterV.Type,
@@ -557,7 +577,7 @@ func TestRecursiveSliceElemInfo(t *testing.T){
 func TestRecursiveSliceElemInfoReflectVal(t *testing.T){
     v:=[][]int{[]int{1,2,3},[]int{5,6,7},[]int{9,10,11}}
     v2:=reflect.ValueOf(v)
-    vals,err:=RecursiveSliceElemInfo[[][]int](v2).Collect()
+    vals,err:=RecursiveSliceElemInfo[[][]int](v2,true).Collect()
     test.BasicTest(nil,err,
         "RecursiveSliceElemInfo returned an error when it should not have.",t,
     )
@@ -568,7 +588,11 @@ func TestRecursiveSliceElemInfoReflectVal(t *testing.T){
         if i==0 || i==4 || i==8 {
             tmp:=[]int{i+1,i+2,i+3}
             for j,tmpV:=range(tmp) {
-                test.BasicTest(tmpV,iterV.Val.([]int)[j],
+                _v,ok:=iterV.Val()
+                test.BasicTest(tmpV,_v.([]int)[j],
+                    "Recurse did not return the proper root node.",t,
+                )
+                test.BasicTest(true,ok,
                     "Recurse did not return the proper root node.",t,
                 )
             }
@@ -586,7 +610,11 @@ func TestRecursiveSliceElemInfoReflectVal(t *testing.T){
                 "Pointer to a root node did not return the correct value.",t,
             )
         } else {
-            test.BasicTest(i,iterV.Val.(int),
+            _v,ok:=iterV.Val()
+            test.BasicTest(i,_v.(int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(true,ok,
                 "Recurse did not return the proper root node.",t,
             )
             test.BasicTest(reflect.TypeOf(int(0)),iterV.Type,
@@ -609,7 +637,7 @@ func TestRecursiveSliceElemInfoReflectVal(t *testing.T){
 func TestRecursiveSliceElemInfoReflectValPntr(t *testing.T){
     v:=[][]int{[]int{1,2,3},[]int{5,6,7},[]int{9,10,11}}
     v2:=reflect.ValueOf(&v)
-    vals,err:=RecursiveSliceElemInfo[[][]int](v2).Collect()
+    vals,err:=RecursiveSliceElemInfo[[][]int](v2,true).Collect()
     test.BasicTest(nil,err,
         "RecursiveSliceElemInfo returned an error when it should not have.",t,
     )
@@ -620,7 +648,11 @@ func TestRecursiveSliceElemInfoReflectValPntr(t *testing.T){
         if i==0 || i==4 || i==8 {
             tmp:=[]int{i+1,i+2,i+3}
             for j,tmpV:=range(tmp) {
-                test.BasicTest(tmpV,iterV.Val.([]int)[j],
+                _v,ok:=iterV.Val()
+                test.BasicTest(tmpV,_v.([]int)[j],
+                    "Recurse did not return the proper root node.",t,
+                )
+                test.BasicTest(true,ok,
                     "Recurse did not return the proper root node.",t,
                 )
             }
@@ -638,7 +670,11 @@ func TestRecursiveSliceElemInfoReflectValPntr(t *testing.T){
                 "Pointer to a root node did not return the correct value.",t,
             )
         } else {
-            test.BasicTest(i,iterV.Val.(int),
+            _v,ok:=iterV.Val()
+            test.BasicTest(i,_v.(int),
+                "Recurse did not return the proper root node.",t,
+            )
+            test.BasicTest(true,ok,
                 "Recurse did not return the proper root node.",t,
             )
             test.BasicTest(reflect.TypeOf(int(0)),iterV.Type,
