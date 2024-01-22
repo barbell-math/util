@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/test"
+	customerr "github.com/barbell-math/util/err"
 )
 
 func TestIsSliceVal(t *testing.T){
@@ -40,8 +41,8 @@ func TestNonSliceElemVals(t *testing.T){
     test.BasicTest(0,len(vals),
         "SliceElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -54,8 +55,8 @@ func TestNonSliceElemValsReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "SliceElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -68,8 +69,8 @@ func TestNonSliceElemValsReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "SliceElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -131,8 +132,8 @@ func TestNonSliceElemPntrs(t *testing.T){
     test.BasicTest(0,len(vals),
         "SliceElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -145,8 +146,8 @@ func TestNonSliceElemPntrsReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "SliceElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -159,8 +160,8 @@ func TestNonSliceElemPntrsReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "SliceElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -219,8 +220,8 @@ func TestSliceElemPntrsReflectValPntr(t *testing.T){
 func TestNonSliceElemType(t *testing.T){
     v:=0
     _,err:=SliceElemType[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -230,8 +231,8 @@ func TestNonSliceElemTypeReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=SliceElemType[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -241,8 +242,8 @@ func TestNonSliceElemTypeReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=SliceElemType[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -286,8 +287,8 @@ func TestSliceElemTypeReflectValPntr(t *testing.T){
 func TestNonSliceElemKind(t *testing.T){
     v:=0
     _,err:=SliceElemKind[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -297,8 +298,8 @@ func TestNonSliceElemKindReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=SliceElemKind[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -308,8 +309,8 @@ func TestNonSliceElemKindReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=SliceElemKind[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -353,8 +354,8 @@ func TestSliceElemKindReflectValPntr(t *testing.T){
 func TestNonSliceElemInfo(t *testing.T){
     v:=0
     _,err:=SliceElemInfo[int](&v,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -364,8 +365,8 @@ func TestNonSliceElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=SliceElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -375,8 +376,8 @@ func TestNonSliceElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=SliceElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -486,8 +487,8 @@ func TestSliceElemInfoReflectValPntr(t *testing.T){
 func TestNonSliceRecursiveElemInfo(t *testing.T){
     v:=0
     _,err:=RecursiveSliceElemInfo[int](&v,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -497,8 +498,8 @@ func TestNonSliceRecursiveElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=RecursiveSliceElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }
@@ -508,8 +509,8 @@ func TestNonSliceRecursiveElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=RecursiveSliceElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "SliceElemVals returned an incorrect error.",t,
         )
     }

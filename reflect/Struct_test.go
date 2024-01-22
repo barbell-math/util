@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/test"
+	customerr "github.com/barbell-math/util/err"
 )
 
 type customString string
@@ -50,8 +51,8 @@ func TestNonStructGetName(t *testing.T){
     v:=0;
     name,err:=GetStructName[int](&v);
     test.BasicTest("",name,"The name of a non struct type was returned.",t);
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -62,8 +63,8 @@ func TestNonStructGetNameFromReflectVal(t *testing.T){
     v2:=reflect.ValueOf(v)
     name,err:=GetStructName[reflect.Value](v2);
     test.BasicTest("",name,"The name of a non struct type was returned.",t);
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -74,8 +75,8 @@ func TestNonStructGetNameFromReflectValPntr(t *testing.T){
     v2:=reflect.ValueOf(&v)
     name,err:=GetStructName[reflect.Value](v2);
     test.BasicTest("",name,"The name of a non struct type was returned.",t);
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -113,8 +114,8 @@ func TestGetStructNameFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldNames(t *testing.T){
     v:=0
     err:=StructFieldNames[int](&v).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -124,8 +125,8 @@ func TestNonStructStructFieldNamesFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldNames[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -135,8 +136,8 @@ func TestNonStructStructFieldNamesFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldNames[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -207,8 +208,8 @@ func TestStructFieldNamesFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldVals(t *testing.T){
     v:=0
     err:=StructFieldVals[int](&v).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -218,8 +219,8 @@ func TestNonStructStructFieldValsFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldVals[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -229,8 +230,8 @@ func TestNonStructStructFieldValsFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldVals[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -301,8 +302,8 @@ func TestStructFieldValsFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldPntrs(t *testing.T){
     v:=0
     err:=StructFieldPntrs[int](&v).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -312,8 +313,8 @@ func TestNonStructStructFieldPntrsFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldPntrs[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -323,8 +324,8 @@ func TestNonStructStructFieldPntrsFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldPntrs[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -388,8 +389,8 @@ func TestStructFieldPntrsFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldTypes(t *testing.T){
     v:=0
     err:=StructFieldTypes[int](&v).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -399,8 +400,8 @@ func TestNonStructStructFieldTypesFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldTypes[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -410,8 +411,8 @@ func TestNonStructStructFieldTypesFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldTypes[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -482,8 +483,8 @@ func TestStructFieldTypesFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldKinds(t *testing.T){
     v:=0
     err:=StructFieldKinds[int](&v).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -493,8 +494,8 @@ func TestNonStructStructFieldKindsFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldKinds[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -504,8 +505,8 @@ func TestNonStructStructFieldKindsFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldKinds[reflect.Value](v2).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -576,8 +577,8 @@ func TestStructFieldKindsFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldInfo(t *testing.T){
     v:=0
     err:=StructFieldInfo[int](&v,true).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -587,8 +588,8 @@ func TestNonStructStructFieldInfoFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldInfo[reflect.Value](v2,true).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -598,8 +599,8 @@ func TestNonStructStructFieldInfoFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldInfo[reflect.Value](v2,true).Consume()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -856,8 +857,8 @@ func TestNonStructRecursiveStructFieldInfo(t *testing.T){
     test.BasicTest(0,len(vals),
         "Recursive struct field info returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -870,8 +871,8 @@ func TestNonStructRecursiveStructFieldInfoFromReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "Recursive struct field info returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }
@@ -884,8 +885,8 @@ func TestNonStructRecursiveStructFieldInfoFromReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "Recursive struct field info returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "Non struct val did not raise appropriate error.",t,
         );
     }

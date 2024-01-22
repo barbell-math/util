@@ -3,6 +3,8 @@ package reflect
 import (
 	"fmt"
 	"reflect"
+
+	customerr "github.com/barbell-math/util/err"
 )
 
 // This struct has fields that contain all the possible relevant information
@@ -70,7 +72,7 @@ func valError[T any, U reflect.Value | *T](
                 reflect.ValueOf(t).Elem().Kind().String(),
             )
     }
-    return IncorrectType(fmt.Sprintf(
+    return customerr.IncorrectType(fmt.Sprintf(
         "Function requires a %s as target. | %s",
         expKind.String(),fString,
     ));

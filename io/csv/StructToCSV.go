@@ -8,19 +8,26 @@ import (
 
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/reflect"
+	customerr "github.com/barbell-math/util/err"
 )
 
 func StructToCSV[R any](elems iter.Iter[R],
         addHeaders bool,
         timeDateFormat string) iter.Iter[[]string] {
     var tmp R;
-    if err:=reflect.IsStructVal(&tmp); err!=nil {
-        return iter.ValElem([]string{},err,1);
+    if reflect.IsStructVal[R](&tmp) {
+        return iter.ValElem(
+            []string{},
+            customerr.IncorrectType(
+                fmt.Sprintf("Expected: Struct Got: %s",stdReflect.TypeOf(tmp)),
+            ),
+            1,
+        );
     }
-    capFilter:=func(thing string) bool {
+    capFilter:=func(idx int, thing string) bool {
         return len(thing)>0 && unicode.IsUpper(rune(thing[0]));
     }
-    headers,_:=reflect.GetStructFieldNames(&tmp,capFilter);
+    headers,_:=reflect.StructFieldNames[R](&tmp).Filter(capFilter).Collect()
     return iter.Next(elems,
     func(index int,
         val R,

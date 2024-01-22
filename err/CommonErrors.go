@@ -11,3 +11,7 @@ var DimensionsDoNotAgree,IsDimensionsDoNotAgree=ErrorFactory(
 var InvalidValue,IsInvalidValue=ErrorFactory(
     "The supplied value is not valid in the supplied context.",
 );
+
+var IncorrectType,IsIncorrectType=ErrorFactory(
+    "An incorrect type was recieved.",
+);

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/test"
+	customerr "github.com/barbell-math/util/err"
 )
 
 func TestIsArrayVal(t *testing.T){
@@ -40,8 +41,8 @@ func TestNonArrayElemVals(t *testing.T){
     test.BasicTest(0,len(vals),
         "ArrayElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -54,8 +55,8 @@ func TestNonArrayElemValsReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "ArrayElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -68,8 +69,8 @@ func TestNonArrayElemValsReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "ArrayElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -131,8 +132,8 @@ func TestNonArrayElemPntrs(t *testing.T){
     test.BasicTest(0,len(vals),
         "ArrayElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -145,8 +146,8 @@ func TestNonArrayElemPntrsReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "ArrayElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -159,8 +160,8 @@ func TestNonArrayElemPntrsReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "ArrayElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -216,8 +217,8 @@ func TestArrayElemPntrsReflectValPntr(t *testing.T){
 func TestNonArrayElemType(t *testing.T){
     v:=0
     _,err:=ArrayElemType[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -227,8 +228,8 @@ func TestNonArrayElemTypeReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=ArrayElemType[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -238,8 +239,8 @@ func TestNonArrayElemTypeReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=ArrayElemType[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -283,8 +284,8 @@ func TestArrayElemTypeReflectValPntr(t *testing.T){
 func TestNonArrayElemKind(t *testing.T){
     v:=0
     _,err:=ArrayElemKind[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -294,8 +295,8 @@ func TestNonArrayElemKindReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=ArrayElemKind[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -305,8 +306,8 @@ func TestNonArrayElemKindReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=ArrayElemKind[reflect.Value](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -350,8 +351,8 @@ func TestArrayElemKindReflectValPntr(t *testing.T){
 func TestNonArrayElemInfo(t *testing.T){
     v:=0
     _,err:=ArrayElemInfo[int](&v,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -361,8 +362,8 @@ func TestNonArrayElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=ArrayElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -372,8 +373,8 @@ func TestNonArrayElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=ArrayElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -485,8 +486,8 @@ func TestArrayElemInfoReflectValPntr(t *testing.T){
 func TestNonArrayRecursiveElemInfo(t *testing.T){
     v:=0
     _,err:=RecursiveArrayElemInfo[int](&v,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -496,8 +497,8 @@ func TestNonArrayRecursiveElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=RecursiveArrayElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }
@@ -507,8 +508,8 @@ func TestNonArrayRecursiveElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=RecursiveArrayElemInfo[reflect.Value](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "ArrayElemVals returned an incorrect error.",t,
         )
     }

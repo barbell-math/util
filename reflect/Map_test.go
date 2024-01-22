@@ -6,6 +6,7 @@ import (
 
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/test"
+	customerr "github.com/barbell-math/util/err"
 )
 
 func TestIsMapVal(t *testing.T){
@@ -41,8 +42,8 @@ func TestNonMapElemKeys(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElemKeys returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElemKeys returned an incorrect error.",t,
         )
     }
@@ -55,8 +56,8 @@ func TestNonMapElemKeysReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElemKeys returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElemKeys returned an incorrect error.",t,
         )
     }
@@ -69,8 +70,8 @@ func TestNonMapElemKeysReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElemKeys returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElemKeys returned an incorrect error.",t,
         )
     }
@@ -135,8 +136,8 @@ func TestNonMapElemVals(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElemVals returned an incorrect error.",t,
         )
     }
@@ -149,8 +150,8 @@ func TestNonMapElemValsReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElemVals returned an incorrect error.",t,
         )
     }
@@ -163,8 +164,8 @@ func TestNonMapElemValsReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElemVals returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElemVals returned an incorrect error.",t,
         )
     }
@@ -235,8 +236,8 @@ func TestNonMapElems(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElems returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -249,8 +250,8 @@ func TestNonMapElemsReflectVal(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElems returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -263,8 +264,8 @@ func TestNonMapElemsReflectValPntr(t *testing.T){
     test.BasicTest(0,len(vals),
         "MapElems returned values when it should not have.",t,
     )
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -350,8 +351,8 @@ func TestMapElemsReflectValPntr(t *testing.T){
 func TestNonMapKeyType(t *testing.T){
     v:=0
     _,err:=MapKeyType[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -361,8 +362,8 @@ func TestNonMapKeyTypeReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=MapKeyType[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -372,8 +373,8 @@ func TestNonMapKeyTypeReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=MapKeyType[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -417,8 +418,8 @@ func TestMapKeyTypeReflectValPntr(t *testing.T){
 func TestNonMapKeyKind(t *testing.T){
     v:=0
     _,err:=MapKeyKind[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -428,8 +429,8 @@ func TestNonMapKeyKindReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=MapKeyKind[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -439,8 +440,8 @@ func TestNonMapKeyKindReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=MapKeyKind[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -484,8 +485,8 @@ func TestMapKeyKindReflectValPntr(t *testing.T){
 func TestNonMapValType(t *testing.T){
     v:=0
     _,err:=MapValType[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -495,8 +496,8 @@ func TestNonMapValTypeReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=MapValType[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -506,8 +507,8 @@ func TestNonMapValTypeReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=MapValType[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -551,8 +552,8 @@ func TestMapValTypeReflectValPntr(t *testing.T){
 func TestNonMapValKind(t *testing.T){
     v:=0
     _,err:=MapValKind[int](&v)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -562,8 +563,8 @@ func TestNonMapValKindReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=MapValKind[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -573,8 +574,8 @@ func TestNonMapValKindReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=MapValKind[int](v2)
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -618,8 +619,8 @@ func TestMapValKindReflectValPntr(t *testing.T){
 func TestNonMapElemInfo(t *testing.T){
     v:=0
     _,err:=MapElemInfo[int](&v,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -629,8 +630,8 @@ func TestNonMapElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=MapElemInfo[int](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -640,8 +641,8 @@ func TestNonMapElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=MapElemInfo[int](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -708,8 +709,8 @@ func TestMapElemInfoReflectValPntr(t *testing.T){
 func TestNonRecursiveMapElemInfo(t *testing.T){
     v:=0
     _,err:=RecursiveMapElemInfo[int](&v,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -719,8 +720,8 @@ func TestNonRecursiveMapElemInfoReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     _,err:=RecursiveMapElemInfo[int](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }
@@ -730,8 +731,8 @@ func TestNonRecursiveMapElemInfoReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     _,err:=RecursiveMapElemInfo[int](v2,true).Collect()
-    if !IsIncorrectType(err) {
-        test.FormatError(IncorrectType(""),err,
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
             "MapElems returned an incorrect error.",t,
         )
     }

@@ -8,8 +8,11 @@ import (
 
 	"github.com/barbell-math/util/reflect"
 	"github.com/barbell-math/util/algo/iter"
+	customerr "github.com/barbell-math/util/err"
 )
 
+// TODO - finish comment
+// TODO - rename timeDate to dateTime (idiot)
 //Only basic types are supported through the CSV interface (which mirrors the
 //limitations of a CSV file). For things like arrays and maps JSON is far more
 //expressive and less error prone.
@@ -26,8 +29,14 @@ import (
 //in the structs that are generated will be zero-value initialized.
 func CSVToStruct[R any](src iter.Iter[[]string], timeDateFormat string) iter.Iter[R] {
     var tmp R;
-    if err:=reflect.IsStructVal(&tmp); err!=nil {
-        return iter.ValElem(tmp,err,1);
+    if reflect.IsStructVal[R](&tmp) {
+        return iter.ValElem(
+            tmp,
+            customerr.IncorrectType(
+                fmt.Sprintf("Expected: Struct Got: %s",stdReflect.TypeOf(tmp)),
+            ),
+            1,
+        );
     }
     headers:=make([]string,0);
     return iter.Next(src,
