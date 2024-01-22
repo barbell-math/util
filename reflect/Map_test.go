@@ -705,4 +705,96 @@ func TestMapElemInfoReflectValPntr(t *testing.T){
     mapElemInfoHelper(v,info,err,t)
 }
 
+func TestNonRecursiveMapElemInfo(t *testing.T){
+    v:=0
+    _,err:=RecursiveMapElemInfo[int](&v,true).Collect()
+    if !IsIncorrectType(err) {
+        test.FormatError(IncorrectType(""),err,
+            "MapElems returned an incorrect error.",t,
+        )
+    }
+}
 
+func TestNonRecursiveMapElemInfoReflectVal(t *testing.T){
+    v:=0
+    v2:=reflect.ValueOf(v)
+    _,err:=RecursiveMapElemInfo[int](v2,true).Collect()
+    if !IsIncorrectType(err) {
+        test.FormatError(IncorrectType(""),err,
+            "MapElems returned an incorrect error.",t,
+        )
+    }
+}
+
+func TestNonRecursiveMapElemInfoReflectValPntr(t *testing.T){
+    v:=0
+    v2:=reflect.ValueOf(&v)
+    _,err:=RecursiveMapElemInfo[int](v2,true).Collect()
+    if !IsIncorrectType(err) {
+        test.FormatError(IncorrectType(""),err,
+            "MapElems returned an incorrect error.",t,
+        )
+    }
+}
+
+func TestRecursiveMapElemInfo(t *testing.T){
+    v:=map[int]any{0: "zero", 1: "one", 2: "two", 3: map[int]string{4: "four"}}
+    info,err:=RecursiveMapElemInfo[map[int]any](&v,true).Collect()
+    test.BasicTest(nil,err,
+        "MapElems returned an error when it should not have.",t,    
+    )
+    test.BasicTest(4,len(info),
+        "The wrong number of elements were returned.",t,
+    )
+    for _,iterV:=range(info) {
+        k,ok:=iterV.A.Val()
+        test.BasicTest(true,ok,
+            "The key was not returned when it should have been.",t,    
+        )
+        actV,ok:=v[k.(int)]
+        test.BasicTest(true,ok,
+            "The key that was returned was not present in the map.",t,    
+        )
+        _v,ok:=iterV.B.Val()
+        test.BasicTest(true,ok,
+            "The key was not returned when it should have been.",t,    
+        )
+        switch _v.(type) {
+            case string: 
+                test.BasicTest(actV,_v.(string),
+                    "The value that was returned was not the correct one.",t,
+                )
+                test.BasicTest(reflect.TypeOf(int(0)),iterV.A.Type,
+                    "The type of the key was incorrect.",t,
+                )
+                // test.BasicTest(reflect.TypeOf(any("")),iterV.B.Type,
+                //     "The type of the value was incorrect.",t,
+                // )
+                test.BasicTest(reflect.Int,iterV.A.Kind,
+                    "The kind of the key was incorrect.",t,
+                )
+                test.BasicTest(reflect.Interface,iterV.B.Kind,
+                    "The kind of the value was incorrect.",t,
+                )
+            case map[int]string:
+                test.BasicTest(len(v[3].(map[int]string)),len(_v.(map[int]string)),
+                    "The value that was returned was not the correct one.",t,
+                )
+                test.BasicTest(v[3].(map[int]string)[4],_v.(map[int]string)[4],
+                    "The value that was returned was not the correct one.",t,
+                )
+                test.BasicTest(reflect.TypeOf(int(0)),iterV.A.Type,
+                    "The type of the key was incorrect.",t,
+                )
+                // test.BasicTest(reflect.TypeOf(any(map[int]string{})),iterV.B.Type,
+                //     "The type of the value was incorrect.",t,
+                // )
+                test.BasicTest(reflect.Int,iterV.A.Kind,
+                    "The kind of the key was incorrect.",t,
+                )
+                test.BasicTest(reflect.Interface,iterV.B.Kind,
+                    "The kind of the value was incorrect.",t,
+                )
+        }
+    }
+}

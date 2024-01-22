@@ -4,7 +4,7 @@ import (
 	customerr "github.com/barbell-math/util/err"
 )
 
-// Next will take it's parent iterator and consume its values. As it does this 
+// Next will take it's parent iterator and consume its values. As it does this
 // it will apply the operation (op) function to the value before passing on the
 // transformed value to it's child iterator. If an error is generated iteration
 // will stop.

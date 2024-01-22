@@ -370,7 +370,7 @@ func Recurse[T any](
             return levelsBreakOp()
         }
         for len(levels)>0 {
-            v,err,cont:=levels[len(levels)-1](Continue)
+            v,err,cont:=levels[len(levels)-1](f)
             if !cont {
                 levels=levels[0:len(levels)-1]
                 continue

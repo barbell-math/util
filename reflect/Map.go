@@ -255,19 +255,19 @@ func MapElemInfo[T any, M reflect.Value | *T](
 // map that it points to if the reflect.Value contains a pointer to a map.
 // Any value that is a map value will be recursed on, pointers to maps will not 
 // be recursed on.
-func RecursiveMapElemInfo[T any, S reflect.Value | *T](
-    s S, 
+func RecursiveMapElemInfo[T any, M reflect.Value | *T](
+    m M, 
     keepVal bool,
 ) iter.Iter[KeyValInfo] {
-    if err:=mapValError[T,S](s); err!=nil {
+    if err:=mapValError[T,M](m); err!=nil {
         return iter.ValElem[KeyValInfo](KeyValInfo{},err,1)
     }
     return iter.Recurse[KeyValInfo](
-        MapElemInfo[T,S](s,keepVal),
+        MapElemInfo[T,M](m,keepVal),
         func(v KeyValInfo) bool { return v.B.Kind==reflect.Map },
         func(v KeyValInfo) iter.Iter[KeyValInfo] {
             if v,ok:=v.B.Val(); ok {
-                return MapElemInfo[T,reflect.Value](reflect.ValueOf(v),keepVal)
+                return MapElemInfo[T,reflect.Value](reflect.ValueOf(&v),keepVal)
             } else {
                 return iter.ValElem[KeyValInfo](
                     KeyValInfo{},

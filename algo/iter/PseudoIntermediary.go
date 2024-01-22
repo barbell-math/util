@@ -5,7 +5,7 @@ import (
 )
 
 // Take will consume the first num elements of it's parent iterator. It will
-// stop iteraton after the first num elements have been consumed. If an error 
+// stop iteraton after the first num elements have been consumed. If an error
 // occurs iteraton will stop regardless of if num elements have been consumed.
 func (i Iter[T])Take(num int) Iter[T] {
     cntr:=0;
