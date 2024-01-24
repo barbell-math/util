@@ -1,12 +1,8 @@
-// Array/slice reflect
-// Static Vector (Array?) - no way to dynamically represent, probably no?
-// Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New
-// Tree, graph...
-// Precompiled nfa/dfa - use go:generate comments!
 package dataStruct
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
@@ -15,15 +11,15 @@ import (
 
 
 type (
-    // A type to repsent an array that dynamically grows as elements are added.
+    // A type to represent an array that dynamically grows as elements are added.
     // This is nothing more than a generically initialized slice with methods
     // attached to it so it can be passed to functions that use the interfaces
-    // defined in the dataStruct/types, the dataStruct/types/static, or
+    // defined in the dataStruct/types, dataStruct/types/static, or
     // dataStruct/types/dynamic packages.
     Vector[T any] []T
     
     // A synchronized version of Vector. All operations will be wrapped in the
-    // appropriate calls the embeded RWMutex. A pointer to a RWMutex is embeded
+    // appropriate calls the embedded RWMutex. A pointer to a RWMutex is embedded
     // rather than a value to avoid copying the lock value.
     SyncedVector[T any] struct {
         *sync.RWMutex
@@ -32,8 +28,8 @@ type (
 )
 
 // Creates a new vector initialized with size zero valued elements. Size must be
-// greater than 0, an error will be returned if it is not. If size is 0 the
-// vector will be initialized with 0 elements.
+// >= 0, an error will be returned if it is not. If size is 0 the vector will be 
+// initialized with 0 elements.
 func NewVector[T any](size int) (Vector[T],error) {
     if size<0 {
         return nil,customerr.ValOutsideRange(
@@ -44,9 +40,9 @@ func NewVector[T any](size int) (Vector[T],error) {
 }
 
 // Creates a new synced vector initialized with size zero valued elements. Size 
-// must be greater than 0, an error will be returned if it is not. If size is 0 
-// the vector will be initialized with 0 elements. The underlying RWMutex value
-// will be fully unlocked upon initialization.
+// must be >= 0, an error will be returned if it is not. If size is 0 the vector 
+// will be initialized with 0 elements. The underlying RWMutex value will be 
+// fully unlocked upon initialization.
 func NewSyncedVector[T any](size int) (SyncedVector[T],error) {
     rv,err:=NewVector[T](size)
     return SyncedVector[T]{
@@ -345,4 +341,14 @@ func (v *Vector[T])PntrElems() iter.Iter[*T] {
         func() error { v.RLock(); return nil },
         func() error { v.RUnlock(); return nil },
     )
+}
+
+// Returns true if the vectors are equal.
+func (v *Vector[T])Eq(other Vector[T]) bool {
+    return reflect.DeepEqual(*v,other)
+}
+
+// Returns true if the vectors are not equal.
+func (v *Vector[T])Neq(other Vector[T]) bool {
+    return !v.Eq(other)
 }

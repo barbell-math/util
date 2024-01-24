@@ -68,3 +68,8 @@ type LastElemWrite[V any] interface {
 type LastElemRemove[V any] interface {
     PopBack() (V,error);
 }
+
+type Equals[O any] interface {
+    Eq(other O) bool
+    Neq(other O) bool
+}

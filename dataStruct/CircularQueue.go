@@ -8,18 +8,29 @@ import (
 )
 
 type (
+    // A container that holds a fixed number of values in such a way that makes
+    // stack and queue operations extremely efficient. Because the length of the
+    // container is fixed (it will not dynamically expand to add more elements
+    // as needed) the values in the underlying array will 'rotate' around the
+    // array as operations are performed making it so no allocations are ever
+    // performed beyond the initial creation of the underlying array.
     CircularBuffer[T any] struct {
         vals []T;
         numElems int;
         startEnd Pair[int,int];
     };
     
+    // A synchronized version of CircularBuffer. All operations will be wrapped 
+    // in the appropriate calls the embedded RWMutex. A pointer to a RWMutex is 
+    // embedded rather than a value to avoid copying the lock value.
     SyncedCircularBuffer[T any] struct {
         *sync.RWMutex
         CircularBuffer[T]
     }
 )
 
+// Creates a new CircularBuffer initialized with size zero valued elements. Size 
+// must be greater than 0, an error will be returned if it is not.
 func NewCircularBuffer[T any](size int) (CircularBuffer[T],error) {
     if size<=0 {
         return CircularBuffer[T]{},customerr.ValOutsideRange(
@@ -38,6 +49,9 @@ func NewCircularBuffer[T any](size int) (CircularBuffer[T],error) {
     },nil;
 }
 
+// Creates a new synced CircularBuffer initialized with size zero valued 
+// elements. Size must be greater than 0, an error will be returned if it is not.
+// The underlying RWMutex value will be fully unlocked upon initialization.
 func NewSyncedCircularBuffer[T any](size int) (SyncedCircularBuffer[T],error) {
     rv,err:=NewCircularBuffer[T](size)
     return SyncedCircularBuffer[T]{
@@ -46,34 +60,76 @@ func NewSyncedCircularBuffer[T any](size int) (SyncedCircularBuffer[T],error) {
     }, err
 }
 
+// A empty pass through function that performs no action. CircularBuffer will 
+// call all the appropriate locking methods despite not being synced, just 
+// nothing will happen. This is done so that SyncedVector can simply embed a 
+// CircularBuffer and override the appropriate locking methods to implement the 
+// correct behavior without needing to make any additional changes such as 
+// wrapping every single method from CircularBuffer.
 func (c *CircularBuffer[T])Lock() { }
+
+// A empty pass through function that performs no action. CircularBuffer will 
+// call all the appropriate locking methods despite not being synced, just 
+// nothing will happen. This is done so that SyncedVector can simply embed a 
+// CircularBuffer and override the appropriate locking methods to implement the 
+// correct behavior without needing to make any additional changes such as 
+// wrapping every single method from CircularBuffer.
 func (c *CircularBuffer[T])Unlock() { }
+
+// A empty pass through function that performs no action. CircularBuffer will 
+// call all the appropriate locking methods despite not being synced, just 
+// nothing will happen. This is done so that SyncedVector can simply embed a 
+// CircularBuffer and override the appropriate locking methods to implement the 
+// correct behavior without needing to make any additional changes such as 
+// wrapping every single method from CircularBuffer.
 func (c *CircularBuffer[T])RLock() { }
+
+// A empty pass through function that performs no action. CircularBuffer will 
+// call all the appropriate locking methods despite not being synced, just 
+// nothing will happen. This is done so that SyncedVector can simply embed a 
+// CircularBuffer and override the appropriate locking methods to implement the 
+// correct behavior without needing to make any additional changes such as 
+// wrapping every single method from CircularBuffer.
 func (c *CircularBuffer[T])RUnlock() { }
 
+// The SyncedCircularBuffer method to override the CircularBuffer pass through 
+// function and actually apply the mutex operation.
 func (c *SyncedCircularBuffer[T])Lock() { c.RWMutex.Lock() }
+
+// The SyncedCircularBuffer method to override the CircularBuffer pass through 
+// function and actually apply the mutex operation.
 func (c *SyncedCircularBuffer[T])Unlock() { c.RWMutex.Unlock() }
+
+// The SyncedCircularBuffer method to override the CircularBuffer pass through 
+// function and actually apply the mutex operation.
 func (c *SyncedCircularBuffer[T])RLock() { c.RWMutex.RLock() }
+
+// The SyncedCircularBuffer method to override the CircularBuffer pass through 
+// function and actually apply the mutex operation.
 func (c *SyncedCircularBuffer[T])RUnlock() { c.RWMutex.RUnlock() }
 
+// Returns true if the circular buffer has reached its capacity.
 func (c *CircularBuffer[T])Full() bool {
     c.RLock()
     defer c.RUnlock()
     return c.numElems==len(c.vals)
 }
 
+// Returns the length of the circular buffer.
 func (c *CircularBuffer[T])Length() int {
     c.RLock()
     defer c.RUnlock()
     return c.numElems;
 }
 
+// Returns the capacity of the circular buffer.
 func (c *CircularBuffer[T])Capacity() int {
     c.RLock()
     defer c.RUnlock()
     return len(c.vals);
 }
 
+// TODO - fix error to gener full error not queue full error
 func (c *CircularBuffer[T])PushFront(v T) error {
     c.Lock()
     defer c.Unlock()
@@ -304,19 +360,6 @@ func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
         func() error { c.RLock(); return nil },
         func() error { c.RUnlock(); return nil },
     )
-}
-
-// TODO -test, verify setup/teardown is correctly called
-func (c *CircularBuffer[T])Collect(i iter.Iter[T]) error {
-    return i.SetupTeardown(
-        func() error { c.RLock(); return nil },
-        func() error { c.RUnlock(); return nil },
-    ).ForEach(func(index int, val T) (iter.IteratorFeedback, error) {
-        if err:=c.Append(val); err==nil {
-            return iter.Break,err 
-        }
-        return iter.Continue,nil
-    })
 }
 
 // This function only works for an index that is <2n when n is the capacity of 
