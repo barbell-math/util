@@ -18,4 +18,4 @@ func dynVectorInterfaceTypeCheck[T any](d dynamic.Vector[T]){}
 func writeInterfaceTypeCeck[K any, V any](d types.Write[K,V]){}
 func readInterfaceTypeCeck[K any, V any](d types.Write[K,V]){}
 
-func equalsInterfaceTypeCheck[T any](d types.Equals[T]){}
+func equalsInterfaceTypeCheck[T any, V any](d types.Equals[T,V]){}

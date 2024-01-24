@@ -61,6 +61,19 @@ func TestCircularBufferStaticVectorTypeInterface(t *testing.T) {
     staticVectorInterfaceTypeCheck[int](&tmp2);
 }
 
+func TestCircularBufferEqualTypeInterface(t *testing.T) {
+    tmp,err:=NewCircularBuffer[int](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    tmp2,err:=NewSyncedCircularBuffer[int](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    equalsInterfaceTypeCheck[CircularBuffer[int],int](&tmp);
+    equalsInterfaceTypeCheck[CircularBuffer[int],int](&tmp2);
+}
+
 func TestCircularBufferDynQueueTypeInterface(t *testing.T){
     test.Panics(
         func () {
@@ -973,4 +986,84 @@ func TestCircularBufferPntrElems(t *testing.T){
     tmp.startEnd.A=2;
     tmp.startEnd.B=1;
     testCircularBufferElemsHelper(tmp,t);
+}
+
+func TestCircularBufferEq(t *testing.T){
+    v,_:=NewCircularBuffer[int](4)
+    v2,_:=NewCircularBuffer[int](4)
+    comp:=func(l *int, r *int) bool { return *l==*r }
+    test.BasicTest(true,v.Eq(v2,comp),
+	"Eq returned a false negative.",t,
+    )
+    test.BasicTest(true,v2.Eq(v,comp),
+	"Eq returned a false negative.",t,
+    )
+    v.Insert(0,1)
+    test.BasicTest(false,v.Eq(v2,comp),
+	"Eq returned a false positive.",t,
+    )
+    test.BasicTest(false,v2.Eq(v,comp),
+	"Eq returned a false positive.",t,
+    )
+    v2.Insert(0,1)
+    test.BasicTest(true,v.Eq(v2,comp),
+	"Eq returned a false negative.",t,
+    )
+    test.BasicTest(true,v2.Eq(v,comp),
+	"Eq returned a false negative.",t,
+    )
+    v.Insert(1,2,3,4)
+    test.BasicTest(false,v.Eq(v2,comp),
+	"Eq returned a false positive.",t,
+    )
+    test.BasicTest(false,v2.Eq(v,comp),
+	"Eq returned a false positive.",t,
+    )
+    v2.Insert(1,2,3,4)
+    test.BasicTest(true,v.Eq(v2,comp),
+	"Eq returned a false negative.",t,
+    )
+    test.BasicTest(true,v2.Eq(v,comp),
+	"Eq returned a false negative.",t,
+    )
+}
+
+func TestCircularQueueNeq(t *testing.T){
+    v,_:=NewCircularBuffer[int](4)
+    v2,_:=NewCircularBuffer[int](4)
+    comp:=func(l *int, r *int) bool { return *l==*r }
+    test.BasicTest(false,v.Neq(v2,comp),
+	"Neq returned a false positive.",t,
+    )
+    test.BasicTest(false,v2.Neq(v,comp),
+	"Neq returned a false positive.",t,
+    )
+    v.Insert(0,1)
+    test.BasicTest(true,v.Neq(v2,comp),
+	"Neq returned a false negative.",t,
+    )
+    test.BasicTest(true,v2.Neq(v,comp),
+	"Neq returned a false negative.",t,
+    )
+    v2.Insert(0,1)
+    test.BasicTest(false,v.Neq(v2,comp),
+	"Neq returned a false positive.",t,
+    )
+    test.BasicTest(false,v2.Neq(v,comp),
+	"Neq returned a false positive.",t,
+    )
+    v.Insert(1,2,3,4)
+    test.BasicTest(true,v.Neq(v2,comp),
+	"Neq returned a false negative.",t,
+    )
+    test.BasicTest(true,v2.Neq(v,comp),
+	"Neq returned a false negative.",t,
+    )
+    v2.Insert(1,2,3,4)
+    test.BasicTest(false,v.Neq(v2,comp),
+	"Neq returned a false positive.",t,
+    )
+    test.BasicTest(false,v2.Neq(v,comp),
+	"Neq returned a false positive.",t,
+    )
 }

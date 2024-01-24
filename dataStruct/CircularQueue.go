@@ -362,6 +362,28 @@ func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
     )
 }
 
+func (c *CircularBuffer[T])Eq(
+    other CircularBuffer[T], 
+    comp func(l *T, r *T) bool,
+) bool {
+    c.RLock()
+    defer c.RUnlock()
+    rv:=(c.Length()==other.Length())
+    for i:=0; i<c.Length() && rv; i++ {
+        l,_:=c.GetPntr(i)   // Ignoring index error because of loop bounds
+        r,_:=other.GetPntr(i)   // Ignoring index error because of loop bounds
+        rv=(rv && comp(l,r))
+    }
+    return rv
+}
+
+func (c *CircularBuffer[T])Neq(
+    other CircularBuffer[T], 
+    comp func(l *T, r *T) bool,
+) bool {
+    return !c.Eq(other,comp)
+}
+
 // This function only works for an index that is <2n when n is the capacity of 
 // the underlying array
 func (c *CircularBuffer[T])incIndex(idx int, amnt int) int {

@@ -54,8 +54,8 @@ func TestVectorDynDequeTypeInterface(t *testing.T) {
 func TestVectorEqualsTypeInterface(t *testing.T) {
     v:=Vector[int](make(Vector[int], 0))
     v2,_:=NewSyncedVector[int](5)
-    equalsInterfaceTypeCheck[Vector[int]](&v);
-    equalsInterfaceTypeCheck[Vector[int]](&v2);
+    equalsInterfaceTypeCheck[Vector[int],int](&v);
+    equalsInterfaceTypeCheck[Vector[int],int](&v2);
 }
 
 func TestVectorStaticTypeInterface(t *testing.T){
@@ -544,40 +544,41 @@ func TestVectorElemPntrs(t *testing.T){
 func TestVectorEq(t *testing.T){
     v:=Vector[int]{0,1,2,3}
     v2:=Vector[int]{0,1,2,3}
-    test.BasicTest(true,v.Eq(v2),
+    comp:=func(l *int, r *int) bool { return *l==*r }
+    test.BasicTest(true,v.Eq(v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v),
+    test.BasicTest(true,v2.Eq(v,comp),
 	"Eq returned a false negative.",t,
     )
     v.Delete(3)
-    test.BasicTest(false,v.Eq(v2),
+    test.BasicTest(false,v.Eq(v2,comp),
 	"Eq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Eq(v),
+    test.BasicTest(false,v2.Eq(v,comp),
 	"Eq returned a false positive.",t,
     )
     v=Vector[int]{0}
     v2=Vector[int]{0}
-    test.BasicTest(true,v.Eq(v2),
+    test.BasicTest(true,v.Eq(v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v),
+    test.BasicTest(true,v2.Eq(v,comp),
 	"Eq returned a false negative.",t,
     )
     v.Delete(0)
-    test.BasicTest(false,v.Eq(v2),
+    test.BasicTest(false,v.Eq(v2,comp),
 	"Eq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Eq(v),
+    test.BasicTest(false,v2.Eq(v,comp),
 	"Eq returned a false positive.",t,
     )
     v=Vector[int]{}
     v2=Vector[int]{}
-    test.BasicTest(true,v.Eq(v2),
+    test.BasicTest(true,v.Eq(v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v),
+    test.BasicTest(true,v2.Eq(v,comp),
 	"Eq returned a false negative.",t,
     )
 }
@@ -585,40 +586,41 @@ func TestVectorEq(t *testing.T){
 func TestVectorNeq(t *testing.T){
     v:=Vector[int]{0,1,2,3}
     v2:=Vector[int]{0,1,2,3}
-    test.BasicTest(false,v.Neq(v2),
+    comp:=func(l *int, r *int) bool { return *l==*r }
+    test.BasicTest(false,v.Neq(v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v),
+    test.BasicTest(false,v2.Neq(v,comp),
 	"Neq returned a false positive.",t,
     )
     v.Delete(3)
-    test.BasicTest(true,v.Neq(v2),
+    test.BasicTest(true,v.Neq(v2,comp),
 	"Neq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Neq(v),
+    test.BasicTest(true,v2.Neq(v,comp),
 	"Neq returned a false negative.",t,
     )
     v=Vector[int]{0}
     v2=Vector[int]{0}
-    test.BasicTest(false,v.Neq(v2),
+    test.BasicTest(false,v.Neq(v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v),
+    test.BasicTest(false,v2.Neq(v,comp),
 	"Neq returned a false positive.",t,
     )
     v.Delete(0)
-    test.BasicTest(true,v.Neq(v2),
+    test.BasicTest(true,v.Neq(v2,comp),
 	"Neq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Neq(v),
+    test.BasicTest(true,v2.Neq(v,comp),
 	"Neq returned a false negative.",t,
     )
     v=Vector[int]{}
     v2=Vector[int]{}
-    test.BasicTest(false,v.Neq(v2),
+    test.BasicTest(false,v.Neq(v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v),
+    test.BasicTest(false,v2.Neq(v,comp),
 	"Neq returned a false positive.",t,
     )
 }

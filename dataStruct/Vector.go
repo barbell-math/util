@@ -2,7 +2,6 @@ package dataStruct
 
 import (
 	"fmt"
-	"reflect"
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
@@ -29,7 +28,8 @@ type (
 
 // Creates a new vector initialized with size zero valued elements. Size must be
 // >= 0, an error will be returned if it is not. If size is 0 the vector will be 
-// initialized with 0 elements.
+// initialized with 0 elements. A vector can also be created by type casting a
+// standard slice.
 func NewVector[T any](size int) (Vector[T],error) {
     if size<0 {
         return nil,customerr.ValOutsideRange(
@@ -343,12 +343,20 @@ func (v *Vector[T])PntrElems() iter.Iter[*T] {
     )
 }
 
-// Returns true if the vectors are equal.
-func (v *Vector[T])Eq(other Vector[T]) bool {
-    return reflect.DeepEqual(*v,other)
+// Returns true if the vectors are equal. The supplied comparison function will
+// be used when comparing values in the vector.
+func (v *Vector[T])Eq(other Vector[T], comp func(l *T, r *T) bool) bool {
+    v.RLock()
+    defer v.RUnlock()
+    rv:=(len(*v)==len(other))
+    for i:=0; i<len(other) && rv; i++ {
+        rv=(rv && comp(&(*v)[i],&other[i]))
+    }
+    return rv
 }
 
-// Returns true if the vectors are not equal.
-func (v *Vector[T])Neq(other Vector[T]) bool {
-    return !v.Eq(other)
+// Returns true if the vectors are not equal. The supplied comparison function 
+// will be used when comparing values in the vector.
+func (v *Vector[T])Neq(other Vector[T], comp func(l *T, r *T) bool) bool {
+    return !v.Eq(other,comp)
 }

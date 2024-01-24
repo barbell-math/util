@@ -69,7 +69,7 @@ type LastElemRemove[V any] interface {
     PopBack() (V,error);
 }
 
-type Equals[O any] interface {
-    Eq(other O) bool
-    Neq(other O) bool
+type Equals[O any, V any] interface {
+    Eq(other O, comp func(l *V, r *V) bool) bool
+    Neq(other O, comp func(l *V, r *V) bool) bool
 }
