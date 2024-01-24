@@ -3,6 +3,7 @@ package dataStruct
 import (
 	"testing"
 
+	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/dataStruct/types/static"
 	customerr "github.com/barbell-math/util/err"
 	"github.com/barbell-math/util/test"
@@ -251,6 +252,10 @@ func TestVectorDelete(t *testing.T){
 	    test.BasicTest(j,v[j],"Delete changed the wrong value.",t)
 	}
     }
+    err:=v.Delete(0)
+    test.BasicTest(nil,err,
+	"Delete returned an error when it should not have.",t,
+    )
 }
 
 func TestVectorClear(t *testing.T){
@@ -282,7 +287,7 @@ func TestVectorSetCapacity(t *testing.T){
     }
 }
 
-func TestPeekPntrFront(t *testing.T){
+func TestVectorPeekPntrFront(t *testing.T){
     v:=Vector[int]{}
     _v,err:=v.PeekPntrFront()
     test.BasicTest((*int)(nil),_v,
@@ -311,7 +316,7 @@ func TestPeekPntrFront(t *testing.T){
     )
 }
 
-func TestPeekFront(t *testing.T){
+func TestVectorPeekFront(t *testing.T){
     v:=Vector[int]{}
     _,err:=v.PeekFront()
     if !customerr.IsValOutsideRange(err) {
@@ -337,7 +342,7 @@ func TestPeekFront(t *testing.T){
     )
 }
 
-func TestPeekPntrBack(t *testing.T){
+func TestVectorPeekPntrBack(t *testing.T){
     v:=Vector[int]{}
     _v,err:=v.PeekPntrBack()
     test.BasicTest((*int)(nil),_v,
@@ -366,7 +371,7 @@ func TestPeekPntrBack(t *testing.T){
     )
 }
 
-func TestPeekBack(t *testing.T){
+func TestVectorPeekBack(t *testing.T){
     v:=Vector[int]{}
     _,err:=v.PeekBack()
     if !customerr.IsValOutsideRange(err) {
@@ -392,7 +397,7 @@ func TestPeekBack(t *testing.T){
     )
 }
 
-func TestPopFront(t *testing.T) {
+func TestVectorPopFront(t *testing.T) {
     v:=Vector[int]{0,1,2,3}
     for i:=0; i<4; i++ {
 	f,err:=v.PopFront()
@@ -411,7 +416,7 @@ func TestPopFront(t *testing.T) {
     }
 }
 
-func TestPopBack(t *testing.T) {
+func TestVectorPopBack(t *testing.T) {
     v:=Vector[int]{0,1,2,3}
     for i:=3; i>=0; i-- {
 	f,err:=v.PopBack()
@@ -430,7 +435,7 @@ func TestPopBack(t *testing.T) {
     }
 }
 
-func TestPushFront(t *testing.T){
+func TestVectorPushFront(t *testing.T){
     v:=Vector[int]{}
     for i:=0; i<4; i++ {
 	v.PushFront(i)
@@ -445,7 +450,7 @@ func TestPushFront(t *testing.T){
     }
 }
 
-func TestPushBack(t *testing.T){
+func TestVectorPushBack(t *testing.T){
     v:=Vector[int]{}
     for i:=0; i<4; i++ {
 	v.PushBack(i)
@@ -458,4 +463,73 @@ func TestPushBack(t *testing.T){
 	    )
 	}
     }
+}
+
+func testVectorElemsHelper(v SyncedVector[int], l int, t *testing.T){
+    for i:=0; i<l; i++ {
+        v.PushBack(i);
+    }
+    cnt:=0
+    v.Elems().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+        cnt++
+        test.BasicTest(index,val,"Element was skipped while iterating.",t);
+        return iter.Continue,nil;
+    });
+    test.BasicTest(l,cnt,
+        "All the elements were not iterated over.",t,
+    )
+}
+func TestVectorElems(t *testing.T){
+    tmp,err:=NewSyncedVector[int](0);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    testVectorElemsHelper(tmp,0,t);
+    tmp,err=NewSyncedVector[int](0);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    testVectorElemsHelper(tmp,1,t);
+    tmp,err=NewSyncedVector[int](0);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    testVectorElemsHelper(tmp,2,t);
+}
+
+func testVectorPntrElemsHelper(v Vector[int], l int, t *testing.T){
+    for i:=0; i<l; i++ {
+        v.PushBack(i);
+    }
+    cnt:=0
+    v.PntrElems().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
+        cnt++
+        test.BasicTest(index,*val,"Element was skipped while iterating.",t);
+        *val=100;
+        return iter.Continue,nil;
+    });
+    v.Elems().ForEach(func(index int, val int) (iter.IteratorFeedback, error) {
+        test.BasicTest(100,val,"Element was not updated while iterating.",t);
+        return iter.Continue,nil;
+    });
+    test.BasicTest(l,cnt,
+        "All the elements were not iterated over.",t,
+    )
+}
+func TestVectorElemPntrs(t *testing.T){
+    tmp,err:=NewSyncedVector[int](0);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    testVectorElemsHelper(tmp,0,t);
+    tmp,err=NewSyncedVector[int](0);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    testVectorElemsHelper(tmp,1,t);
+    tmp,err=NewSyncedVector[int](0);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    testVectorElemsHelper(tmp,2,t);
 }
