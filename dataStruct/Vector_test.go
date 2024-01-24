@@ -8,6 +8,20 @@ import (
 	"github.com/barbell-math/util/test"
 )
 
+func TestVectorWriteInterface(t *testing.T){
+    v:=Vector[string](make(Vector[string],0))
+    v2,_:=NewSyncedVector[string](5)
+    writeInterfaceTypeCeck[int,string](&v);
+    writeInterfaceTypeCeck[int,string](&v2);
+}
+
+func TestVectorReadInterface(t *testing.T){
+    v:=Vector[string](make(Vector[string],0))
+    v2,_:=NewSyncedVector[string](5)
+    readInterfaceTypeCeck[int,string](&v);
+    readInterfaceTypeCeck[int,string](&v2);
+}
+
 func TestVectorDynVectorTypeInterface(t *testing.T) {
     v:=Vector[int](make(Vector[int], 0))
     v2,_:=NewSyncedVector[int](5)
@@ -142,7 +156,7 @@ func TestVectorGetPntr(t *testing.T){
 func TestVectorSet(t *testing.T){
     v:=Vector[int]{0,1,2,3,4,5}
     for i:=0; i<5; i++ {
-	err:=v.Set(i+1,i)
+	err:=v.Set(i,i+1)
 	test.BasicTest(nil,err,
 	    "Get returned an error when it shouldn't have.",t,
 	)
@@ -152,7 +166,7 @@ func TestVectorSet(t *testing.T){
 	    "Set did not set the value correctly.",t,
 	)
     }
-    err:=v.Set(6,-1)
+    err:=v.Set(-1,6)
     if !customerr.IsValOutsideRange(err) {
 	test.FormatError(customerr.ValOutsideRange(""),err,
 	    "Get did not return the correct error with invalid index.",t,
@@ -165,7 +179,7 @@ func TestVectorSet(t *testing.T){
 	)
     }
     v=Vector[int]{}
-    err=v.Set(6,0)
+    err=v.Set(0,6)
     if !customerr.IsValOutsideRange(err) {
 	test.FormatError(customerr.ValOutsideRange(""),err,
 	    "Get did not return the correct error with invalid index.",t,

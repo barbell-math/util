@@ -12,6 +12,8 @@ import (
 type FieldInfo struct {
     // The name of the field.
     Name string
+    // The tag associated with the struct field.
+    Tag reflect.StructTag
     // The value information for the field.
     ValInfo
 }
@@ -144,6 +146,25 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
     )
 }
 
+// TODO -test
+// Returns an iterator that provides the struct field tags if a struct is
+// is supplied as an argument, returns an error otherwise. As a special case, 
+// if a reflect.Value is passed to this function it will return the field 
+// tags of the struct it contains or the field tags of the struct that it
+// points to if the reflect.Value contains a pointer to a struct.
+func StructFieldTags[T any, S reflect.Value | *T](s S) iter.Iter[reflect.StructTag] {
+    structVal,err:=homogonizeStructVal[T,S](s)
+    if err!=nil {
+        return iter.ValElem[reflect.StructTag]("",err,1)
+    }
+    return iter.SequentialElems[reflect.StructTag](
+        structVal.NumField(),
+        func(i int) (reflect.StructTag,error) {
+            return structVal.Type().Field(i).Tag,nil
+        },
+    )
+}
+
 // Returns an iterator that provides the struct field info if a struct is
 // is supplied as an argument, returns an error otherwise. As a special case, 
 // if a reflect.Value is passed to this function it will return the field 
@@ -168,6 +189,7 @@ func StructFieldInfo[T any, S reflect.Value | *T](
             f:=structVal.Field(i)
             return FieldInfo{
                 Name: n,
+                Tag: structVal.Type().Field(i).Tag,
                 ValInfo: ValInfo{
                     Type: f.Type(),
                     Kind: f.Kind(),

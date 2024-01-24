@@ -4,14 +4,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/barbell-math/util/test"
 	customerr "github.com/barbell-math/util/err"
+	"github.com/barbell-math/util/test"
 )
 
 type customString string
 type testStruct struct {
-    One int;
-    Two string;
+    One int `json:"one"`
+    Two string `json:"two"`
     Three customString
 };
 
@@ -574,6 +574,100 @@ func TestStructFieldKindsFromReflectValPntr(t *testing.T){
     );
 }
 
+func TestNonStructStructFieldTags(t *testing.T){
+    v:=0
+    err:=StructFieldTags[int](&v).Consume()
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
+            "Non struct val did not raise appropriate error.",t,
+        );
+    }
+}
+
+func TestNonStructStructFieldTagsFromReflectVal(t *testing.T){
+    v:=0
+    v2:=reflect.ValueOf(v)
+    err:=StructFieldTags[reflect.Value](v2).Consume()
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
+            "Non struct val did not raise appropriate error.",t,
+        );
+    }
+}
+
+func TestNonStructStructFieldTagsFromReflectValPntr(t *testing.T){
+    v:=0
+    v2:=reflect.ValueOf(&v)
+    err:=StructFieldTags[reflect.Value](v2).Consume()
+    if !customerr.IsIncorrectType(err) {
+        test.FormatError(customerr.IncorrectType(""),err,
+            "Non struct val did not raise appropriate error.",t,
+        );
+    }
+}
+
+func TestStructFieldTags(t *testing.T){
+    var s testStruct
+    vals,err:=StructFieldTags[testStruct](&s).Collect()
+    test.BasicTest(3,len(vals),
+        "The correct number of vals was not returned.",t,
+    )
+    test.BasicTest("one",vals[0].Get("json"),
+        "First struct field kind was not correct.",t,
+    );
+    test.BasicTest("two",vals[1].Get("json"),
+        "Second struct field kind was not correct.",t,
+    );
+    test.BasicTest("",vals[2].Get("json"),
+        "Second struct field kind was not correct.",t,
+    );
+    test.BasicTest(nil,err,
+        "Getting struct field types returned error when it was not supposed to.",t,
+    );
+}
+
+func TestStructFieldTagsFromReflectVal(t *testing.T){
+    var s testStruct
+    s2:=reflect.ValueOf(s)
+    vals,err:=StructFieldTags[reflect.Value](s2).Collect()
+    test.BasicTest(3,len(vals),
+        "The correct number of vals was not returned.",t,
+    )
+    test.BasicTest("one",vals[0].Get("json"),
+        "First struct field kind was not correct.",t,
+    );
+    test.BasicTest("two",vals[1].Get("json"),
+        "Second struct field kind was not correct.",t,
+    );
+    test.BasicTest("",vals[2].Get("json"),
+        "Second struct field kind was not correct.",t,
+    );
+    test.BasicTest(nil,err,
+        "Getting struct field types returned error when it was not supposed to.",t,
+    );
+}
+
+func TestStructFieldTagsFromReflectValPntr(t *testing.T){
+    var s testStruct
+    s2:=reflect.ValueOf(&s)
+    vals,err:=StructFieldTags[reflect.Value](s2).Collect()
+    test.BasicTest(3,len(vals),
+        "The correct number of vals was not returned.",t,
+    )
+    test.BasicTest("one",vals[0].Get("json"),
+        "First struct field kind was not correct.",t,
+    );
+    test.BasicTest("two",vals[1].Get("json"),
+        "Second struct field kind was not correct.",t,
+    );
+    test.BasicTest("",vals[2].Get("json"),
+        "Second struct field kind was not correct.",t,
+    );
+    test.BasicTest(nil,err,
+        "Getting struct field types returned error when it was not supposed to.",t,
+    );
+}
+
 func TestNonStructStructFieldInfo(t *testing.T){
     v:=0
     err:=StructFieldInfo[int](&v,true).Consume()
@@ -623,6 +717,15 @@ func TestStructFieldInfo(t *testing.T){
     )
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
+    )
+    test.BasicTest("one",vals[0].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("two",vals[1].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[2].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
     )
     v,ok:=vals[0].Val()
     test.BasicTest(1,v.(int),
@@ -704,6 +807,15 @@ func TestStructFieldInfoFromReflectVal(t *testing.T){
     )
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
+    )
+    test.BasicTest("one",vals[0].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("two",vals[1].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[2].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
     )
     v,ok:=vals[0].Val()
     test.BasicTest(1,v.(int),
@@ -791,6 +903,15 @@ func TestStructFieldInfoFromReflectValPntr(t *testing.T){
     )
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
+    )
+    test.BasicTest("one",vals[0].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("two",vals[1].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[2].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
     )
     v,ok:=vals[0].Val()
     test.BasicTest(1,v.(int),
@@ -910,6 +1031,15 @@ func TestRecursiveStructFieldInfo(t *testing.T){
     test.BasicTest("Three",vals[2].Name,
         "Third struct name was not correct.",t,
     )
+    test.BasicTest("one",vals[0].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("two",vals[1].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[2].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
     v,ok:=vals[0].Val()
     test.BasicTest(1,v.(int),
         "First struct val was not correct.",t,
@@ -998,6 +1128,21 @@ func TestRecursiveStructFieldInfo2(t *testing.T){
     )
     test.BasicTest("Three",vals[4].Name,
         "Third struct name was not correct.",t,
+    )
+    test.BasicTest("",vals[0].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[1].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("one",vals[2].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("two",vals[3].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[4].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
     )
     v,ok:=vals[0].Val()
     test.BasicTest(4.0,v.(float64),
@@ -1119,6 +1264,12 @@ func TestRecursiveStructFieldInfo2FromReflectValue(t *testing.T){
     test.BasicTest("Five",vals[1].Name,
         "Second struct name was not correct.",t,
     )
+    test.BasicTest("",vals[0].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[1].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
     v,ok:=vals[0].Val()
     test.BasicTest(4.0,v.(float64),
         "First struct val was not correct.",t,
@@ -1192,6 +1343,21 @@ func TestRecursiveStructFieldInfo2FromReflectValuePntr(t *testing.T){
     )
     test.BasicTest("Three",vals[4].Name,
         "Third struct name was not correct.",t,
+    )
+    test.BasicTest("",vals[0].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[1].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("one",vals[2].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("two",vals[3].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
+    )
+    test.BasicTest("",vals[4].Tag.Get("json"),
+        "Third struct tag was not correct.",t,
     )
     v,ok:=vals[0].Val()
     test.BasicTest(4.0,v.(float64),

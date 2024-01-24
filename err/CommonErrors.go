@@ -15,3 +15,7 @@ var InvalidValue,IsInvalidValue=ErrorFactory(
 var IncorrectType,IsIncorrectType=ErrorFactory(
     "An incorrect type was recieved.",
 );
+
+var UnsupportedType,IsUnsupportedType=ErrorFactory(
+    "The type of the recieved value was not valid.",
+);

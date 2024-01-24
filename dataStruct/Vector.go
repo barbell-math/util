@@ -89,7 +89,7 @@ func (v *Vector[T])GetPntr(idx int) (*T,error){
     return nil,getIndexOutOfBoundsError(idx,len(*v))
 }
 
-func (v *Vector[T])Set(val T, idx int) error {
+func (v *Vector[T])Set(idx int, val T) error {
     v.Lock()
     defer v.Unlock()
     if idx>=0 && idx<len(*v) && len(*v)>0 {

@@ -25,46 +25,46 @@ type StaticCapacity interface {
     Full() bool
 }
 
-type Read[T any, U any] interface {
-    Get(idx U) (T,error);
-    GetPntr(idx U) (*T,error);
+type Read[K any, V any] interface {
+    Get(idx K) (V,error);
+    GetPntr(idx K) (*V,error);
 }
 
-type Write[T any, U any] interface {
-    Set(idx U, v T) error;
-    Insert(idx U, v ...T) error;
-    Append(vals ...T) error
+type Write[K any, V any] interface {
+    Set(idx K, v V) error;
+    Insert(idx K, v ...V) error;
+    Append(vals ...V) error
 }
 
-type Delete[T any, U any] interface {
-    Delete(idx U) error
+type Delete[K any, V any] interface {
+    Delete(idx K) error
     Clear()
 }
 
-type FirstElemRead[T any] interface {
-    PeekFront() (T,error);
-    PeekPntrFront() (*T,error);
+type FirstElemRead[V any] interface {
+    PeekFront() (V,error);
+    PeekPntrFront() (*V,error);
 }
 
-type FirstElemWrite[T any] interface {
-    PushFront(v T) error;
-    ForcePushFront(v T)
+type FirstElemWrite[V any] interface {
+    PushFront(v V) error;
+    ForcePushFront(v V)
 }
 
-type FirstElemRemove[T any] interface {
-    PopFront() (T,error);
+type FirstElemRemove[V any] interface {
+    PopFront() (V,error);
 }
 
-type LastElemRead[T any] interface {
-    PeekBack() (T,error);
-    PeekPntrBack() (*T,error);
+type LastElemRead[V any] interface {
+    PeekBack() (V,error);
+    PeekPntrBack() (*V,error);
 }
 
-type LastElemWrite[T any] interface {
-    PushBack(v T) (error);
-    ForcePushBack(v T)
+type LastElemWrite[V any] interface {
+    PushBack(v V) (error);
+    ForcePushBack(v V)
 }
 
-type LastElemRemove[T any] interface {
-    PopBack() (T,error);
+type LastElemRemove[V any] interface {
+    PopBack() (V,error);
 }

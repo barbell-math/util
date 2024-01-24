@@ -306,6 +306,19 @@ func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
     )
 }
 
+// TODO -test, verify setup/teardown is correctly called
+func (c *CircularBuffer[T])Collect(i iter.Iter[T]) error {
+    return i.SetupTeardown(
+        func() error { c.RLock(); return nil },
+        func() error { c.RUnlock(); return nil },
+    ).ForEach(func(index int, val T) (iter.IteratorFeedback, error) {
+        if err:=c.Append(val); err==nil {
+            return iter.Break,err 
+        }
+        return iter.Continue,nil
+    })
+}
+
 // This function only works for an index that is <2n when n is the capacity of 
 // the underlying array
 func (c *CircularBuffer[T])incIndex(idx int, amnt int) int {

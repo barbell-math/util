@@ -1,4 +1,4 @@
-package csv;
+package csv
 
 import (
 	"fmt"
@@ -6,9 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/barbell-math/util/reflect"
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/dataStruct"
+	"github.com/barbell-math/util/dataStruct/types/static"
 	customerr "github.com/barbell-math/util/err"
+	"github.com/barbell-math/util/reflect"
 )
 
 // TODO - finish comment
@@ -27,7 +29,7 @@ import (
 //be set properly.
 //If any columns are missing or there are blank values the corresponding values
 //in the structs that are generated will be zero-value initialized.
-func CSVToStruct[R any](src iter.Iter[[]string], timeDateFormat string) iter.Iter[R] {
+func CSVToStruct[R any](src iter.Iter[[]string], dateTimeFormat string) iter.Iter[R] {
     var tmp R;
     if reflect.IsStructVal[R](&tmp) {
         return iter.ValElem(
@@ -38,7 +40,20 @@ func CSVToStruct[R any](src iter.Iter[[]string], timeDateFormat string) iter.Ite
             1,
         );
     }
-    headers:=make([]string,0);
+    var headers []string
+    return iter.Next[[]string,R](src,func(
+        index int, 
+        val []string, 
+        status iter.IteratorFeedback,
+    ) (iter.IteratorFeedback, R, error) {
+        if status==iter.Break {
+            return iter.Break,tmp,nil;
+        }
+        if index==0 {
+            headers=val;
+            return iter.Iterate,tmp,nil;
+        } 
+    })
     return iter.Next(src,
     func(index int, val []string, status iter.IteratorFeedback) (iter.IteratorFeedback, R, error) {
         if status==iter.Break {
@@ -48,7 +63,7 @@ func CSVToStruct[R any](src iter.Iter[[]string], timeDateFormat string) iter.Ite
             headers=val;
             return iter.Iterate,tmp,nil;
         } 
-        if i,err:=convFromCSV[R](headers,val,timeDateFormat); err==nil {
+        if i,err:=convFromCSV[R](headers,val,dateTimeFormat); err==nil {
             return iter.Continue,i,err;
         } else {
             err=MalformedCSVFile(
@@ -60,16 +75,34 @@ func CSVToStruct[R any](src iter.Iter[[]string], timeDateFormat string) iter.Ite
     });
 }
 
+func getValidColNames[R any](s *R) []string {
+    validColNames,_:=iter.Map[static.Pair[string,stdReflect.StructTag],string](
+        iter.Zip[string,stdReflect.StructTag](
+            reflect.StructFieldNames[R](&tmp),
+            reflect.StructFieldTags[R](&tmp),
+            func() static.Pair[string, stdReflect.StructTag] {
+                return &dataStruct.Pair[string,stdReflect.StructTag]{}
+            },
+        ),
+        func(index int, val static.Pair[string, stdReflect.StructTag]) (string, error) {
+            if v,ok:=val.GetB().Lookup("csv"); ok {
+                return v,nil
+            }
+            return val.GetA(),nil
+        },
+    ).Collect()
+}
+
 func convFromCSV[R any](
         headers []string,
         columns []string,
-        timeDateFormat string) (R,error) {
+        dateTimeFormat string) (R,error) {
     var rv R;
     if len(headers)==len(columns) {
         var err error=nil;
         for i:=0; err==nil && i<len(headers); i++ {
             if len(columns[i])>0 {
-                err=setTableValue(&rv,headers[i],columns[i],timeDateFormat);
+                err=setTableValue(&rv,headers[i],columns[i],dateTimeFormat);
             }
         }
         return rv,err;
@@ -84,14 +117,14 @@ func setTableValue[R any](
         row *R,
         name string,
         val string,
-        timeDateFormat string) error {
+        dateTimeFormat string) error {
     var err error=nil;
     s:=stdReflect.ValueOf(row).Elem();
     f:=s.FieldByName(name);
     if f.IsValid() && f.CanSet() {
         switch f.Interface().(type) {
             case time.Time: var tmp time.Time;
-                tmp,err=time.Parse(timeDateFormat,val);
+                tmp,err=time.Parse(dateTimeFormat,val);
                 f.Set(stdReflect.ValueOf(tmp));
             case bool: var tmp bool;
                 tmp,err=strconv.ParseBool(val);
@@ -109,7 +142,7 @@ func setTableValue[R any](
             case float32: err=setFloat[float32](f,val);
             case float64: err=setFloat[float32](f,val);
             case string: err=setString(f,val);
-            default: err=UnsupportedType(fmt.Sprintf("'%s'",f.Kind().String()));
+            default: err=customerr.UnsupportedType(fmt.Sprintf("'%s'",f.Kind().String()));
         }
     } else {
         err=fmt.Errorf(

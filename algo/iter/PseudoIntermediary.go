@@ -4,6 +4,8 @@ import (
 	staticType "github.com/barbell-math/util/dataStruct/types/static"
 )
 
+// This function is an intermediary.
+//
 // Take will consume the first num elements of it's parent iterator. It will
 // stop iteraton after the first num elements have been consumed. If an error
 // occurs iteraton will stop regardless of if num elements have been consumed.
@@ -19,6 +21,8 @@ func (i Iter[T])Take(num int) Iter[T] {
     });
 }
 
+// This function is an intermediary.
+//
 // Take while will take elements while the supplied operation (op) returns true.
 // Once the supplied operation returns false iteration will stop. If an error 
 // is returned from the parent iterator iteration will stop and the operation
@@ -33,6 +37,8 @@ func (i Iter[T])TakeWhile(op func(val T) bool) Iter[T] {
     });
 }
 
+// This function is an intermediary.
+//
 // Skip will skip the first num elements of it's parent iterator before 
 // propogating any further elements to it's child iterator. Skip will stop 
 // iteraton if an error is returned from it's parent iterator regardless of if
@@ -41,6 +47,8 @@ func (i Iter[T])Skip(num int) Iter[T] {
     return i.Filter(FilterToIndex[T](num));
 }
 
+// This function is an intermediary.
+//
 // Map will create a mapping between value of one iterator and values of another
 // iterator. Iteraton will stop if an error is generated.
 func Map[T any, U any](
@@ -58,6 +66,8 @@ func Map[T any, U any](
     });
 }
 
+// This function is an intermediary.
+//
 // Map will create a mapping between two iterators of the same type. This is 
 // equivilent the calling the previous Map function and providing it with the 
 // same types. Iteraton will stop if an error is generated.
@@ -74,6 +84,8 @@ func FilterToIndex[T any](num int) func(index int, val T) bool {
     }
 }
 
+// This function is an intermediary.
+//
 // Filter will selectively pass on values from it's parent iterator to its child
 // iterator based on the return value of the operatio (op) function. An error 
 // will stop iteration and be propogated to the child iterator regardless of 
@@ -88,6 +100,8 @@ func (i Iter[T])Filter(op func(index int, val T) bool) Iter[T] {
     });
 }
 
+// This function is an intermediary.
+//
 // Setup will call the provided setup function before it calls its parent 
 // iterator. The setup function will only be called once. An error returned
 // from the setup function will stop iteration and the parent iterator will 
@@ -96,6 +110,8 @@ func (i Iter[T])Setup(setup func() error) Iter[T] {
     return i.SetupTeardown(setup, func() error {return nil})
 }
 
+// This function is an intermediary.
+//
 // Teardown will call the provided teardown function once it's parent iterator 
 // has completed iteration. Teardown will only be called it iterator has started.
 // If iteration never began due to an early error teardown will not be called.
@@ -105,6 +121,8 @@ func (i Iter[T])Teardown(teardown func() error) Iter[T] {
     return i.SetupTeardown(func() error {return nil},teardown)
 }
 
+// This function is an intermediary.
+//
 //Window cannot be tested here because it would cause a circular import with the 
 //dataStruct module. Testing would require importing a specific implementation
 //of a queue. Using the types interface definition is the only thing preventing

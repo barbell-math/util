@@ -23,40 +23,6 @@ func TestCollect(t *testing.T){
     collectIterHelper([]int{},t);
 }
 
-func collectIntoIterHelper[T any](
-        vals []T,
-        buff []T,
-        expectedNumChange int,
-        t *testing.T){
-    origLen:=len(buff);
-    rv,err:=SliceElems(vals).CollectInto(buff);
-    test.BasicTest(origLen,len(buff),
-        "Buffer length changed when it shouldn't have.",t,
-    );
-    test.BasicTest(expectedNumChange,rv,
-        "Total number of elements changed is not correct",t,
-    );
-    test.BasicTest(nil,err,
-        "CollectInto returned and error when it was not supposed to.",t,
-    );
-    min:=len(buff);
-    if len(vals)<len(buff) {
-        min=len(vals);
-    }
-    for i:=0; i<min; i++ {
-        test.BasicTest(vals[i],buff[i],fmt.Sprintf(
-            "Values do not match | Index: %d",i,
-        ),t);
-    }
-}
-func TestCollectInto(t *testing.T){
-    collectIntoIterHelper([]int{1,2,3,4},make([]int,5),4,t);
-    collectIntoIterHelper([]int{1,2,3,4},make([]int,4),4,t);
-    collectIntoIterHelper([]int{1,2,3,4},make([]int,3),3,t);
-    collectIntoIterHelper([]int{1},make([]int,1),1,t);
-    collectIntoIterHelper([]int{},make([]int,0),0,t);
-}
-
 func appendIterHelper[T any](orig []T, vals []T, t *testing.T){
     origLen:=len(orig);
     expLen:=len(orig)+len(vals);
@@ -296,8 +262,13 @@ func toFileIterHelperWithNewline(numVals int, src string, t *testing.T){
     for i,_:=range(vals) {
         vals[i]=i;
     }
-    SliceElems(vals).ToFile(src,true);
-    f,err:=os.Open(src);
+    f, err := os.OpenFile(src, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+    if err != nil {
+        panic(err)
+    }
+    SliceElems(vals).ToWriter(f,true);
+    f.Close()
+    f,err=os.Open(src);
     if err!=nil {
         test.FormatError(nil,err,"The file was not created properly.",t);
     }
@@ -323,8 +294,13 @@ func toFileIterHelperNoNewline(numVals int, src string, t *testing.T){
         vals[i]=i;
         correctVal=fmt.Sprintf("%s%d",correctVal,i);
     }
-    SliceElems(vals).ToFile(src,false);
-    f,err:=os.Open(src);
+    f, err := os.OpenFile(src, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+    if err != nil {
+        panic(err)
+    }
+    SliceElems(vals).ToWriter(f,false);
+    f.Close()
+    f,err=os.Open(src);
     if err!=nil {
         test.FormatError(nil,err,"The file was not created properly.",t);
     }
