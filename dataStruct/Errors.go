@@ -5,8 +5,8 @@ import (
     customerr "github.com/barbell-math/util/err"
 )
 
-var QueueFull,IsQueueFull=customerr.ErrorFactory(
-    "The capacity of the queue has been reached.",
+var Full,IsFull=customerr.ErrorFactory(
+    "The capacity of the container has been reached.",
 );
 
 var Empty,IsEmpty=customerr.ErrorFactory(

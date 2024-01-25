@@ -191,8 +191,8 @@ func TestCircularBufferPushFront(t *testing.T){
         test.BasicTest(4,tmp.startEnd.B,"Push modified the end index.",t);
     }
     res:=tmp.PushBack(5);
-    if !IsQueueFull(res) {
-        test.FormatError(QueueFull(""),res,
+    if !IsFull(res) {
+        test.FormatError(Full(""),res,
             "Push did not detect the queue was full.",t,
         );
     }
@@ -225,8 +225,8 @@ func TestCircularBufferPushBack(t *testing.T){
         );
     }
     res:=tmp.PushBack(5);
-    if !IsQueueFull(res) {
-        test.FormatError(QueueFull(""),res,
+    if !IsFull(res) {
+        test.FormatError(Full(""),res,
             "Push did not detect the queue was full.",t,
         );
     }
@@ -263,8 +263,8 @@ func TestCircularBufferInsertFront(t *testing.T){
         )
     }
     err=tmp.Insert(5,5)
-    if !IsQueueFull(err) {
-        test.FormatError(QueueFull(""),err,
+    if !IsFull(err) {
+        test.FormatError(Full(""),err,
             "Insert did not detect the queue was full.",t,
         );
     }
@@ -300,8 +300,8 @@ func TestCircularBufferInsertBack(t *testing.T) {
         )
     }
     err:=tmp.Insert(0,5)
-    if !IsQueueFull(err) {
-        test.FormatError(QueueFull(""),err,
+    if !IsFull(err) {
+        test.FormatError(Full(""),err,
             "Insert did not detect the queue was full.",t,
         );
     }
@@ -375,8 +375,8 @@ func TestCircularBufferInsert(t *testing.T){
         )
     }
     err=tmp.Insert(5,6)
-    if !IsQueueFull(err) {
-        test.FormatError(QueueFull(""),err,
+    if !IsFull(err) {
+        test.FormatError(Full(""),err,
             "Insert returned the wrong error.",t,
         )
     }
@@ -389,8 +389,8 @@ func TestCircularBufferInsert(t *testing.T){
             "Insert did not put the values in the right position.",t,
         )
     }
-    if !IsQueueFull(err) {
-        test.FormatError(QueueFull(""),err,
+    if !IsFull(err) {
+        test.FormatError(Full(""),err,
             "Insert returned the wrong error.",t,
         )
     }
@@ -521,8 +521,8 @@ func TestCircularBufferAppend(t *testing.T){
         );
     }
     res:=tmp.Append(5);
-    if !IsQueueFull(res) {
-        test.FormatError(QueueFull(""),res,
+    if !IsFull(res) {
+        test.FormatError(Full(""),res,
             "Append did not detect the queue was full.",t,
         );
     }
@@ -564,8 +564,8 @@ func TestCircularBufferPushStartFromMiddle(t *testing.T) {
         }
     }
     res:=tmp.PushBack(5);
-    if !IsQueueFull(res) {
-        test.FormatError(QueueFull(""),res,
+    if !IsFull(res) {
+        test.FormatError(Full(""),res,
             "Push did not detect the queue was full.",t,
         );
     }
