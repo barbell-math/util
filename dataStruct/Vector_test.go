@@ -260,9 +260,11 @@ func TestVectorDelete(t *testing.T){
 	}
     }
     err:=v.Delete(0)
-    test.BasicTest(nil,err,
-	"Delete returned an error when it should not have.",t,
-    )
+    if !customerr.IsValOutsideRange(err) {
+	test.FormatError(customerr.ValOutsideRange(""),err,
+	    "Delete returned an incorrect error.",t,
+	)
+    }
 }
 
 func TestVectorClear(t *testing.T){

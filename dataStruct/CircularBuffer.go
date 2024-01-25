@@ -331,7 +331,6 @@ func (c *CircularBuffer[T])PopFront() (T,error) {
     return tmp,Empty("Nothing to pop!");
 }
 
-// TODO - figure out coccect behavior
 // Deletes the value at the specified index. If the index is >= the length of the
 // circular buffer then no action is taken and no error is returned. The function 
 // will never return an error.

@@ -185,13 +185,14 @@ func (v *Vector[T])Insert(idx int, vals ...T) error {
     return getIndexOutOfBoundsError(idx,len(*v))
 }
 
-// Deletes the value at the specified index. If the index is >= the length of the
-// vector then no action is taken and no error is returned. The function will
-// never return an error.
+// Deletes the value at the specified index. Returns an error if the index is 
+// >= the length of the vector.
 func (v *Vector[T])Delete(idx int) error {
     v.Lock()
     defer v.Unlock()
-    if idx>=0 && idx<len(*v) && len(*v)>0 {
+    if idx<0 || idx>=len(*v) {
+        return getIndexOutOfBoundsError(idx,len(*v))
+    } else if idx>=0 && idx<len(*v) && len(*v)>0 {
         *v=append((*v)[:idx],(*v)[idx+1:]...)
     }
     return nil
