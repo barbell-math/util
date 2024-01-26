@@ -4,10 +4,9 @@ import (
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/container/containerTypes"
+	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/customerr"
 )
-
 
 type (
     // A type to represent an array that dynamically grows as elements are added.
@@ -16,12 +15,12 @@ type (
     // defined in the [containerTypes], [staticContainers], or
     // [dynamicContainers] packages. The type constraints on the generics
     // define the logic for how equality comparisons will be handled.
-    Vector[T any, U containerTypes.Widget[T]] []T
+    Vector[T any, U widgets.WidgetInterface[T]] []T
 
     // A synchronized version of Vector. All operations will be wrapped in the
     // appropriate calls the embedded RWMutex. A pointer to a RWMutex is embedded
     // rather than a value to avoid copying the lock value.
-    SyncedVector[T any, U containerTypes.Widget[T]] struct {
+    SyncedVector[T any, U widgets.WidgetInterface[T]] struct {
     	*sync.RWMutex
     	Vector[T,U]
     }
@@ -41,7 +40,7 @@ type (
 //
 // Note that by performing the above type casts the operations provided by the
 // widget, including equality, are not preserved.
-func NewVector[T any, U containerTypes.Widget[T]](size int) (Vector[T,U],error) {
+func NewVector[T any, U widgets.WidgetInterface[T]](size int) (Vector[T,U],error) {
     if size<0 {
 	 return Vector[T,U]{}, customerr.Wrap(
 	    customerr.ValOutsideRange,
@@ -55,7 +54,7 @@ func NewVector[T any, U containerTypes.Widget[T]](size int) (Vector[T,U],error) 
 // must be >= 0, an error will be returned if it is not. If size is 0 the vector 
 // will be initialized with 0 elements. The underlying RWMutex value will be 
 // fully unlocked upon initialization.
-func NewSyncedVector[T any, U containerTypes.Widget[T]](
+func NewSyncedVector[T any, U widgets.WidgetInterface[T]](
     size int,
 ) (SyncedVector[T,U],error) {
     rv,err:=NewVector[T,U](size)
@@ -170,9 +169,9 @@ func (v *Vector[T, U])Contains(val T) bool {
     defer v.RUnlock()
     found:=false
     var wrapper U
+    wrapper.Wrap(&val)
     for i:=0; i<len(*v) && !found; i++ {
-        wrapper.Wrap(&(*v)[i])
-        found=wrapper.Eq(&val)
+        found=wrapper.Eq(&(*v)[i])
     }
     return found
 }
@@ -242,9 +241,9 @@ func (v *Vector[T, U])Pop(val T, num int) int {
     defer v.Unlock()
     cntr:=0
     var wrapper U
+    wrapper.Wrap(&val)
     for i:=0; i<len(*v); i++ {
-        wrapper.Wrap(&(*v)[i])
-        if wrapper.Eq(&val) {
+        if wrapper.Eq(&(*v)[i]) {
             *v=append((*v)[:i],(*v)[i+1:]...)
             cntr++
             if cntr>=num {

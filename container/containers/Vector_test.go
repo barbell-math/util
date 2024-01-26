@@ -4,144 +4,144 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/container/builtinWidgets"
+	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )
 
 func TestVectorTypeCasting(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](3)
+    v,_:=NewVector[string,widgets.BuiltinString](3)
     s:=[]string(v)
     _=s
 
     s2:=make([]string,4)
-    v2:=Vector[string,builtinWidgets.BuiltinString](s2)
+    v2:=Vector[string,widgets.BuiltinString](s2)
     _=v2
 }
 
 func TestVectorSyncableInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     syncableInterface(&v);
     syncableInterface(&v2);
 }
 
 func TestVectorLengthInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     lengthInterface(&v);
     lengthInterface(&v2);
 }
 
 func TestVectorCapacityInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     capacityInterface(&v);
     capacityInterface(&v2);
 }
 
 func TestVectorWriteOpsInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     writeOpsInterface[int,string](&v);
     writeOpsInterface[int,string](&v2);
 }
 
 func TestVectorWriteKeyedOpsInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     writeKeyedOpsInterface[int,string](&v);
     writeKeyedOpsInterface[int,string](&v2);
 }
 
 func TestVectorReadOpsInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     readOpsInterface[int,string](&v);
     readOpsInterface[int,string](&v2);
 }
 
 func TestVectorReadKeyedOpsInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     readKeyedOpsInterface[int,string](&v);
     readKeyedOpsInterface[int,string](&v2);
 }
 
 func TestVectorDeleteOpsInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     deleteOpsInterface[int,string](&v);
     deleteOpsInterface[int,string](&v2);
 }
 
 func TestVectorDeleteKeyedOpsInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     deleteKeyedOpsInterface[int,string](&v);
     deleteKeyedOpsInterface[int,string](&v2);
 }
 
 func TestVectorFirstElemReadInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     firstElemReadInterface[string](&v);
     firstElemReadInterface[string](&v2);
 }
 
 func TestVectorFirstElemWriteInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     firstElemWriteInterface[string](&v);
     firstElemWriteInterface[string](&v2);
 }
 
 func TestVectorFirstElemDeleteInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     firstElemDeleteInterface[string](&v);
     firstElemDeleteInterface[string](&v2);
 }
 
 func TestVectorLastElemReadInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     lastElemReadInterface[string](&v);
     lastElemReadInterface[string](&v2);
 }
 
 func TestVectorLastElemWriteInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     lastElemWriteInterface[string](&v);
     lastElemWriteInterface[string](&v2);
 }
 
 func TestVectorLastElemDeleteInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     lastElemDeleteInterface[string](&v);
     lastElemDeleteInterface[string](&v2);
 }
 
 func TestReadVectorInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     vectorReadInterface[string](&v);
     vectorReadInterface[string](&v2);
 }
 
 func TestWriteVectorInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     vectorWriteInterface[string](&v);
     vectorWriteInterface[string](&v2);
 }
 
 func TestVectorInterface(t *testing.T){
-    v,_:=NewVector[string,builtinWidgets.BuiltinString](0)
-    v2,_:=NewSyncedVector[string,builtinWidgets.BuiltinString](0)
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    v2,_:=NewSyncedVector[string,widgets.BuiltinString](0)
     vectorInterface[string](&v);
     vectorInterface[string](&v2);
 }
@@ -150,7 +150,7 @@ func TestVectorStaticCapacityInterface(t *testing.T){
     test.Panics(
         func () {
             var c any
-            c,_=NewVector[int,builtinWidgets.BuiltinInt](0)
+            c,_=NewVector[int,widgets.BuiltinInt](0)
             c2:=c.(containerTypes.StaticCapacity)
             _=c2
         },
@@ -161,8 +161,8 @@ func TestVectorStaticCapacityInterface(t *testing.T){
 //     test.Panics(
 //         func () {
 //             var c any
-//             c,_=NewVector[int,builtinWidgets.BuiltinInt]((5)
-//             c2:=c.(static.Vector[int,builtinWidgets.BuiltinInt]()
+//             c,_=NewVector[int,widgets.BuiltinInt]((5)
+//             c2:=c.(static.Vector[int,widgets.BuiltinInt]()
 //             _=c2
 //         },
 //         "Code did not panic when casting a dynamic vector to a static vector.",t,
@@ -170,7 +170,7 @@ func TestVectorStaticCapacityInterface(t *testing.T){
 //     test.Panics(
 //         func () {
 //             var c any
-//             c,_=NewVector[int,builtinWidgets.BuiltinInt]((5)
+//             c,_=NewVector[int,widgets.BuiltinInt]((5)
 //             c2:=c.(static.Queue[int])
 //             _=c2
 //         },
@@ -179,7 +179,7 @@ func TestVectorStaticCapacityInterface(t *testing.T){
 //     test.Panics(
 //         func () {
 //             var c any
-//             c,_=NewVector[int,builtinWidgets.BuiltinInt]((5)
+//             c,_=NewVector[int,widgets.BuiltinInt]((5)
 //             c2:=c.(static.Stack[int])
 //             _=c2
 //         },
@@ -188,7 +188,7 @@ func TestVectorStaticCapacityInterface(t *testing.T){
 //     test.Panics(
 //         func () {
 //             var c any
-//             c,_=NewVector[int,builtinWidgets.BuiltinInt]((5)
+//             c,_=NewVector[int,widgets.BuiltinInt]((5)
 //             c2:=c.(static.Deque[int])
 //             _=c2
 //         },
@@ -197,7 +197,7 @@ func TestVectorStaticCapacityInterface(t *testing.T){
 // }
 
 func TestVectorGet(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3,4,5})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
     for i:=0; i<5; i++ {
 	_v,err:=v.Get(i)
 	test.BasicTest(i,_v,
@@ -215,7 +215,7 @@ func TestVectorGet(t *testing.T){
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Get did not return the correct error with invalid index.",t,
     )
-    v=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v=Vector[int,widgets.BuiltinInt]([]int{})
     _,err=v.Get(0)
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Get did not return the correct error with invalid index.",t,
@@ -223,7 +223,7 @@ func TestVectorGet(t *testing.T){
 }
 
 func TestVectorGetPntr(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3,4,5})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
     for i:=0; i<5; i++ {
 	_v,err:=v.GetPntr(i)
 	test.BasicTest(i,*_v,
@@ -241,7 +241,7 @@ func TestVectorGetPntr(t *testing.T){
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Get pntr did not return the correct error with invalid index.",t,
     )
-    v=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v=Vector[int,widgets.BuiltinInt]([]int{})
     _,err=v.GetPntr(0)
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Get pntr did not return the correct error with invalid index.",t,
@@ -249,7 +249,7 @@ func TestVectorGetPntr(t *testing.T){
 }
 
 func TestVectorEmplace(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3,4,5})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
     for i:=0; i<5; i++ {
 	err:=v.Emplace(i,i+1)
 	test.BasicTest(nil,err,
@@ -269,7 +269,7 @@ func TestVectorEmplace(t *testing.T){
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Emplace did not return the correct error with invalid index.",t,
     )
-    v=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v=Vector[int,widgets.BuiltinInt]([]int{})
     err=v.Emplace(0,6)
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Emplace did not return the correct error with invalid index.",t,
@@ -277,7 +277,7 @@ func TestVectorEmplace(t *testing.T){
 }
 
 func TestVectorAppend(t *testing.T) {
-    v,_:=NewVector[int,builtinWidgets.BuiltinInt](0)
+    v,_:=NewVector[int,widgets.BuiltinInt](0)
     for i:=0; i<5; i++ { v.Append(i) }
     for i:=0; i<5; i++ {
 	test.BasicTest(i,v[i],
@@ -293,7 +293,7 @@ func TestVectorAppend(t *testing.T) {
 }
 
 func vectorPushHelper(idx int, l int, t *testing.T){
-    tmp,_:=NewVector[int,builtinWidgets.BuiltinInt](l-1)
+    tmp,_:=NewVector[int,widgets.BuiltinInt](l-1)
     for i:=0; i<l-1; i++ { tmp[i]=i }
     err:=tmp.Push(idx,l-1)
     test.BasicTest(nil,err,
@@ -318,7 +318,7 @@ func vectorPushHelper(idx int, l int, t *testing.T){
     }
 }
 func TestVectorPush(t *testing.T){
-    v,_:=NewVector[int,builtinWidgets.BuiltinInt](0)
+    v,_:=NewVector[int,widgets.BuiltinInt](0)
     for i:=2; i>=0; i-- { v.Push(0,i) }
     for i:=3; i<5; i++ { v.Push(len(v),i) }
     for i:=0; i<5; i++ {
@@ -332,7 +332,7 @@ func TestVectorPush(t *testing.T){
 }
 
 func TestVectorDelete(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3,4,5})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
     for i:=len(v)-1; i>=0; i-- {
 	v.Delete(i)
 	test.BasicTest(i,len(v),"Delete removed to many values.",t)
@@ -347,14 +347,14 @@ func TestVectorDelete(t *testing.T){
 }
 
 func TestVectorClear(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3,4,5})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
     v.Clear()
     test.BasicTest(0,len(v),"Clear did not reset the underlying vector.",t)
     test.BasicTest(0,cap(v),"Clear did not reset the underlying vector.",t)
 }
 
 func TestVectorSetCapacity(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3,4,5})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
     test.BasicTest(6,len(v),"Initial length is not correct.",t)
     test.BasicTest(6,cap(v),"Initial cap is not correct.",t)
     v.SetCapacity(10)
@@ -376,7 +376,7 @@ func TestVectorSetCapacity(t *testing.T){
 }
 
 func TestVectorPeekPntrFront(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v:=Vector[int,widgets.BuiltinInt]([]int{})
     _v,err:=v.PeekPntrFront()
     test.BasicTest((*int)(nil),_v,
 	"Peek pntr front did not return the correct value.",t,	
@@ -403,7 +403,7 @@ func TestVectorPeekPntrFront(t *testing.T){
 }
 
 func TestVectorPeekFront(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v:=Vector[int,widgets.BuiltinInt]([]int{})
     _,err:=v.PeekFront()
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Peek front returned an incorrect error.",t,
@@ -427,7 +427,7 @@ func TestVectorPeekFront(t *testing.T){
 }
 
 func TestVectorPeekPntrBack(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v:=Vector[int,widgets.BuiltinInt]([]int{})
     _v,err:=v.PeekPntrBack()
     test.BasicTest((*int)(nil),_v,
 	"Peek pntr back did not return the correct value.",t,	
@@ -454,7 +454,7 @@ func TestVectorPeekPntrBack(t *testing.T){
 }
 
 func TestVectorPeekBack(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v:=Vector[int,widgets.BuiltinInt]([]int{})
     _,err:=v.PeekBack()
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Peek back returned an incorrect error.",t,
@@ -478,7 +478,7 @@ func TestVectorPeekBack(t *testing.T){
 }
 
 func TestVectorPopFront(t *testing.T) {
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
     for i:=0; i<4; i++ {
 	f,err:=v.PopFront()
 	test.BasicTest(i,f,
@@ -495,7 +495,7 @@ func TestVectorPopFront(t *testing.T) {
 }
 
 func TestVectorPopBack(t *testing.T) {
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3})
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
     for i:=3; i>=0; i-- {
 	f,err:=v.PopBack()
 	test.BasicTest(i,f,
@@ -512,7 +512,7 @@ func TestVectorPopBack(t *testing.T) {
 }
 
 func TestVectorPushFront(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v:=Vector[int,widgets.BuiltinInt]([]int{})
     for i:=0; i<4; i++ {
 	v.PushFront(i)
 	test.BasicTest(i+1,len(v),
@@ -527,7 +527,7 @@ func TestVectorPushFront(t *testing.T){
 }
 
 func TestVectorPushBack(t *testing.T){
-    v:=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+    v:=Vector[int,widgets.BuiltinInt]([]int{})
     for i:=0; i<4; i++ {
 	v.PushBack(i)
 	test.BasicTest(i+1,len(v),
@@ -542,7 +542,7 @@ func TestVectorPushBack(t *testing.T){
 }
 
 func testVectorElemsHelper(
-    v SyncedVector[int,builtinWidgets.BuiltinInt], 
+    v SyncedVector[int,widgets.BuiltinInt], 
     l int, 
     t *testing.T,
 ){
@@ -560,17 +560,17 @@ func testVectorElemsHelper(
     )
 }
 func TestVectorElems(t *testing.T){
-    tmp,err:=NewSyncedVector[int,builtinWidgets.BuiltinInt](0);
+    tmp,err:=NewSyncedVector[int,widgets.BuiltinInt](0);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     testVectorElemsHelper(tmp,0,t);
-    tmp,err=NewSyncedVector[int,builtinWidgets.BuiltinInt](0);
+    tmp,err=NewSyncedVector[int,widgets.BuiltinInt](0);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     testVectorElemsHelper(tmp,1,t);
-    tmp,err=NewSyncedVector[int,builtinWidgets.BuiltinInt](0);
+    tmp,err=NewSyncedVector[int,widgets.BuiltinInt](0);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
@@ -578,7 +578,7 @@ func TestVectorElems(t *testing.T){
 }
 
 func testVectorPntrElemsHelper(
-    v SyncedVector[int,builtinWidgets.BuiltinInt], 
+    v SyncedVector[int,widgets.BuiltinInt], 
     l int, 
     t *testing.T,
 ){
@@ -601,17 +601,17 @@ func testVectorPntrElemsHelper(
     )
 }
 func TestVectorElemPntrs(t *testing.T){
-    tmp,err:=NewSyncedVector[int,builtinWidgets.BuiltinInt](0);
+    tmp,err:=NewSyncedVector[int,widgets.BuiltinInt](0);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     testVectorElemsHelper(tmp,0,t);
-    tmp,err=NewSyncedVector[int,builtinWidgets.BuiltinInt](0);
+    tmp,err=NewSyncedVector[int,widgets.BuiltinInt](0);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     testVectorElemsHelper(tmp,1,t);
-    tmp,err=NewSyncedVector[int,builtinWidgets.BuiltinInt](0);
+    tmp,err=NewSyncedVector[int,widgets.BuiltinInt](0);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
     );
@@ -619,8 +619,8 @@ func TestVectorElemPntrs(t *testing.T){
 }
 
 // func TestVectorEq(t *testing.T){
-//     v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3})
-//     v2:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3})
+//     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
+//     v2:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
 //     comp:=func(l *int, r *int) bool { return *l==*r }
 //     test.BasicTest(true,v.Eq(&v2,comp),
 // 	"Eq returned a false negative.",t,
@@ -635,8 +635,8 @@ func TestVectorElemPntrs(t *testing.T){
 //     test.BasicTest(false,v2.Eq(&v,comp),
 // 	"Eq returned a false positive.",t,
 //     )
-//     v=Vector[int,builtinWidgets.BuiltinInt]([]int{0})
-//     v2=Vector[int,builtinWidgets.BuiltinInt]([]int{0})
+//     v=Vector[int,widgets.BuiltinInt]([]int{0})
+//     v2=Vector[int,widgets.BuiltinInt]([]int{0})
 //     test.BasicTest(true,v.Eq(&v2,comp),
 // 	"Eq returned a false negative.",t,
 //     )
@@ -650,8 +650,8 @@ func TestVectorElemPntrs(t *testing.T){
 //     test.BasicTest(false,v2.Eq(&v,comp),
 // 	"Eq returned a false positive.",t,
 //     )
-//     v=Vector[int,builtinWidgets.BuiltinInt]([]int{})
-//     v2=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+//     v=Vector[int,widgets.BuiltinInt]([]int{})
+//     v2=Vector[int,widgets.BuiltinInt]([]int{})
 //     test.BasicTest(true,v.Eq(&v2,comp),
 // 	"Eq returned a false negative.",t,
 //     )
@@ -661,8 +661,8 @@ func TestVectorElemPntrs(t *testing.T){
 // }
 // 
 // func TestVectorNeq(t *testing.T){
-//     v:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3})
-//     v2:=Vector[int,builtinWidgets.BuiltinInt]([]int{0,1,2,3})
+//     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
+//     v2:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
 //     comp:=func(l *int, r *int) bool { return *l==*r }
 //     test.BasicTest(false,v.Neq(&v2,comp),
 // 	"Neq returned a false positive.",t,
@@ -677,8 +677,8 @@ func TestVectorElemPntrs(t *testing.T){
 //     test.BasicTest(true,v2.Neq(&v,comp),
 // 	"Neq returned a false negative.",t,
 //     )
-//     v=Vector[int,builtinWidgets.BuiltinInt]([]int{0})
-//     v2=Vector[int,builtinWidgets.BuiltinInt]([]int{0})
+//     v=Vector[int,widgets.BuiltinInt]([]int{0})
+//     v2=Vector[int,widgets.BuiltinInt]([]int{0})
 //     test.BasicTest(false,v.Neq(&v2,comp),
 // 	"Neq returned a false positive.",t,
 //     )
@@ -692,8 +692,8 @@ func TestVectorElemPntrs(t *testing.T){
 //     test.BasicTest(true,v2.Neq(&v,comp),
 // 	"Neq returned a false negative.",t,
 //     )
-//     v=Vector[int,builtinWidgets.BuiltinInt]([]int{})
-//     v2=Vector[int,builtinWidgets.BuiltinInt]([]int{})
+//     v=Vector[int,widgets.BuiltinInt]([]int{})
+//     v2=Vector[int,widgets.BuiltinInt]([]int{})
 //     test.BasicTest(false,v.Neq(&v2,comp),
 // 	"Neq returned a false positive.",t,
 //     )

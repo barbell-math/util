@@ -47,22 +47,22 @@ func main() {
 		generateGlobals()+
 		"// A widget to represent the built-in type {{ .Type }}\n"+
 		"// This is meant to be used with the containers from the [containers] package.\n"+
-		"type Builtin{{ .CapType }} struct { *{{.Type}} }\n\n"+
+		"type Builtin{{ .CapType }} Widget[{{ .Type }}]\n\n"+
 		"// Returns true if both {{ .Type }}'s are equal. Uses the standard == operator internally.\n"+
 		"func (a Builtin{{ .CapType }})Eq(r *{{ .Type }}) bool {\n"+
-		"    return *(a.{{ .Type }})==*r\n"+
+		"    return *(a.v)==*r\n"+
 		"}\n\n"+
 		"// Returns true if a is less than r. Uses the standard < operator internally.\n"+
 		"func (a Builtin{{ .CapType }})Lt(r *{{ .Type }}) bool {\n"+
-		"    return *(a.{{ .Type }})<*r\n"+
+		"    return *(a.v)<*r\n"+
 		"}\n\n"+
 		"// Unwraps the provided type to get the original value as it's original type.\n"+
 		"func (a Builtin{{ .CapType }})Unwrap() *{{ .Type }} {\n"+
-		"    return a.{{ .Type }}\n"+
+		"    return Widget[{{ .Type }}](a).Unwrap()\n"+
 		"}\n\n"+
 		"// Wraps the provided type to allow access to the provided methods.\n"+
 		"func (a Builtin{{ .CapType }})Wrap(v *{{ .Type }}) {\n"+
-		"    a=Builtin{{ .CapType }}{ {{ .Type }}: v}\n"+
+		"    Widget[{{ .Type }}](a).Wrap(v)\n"+
 		"}\n\n"+
 		"// Provides a hash function for the value that it is wrapping.\n"+
 		generateHashFunction(),
@@ -143,7 +143,7 @@ func generateHashFunction() string {
 		case "uint32": fallthrough
 		case "uint64":
 			return "func (a Builtin{{ .CapType }})Hash() uint64 {\n"+
-				"    return uint64(*a.{{ .Type }})\n"+
+				"    return uint64(*a.v)\n"+
 			    "}\n\n"
 		case "float32": fallthrough
 		case "float64":
@@ -152,7 +152,7 @@ func generateHashFunction() string {
 			    "}\n\n"
 		case "string":
 			return "func (a Builtin{{ .CapType }})Hash() uint64 {\n"+
-				"    return maphash.String(RANDOM_SEED_{{ .Type }},*(a.{{ .Type }}))\n"+
+				"    return maphash.String(RANDOM_SEED_{{ .Type }},*(a.v))\n"+
 			    "}\n\n"
 		default:
 			return "func (a Builtin{{ .CapType }})Hash() uint64 {\n"+

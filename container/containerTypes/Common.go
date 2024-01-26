@@ -10,16 +10,6 @@ const (
     PopAll int=math.MaxInt
 )
 
-// The type of values that the containers will act upon. This interface enforces
-// all the required information is exposed by the underlying types held in the 
-// container.
-type Widget[T any] interface {
-    Eq(other *T) bool
-    Lt(other *T) bool
-    Unwrap() *T
-    Wrap(v *T)
-    Hash() uint64
-}
 
 // The interface that the RWMutex exposes.
 type RWSyncable interface {
