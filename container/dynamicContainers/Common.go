@@ -5,7 +5,7 @@ package dynamicContainers
 import "github.com/barbell-math/util/container/containerTypes"
 
 // An interface that only allows read operations on a vector.
-type ReadVector[K ~int | ~int8 | ~int16 | ~int32 | ~int64, V any] interface {
+type ReadVector[K ~int, V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Length
 	containerTypes.Capacity
@@ -15,7 +15,7 @@ type ReadVector[K ~int | ~int8 | ~int16 | ~int32 | ~int64, V any] interface {
 	containerTypes.FirstElemRead[V]
 }
 // An interface that only allows write operations on a vector.
-type WriteVector[K ~int | ~int8 | ~int16 | ~int32 | ~int64, V any] interface {
+type WriteVector[K ~int, V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Length
 	containerTypes.Capacity
@@ -30,7 +30,14 @@ type WriteVector[K ~int | ~int8 | ~int16 | ~int32 | ~int64, V any] interface {
 }
 // An interface that represents a vector with no restrictions on reading or
 // writing.
-type Vector[K ~int | ~int8 | ~int16 | ~int32 | ~int64, V any] interface {
+type Vector[K ~int, V any] interface {
 	ReadVector[K,V]
 	WriteVector[K,V]
+}
+
+type ReadSet[K interface{}, V any] interface {
+	containerTypes.RWSyncable
+	containerTypes.Length
+	//containerTypes.Capacity
+	containerTypes.ReadOps[K,V]
 }

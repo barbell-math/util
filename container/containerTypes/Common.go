@@ -3,6 +3,12 @@
 // to allow for very specific sub-types of containers to be specified.
 package containerTypes
 
+import "math"
+
+
+const (
+    PopAll int=math.MaxInt
+)
 
 // The type of values that the containers will act upon. This interface enforces
 // all the required information is exposed by the underlying types held in the 
@@ -10,7 +16,7 @@ package containerTypes
 type Widget[T any] interface {
     Eq(other *T) bool
     Lt(other *T) bool
-    Unwrap() T
+    Unwrap() *T
     Wrap(v *T)
     Hash() uint64
 }
@@ -47,7 +53,7 @@ type ReadKeyedOps[K any, V any] interface {
     ReadOps[K,V]
     Get(k K) (V,error)
     GetPntr(k K) (*V,error)
-    KeyOf(v V) (K,error)
+    KeyOf(v V) (K,bool)
 }
 
 // An interface the enforces implementation of write-only, value-only, operations.
@@ -63,7 +69,7 @@ type WriteKeyedOps[K any, V any] interface {
 
 // An interface the enforces implementation of delete-only, value-only, operations.
 type DeleteOps[K any, V any] interface {
-    Pop(v V, n int) error
+    Pop(v V, num int) int
 }
 // An interface the enforces implementation of delete-only, key/value, operations.
 type DeleteKeyedOps[K any, V any] interface {
