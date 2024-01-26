@@ -1,11 +1,12 @@
 package containers
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/container/containerTypes"
+	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )
@@ -246,6 +247,12 @@ func TestVectorGetPntr(t *testing.T){
     test.ContainsError(customerr.ValOutsideRange,err,
 	"Get pntr did not return the correct error with invalid index.",t,
     )
+}
+
+func TestVectorContains(t *testing.T){
+    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
+    fmt.Println(v.Contains(4))
+    fmt.Println(v.Contains(-4))
 }
 
 func TestVectorEmplace(t *testing.T){

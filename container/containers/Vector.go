@@ -168,10 +168,10 @@ func (v *Vector[T, U])Contains(val T) bool {
     v.RLock()
     defer v.RUnlock()
     found:=false
-    var wrapper U
-    wrapper.Wrap(&val)
+    w:=widgets.NewWidget[T,U](getWidgetIFaceImpl[T,U]())
+    w.Wrap(&val)
     for i:=0; i<len(*v) && !found; i++ {
-        found=wrapper.Eq(&(*v)[i])
+        found=w.Eq(&(*v)[i])
     }
     return found
 }
@@ -187,10 +187,10 @@ func (v *Vector[T, U])KeyOf(val T) (int,bool) {
     defer v.RUnlock()
     rv:=-1
     found:=false
-    var wrapper U
+    var w widgets.Widget[T,U]
     for i:=0; i<len(*v) && !found; i++ {
-        wrapper.Wrap(&(*v)[i])
-        if found=wrapper.Eq(&val); found {
+        w.Wrap(&(*v)[i])
+        if found=w.Eq(&val); found {
             rv=i
         }
     }
@@ -240,7 +240,7 @@ func (v *Vector[T, U])Pop(val T, num int) int {
     v.Lock()
     defer v.Unlock()
     cntr:=0
-    var wrapper U
+    var wrapper widgets.Widget[T,U]
     wrapper.Wrap(&val)
     for i:=0; i<len(*v); i++ {
         if wrapper.Eq(&(*v)[i]) {
