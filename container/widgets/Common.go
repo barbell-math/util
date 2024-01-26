@@ -6,9 +6,11 @@ package widgets
 
 
 type (
-    // The type of values that the containers will act upon. This interface 
-    // enforces all the required information is exposed by the underlying types 
-    // held in the container.
+    // The interface that defines what it means to be a widget. This interface
+    // is used by the containers in the [containers] package when performing
+    // certian operations. Implementations of this interface are expected to
+    // hold no state as the methods shown below will not be called in any
+    // predetermined order.
     WidgetInterface[T any] interface {
         // A function that should return true if the current value equals other.
         Eq(l *T, r *T) bool
@@ -19,27 +21,37 @@ type (
     }
 
     // The base widget implementation that all the containers in the [containers]
-    // package use as a type restriction.
+    // package use as a type restriction. This type must be instantiaed with the
+    // [NewWidget] function; zero valued Widget's are not valid and will result
+    // in nil pointer errors.
     Widget[T any, I WidgetInterface[T]] struct { 
-        v *T
         iFace I
     }
 )
 
-func NewWidget[T any, I WidgetInterface[T]](i I) Widget[T,I] {
-    return Widget[T, I]{iFace: i}
+// Creates a new widget and sets its internal state so that it is valid and can
+// be used without error.
+func NewWidget[T any, I WidgetInterface[T]]() Widget[T,I] {
+    var iFaceImpl I
+    return Widget[T, I]{iFace: iFaceImpl}
 }
 
+// Compares the left (l) and right (r) values and returns true is l==r using the
+// Eq function from the interface that was supplied as a generic type.
 func (w *Widget[T, I])Eq(l *T, r *T) bool {
     return w.iFace.Eq(l,r)
 }
 
+// Compares the left (l) and right (r) values and returns true is l<r using the
+// Lt function from the interface that was supplied as a generic type.
 func (w *Widget[T, I])Lt(l *T, r *T) bool {
     return w.iFace.Lt(l,r)
 }
 
-func (w *Widget[T, I])Hash() uint64 {
-    return w.iFace.Hash(w.v)
+// Generates a hash for the given value using the hash function from the interface
+// that was supplied as a generic type.
+func (w *Widget[T, I])Hash(v *T) uint64 {
+    return w.iFace.Hash(v)
 }
 
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=int

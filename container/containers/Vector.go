@@ -168,7 +168,7 @@ func (v *Vector[T, U])Contains(val T) bool {
     v.RLock()
     defer v.RUnlock()
     found:=false
-    w:=widgets.NewWidget[T,U](getWidgetIFaceImpl[T,U]())
+    w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v) && !found; i++ {
         found=w.Eq(&val,&(*v)[i])
     }
@@ -238,7 +238,7 @@ func (v *Vector[T, U])Pop(val T, num int) int {
     v.Lock()
     defer v.Unlock()
     cntr:=0
-    w:=widgets.NewWidget[T,U](getWidgetIFaceImpl[T,U]())
+    w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v); i++ {
         if w.Eq(&val,&(*v)[i]) {
             *v=append((*v)[:i],(*v)[i+1:]...)
