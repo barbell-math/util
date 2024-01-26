@@ -46,6 +46,8 @@ func main() {
 
 	t,err:=template.New("builtin").Parse(
 		"package {{ .Package }}\n\n"+
+		generateImports(vals.Type)+
+		generateGlobals(vals.Type)+
 		"type Builtin{{ .CapType }} {{.Type}}\n\n"+
 		"func (a *Builtin{{ .CapType }})Eq(r *{{ .Type }}) bool {\n"+
 		"    return ({{ .Type }}(*a))==*r\n"+
@@ -58,7 +60,8 @@ func main() {
 		"}\n\n"+
 		"func (a *Builtin{{ .CapType }})Wrap(v *{{ .Type }}) {\n"+
 		"    *a=Builtin{{ .CapType }}(*v)\n"+
-		"}\n\n",
+		"}\n\n"+
+		generateHashFunction(vals.Type),
 	)
 	if err!=nil {
 		fmt.Println("ERROR | An error occurred parsing the template.")
@@ -70,4 +73,51 @@ func main() {
 		fmt.Println("ERROR | An error occurred when populating the template.")
 	}
 	f.Close()
+}
+
+func generateImports(typeName string) string {
+	if typeName=="string" {
+		return "import \"hash/maphash\"\n\n"
+	}
+	return ""
+}
+
+func generateGlobals(typeName string) string {
+	if typeName=="string" {
+		return "var RANDOM_SEED_{{ .Type }} maphash.Seed=maphash.MakeSeed()\n\n"
+	}
+	return ""
+}
+
+func generateHashFunction(typeName string) string {
+	switch typeName {
+		case "int": fallthrough
+		case "int8": fallthrough
+		case "int16": fallthrough
+		case "int32": fallthrough
+		case "int64": fallthrough
+		case "uint": fallthrough
+		case "uint8": fallthrough
+		case "uint16": fallthrough
+		case "uint32": fallthrough
+		case "uint64":
+			return "func (a *Builtin{{ .CapType }})Hash() uint64 {\n"+
+				"    return uint64(a.Unwrap())\n"+
+			    "}\n\n"
+		case "float32": fallthrough
+		case "float64":
+			return "func (a *Builtin{{ .CapType }})Hash() uint64 {\n"+
+				"    panic(\"Floats are not hashable!\")\n"+
+			    "}\n\n"
+		case "string":
+			return "func (a *Builtin{{ .CapType }})Hash() uint64 {\n"+
+				"    return maphash.String(RANDOM_SEED_{{ .Type }},string(*a))\n"+
+			    "}\n\n"
+		default:
+			return "func (a *Builtin{{ .CapType }})Hash() uint64 {\n"+
+				"    // this will fail compilation (on purpose!)\n"+
+				"    // the supplied type was not hashable!\n"+
+				"    return int(-1)\n"+
+			    "}\n\n"
+	}
 }

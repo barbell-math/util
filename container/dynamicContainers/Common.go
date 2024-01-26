@@ -1,3 +1,5 @@
+// This package serves to define the set of dynamic containers and expose them
+// as interfaces.
 package dynamicContainers
 
 import "github.com/barbell-math/util/container/containerTypes"

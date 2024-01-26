@@ -12,6 +12,7 @@ type Widget[T any] interface {
     Lt(other *T) bool
     Unwrap() T
     Wrap(v *T)
+    Hash() uint64
 }
 
 // The interface that the RWMutex exposes.
@@ -56,7 +57,7 @@ type WriteOps[K any, V any] interface {
 // An interface the enforces implementation of write-only, key/value, operations.
 type WriteKeyedOps[K any, V any] interface {
     WriteOps[K,V]
-    Set(idx K, v V) error;
+    Emplace(idx K, v V) error;
     Push(idx K, v ...V) error;
 }
 

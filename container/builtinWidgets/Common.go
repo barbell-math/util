@@ -1,3 +1,7 @@
+// This package serves to implement the comparison and hash operations necessary
+// to put built-in types into the containers defined in [containers]. All of the
+// types in this package will implement the [containers.Widget] interface.
+// Basically all of the code in this package is generated with go:generate comments.
 package builtinWidgets
 
 //go:generate go run widgetTemplate.go builtinWidgets int

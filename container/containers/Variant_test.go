@@ -3,8 +3,8 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/dataStruct/types/static"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/container/staticContainers"
 )
 
 func TestVariantA(t *testing.T){
@@ -33,11 +33,13 @@ func TestVariantB(t *testing.T){
     );
 }
 
-func interfaceTestHelper[T any, U any](v static.Variant[T,U]){}
+func interfaceTestHelper[T any, U any](v staticContainers.Variant[T,U]){}
 func TestVariantInterface(t *testing.T){
     tmp:=5;
     v:=Variant[int,float64]{};
     interfaceTestHelper[int,float64](v);
     interfaceV:=v.SetValA(tmp);
     interfaceTestHelper(interfaceV);
+    interfaceV2:=v.SetValB(5.00);
+    interfaceTestHelper(interfaceV2);
 }
