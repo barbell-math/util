@@ -1,9 +1,11 @@
 package iter
 
 import (
-	customerr "github.com/barbell-math/util/err"
+	"github.com/barbell-math/util/customerr"
 )
 
+// This function is an intermediary.
+//
 // Next will take it's parent iterator and consume its values. As it does this
 // it will apply the operation (op) function to the value before passing on the
 // transformed value to it's child iterator. If an error is generated iteration
@@ -31,17 +33,19 @@ func Next[T any, U any](i Iter[T],
     }
 }
 
-// Next will take it's parent iterator and consume its values. As it does this 
-// it will apply the operation (op) function to the value before passing on the
-// transformed value to it's child iterator. If an error is generated iteration
-// will stop. This is equivalent to calling the previous Next function and 
-// providing it with the same types.
+// This function is an intermediary.
+//
+// This function is equivalent to [Next], the only difference is that the
+// the inputs iterator type and output iterator type must be the same. It is 
+// offered as a convenience function.
 func (i Iter[T])Next(
     op func(index int, val T, status IteratorFeedback) (IteratorFeedback,T,error),
 ) Iter[T] {
     return Next(i,op);
 }
 
+// This function is an intermediary.
+//
 // SetupTeardown provides a way to have setup and teardown procedures. These 
 // setup and teardown procedures will be called once before the parent iterator
 // is ever called and after once after the parent iterator has completed. The 
@@ -68,6 +72,8 @@ func (i Iter[T])SetupTeardown(setup func() error, teardown func() error) Iter[T]
     }
 }
 
+// This function is an intermediary.
+//
 // Inject will inject values into the iterator stream based on the operation (op)
 // functions return values. If the operation function returns true then the value
 // will be injected and the parent iterators current value will be cached to be

@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"os"
 
-	staticType "github.com/barbell-math/util/dataStruct/types/static"
-	customerr "github.com/barbell-math/util/err"
+	"github.com/barbell-math/util/container/staticContainers"
+	"github.com/barbell-math/util/customerr"
 )
 
 // This function is a Producer.
@@ -118,12 +118,12 @@ func mapOp[K comparable, V any](
 // it changed while being iterated over behavior is undefined.
 func MapElems[K comparable, V any](
     m map[K]V, 
-    factory func() staticType.Pair[K,V],
-) Iter[staticType.Pair[K,V]] {
+    factory func() staticContainers.Pair[K,V],
+) Iter[staticContainers.Pair[K,V]] {
     cont:=make(chan bool)
     c:=mapOp(cont,m)
     i:=-1;
-    return func(f IteratorFeedback) (staticType.Pair[K,V],error,bool) {
+    return func(f IteratorFeedback) (staticContainers.Pair[K,V],error,bool) {
         i++;
         if i<len(m) && f!=Break {
             cont <- true
@@ -232,9 +232,9 @@ func FileLines(path string) Iter[string] {
 func Zip[T any, U any](
     i1 Iter[T], 
     i2 Iter[U], 
-    factory func() staticType.Pair[T,U],
-) Iter[staticType.Pair[T,U]] {
-    return func(f IteratorFeedback) (staticType.Pair[T, U], error, bool) {
+    factory func() staticContainers.Pair[T,U],
+) Iter[staticContainers.Pair[T,U]] {
+    return func(f IteratorFeedback) (staticContainers.Pair[T, U], error, bool) {
         if f==Break {
             return nil,customerr.AppendError(i1.Stop(),i2.Stop()),false
         }
@@ -263,15 +263,15 @@ func Zip[T any, U any](
 func Join[T any, U any](
     i1 Iter[T],
     i2 Iter[U],
-    factory func() staticType.Variant[T,U],
+    factory func() staticContainers.Variant[T,U],
     decider func(left T, right U) bool,
-) Iter[staticType.Variant[T,U]] {
+) Iter[staticContainers.Variant[T,U]] {
     var i1Val T;
     var i2Val U;
     var err1, err2 error;
     cont1, cont2:=true, true;
     getI1Val, getI2Val:=true, true;
-    return func(f IteratorFeedback) (staticType.Variant[T,U], error, bool) {
+    return func(f IteratorFeedback) (staticContainers.Variant[T,U], error, bool) {
         if f==Break {
             return nil, customerr.AppendError(i1.Stop(),i2.Stop()), false;
         }
@@ -316,7 +316,7 @@ func Join[T any, U any](
 func JoinSame[T any](
     i1 Iter[T],
     i2 Iter[T],
-    factory func() staticType.Variant[T,T],
+    factory func() staticContainers.Variant[T,T],
     decider func(left T, right T) bool,
 ) Iter[T] {
     var tmp T;

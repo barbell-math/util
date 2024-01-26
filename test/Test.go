@@ -1,8 +1,9 @@
-package test;
+package test
 
 import (
-    "fmt"
-    "testing"
+	"errors"
+	"fmt"
+	"testing"
 )
 
 func BasicTest(expected any, got any, base string, t *testing.T){
@@ -12,6 +13,12 @@ func BasicTest(expected any, got any, base string, t *testing.T){
 }
 func FormatError(expected any, got any, base string, t *testing.T){
     t.Error(fmt.Sprintf("Err: %s\nExpected: '%v'\nGot: '%v'",base,expected,got));
+}
+
+func ContainsError(expected error, got error, base string, t *testing.T){
+    if !errors.Is(got,expected) {
+        FormatError(expected,got,base,t)
+    }
 }
 
 func SlicesMatch[T any](actual []T, generated []T, t *testing.T){

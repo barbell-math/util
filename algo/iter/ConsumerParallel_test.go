@@ -3,7 +3,7 @@ package iter;
 import (
 	"testing"
 	"github.com/barbell-math/util/test"
-    customerr "github.com/barbell-math/util/err"
+    "github.com/barbell-math/util/customerr"
 )
 
 func parallelIterHelper(vals []int, numThreads int, t *testing.T){
@@ -28,11 +28,9 @@ func TestParallel(t *testing.T) {
     rv:=SliceElems([]int{1,2,3,4}).Parallel(func(val int) (int,error) {
         return 0,nil;
     },NoOp[int,int],0);
-    if !customerr.IsValOutsideRange(rv) {
-        test.FormatError(customerr.ValOutsideRange(""),rv,
-            "ForEachParallel returned incorrect error when one was expected.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,rv,
+        "ForEachParallel returned incorrect error when one was expected.",t,
+    )
     vals:=make([]int,200);
     for i:=0; i<200; i++ {
         vals[i]=i;

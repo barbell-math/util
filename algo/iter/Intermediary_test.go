@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/test"
-	customerr "github.com/barbell-math/util/err"
+	"github.com/barbell-math/util/customerr"
 )
 
 func TestNext(t *testing.T){

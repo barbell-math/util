@@ -1,4 +1,4 @@
-package err
+package customerr
 
 import (
 	"fmt"
@@ -48,8 +48,10 @@ func TestUnwrap(t *testing.T){
 func TestAppendErrorTwoErrors(t *testing.T) {
     e:=AppendError(ValOutsideRange,DimensionsDoNotAgree)
     test.BasicTest(fmt.Sprintf(
-        "Multiple errors have occurred.\nFirst error: %s\nSecond error: %s\n",
-        ValOutsideRange,DimensionsDoNotAgree,
+        "%s\n%s\n\nThe error above also caused the below error:\n%s\n",
+        MultipleErrorsOccurred.Error(),
+        ValOutsideRange.Error(),
+        DimensionsDoNotAgree.Error(),
     ), e.Error(), "Appending errors did not format the final error properly.",t,)
 }
 

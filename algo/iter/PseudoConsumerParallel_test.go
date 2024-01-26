@@ -3,7 +3,7 @@ package iter;
 import (
     "testing"
     "github.com/barbell-math/util/test"
-    customerr "github.com/barbell-math/util/err"
+    "github.com/barbell-math/util/customerr"
 )
 
 func filterParallelHelper(vals []int, numThreads int, t *testing.T) {
@@ -25,11 +25,9 @@ func TestFilterParallel(t *testing.T) {
     _,err:=SliceElems([]int{1,2,3,4}).FilterParallel(func(val int) bool {
         return false;
     },0);
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "FilterParallel returned incorrect error when one was expected.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "FilterParallel returned incorrect error when one was expected.",t,
+    );
     vals:=make([]int,200);
     for i:=0; i<200; i++ {
         vals[i]=i;

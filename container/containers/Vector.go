@@ -1,26 +1,35 @@
 package containers
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/barbell-math/util/container/containerTypes"
+	"github.com/barbell-math/util/customerr"
 )
 
 
 type (
-	Vector[W containerTypes.Widget[T], T any] []containerTypes.Widget[T]
+	Vector[T any, U any , CONSTRAINT WidgetConstraint[T,U]] []T
 
-	SyncedVector[W containerTypes.Widget[T], T any] struct {
+	SyncedVector[T any, U any, CONSTRAINT WidgetConstraint[T,U]] struct {
 		*sync.RWMutex
-		Vector[W,T]
+		Vector[T,U,CONSTRAINT]
 	}
 )
 
-func NewVector[W containerTypes.Widget[T], T any](size int) (Vector[W,T],error) {
+func NewVector[T any, U any, CONSTRAINT WidgetConstraint[T,U]](
+	size int,
+) (Vector[T,U,CONSTRAINT],error) {
 	if size<0 {
-		return Vector[W, T]{},fmt.Errorf(
-			"%w | Size must be >=0. Got: %d",ValOutsideRange,size,
+		return Vector[T,U,CONSTRAINT]{}, customerr.Wrap(
+			customerr.ValOutsideRange,
+			"Size must be >=0. Got: %d",size,
 		)
 	}
+	return make(Vector[T,U,CONSTRAINT],size),nil
+}
+
+func SliceToVector[T any, U any, CONSTRAINT WidgetConstraint[T,U]](
+	s []T,
+) Vector[T,U,CONSTRAINT] {
+	return Vector[T, U, CONSTRAINT](s)
 }

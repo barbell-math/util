@@ -38,6 +38,12 @@ func (i Iter[T])ForEach(
 // that ForEach uses. For each will always get a parent iterators value before
 // the op function is consulted. Stop should just stop, and not call the parent
 // iterators one last time meaning it has to be separate.
+
+// This function is a consumer.
+//
+// Stop will stop all iteration without ever consuming a single value from it's
+// parent iterator. Any errors returned will be generated from each iterator
+// performing there respective teardown operations.
 func (i Iter[T])Stop() error {
     _,cleanUpErr,_:=i(Break);
     return cleanUpErr;

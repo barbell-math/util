@@ -1,4 +1,4 @@
-package err
+package customerr
 
 import (
 	"errors"
@@ -55,27 +55,39 @@ func ArrayDimsArgree[N any, P any](l []N, r []P) error {
     return nil;
 }
 
-// Given two errors it will append them with a predetermined format, as shown
-// below.
+// Given a list of errors it will append them with a predetermined format, as 
+// shown below.
 //
 //  Multiple errors have occured.
-//  First error: <original first error>
+//  <original first error>
 //    |- <wrapped information>
-//  Second error: <original second error>
+//  ...
+//  The error above also caused the below error:
+//  <original nth error>
 //    |- <wrapped information>
 //
-// This allows for consistent error formatting. If either first or second is nil
-// then second or first will be respectively returned without wrapping them with
-// additional information. If both first and second are nil then nil will be
-// returned.
-func AppendError(first error, second error) error {
-    if second!=nil && first==nil {
-        first=second;
-    } else if second!=nil && first!=nil {
-        return fmt.Errorf(
-            "Multiple errors have occurred.\nFirst error: %w\nSecond error: %w\n",
-            first,second,
-        )
+// This allows for consistent error formatting. Special cases are as follows:
+//  - All supplied errors are nil: The returned value will be nil.
+//  - Only one of the supplied errors is nil: The returned value will be the error that is not nil.
+//  - Multiple errors are not nil: The returned error will be a [MultipleErrorsOccurred] error with all of the sub-errors wrapped in it following the above format.
+func AppendError(errs ...error) error {
+    var rv error
+    cntr:=0
+    for _,e:=range(errs) {
+        if e!=nil {
+            if cntr==0 {
+                rv=e
+            } else {
+                rv=fmt.Errorf(
+                    "%w\n\nThe error above also caused the below error:\n%w\n",
+                    rv,e,
+                )
+            }
+            cntr++
+        }
     }
-    return first;
+    if cntr>1 {
+        rv=fmt.Errorf("%w\n%w",MultipleErrorsOccurred,rv)
+    }
+    return rv
 }
