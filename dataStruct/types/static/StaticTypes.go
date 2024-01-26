@@ -13,7 +13,7 @@ type ReadVector[T any] interface {
     types.Read[T,int]
 }
 type WriteVector[T any] interface {
-    types.SyncPassThrough
+    types.Syncable
     types.StaticCapacity
     types.Write[T,int]
     types.Delete[T,int]
@@ -28,7 +28,7 @@ type ReadQueue[T any] interface {
     types.FirstElemRead[T]
 }
 type WriteQueue[T any] interface {
-    types.SyncPassThrough
+    types.Syncable
     types.StaticCapacity
     types.FirstElemRemove[T]
     types.LastElemWrite[T]
@@ -43,7 +43,7 @@ type ReadStack[T any] interface {
     types.FirstElemRead[T]
 }
 type WriteStack[T any] interface {
-    types.SyncPassThrough
+    types.Syncable
     types.StaticCapacity
     types.FirstElemWrite[T]
     types.FirstElemRemove[T]
@@ -71,7 +71,7 @@ type ReadMap[T any, U any] interface {
     types.Read[T,U]
 }
 type WriteMap[T any, U any] interface {
-    types.SyncPassThrough
+    types.Syncable
     types.StaticCapacity
     types.Write[T,U]
     types.Delete[T,U]

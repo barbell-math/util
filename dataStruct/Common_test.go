@@ -14,6 +14,7 @@ func dynQueueInterfaceTypeCheck[T any](d dynamic.Queue[T]){}
 func dynStackInterfaceTypeCheck[T any](d dynamic.Stack[T]){}
 func dynDequeInterfaceTypeCheck[T any](d dynamic.Deque[T]){}
 func dynVectorInterfaceTypeCheck[T any](d dynamic.Vector[T]){}
+func dynSetInterfaceTypeCheck[T any](d dynamic.Vector[T]){}
 
 func writeInterfaceTypeCeck[K any, V any](d types.Write[K,V]){}
 func readInterfaceTypeCeck[K any, V any](d types.Write[K,V]){}

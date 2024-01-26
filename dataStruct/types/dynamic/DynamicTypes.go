@@ -79,3 +79,15 @@ type Map[T any, U any] interface {
     ReadMap[T,U]
     WriteMap[T,U]
 }
+
+type ReadSet[T ~uint32 | ~uint64, U any] interface {
+    types.Read[T,U]
+}
+type WriteSet[T ~uint32 | ~uint64, U any] interface {
+    types.SyncPassThrough
+    types.Write[T,U]
+}
+type Set[T ~uint32 | ~uint64, U any] interface {
+    ReadSet[T,U]
+    WriteSet[T,U]
+}

@@ -211,15 +211,15 @@ func TestVectorAppend(t *testing.T) {
     }
 }
 
-func vectorInsertHelper(idx int, l int, t *testing.T){
+func vectorPushHelper(idx int, l int, t *testing.T){
     tmp:=make(Vector[int],l-1)
     for i:=0; i<l-1; i++ { tmp[i]=i }
-    err:=tmp.Insert(idx,l-1)
+    err:=tmp.Push(idx,l-1)
     test.BasicTest(nil,err,
-        "Insert returned an error when it shouldn't have.",t,
+        "Push returned an error when it shouldn't have.",t,
     )
     test.BasicTest(l,tmp.Length(),
-        "Insert did not increment the number of elements.",t,
+        "Push did not increment the number of elements.",t,
     )
     for i:=0; i<len(tmp); i++ {
         var exp int
@@ -232,21 +232,21 @@ func vectorInsertHelper(idx int, l int, t *testing.T){
             exp=i-1
         }
         test.BasicTest(exp,v,
-            "Insert did not put the value in the correct place.",t,
+            "Push did not put the value in the correct place.",t,
         )
     }
 }
-func TestVectorInsert(t *testing.T){
+func TestVectorPush(t *testing.T){
     v:=make(Vector[int],0)
-    for i:=2; i>=0; i-- { v.Insert(0,i) }
-    for i:=3; i<5; i++ { v.Insert(len(v),i) }
+    for i:=2; i>=0; i-- { v.Push(0,i) }
+    for i:=3; i<5; i++ { v.Push(len(v),i) }
     for i:=0; i<5; i++ {
 	test.BasicTest(i,v[i],
-	    "Insert did not put the values in the correct place.",t,
+	    "Push did not put the values in the correct place.",t,
 	)
     }
     for i:=0; i<5; i++ {
-	vectorInsertHelper(i,5,t)
+	vectorPushHelper(i,5,t)
     }
 }
 
@@ -547,40 +547,40 @@ func TestVectorEq(t *testing.T){
     v:=Vector[int]{0,1,2,3}
     v2:=Vector[int]{0,1,2,3}
     comp:=func(l *int, r *int) bool { return *l==*r }
-    test.BasicTest(true,v.Eq(v2,comp),
+    test.BasicTest(true,v.Eq(&v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v,comp),
+    test.BasicTest(true,v2.Eq(&v,comp),
 	"Eq returned a false negative.",t,
     )
     v.Delete(3)
-    test.BasicTest(false,v.Eq(v2,comp),
+    test.BasicTest(false,v.Eq(&v2,comp),
 	"Eq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Eq(v,comp),
+    test.BasicTest(false,v2.Eq(&v,comp),
 	"Eq returned a false positive.",t,
     )
     v=Vector[int]{0}
     v2=Vector[int]{0}
-    test.BasicTest(true,v.Eq(v2,comp),
+    test.BasicTest(true,v.Eq(&v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v,comp),
+    test.BasicTest(true,v2.Eq(&v,comp),
 	"Eq returned a false negative.",t,
     )
     v.Delete(0)
-    test.BasicTest(false,v.Eq(v2,comp),
+    test.BasicTest(false,v.Eq(&v2,comp),
 	"Eq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Eq(v,comp),
+    test.BasicTest(false,v2.Eq(&v,comp),
 	"Eq returned a false positive.",t,
     )
     v=Vector[int]{}
     v2=Vector[int]{}
-    test.BasicTest(true,v.Eq(v2,comp),
+    test.BasicTest(true,v.Eq(&v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v,comp),
+    test.BasicTest(true,v2.Eq(&v,comp),
 	"Eq returned a false negative.",t,
     )
 }
@@ -589,40 +589,40 @@ func TestVectorNeq(t *testing.T){
     v:=Vector[int]{0,1,2,3}
     v2:=Vector[int]{0,1,2,3}
     comp:=func(l *int, r *int) bool { return *l==*r }
-    test.BasicTest(false,v.Neq(v2,comp),
+    test.BasicTest(false,v.Neq(&v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v,comp),
+    test.BasicTest(false,v2.Neq(&v,comp),
 	"Neq returned a false positive.",t,
     )
     v.Delete(3)
-    test.BasicTest(true,v.Neq(v2,comp),
+    test.BasicTest(true,v.Neq(&v2,comp),
 	"Neq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Neq(v,comp),
+    test.BasicTest(true,v2.Neq(&v,comp),
 	"Neq returned a false negative.",t,
     )
     v=Vector[int]{0}
     v2=Vector[int]{0}
-    test.BasicTest(false,v.Neq(v2,comp),
+    test.BasicTest(false,v.Neq(&v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v,comp),
+    test.BasicTest(false,v2.Neq(&v,comp),
 	"Neq returned a false positive.",t,
     )
     v.Delete(0)
-    test.BasicTest(true,v.Neq(v2,comp),
+    test.BasicTest(true,v.Neq(&v2,comp),
 	"Neq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Neq(v,comp),
+    test.BasicTest(true,v2.Neq(&v,comp),
 	"Neq returned a false negative.",t,
     )
     v=Vector[int]{}
     v2=Vector[int]{}
-    test.BasicTest(false,v.Neq(v2,comp),
+    test.BasicTest(false,v.Neq(&v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v,comp),
+    test.BasicTest(false,v2.Neq(&v,comp),
 	"Neq returned a false positive.",t,
     )
 }

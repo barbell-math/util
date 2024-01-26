@@ -250,9 +250,9 @@ func (c *CircularBuffer[T])Set(v T, idx int) error {
     return getIndexOutOfBoundsError(idx,c.numElems)
 }
 
-// Inserts the supplied values at the given index. Returns an error if the index
-// is >= the length of the circular buffer.
-func (c *CircularBuffer[T])Insert(idx int, v ...T) error {
+// Pushes (inserts) the supplied values at the given index. Returns an error if 
+// the index is >= the length of the circular buffer.
+func (c *CircularBuffer[T])Push(idx int, v ...T) error {
     c.Lock()
     defer c.Unlock()
     if idx<0 || idx>c.numElems {
@@ -407,7 +407,7 @@ func (c *CircularBuffer[T])PntrElems() iter.Iter[*T] {
 // Returns true if the circular buffers are equal. The supplied comparison 
 // function will be used when comparing values in the circular buffer.
 func (c *CircularBuffer[T])Eq(
-    other CircularBuffer[T], 
+    other *CircularBuffer[T], 
     comp func(l *T, r *T) bool,
 ) bool {
     c.RLock()
@@ -424,7 +424,7 @@ func (c *CircularBuffer[T])Eq(
 // Returns true if the circular buffers are not equal. The supplied comparison 
 // function will be used when comparing values in the circular buffer.
 func (c *CircularBuffer[T])Neq(
-    other CircularBuffer[T], 
+    other *CircularBuffer[T], 
     comp func(l *T, r *T) bool,
 ) bool {
     return !c.Eq(other,comp)

@@ -113,7 +113,7 @@ func (d *Deque[T])Append(vals ...T) error {
     return nil
 }
 
-func (d *Deque[T])Insert(idx int, vals ...T) error {
+func (d *Deque[T])Push(idx int, vals ...T) error {
     d.Lock()
     defer d.Unlock()
     if idx>=0 && idx<len(d.vals) && len(d.vals)>0 {

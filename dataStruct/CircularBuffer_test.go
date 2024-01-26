@@ -171,7 +171,7 @@ func TestNewCircularBufferBadSize(t *testing.T) {
     );
 }
 
-func TestCircularBufferPushFront(t *testing.T){
+func TestCircularBufferPushToFront(t *testing.T){
     tmp,err:=NewCircularBuffer[int](5);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
@@ -205,7 +205,7 @@ func TestCircularBufferPushFront(t *testing.T){
     );
 }
 
-func TestCircularBufferPushBack(t *testing.T){
+func TestCircularBufferPushToBack(t *testing.T){
     tmp,err:=NewCircularBuffer[int](5);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
@@ -239,97 +239,97 @@ func TestCircularBufferPushBack(t *testing.T){
     );
 }
 
-func TestCircularBufferInsertFront(t *testing.T){
+func TestCircularBufferPushFront(t *testing.T){
     tmp,_:=NewCircularBuffer[int](5)
-    err:=tmp.Insert(1,1)
+    err:=tmp.Push(1,1)
     if !customerr.IsValOutsideRange(err) {
         test.FormatError(customerr.ValOutsideRange(""),err,
-            "Insert returned the wrong error.",t,
+            "Push returned the wrong error.",t,
         );
     }
     for i:=0; i<5; i++ {
-        err=tmp.Insert(i,i)
+        err=tmp.Push(i,i)
         test.BasicTest(nil,err,
-            "Insert returned an error when it shouldn't have.",t,
+            "Push returned an error when it shouldn't have.",t,
         )
         test.BasicTest(i+1,tmp.Length(),
-            "Insert did not increment the number of elements.",t,
+            "Push did not increment the number of elements.",t,
         )
     }
     for i:=0; i<5; i++ {
         v,_:=tmp.Get(i)
         test.BasicTest(i,v,
-            "Insert did not set the values correctly.",t,
+            "Push did not set the values correctly.",t,
         )
     }
-    err=tmp.Insert(5,5)
+    err=tmp.Push(5,5)
     if !IsFull(err) {
         test.FormatError(Full(""),err,
-            "Insert did not detect the queue was full.",t,
+            "Push did not detect the queue was full.",t,
         );
     }
     test.BasicTest(5,tmp.Length(),
-        "Insert incremented the number of elements when it shouldn't have.",t,
+        "Push incremented the number of elements when it shouldn't have.",t,
     )
-    err=tmp.Insert(6,5)
+    err=tmp.Push(6,5)
     if !customerr.IsValOutsideRange(err) {
         test.FormatError(customerr.ValOutsideRange(""),err,
-            "Insert returned the wrong error.",t,
+            "Push returned the wrong error.",t,
         );
     }
     test.BasicTest(5,tmp.Length(),
-        "Insert incremented the number of elements when it shouldn't have.",t,
+        "Push incremented the number of elements when it shouldn't have.",t,
     )
 }
 
-func TestCircularBufferInsertBack(t *testing.T) {
+func TestCircularBufferPushBack(t *testing.T) {
     tmp,_:=NewCircularBuffer[int](5)
     for i:=0; i<5; i++ {
-        err:=tmp.Insert(0,i)
+        err:=tmp.Push(0,i)
         test.BasicTest(nil,err,
-            "Insert returned an error when it shouldn't have.",t,
+            "Push returned an error when it shouldn't have.",t,
         )
         test.BasicTest(i+1,tmp.Length(),
-            "Insert did not increment the number of elements.",t,
+            "Push did not increment the number of elements.",t,
         )
     }
     for i:=0; i<5; i++ {
         v,_:=tmp.Get(i)
         test.BasicTest(4-i,v,
-            "Insert did not set the values correctly.",t,
+            "Push did not set the values correctly.",t,
         )
     }
-    err:=tmp.Insert(0,5)
+    err:=tmp.Push(0,5)
     if !IsFull(err) {
         test.FormatError(Full(""),err,
-            "Insert did not detect the queue was full.",t,
+            "Push did not detect the queue was full.",t,
         );
     }
     test.BasicTest(5,tmp.Length(),
-        "Insert incremented the number of elements when it shouldn't have.",t,
+        "Push incremented the number of elements when it shouldn't have.",t,
     )
-    err=tmp.Insert(6,5)
+    err=tmp.Push(6,5)
     if !customerr.IsValOutsideRange(err) {
         test.FormatError(customerr.ValOutsideRange(""),err,
-            "Insert returned the wrong error.",t,
+            "Push returned the wrong error.",t,
         );
     }
     test.BasicTest(5,tmp.Length(),
-        "Insert incremented the number of elements when it shouldn't have.",t,
+        "Push incremented the number of elements when it shouldn't have.",t,
     )
 }
 
-func circularBufferInsertHelper(idx int, l int, t *testing.T){
+func circularBufferPushHelper(idx int, l int, t *testing.T){
     tmp,_:=NewCircularBuffer[int](l)
     for i:=0; i<l-1; i++ {
         tmp.PushBack(i)
     }
-    err:=tmp.Insert(idx,l-1)
+    err:=tmp.Push(idx,l-1)
     test.BasicTest(nil,err,
-        "Insert returned an error when it shouldn't have.",t,
+        "Push returned an error when it shouldn't have.",t,
     )
     test.BasicTest(l,tmp.Length(),
-        "Insert did not increment the number of elements.",t,
+        "Push did not increment the number of elements.",t,
     )
     for i:=0; i<l; i++ {
         var exp int
@@ -342,56 +342,56 @@ func circularBufferInsertHelper(idx int, l int, t *testing.T){
             exp=i-1
         }
         test.BasicTest(exp,v,
-            "Insert did not put the value in the correct place.",t,
+            "Push did not put the value in the correct place.",t,
         )
     }
 }
-func TestCircularBufferRandomInsert(t *testing.T){
+func TestCircularBufferRandomPush(t *testing.T){
     for i:=0; i<5; i++ {
-        circularBufferInsertHelper(i,5,t)
+        circularBufferPushHelper(i,5,t)
     }
 }
 
-func TestCircularBufferInsert(t *testing.T){
+func TestCircularBufferPush(t *testing.T){
     tmp,_:=NewCircularBuffer[int](5)
-    err:=tmp.Insert(0,1,2,3)
+    err:=tmp.Push(0,1,2,3)
     test.BasicTest(nil,err,
-        "Insert returned an error when it shouldn't have.",t,
+        "Push returned an error when it shouldn't have.",t,
     )
     for i:=0; i<3; i++ {
         v,_:=tmp.Get(i)
         test.BasicTest(i+1,v,
-            "Inserting many values did not work correctly.",t,
+            "Pushing many values did not work correctly.",t,
         )
     }
-    err=tmp.Insert(3,4,5)
+    err=tmp.Push(3,4,5)
     test.BasicTest(nil,err,
-        "Insert returned an error when it shouldn't have.",t,
+        "Push returned an error when it shouldn't have.",t,
     )
     for i:=0; i<5; i++ {
         v,_:=tmp.Get(i)
         test.BasicTest(i+1,v,
-            "Inserting many values did not work correctly.",t,
+            "Pushing many values did not work correctly.",t,
         )
     }
-    err=tmp.Insert(5,6)
+    err=tmp.Push(5,6)
     if !IsFull(err) {
         test.FormatError(Full(""),err,
-            "Insert returned the wrong error.",t,
+            "Push returned the wrong error.",t,
         )
     }
     tmp,_=NewCircularBuffer[int](5)
-    tmp.Insert(0,1,2)
-    err=tmp.Insert(2,3,4,5,6)
+    tmp.Push(0,1,2)
+    err=tmp.Push(2,3,4,5,6)
     for i:=0; i<5; i++ {
         v,_:=tmp.Get(i)
         test.BasicTest(i+1,v,
-            "Insert did not put the values in the right position.",t,
+            "Push did not put the values in the right position.",t,
         )
     }
     if !IsFull(err) {
         test.FormatError(Full(""),err,
-            "Insert returned the wrong error.",t,
+            "Push returned the wrong error.",t,
         )
     }
 }
@@ -992,38 +992,38 @@ func TestCircularBufferEq(t *testing.T){
     v,_:=NewCircularBuffer[int](4)
     v2,_:=NewCircularBuffer[int](4)
     comp:=func(l *int, r *int) bool { return *l==*r }
-    test.BasicTest(true,v.Eq(v2,comp),
+    test.BasicTest(true,v.Eq(&v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v,comp),
+    test.BasicTest(true,v2.Eq(&v,comp),
 	"Eq returned a false negative.",t,
     )
-    v.Insert(0,1)
-    test.BasicTest(false,v.Eq(v2,comp),
+    v.Push(0,1)
+    test.BasicTest(false,v.Eq(&v2,comp),
 	"Eq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Eq(v,comp),
+    test.BasicTest(false,v2.Eq(&v,comp),
 	"Eq returned a false positive.",t,
     )
-    v2.Insert(0,1)
-    test.BasicTest(true,v.Eq(v2,comp),
+    v2.Push(0,1)
+    test.BasicTest(true,v.Eq(&v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v,comp),
+    test.BasicTest(true,v2.Eq(&v,comp),
 	"Eq returned a false negative.",t,
     )
-    v.Insert(1,2,3,4)
-    test.BasicTest(false,v.Eq(v2,comp),
+    v.Push(1,2,3,4)
+    test.BasicTest(false,v.Eq(&v2,comp),
 	"Eq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Eq(v,comp),
+    test.BasicTest(false,v2.Eq(&v,comp),
 	"Eq returned a false positive.",t,
     )
-    v2.Insert(1,2,3,4)
-    test.BasicTest(true,v.Eq(v2,comp),
+    v2.Push(1,2,3,4)
+    test.BasicTest(true,v.Eq(&v2,comp),
 	"Eq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Eq(v,comp),
+    test.BasicTest(true,v2.Eq(&v,comp),
 	"Eq returned a false negative.",t,
     )
 }
@@ -1032,38 +1032,38 @@ func TestCircularQueueNeq(t *testing.T){
     v,_:=NewCircularBuffer[int](4)
     v2,_:=NewCircularBuffer[int](4)
     comp:=func(l *int, r *int) bool { return *l==*r }
-    test.BasicTest(false,v.Neq(v2,comp),
+    test.BasicTest(false,v.Neq(&v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v,comp),
+    test.BasicTest(false,v2.Neq(&v,comp),
 	"Neq returned a false positive.",t,
     )
-    v.Insert(0,1)
-    test.BasicTest(true,v.Neq(v2,comp),
+    v.Push(0,1)
+    test.BasicTest(true,v.Neq(&v2,comp),
 	"Neq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Neq(v,comp),
+    test.BasicTest(true,v2.Neq(&v,comp),
 	"Neq returned a false negative.",t,
     )
-    v2.Insert(0,1)
-    test.BasicTest(false,v.Neq(v2,comp),
+    v2.Push(0,1)
+    test.BasicTest(false,v.Neq(&v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v,comp),
+    test.BasicTest(false,v2.Neq(&v,comp),
 	"Neq returned a false positive.",t,
     )
-    v.Insert(1,2,3,4)
-    test.BasicTest(true,v.Neq(v2,comp),
+    v.Push(1,2,3,4)
+    test.BasicTest(true,v.Neq(&v2,comp),
 	"Neq returned a false negative.",t,
     )
-    test.BasicTest(true,v2.Neq(v,comp),
+    test.BasicTest(true,v2.Neq(&v,comp),
 	"Neq returned a false negative.",t,
     )
-    v2.Insert(1,2,3,4)
-    test.BasicTest(false,v.Neq(v2,comp),
+    v2.Push(1,2,3,4)
+    test.BasicTest(false,v.Neq(&v2,comp),
 	"Neq returned a false positive.",t,
     )
-    test.BasicTest(false,v2.Neq(v,comp),
+    test.BasicTest(false,v2.Neq(&v,comp),
 	"Neq returned a false positive.",t,
     )
 }

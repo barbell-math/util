@@ -6,6 +6,12 @@ import (
 	customerr "github.com/barbell-math/util/err"
 )
 
+type Equals[T any] interface {
+    Eq(other *T) bool
+    Neq(other *T) bool
+}
+
+// deprecated
 func SlicesEqual[T comparable](one []T, two []T) bool {
     if len(one)!=len(two) {
         return false;
@@ -18,6 +24,7 @@ func SlicesEqual[T comparable](one []T, two []T) bool {
     return res;
 }
 
+// deprecated
 func ZipSlices[K comparable, V any](keys []K, vals []V) (map[K]V,error) {
     rv:=make(map[K]V,len(keys));
     if err:=customerr.ArrayDimsArgree(keys,vals,

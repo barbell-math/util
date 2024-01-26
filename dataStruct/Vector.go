@@ -168,11 +168,11 @@ func (v *Vector[T])Append(vals ...T) error {
     return nil
 }
 
-// Inserts the supplied values at the given index. Returns an error if the index
-// is >= the length of the vector.
+// Pushes (inserts)the supplied values at the given index. Returns an error if 
+// the index is >= the length of the vector.
 // For time complexity see the InsertVector section of:
 // https://go.dev/wiki/SliceTricks
-func (v *Vector[T])Insert(idx int, vals ...T) error {
+func (v *Vector[T])Push(idx int, vals ...T) error {
     v.Lock()
     defer v.Unlock()
     if idx>=0 && idx<len(*v) && len(*v)>0 {
@@ -346,18 +346,18 @@ func (v *Vector[T])PntrElems() iter.Iter[*T] {
 
 // Returns true if the vectors are equal. The supplied comparison function will
 // be used when comparing values in the vector.
-func (v *Vector[T])Eq(other Vector[T], comp func(l *T, r *T) bool) bool {
+func (v *Vector[T])Eq(other *Vector[T], comp func(l *T, r *T) bool) bool {
     v.RLock()
     defer v.RUnlock()
-    rv:=(len(*v)==len(other))
-    for i:=0; i<len(other) && rv; i++ {
-        rv=(rv && comp(&(*v)[i],&other[i]))
+    rv:=(len(*v)==len(*other))
+    for i:=0; i<len(*other) && rv; i++ {
+        rv=(rv && comp(&(*v)[i],&(*other)[i]))
     }
     return rv
 }
 
 // Returns true if the vectors are not equal. The supplied comparison function 
 // will be used when comparing values in the vector.
-func (v *Vector[T])Neq(other Vector[T], comp func(l *T, r *T) bool) bool {
+func (v *Vector[T])Neq(other *Vector[T], comp func(l *T, r *T) bool) bool {
     return !v.Eq(other,comp)
 }
