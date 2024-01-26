@@ -357,7 +357,7 @@ func TestVectorPeekPntrBack(t *testing.T){
 func TestVectorPeekBack(t *testing.T){
     v:=SliceToVector[int,builtinWidgets.BuiltinInt]([]int{})
     _,err:=v.PeekBack()
-    test.BasicTest(customerr.ValOutsideRange,err,
+    test.ContainsError(customerr.ValOutsideRange,err,
 	"Peek back returned an incorrect error.",t,
     )
     v.Append(1)
@@ -390,7 +390,7 @@ func TestVectorPopFront(t *testing.T) {
 	)
     }
     _,err:=v.PopFront()
-    test.ContainsError(customerr.ValOutsideRange,err,
+    test.ContainsError(Empty,err,
 	"Pop front returned an incorrect error.",t,
     )
 }
@@ -407,7 +407,7 @@ func TestVectorPopBack(t *testing.T) {
 	)
     }
     _,err:=v.PopBack()
-    test.ContainsError(customerr.ValOutsideRange,err,
+    test.ContainsError(Empty,err,
 	"Pop front returned an incorrect error.",t,
     )
 }
