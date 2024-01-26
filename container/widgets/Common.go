@@ -30,20 +30,12 @@ func NewWidget[T any, I WidgetInterface[T]](i I) Widget[T,I] {
     return Widget[T, I]{iFace: i}
 }
 
-func (w *Widget[T,U])Wrap(v *T) {
-    w.v=v
+func (w *Widget[T, I])Eq(l *T, r *T) bool {
+    return w.iFace.Eq(l,r)
 }
 
-func (w *Widget[T,U])Unwrap() *T {
-    return w.v
-}
-
-func (w *Widget[T, I])Eq(other *T) bool {
-    return w.iFace.Eq(w.v,other)
-}
-
-func (w *Widget[T, I])Lt(other *T) bool {
-    return w.iFace.Lt(w.v,other)
+func (w *Widget[T, I])Lt(l *T, r *T) bool {
+    return w.iFace.Lt(l,r)
 }
 
 func (w *Widget[T, I])Hash() uint64 {
