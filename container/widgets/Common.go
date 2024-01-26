@@ -23,8 +23,15 @@ type (
     // The base widget implementation that all the containers in the [containers]
     // package use as a type restriction. This type must be instantiaed with the
     // [NewWidget] function; zero valued Widget's are not valid and will result
-    // in nil pointer errors.
-    Widget[T any, I WidgetInterface[T]] struct { 
+    // in nil pointer errors. The size of this struct will equal the size of the 
+    // underlying WidgetInterface[T] value. This has the implication that if the
+    // interface type is zero bytes the the widget will also be zero bytes. This
+    // is important because containers will create widgets as needed, so minimizing
+    // the size of the widget will reduce memory allocations. It is also for this
+    // reason that any type that implements the widget interface 'for itself'
+    // should have pointer recievers for the widget interface methods unless the 
+    // underlying type is small enough to make this concern mute.
+    Widget[T any, I WidgetInterface[T]] struct {
         iFace I
     }
 )
