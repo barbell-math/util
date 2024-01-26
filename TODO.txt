@@ -1,0 +1,7 @@
+// Set
+// Fix CSV
+// Static Vector (Array?) - no way to dynamically represent, probably no?
+// Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New
+// Tree, graph...
+// Precompiled nfa/dfa - use go:generate comments!
+// https://go.dev/doc/modules/publishing

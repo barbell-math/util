@@ -108,11 +108,11 @@ func (i Iter[T])AppendTo(orig *[]T) (int,error) {
 // error occurs. If an error occurs then the slice will contain all the values 
 // that were recieved up until that point.
 func (i Iter[T])CollectInto(
-    container interface { types.Write[int,T]; types.SyncPassThrough },
+    container interface { types.Write[int,T]; types.Syncable },
     collectOp func(
-        container interface { types.Write[int,T]; types.SyncPassThrough }, 
+        container interface { types.Write[int,T]; types.Syncable }, 
         val T,
-    )error,
+    ) error,
 ) (int,error) {
     j:=0
     err:=i.SetupTeardown(

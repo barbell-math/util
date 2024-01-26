@@ -1,13 +1,18 @@
 package iter;
 
 import (
-//    "fmt"
-    customerr "github.com/barbell-math/util/err"
+    "github.com/barbell-math/util/customerr"
 )
 
-//ForEach is the only true consumer, all other consumers can be expressed using
-//ForEach making them pseudo-consumers. By using this pattern all pseudo-consumers
-//are abstracted away from the complex looping logic.
+// ForEach is the most ubuquitous consumer, most other consumers can be expressed 
+// using ForEach making them pseudo-consumers. By using this pattern all 
+// pseudo-consumers are abstracted away from the complex looping logic.
+
+// This funciton is a consumer.
+//
+// For each will take values from it's parent iterator and perform the supplied
+// operation function on each value, until an error occurs. If an error occurs
+// the operation function is not called and iteration stops.
 func (i Iter[T])ForEach(
         op func(index int, val T) (IteratorFeedback,error)) error {
     j:=0;

@@ -11,7 +11,7 @@ func BasicTest(expected any, got any, base string, t *testing.T){
     }
 }
 func FormatError(expected any, got any, base string, t *testing.T){
-    t.Error(fmt.Sprintf("Err: %s Expected: '%v' Got: '%v'",base,expected,got));
+    t.Error(fmt.Sprintf("Err: %s\nExpected: '%v'\nGot: '%v'",base,expected,got));
 }
 
 func SlicesMatch[T any](actual []T, generated []T, t *testing.T){
