@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"reflect"
 	"unsafe"
 
 	"github.com/barbell-math/util/container/staticContainers"
@@ -26,17 +27,15 @@ type Variant[T any, U any] struct {
 
 // The return type for these two functions has to be types.Variant because that
 // is what the interface expects. The interface cannot use a specific return
-// value because that would require the interface to import this package, creating
-// circular imports.
+// value because that would require the interface to import this package, 
+// creating circular imports.
 
 // Sets the variant to hold value type A, initilized with the value passed to 
 // the function. After calling this method the variant will panic if value
 // type B is attempted to be accessed.
 func (v Variant[T, U]) SetValA(newVal T) staticContainers.Variant[T, U] {
-	var tmpA T
-	var tmpB U
-	size:=unsafe.Sizeof(tmpA)
-	if bSize:=unsafe.Sizeof(tmpB); bSize>size {
+	size:=reflect.TypeOf((*T)(nil)).Elem().Size()
+	if bSize:=reflect.TypeOf((*U)(nil)).Elem().Size(); bSize>size {
 		size=bSize
 	}
 	v.data=make([]byte,size)
@@ -49,10 +48,8 @@ func (v Variant[T, U]) SetValA(newVal T) staticContainers.Variant[T, U] {
 // the function. After calling this method the variant will panic if value
 // type A is attempted to be accessed.
 func (v Variant[T, U]) SetValB(newVal U) staticContainers.Variant[T, U] {
-	var tmpA T
-	var tmpB U
-	size:=unsafe.Sizeof(tmpA)
-	if bSize:=unsafe.Sizeof(tmpB); bSize>size {
+	size:=reflect.TypeOf((*T)(nil)).Elem().Size()
+	if bSize:=reflect.TypeOf((*U)(nil)).Elem().Size(); bSize>size {
 		size=bSize
 	}
 	v.data=make([]byte,size)
