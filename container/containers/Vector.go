@@ -160,7 +160,6 @@ func (v *Vector[T,U])GetPntr(idx int) (*T,error){
     return nil,getIndexOutOfBoundsError(idx,0,len(*v))
 }
 
-// TODO - test
 // Contains will return true if the supplied value is in the vector, false
 // otherwise. All equality comparisons are performed by the generic U widget
 // type that the vector was initialized with.
@@ -175,7 +174,6 @@ func (v *Vector[T, U])Contains(val T) bool {
     return found
 }
 
-// TODO - test
 // KeyOf will return the index of the first occurrence of the supplied value
 // in the vector. If the value is not found then the returned index will be -1
 // and the boolean flag will be set to false. If the value is found then the
@@ -186,7 +184,7 @@ func (v *Vector[T, U])KeyOf(val T) (int,bool) {
     defer v.RUnlock()
     rv:=-1
     found:=false
-    var w widgets.Widget[T,U]
+    w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v) && !found; i++ {
         if found=w.Eq(&val,&(*v)[i]); found {
             rv=i
@@ -233,21 +231,37 @@ func (v *Vector[T,U])Push(idx int, vals ...T) error {
     return getIndexOutOfBoundsError(idx,0,len(*v))
 }
 
-// TODO -test
+// Pop will remove the first num occurrences of val in the vector. All equality 
+// comparisons are performed by the generic U widget type that the vector was 
+// initialized with. If num is <=0 then no values will be poped and the vector
+// will not change.
 func (v *Vector[T, U])Pop(val T, num int) int {
+    if num<=0 {
+        return 0
+    }
     v.Lock()
     defer v.Unlock()
     cntr:=0
+    prevIndex:=-1
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v); i++ {
-        if w.Eq(&val,&(*v)[i]) {
-            *v=append((*v)[:i],(*v)[i+1:]...)
+        if w.Eq(&val,&(*v)[i]) && cntr+1<=num {
+            if prevIndex==-1 {  // Initial value found
+                prevIndex=i
+            } else {
+                copy((*v)[prevIndex-cntr+1:i],(*v)[prevIndex+1:i])
+                prevIndex=i
+            }
             cntr++
             if cntr>=num {
                 break
             }
         }
     }
+    if prevIndex!=-1 {
+        copy((*v)[prevIndex-cntr+1:len(*v)],(*v)[prevIndex+1:len(*v)])
+    }
+    *v=(*v)[:len(*v)-cntr]
     return cntr
 }
 

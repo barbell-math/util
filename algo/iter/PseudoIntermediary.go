@@ -117,7 +117,7 @@ func (i Iter[T])Teardown(teardown func() error) Iter[T] {
     return i.SetupTeardown(func() error {return nil},teardown)
 }
 
-// TODO - reimpement
+// TODO - reimplement
 // // This function is an intermediary.
 // //
 // //Window cannot be tested here because it would cause a circular import with the 
@@ -132,13 +132,13 @@ func (i Iter[T])Teardown(teardown func() error) Iter[T] {
 // // allowPartials to false will enforce all returned windows to have length equal
 // // to the allowed capacity of the supplied queue. An error will stop iteration.
 // func Window[T any](i Iter[T],
-//     q interface{ staticType.Queue[T]; staticType.Vector[T] },
+//     q interface{ staticContainers.Queue[T]; staticContainers.Vector[T] },
 //     allowPartials bool,
-// ) Iter[staticType.Vector[T]] {
+// ) Iter[staticContainers.Vector[T]] {
 //     return Next(i,
 //     func(
 //         index int, val T, status IteratorFeedback,
-//     ) (IteratorFeedback, staticType.Vector[T], error) {
+//     ) (IteratorFeedback, staticContainers.Vector[T], error) {
 //         if status==Break {
 //             return Break,q,nil;
 //         }

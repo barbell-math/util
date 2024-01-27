@@ -1,7 +1,6 @@
 package containers
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/barbell-math/util/algo/iter"
@@ -249,10 +248,58 @@ func TestVectorGetPntr(t *testing.T){
     )
 }
 
+func vectorContainsHelper(l int, t *testing.T){
+    v,_:=NewVector[int,widgets.BuiltinInt](l)
+    for i:=0; i<l; i++ {
+	v.Emplace(i,i)
+    }
+    for i:=0; i<l; i++ {
+	test.BasicTest(true,v.Contains(i),
+	    "Contains returned a false negative.",t,
+	)
+    }
+    test.BasicTest(false,v.Contains(-1),
+	"Contains returned a false positive.",t,
+    )
+    test.BasicTest(false,v.Contains(l),
+	"Contains returned a false positive.",t,
+    )
+}
 func TestVectorContains(t *testing.T){
-    v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3,4,5})
-    fmt.Println(v.Contains(4))
-    fmt.Println(v.Contains(-4))
+    vectorContainsHelper(0,t)
+    vectorContainsHelper(1,t)
+    vectorContainsHelper(2,t)
+    vectorContainsHelper(5,t)
+}
+
+func vectorKeyOfHelper(l int, t *testing.T){
+    v,_:=NewVector[int,widgets.BuiltinInt](l)
+    for i:=0; i<l; i++ {
+	v.Emplace(i,i)
+    }
+    for i:=0; i<l; i++ {
+	k,found:=v.KeyOf(i)
+	test.BasicTest(i,k,
+	    "KeyOf did not return the correct index.",t,
+	)
+	test.BasicTest(true,found,
+	    "KeyOf returned a false negative.",t,
+	)
+    }
+    _,found:=v.KeyOf(-1)
+    test.BasicTest(false,found,
+	"KeyOf returned a false positive.",t,
+    )
+    _,found=v.KeyOf(-1)
+    test.BasicTest(false,v.Contains(l),
+	"KeyOf returned a false positive.",t,
+    )
+}
+func TestVectorKeyOf(t *testing.T){
+    vectorKeyOfHelper(0,t)
+    vectorKeyOfHelper(1,t)
+    vectorKeyOfHelper(2,t)
+    vectorKeyOfHelper(5,t)
 }
 
 func TestVectorEmplace(t *testing.T){
@@ -335,6 +382,54 @@ func TestVectorPush(t *testing.T){
     }
     for i:=0; i<5; i++ {
 	vectorPushHelper(i,5,t)
+    }
+}
+
+func vectorPopHelper(l int, num int, t *testing.T){
+    // fmt.Println("Permutation: l: ",l," num: ",num)
+    v,_:=NewVector[int,widgets.BuiltinInt](0)
+    for i:=0; i<l; i++ {
+	if i%4==0 {
+	    v.Append(-1)
+	} else {
+	    v.Append(i)
+	}
+    }
+    // fmt.Println("Init:   ",v)
+    n:=v.Pop(-1,num)
+    exp,_:=NewVector[int,widgets.BuiltinInt](0)
+    cntr:=0
+    for i:=0; i<l; i++ {
+	if i%4==0 {
+	    if cntr<num {
+	        cntr++
+	        continue
+	    } else {
+	        exp.Append(-1)
+	    }
+	} else {
+	    exp.Append(i)
+	}
+    }
+    test.BasicTest(len(exp),len(v),
+	"Pop did not remove value from the list correctly.",t,
+    )
+    test.BasicTest(cntr,n,
+	"Pop did not pop the correct number of values.",t,
+    )
+    // fmt.Println("EXP:    ",exp)
+    // fmt.Println("Final:  ",v)
+    for i:=0; i<len(v); i++ {
+	test.BasicTest(exp[i],v[i],
+	    "Pop did not shift the values correctly.",t,
+	)
+    }
+}
+func TestVectorPop(t *testing.T){
+    for i:=0; i<13; i++ {
+	for j:=0; j<13; j++ {
+	    vectorPopHelper(i,j,t)
+	}
     }
 }
 
