@@ -11,7 +11,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	// "text/template"
 )
 
 type Category byte
@@ -216,7 +215,7 @@ func viableFirstParam(fn *ast.FuncDecl, srcFile *os.File) (bool,string) {
 		}
 		src:=make([]byte,f.Results.End()-f.Results.Pos())
 		if _,err:=srcFile.Read(src); err==nil {
-			expSrcType:=fmt.Sprintf("%sContainers.%s*",VALS.Cat.String(),VALS.Type)
+			expSrcType:=fmt.Sprintf("%sContainers.%s*",VALS.Cat.String(),VALS.Interface)
 			if match,_:=regexp.Match(expSrcType,src); !match {
 				return false,fmt.Sprintf("Src type was not correct.\nExpected: %s\nGot: %s\n",expSrcType,string(src))
 			}
