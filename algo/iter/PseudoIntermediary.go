@@ -117,7 +117,7 @@ func (i Iter[T])Teardown(teardown func() error) Iter[T] {
     return i.SetupTeardown(func() error {return nil},teardown)
 }
 
-// TODO - reimplement
+// TODO - reimplement after circular queue is finished
 // // This function is an intermediary.
 // //
 // //Window cannot be tested here because it would cause a circular import with the 

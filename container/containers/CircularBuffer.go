@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/customerr"
 )
@@ -197,7 +198,6 @@ func (c *CircularBuffer[T,U])ForcePushFront(v T) {
     c.vals[c.startEnd.A]=v;
 }
 
-// TODO - make peek (pntr) back
 // Returns the value at index 0 if one is present. If the circular buffer has no 
 // elements then an error is returned.
 func (c *CircularBuffer[T,U])PeekFront() (T,error) {
@@ -216,6 +216,28 @@ func (c *CircularBuffer[T,U])PeekPntrFront() (*T,error) {
     defer c.RUnlock()
     if c.numElems>0 {
         return &c.vals[c.startEnd.A],nil
+    }
+    return nil,getIndexOutOfBoundsError(0,0,c.numElems)
+}
+
+// Returns the value at index len(circular buffer)-1 if one is present. If the 
+// circular buffer has no elements then an error is returned.
+func (c *CircularBuffer[T, U])PeekBack() (T,error) {
+    v,err:=c.PeekPntrBack();
+    if v!=nil {
+        return *v,err;
+    }
+    var tmp T;
+    return tmp,err;
+}
+
+// Returns a pointer to the value at index len(circular buffer)-1 if one is 
+// present. If the circular buffer has no elements then an error is returned.
+func (c *CircularBuffer[T, U])PeekPntrBack() (*T,error) {
+    c.RLock()
+    defer c.RUnlock()
+    if c.numElems>0 {
+        return &c.vals[c.startEnd.B],nil
     }
     return nil,getIndexOutOfBoundsError(0,0,c.numElems)
 }
@@ -243,9 +265,19 @@ func (c *CircularBuffer[T,U])GetPntr(idx int) (*T,error) {
     return nil,getIndexOutOfBoundsError(idx,0,c.numElems)
 }
 
-// TODO - implement
+// Contains will return true if the supplied value is in the vector, false
+// otherwise. All equality comparisons are performed by the generic U widget
+// type that the vector was initialized with.
 func (c *CircularBuffer[T, U])Contains(val T) bool {
-    return false
+    c.RLock()
+    defer c.RUnlock()
+    found:=false
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<c.numElems && !found; i++ {
+        properIndex:=c.getProperIndex(i)
+        found=w.Eq(&val,&c.vals[properIndex])
+    }
+    return found
 }
 
 // TODO - implement
@@ -315,7 +347,7 @@ func (c *CircularBuffer[T,U])insertMoveBack(v []T, idx int, maxVals int) {
     }
 }
 
-// Appends the supplied values to the circular buffer. A [Full] error will be
+// Appends the supplied values to the circular buffer. A [containerTypes.Full] error will be
 // returned if the circular buffer reaches it's capacity.
 func (c *CircularBuffer[T,U])Append(v ...T) error {
     c.Lock()
@@ -344,7 +376,22 @@ func (c *CircularBuffer[T,U])PopFront() (T,error) {
         return rv,nil;
     }
     var tmp T;
-    return tmp,Empty
+    return tmp,containerTypes.Empty
+}
+
+// Returns and removes the element at the back of the circular buffer. Returns 
+// an error if the circular buffer has no elements.
+func (c *CircularBuffer[T, U])PopBack() (T,error) {
+    c.Lock()
+    defer c.Unlock()
+    if c.numElems>0 {
+        rv:=c.vals[c.startEnd.B];
+        c.startEnd.B=c.decIndex(c.startEnd.B,1);
+        c.numElems--;
+        return rv,nil;
+    }
+    var tmp T;
+    return tmp,containerTypes.Empty
 }
 
 // Deletes the value at the specified index. If the index is >= the length of the
@@ -487,5 +534,5 @@ func (c *CircularBuffer[T,U])distanceFromBack(idx int) int{
 }
 
 func (c *CircularBuffer[T,U])getFullError() error {
-    return customerr.Wrap(Full,"Circular buffer size: %d",len(c.vals))
+    return customerr.Wrap(containerTypes.Full,"Circular buffer size: %d",len(c.vals))
 }

@@ -7,22 +7,41 @@ import (
 	"github.com/barbell-math/util/container/staticContainers"
 )
 
-// The type is used to determine which value is in a [Variant].
-type VariantFlag int
 
-const (
-	A VariantFlag = iota	// A value
-	B						// B value
+type (
+	// A variant type that can hold one of two types at a single time. The 
+	// underlying value can be accessed through methods of the variant. Trying 
+	// to access the wrong value will result in a panic unless a default value 
+	// is supplied. The size of the struct will be equal to the largest type 
+	// plus one byte which is used to specify which value is in the variant.
+	Variant[A any, B any] struct {
+		data []byte
+	}
+
+	variantFlag byte
 )
 
-// A variant type that can hold one of two types at a single time. The underlying
-// value can be accessed through methods of the variant. Trying to access the
-// wrong value will result in a panic unless a default value is supplied. The
-// size of the struct will be equal to the largest type plus the size of the
-// [VariantFlag].
-type Variant[T any, U any] struct {
-	data []byte
-	aOrB VariantFlag
+const (
+	aVal variantFlag = iota
+	bVal
+)
+
+func (v *Variant[A,B])initData() {
+	if len(v.data)==0 {
+		v.data=make([]byte,v.dataSize()+1)
+	}
+}
+
+func (v Variant[A,B])dataSize() uintptr {
+	size:=reflect.TypeOf((*A)(nil)).Elem().Size()
+	if bSize:=reflect.TypeOf((*B)(nil)).Elem().Size(); bSize>size {
+		size=bSize
+	}
+	return size
+}
+
+func (v Variant[A,B])dataStart() unsafe.Pointer {
+	return unsafe.Pointer(&v.data[1])
 }
 
 // The return type for these two functions has to be types.Variant because that
@@ -33,58 +52,50 @@ type Variant[T any, U any] struct {
 // Sets the variant to hold value type A, initilized with the value passed to 
 // the function. After calling this method the variant will panic if value
 // type B is attempted to be accessed.
-func (v Variant[T, U]) SetValA(newVal T) staticContainers.Variant[T, U] {
-	size:=reflect.TypeOf((*T)(nil)).Elem().Size()
-	if bSize:=reflect.TypeOf((*U)(nil)).Elem().Size(); bSize>size {
-		size=bSize
-	}
-	v.data=make([]byte,size)
-	*(*T)(unsafe.Pointer(&v.data))=newVal
-	v.aOrB = A
+func (v Variant[A,B]) SetValA(newVal A) staticContainers.Variant[A,B] {
+	v.initData()
+	v.data[0]=byte(aVal)
+	*(*A)(v.dataStart())=newVal
 	return v
 }
 
 // Sets the variant to hold value type B, initilized with the value passed to 
 // the function. After calling this method the variant will panic if value
 // type A is attempted to be accessed.
-func (v Variant[T, U]) SetValB(newVal U) staticContainers.Variant[T, U] {
-	size:=reflect.TypeOf((*T)(nil)).Elem().Size()
-	if bSize:=reflect.TypeOf((*U)(nil)).Elem().Size(); bSize>size {
-		size=bSize
-	}
-	v.data=make([]byte,size)
-	*(*U)(unsafe.Pointer(&v.data))=newVal
-	v.aOrB = B
+func (v Variant[A,B]) SetValB(newVal B) staticContainers.Variant[A,B] {
+	v.initData()
+	v.data[0]=byte(bVal)
+	*(*B)(v.dataStart())=newVal
 	return v
 }
 
 // Returns true if the variant holds value A.
-func (v Variant[T, U]) HasA() bool { return v.aOrB == A }
+func (v Variant[A,B]) HasA() bool { return v.data[0]==byte(aVal) }
 // Returns true if the variant holds value B.
-func (v Variant[T, U]) HasB() bool { return v.aOrB == B }
+func (v Variant[A,B]) HasB() bool { return v.data[0]==byte(bVal) }
 
 // Attempts to return value A from the variant. Panics if the variant does not
 // hold type A.
-func (v Variant[T, U]) ValA() T {
-	if v.aOrB!=A{
+func (v Variant[A,B]) ValA() A {
+	if !v.HasA() {
 		panic("Variant does not contain type A!")
 	}
-	return *(*T)(unsafe.Pointer(&v.data))
+	return *(*A)(v.dataStart())
 }
 
 // Attempts to return value B from the variant. Panics if the variant does not
 // hold type B.
-func (v Variant[T, U]) ValB() U {
-	if v.aOrB!=B{
+func (v Variant[A,B]) ValB() B {
+	if !v.HasB() {
 		panic("Variant does not contain type B!")
 	}
-	return *(*U)(unsafe.Pointer(&v.data))
+	return *(*B)(v.dataStart())
 }
 
 // Attempts to return value A from the variant. If the variant does not hold
 // type A then it will return the default value.
-func (v Variant[T, U]) ValAOr(_default T) T {
-	if v.aOrB == A {
+func (v Variant[A,B]) ValAOr(_default A) A {
+	if v.HasA() {
 		return v.ValA()
 	}
 	return _default
@@ -92,8 +103,8 @@ func (v Variant[T, U]) ValAOr(_default T) T {
 
 // Attempts to return value B from the variant. If the variant does not hold
 // type B then it will return the default value.
-func (v Variant[T, U]) ValBOr(_default U) U {
-	if v.aOrB == B {
+func (v Variant[A,B]) ValBOr(_default B) B {
+	if v.HasB() {
 		return v.ValB()
 	}
 	return _default

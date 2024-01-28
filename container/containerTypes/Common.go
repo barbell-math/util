@@ -7,9 +7,10 @@ import "math"
 
 
 const (
+    // A constant that may be passed to the pop function of the [DeleteOps] 
+    // interface to specify popping all values.
     PopAll int=math.MaxInt
 )
-
 
 // The interface that the RWMutex exposes.
 type RWSyncable interface {

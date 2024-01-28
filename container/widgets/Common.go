@@ -61,6 +61,8 @@ func (w *Widget[T, I])Hash(v *T) uint64 {
     return w.iFace.Hash(v)
 }
 
+//go:generate go run widgetInterfaceImpl.go -package=widgets -type=byte
+
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=int
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=int8
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=int16

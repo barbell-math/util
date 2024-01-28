@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/customerr"
 )
@@ -214,7 +215,7 @@ func (v *Vector[T,U])Append(vals ...T) error {
     return nil
 }
 
-// Pushes (inserts)the supplied values at the given index. Returns an error if 
+// Pushes (inserts) the supplied values at the given index. Returns an error if 
 // the index is >= the length of the vector.
 // For time complexity see the InsertVector section of:
 // https://go.dev/wiki/SliceTricks
@@ -345,7 +346,7 @@ func (v *Vector[T,U])PopFront() (T,error) {
         return rv,nil
     }
     var tmp T
-    return tmp,customerr.Wrap(Empty,"Nothing to pop!")
+    return tmp,customerr.Wrap(containerTypes.Empty,"Nothing to pop!")
 }
 
 // Returns and removes the element at the back of the vector. Returns an error
@@ -359,7 +360,7 @@ func (v *Vector[T,U])PopBack() (T,error) {
         return rv,nil
     }
     var tmp T
-    return tmp,customerr.Wrap(Empty,"Nothing to pop!")
+    return tmp,customerr.Wrap(containerTypes.Empty,"Nothing to pop!")
 }
 
 // Pushes an element to the back of the vector. Equivalent to appending a single

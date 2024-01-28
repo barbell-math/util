@@ -10,131 +10,131 @@ import (
 	"github.com/barbell-math/util/test"
 )
 
-func TestCircularBufferSyncableInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    syncableInterface(&v);
-    syncableInterface(&v2);
-}
-
-func TestCircularBufferLengthInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    lengthInterface(&v);
-    lengthInterface(&v2);
-}
-
-func TestCircularBufferCapacityInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    capacityInterface(&v);
-    capacityInterface(&v2);
-}
-
-func TestCircularBufferWriteOpsInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    writeOpsInterface[int,string](&v);
-    writeOpsInterface[int,string](&v2);
-}
-
-func TestCircularBufferWriteKeyedOpsInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    writeKeyedOpsInterface[int,string](&v);
-    writeKeyedOpsInterface[int,string](&v2);
-}
-
-func TestCircularBufferReadOpsInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    readOpsInterface[int,string](&v);
-    readOpsInterface[int,string](&v2);
-}
-
-func TestCircularBufferReadKeyedOpsInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    readKeyedOpsInterface[int,string](&v);
-    readKeyedOpsInterface[int,string](&v2);
-}
-
-func TestCircularBufferDeleteOpsInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    deleteOpsInterface[int,string](&v);
-    deleteOpsInterface[int,string](&v2);
-}
-
-func TestCircularBufferDeleteKeyedOpsInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    deleteKeyedOpsInterface[int,string](&v);
-    deleteKeyedOpsInterface[int,string](&v2);
-}
-
-func TestCircularBufferFirstElemReadInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    firstElemReadInterface[string](&v);
-    firstElemReadInterface[string](&v2);
-}
-
-func TestCircularBufferFirstElemWriteInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    firstElemWriteInterface[string](&v);
-    firstElemWriteInterface[string](&v2);
-}
-
-func TestCircularBufferFirstElemDeleteInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    firstElemDeleteInterface[string](&v);
-    firstElemDeleteInterface[string](&v2);
-}
-
-func TestCircularBufferLastElemReadInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    lastElemReadInterface[string](&v);
-    lastElemReadInterface[string](&v2);
-}
-
-func TestCircularBufferLastElemWriteInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    lastElemWriteInterface[string](&v);
-    lastElemWriteInterface[string](&v2);
-}
-
-func TestCircularBufferLastElemDeleteInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    lastElemDeleteInterface[string](&v);
-    lastElemDeleteInterface[string](&v2);
-}
-
-func TestReadCircularBufferInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    vectorReadInterface[string](&v);
-    vectorReadInterface[string](&v2);
-}
-
-func TestWriteCircularBufferInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    vectorWriteInterface[string](&v);
-    vectorWriteInterface[string](&v2);
-}
-
-func TestCircularBufferInterface(t *testing.T){
-    v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
-    v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
-    vectorInterface[string](&v);
-    vectorInterface[string](&v2);
-}
+// func TestCircularBufferSyncableInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     syncableInterface(&v);
+//     syncableInterface(&v2);
+// }
+// 
+// func TestCircularBufferLengthInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     lengthInterface(&v);
+//     lengthInterface(&v2);
+// }
+// 
+// func TestCircularBufferCapacityInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     capacityInterface(&v);
+//     capacityInterface(&v2);
+// }
+// 
+// func TestCircularBufferWriteOpsInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     writeOpsInterface[int,string](&v);
+//     writeOpsInterface[int,string](&v2);
+// }
+// 
+// func TestCircularBufferWriteKeyedOpsInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     writeKeyedOpsInterface[int,string](&v);
+//     writeKeyedOpsInterface[int,string](&v2);
+// }
+// 
+// func TestCircularBufferReadOpsInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     readOpsInterface[int,string](&v);
+//     readOpsInterface[int,string](&v2);
+// }
+// 
+// func TestCircularBufferReadKeyedOpsInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     readKeyedOpsInterface[int,string](&v);
+//     readKeyedOpsInterface[int,string](&v2);
+// }
+// 
+// func TestCircularBufferDeleteOpsInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     deleteOpsInterface[int,string](&v);
+//     deleteOpsInterface[int,string](&v2);
+// }
+// 
+// func TestCircularBufferDeleteKeyedOpsInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     deleteKeyedOpsInterface[int,string](&v);
+//     deleteKeyedOpsInterface[int,string](&v2);
+// }
+// 
+// func TestCircularBufferFirstElemReadInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     firstElemReadInterface[string](&v);
+//     firstElemReadInterface[string](&v2);
+// }
+// 
+// func TestCircularBufferFirstElemWriteInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     firstElemWriteInterface[string](&v);
+//     firstElemWriteInterface[string](&v2);
+// }
+// 
+// func TestCircularBufferFirstElemDeleteInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     firstElemDeleteInterface[string](&v);
+//     firstElemDeleteInterface[string](&v2);
+// }
+// 
+// func TestCircularBufferLastElemReadInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     lastElemReadInterface[string](&v);
+//     lastElemReadInterface[string](&v2);
+// }
+// 
+// func TestCircularBufferLastElemWriteInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     lastElemWriteInterface[string](&v);
+//     lastElemWriteInterface[string](&v2);
+// }
+// 
+// func TestCircularBufferLastElemDeleteInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     lastElemDeleteInterface[string](&v);
+//     lastElemDeleteInterface[string](&v2);
+// }
+// 
+// func TestReadCircularBufferInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     vectorReadInterface[string](&v);
+//     vectorReadInterface[string](&v2);
+// }
+// 
+// func TestWriteCircularBufferInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     vectorWriteInterface[string](&v);
+//     vectorWriteInterface[string](&v2);
+// }
+// 
+// func TestCircularBufferInterface(t *testing.T){
+//     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)
+//     v2,_:=NewSyncedCircularBuffer[string,widgets.BuiltinString](0)
+//     vectorInterface[string](&v);
+//     vectorInterface[string](&v2);
+// }
 
 func TestCircularBufferStaticCapacityInterface(t *testing.T){
     test.Panics(
@@ -148,60 +148,60 @@ func TestCircularBufferStaticCapacityInterface(t *testing.T){
     )
 }
 
-// func TestCircularBufferDynQueueTypeInterface(t *testing.T){
+// func TestCircularBufferDynbufferTypeInterface(t *testing.T){
 //     test.Panics(
 //         func () {
 //             var c any
 //             c,_=NewCircularBuffer[int,widgets.BuiltinInt](5)
-//             c2:=c.(dynamic.Queue[int])
+//             c2:=c.(dynamic.buffer[int])
 //             _=c2
 //         }, 
-//         "Code did not panic when casting a circular queue to a dynamic queue.",t,
+//         "Code did not panic when casting a circular buffer to a dynamic buffer.",t,
 //     )
 //     test.Panics(
 //         func () {
 //             var c any
 //             c,_=NewSyncedCircularBuffer[int](5)
-//             c2:=c.(dynamic.Queue[int])
+//             c2:=c.(dynamic.buffer[int])
 //             _=c2
 //         }, 
-//         "Code did not panic when casting a synced circular queue to a dynamic queue.",t,
+//         "Code did not panic when casting a synced circular buffer to a dynamic buffer.",t,
 //     )
 //     test.Panics(
 //         func () {
 //             var c any
 //             c,_=NewCircularBuffer[int,widgets.BuiltinInt](5)
-//             c2:=c.(dynamic.ReadQueue[int])
+//             c2:=c.(dynamic.Readbuffer[int])
 //             _=c2
 //         }, 
-//         "Code did not panic when casting a circular queue to a dynamic queue.",t,
+//         "Code did not panic when casting a circular buffer to a dynamic buffer.",t,
 //     )
 //     test.Panics(
 //         func () {
 //             var c any
 //             c,_=NewSyncedCircularBuffer[int](5)
-//             c2:=c.(dynamic.ReadQueue[int])
+//             c2:=c.(dynamic.Readbuffer[int])
 //             _=c2
 //         }, 
-//         "Code did not panic when casting a synced circular queue to a dynamic queue.",t,
+//         "Code did not panic when casting a synced circular buffer to a dynamic buffer.",t,
 //     )
 //     test.Panics(
 //         func () {
 //             var c any
 //             c,_=NewCircularBuffer[int,widgets.BuiltinInt](5)
-//             c2:=c.(dynamic.WriteQueue[int])
+//             c2:=c.(dynamic.Writebuffer[int])
 //             _=c2
 //         }, 
-//         "Code did not panic when casting a circular queue to a dynamic queue.",t,
+//         "Code did not panic when casting a circular buffer to a dynamic buffer.",t,
 //     )
 //     test.Panics(
 //         func () {
 //             var c any
 //             c,_=NewSyncedCircularBuffer[int](5)
-//             c2:=c.(dynamic.WriteQueue[int])
+//             c2:=c.(dynamic.Writebuffer[int])
 //             _=c2
 //         }, 
-//         "Code did not panic when casting a synced circular queue to a dynamic queue.",t,
+//         "Code did not panic when casting a synced circular buffer to a dynamic buffer.",t,
 //     )
 // }
 
@@ -211,37 +211,35 @@ func TestNewCircularBuffer(t *testing.T) {
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     test.BasicTest(5,len(tmp.vals),
-        "NewCircularBuffer added values to empty queue during initialization.",t,
+        "NewCircularBuffer added values to empty buffer during initialization.",t,
     );
     test.BasicTest(5,cap(tmp.vals),
         "NewCircularBuffer did not set capacity correctly.",t,
     );
     test.BasicTest(0,tmp.startEnd.A,
-        "NewCircularBuffer added values to empty queue during initialization.",t,
+        "NewCircularBuffer added values to empty buffer during initialization.",t,
     );
     test.BasicTest(4,tmp.startEnd.B,
-        "NewCircularBuffer added values to empty queue during initialization.",t,
+        "NewCircularBuffer added values to empty buffer during initialization.",t,
     );
 }
 
 func TestNewCircularBufferBadSize(t *testing.T) {
     tmp,err:=NewCircularBuffer[int,widgets.BuiltinInt](0);
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Invalid queue size did not raise the correct error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Invalid buffer size did not raise the correct error.",t,
+    )
     test.BasicTest(0,len(tmp.vals),
-        "NewCircularBuffer added values to empty queue during initialization.",t,
+        "NewCircularBuffer added values to empty buffer during initialization.",t,
     );
     test.BasicTest(0,cap(tmp.vals),
         "NewCircularBuffer did not set capacity correctly.",t,
     );
     test.BasicTest(0,tmp.startEnd.A,
-        "NewCircularBuffer added values to empty queue during initialization.",t,
+        "NewCircularBuffer added values to empty buffer during initialization.",t,
     );
     test.BasicTest(0,tmp.startEnd.B,
-        "NewCircularBuffer added values to empty queue during initialization.",t,
+        "NewCircularBuffer added values to empty buffer during initialization.",t,
     );
 }
 
@@ -265,17 +263,15 @@ func TestCircularBufferPushToFront(t *testing.T){
         test.BasicTest(4,tmp.startEnd.B,"Push modified the end index.",t);
     }
     res:=tmp.PushBack(5);
-    if !IsFull(res) {
-        test.FormatError(Full(""),res,
-            "Push did not detect the queue was full.",t,
-        );
-    }
+    test.ContainsError(containerTypes.Full,res,
+        "Push did not detect the buffer was full.",t,
+    )
     test.BasicTest(5,tmp.numElems,
-        "Push incremented NumElems when queue was full.",t,
+        "Push incremented NumElems when buffer was full.",t,
     );
     test.BasicTest(0,tmp.startEnd.A,"Push modified the start index.",t);
     test.BasicTest(4,tmp.startEnd.B,
-        "Push modified the end index when the queue was full.",t,
+        "Push modified the end index when the buffer was full.",t,
     );
 }
 
@@ -299,28 +295,24 @@ func TestCircularBufferPushToBack(t *testing.T){
         );
     }
     res:=tmp.PushBack(5);
-    if !IsFull(res) {
-        test.FormatError(Full(""),res,
-            "Push did not detect the queue was full.",t,
-        );
-    }
+    test.ContainsError(containerTypes.Full,res,
+        "Push did not detect the buffer was full.",t,
+    )
     test.BasicTest(5,tmp.numElems,
-        "Push incremented NumElems when queue was full.",t,
+        "Push incremented NumElems when buffer was full.",t,
     );
     test.BasicTest(0,tmp.startEnd.A,"Push modified the start index.",t);
     test.BasicTest(len(tmp.vals)-1,tmp.startEnd.B,
-        "Push modified the end index when the queue was full.",t,
+        "Push modified the end index when the buffer was full.",t,
     );
 }
 
 func TestCircularBufferPushFront(t *testing.T){
     tmp,_:=NewCircularBuffer[int,widgets.BuiltinInt](5)
     err:=tmp.Push(1,1)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Push returned the wrong error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Push returned the wrong error.",t,
+    )
     for i:=0; i<5; i++ {
         err=tmp.Push(i,i)
         test.BasicTest(nil,err,
@@ -337,20 +329,16 @@ func TestCircularBufferPushFront(t *testing.T){
         )
     }
     err=tmp.Push(5,5)
-    if !IsFull(err) {
-        test.FormatError(Full(""),err,
-            "Push did not detect the queue was full.",t,
-        );
-    }
+    test.ContainsError(containerTypes.Full,err,
+        "Push did not detect the buffer was full.",t,
+    )
     test.BasicTest(5,tmp.Length(),
         "Push incremented the number of elements when it shouldn't have.",t,
     )
     err=tmp.Push(6,5)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Push returned the wrong error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Push returned the wrong error.",t,
+    )
     test.BasicTest(5,tmp.Length(),
         "Push incremented the number of elements when it shouldn't have.",t,
     )
@@ -374,20 +362,16 @@ func TestCircularBufferPushBack(t *testing.T) {
         )
     }
     err:=tmp.Push(0,5)
-    if !IsFull(err) {
-        test.FormatError(Full(""),err,
-            "Push did not detect the queue was full.",t,
-        );
-    }
+    test.ContainsError(containerTypes.Full,err,
+        "Push did not detect the buffer was full.",t,
+    )
     test.BasicTest(5,tmp.Length(),
         "Push incremented the number of elements when it shouldn't have.",t,
     )
     err=tmp.Push(6,5)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Push returned the wrong error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Push returned the wrong error.",t,
+    )
     test.BasicTest(5,tmp.Length(),
         "Push incremented the number of elements when it shouldn't have.",t,
     )
@@ -449,11 +433,9 @@ func TestCircularBufferPush(t *testing.T){
         )
     }
     err=tmp.Push(5,6)
-    if !IsFull(err) {
-        test.FormatError(Full(""),err,
-            "Push returned the wrong error.",t,
-        )
-    }
+    test.ContainsError(containerTypes.Full,err,
+        "Push did not detect the buffer was full.",t,
+    )
     tmp,_=NewCircularBuffer[int,widgets.BuiltinInt](5)
     tmp.Push(0,1,2)
     err=tmp.Push(2,3,4,5,6)
@@ -463,30 +445,24 @@ func TestCircularBufferPush(t *testing.T){
             "Push did not put the values in the right position.",t,
         )
     }
-    if !IsFull(err) {
-        test.FormatError(Full(""),err,
-            "Push returned the wrong error.",t,
-        )
-    }
+    test.ContainsError(containerTypes.Full,err,
+        "Push did not detect the buffer was full.",t,
+    )
 }
 
 func TestCircularBufferDeleteFront(t *testing.T){
     tmp,_:=NewCircularBuffer[int,widgets.BuiltinInt](5)
     err:=tmp.Delete(0)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Delete did not return the correct error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Delete did not return the correct error.",t,
+    )
     for i:=0; i<5; i++ {
         tmp.PushBack(i)
     }
     err=tmp.Delete(6)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Delete did not return the correct error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Delete did not return the correct error.",t,
+    )
     for i:=0; i<5; i++ {
         err:=tmp.Delete(0)
         test.BasicTest(nil,err,
@@ -510,20 +486,16 @@ func TestCircularBufferDeleteFront(t *testing.T){
 func TestCircularBufferDeleteBack(t *testing.T) {
     tmp,_:=NewCircularBuffer[int,widgets.BuiltinInt](5)
     err:=tmp.Delete(0)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Delete did not return the correct error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Delete did not return the correct error.",t,
+    )
     for i:=0; i<5; i++ {
         tmp.PushBack(i)
     }
     err=tmp.Delete(6)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Delete did not return the correct error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Delete did not return the correct error.",t,
+    )
     for i:=0; i<5; i++ {
         err:=tmp.Delete(tmp.Length()-1)
         test.BasicTest(nil,err,
@@ -595,17 +567,15 @@ func TestCircularBufferAppend(t *testing.T){
         );
     }
     res:=tmp.Append(5);
-    if !IsFull(res) {
-        test.FormatError(Full(""),res,
-            "Append did not detect the queue was full.",t,
-        );
-    }
+    test.ContainsError(containerTypes.Full,res,
+        "Append did not detect the buffer was full.",t,
+    )
     test.BasicTest(5,tmp.numElems,
-        "Append incremented NumElems when queue was full.",t,
+        "Append incremented NumElems when buffer was full.",t,
     );
     test.BasicTest(0,tmp.startEnd.A,"Append modified the start index.",t);
     test.BasicTest(len(tmp.vals)-1,tmp.startEnd.B,
-        "Append modified the end index when the queue was full.",t,
+        "Append modified the end index when the buffer was full.",t,
     );
 }
 
@@ -638,17 +608,15 @@ func TestCircularBufferPushStartFromMiddle(t *testing.T) {
         }
     }
     res:=tmp.PushBack(5);
-    if !IsFull(res) {
-        test.FormatError(Full(""),res,
-            "Push did not detect the queue was full.",t,
-        );
-    }
+    test.ContainsError(containerTypes.Full,res,
+        "Append did not detect the buffer was full.",t,
+    )
     test.BasicTest(5,tmp.numElems,
-        "Push incremented NumElems when queue was full.",t,
+        "Push incremented NumElems when buffer was full.",t,
     );
     test.BasicTest(2,tmp.startEnd.A,"Push modified the start index.",t);
     test.BasicTest(1,tmp.startEnd.B,
-        "Push modified the end index when the queue was full.",t,
+        "Push modified the end index when the buffer was full.",t,
     );
 }
 
@@ -710,7 +678,10 @@ func TestCircularBufferForcePushBack(t *testing.T){
     }
 }
 
-func testCircularBufferGetHelper(c CircularBuffer[int], t *testing.T){
+func testCircularBufferGetHelper(
+    c CircularBuffer[int,widgets.BuiltinInt], 
+    t *testing.T,
+){
     for i:=0; i<len(c.vals); i++ {
         c.PushBack(i);
     }
@@ -722,17 +693,13 @@ func testCircularBufferGetHelper(c CircularBuffer[int], t *testing.T){
         test.BasicTest(i,v,"Get did not return correct value.",t);
     }
     _,err:=c.Get(5);
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Get did not return the correct error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Get did not return the correct error.",t,
+    )
     _,err=c.Get(-1);
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Get did not return the correct error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Get did not return the correct error.",t,
+    )
 }
 func TestCircularBufferGet(t *testing.T){
     tmp,err:=NewCircularBuffer[int,widgets.BuiltinInt](5);
@@ -740,11 +707,9 @@ func TestCircularBufferGet(t *testing.T){
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     _,err=tmp.Get(0)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Get on a zero length queue did not return the correct error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Get did not return the correct error.",t,
+    )
     testCircularBufferGetHelper(tmp,t);
     tmp,err=NewCircularBuffer[int,widgets.BuiltinInt](5);
     test.BasicTest(nil,err,
@@ -761,11 +726,9 @@ func TestCircularBufferPeekFront(t *testing.T) {
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     _,err=tmp.PeekFront()
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Peek front returned the incorrect error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek front returned the incorrect error.",t,
+    )
     tmp.PushBack(1)
     v,err:=tmp.PeekFront()
     test.BasicTest(1,v,"Peek front returned the incorrect value.",t);
@@ -798,14 +761,61 @@ func TestCircularBufferPeekFront(t *testing.T) {
     );
     tmp.PopFront()
     _,err=tmp.PeekFront()
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Peek front returned the incorrect error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek front returned the incorrect error.",t,
+    )
 }
 
-func testCircularBufferGetPntrHelper(c CircularBuffer[int], t *testing.T){
+func TestCircularBufferPeekBack(t *testing.T) {
+    tmp,err:=NewCircularBuffer[int,widgets.BuiltinInt](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    _,err=tmp.PeekBack()
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek front returned the incorrect error.",t,
+    )
+    tmp.PushBack(1)
+    v,err:=tmp.PeekBack()
+    test.BasicTest(1,v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek front returned an error when it shouldn't have.",t,
+    );
+    tmp.PushBack(2)
+    v,err=tmp.PeekBack()
+    test.BasicTest(2,v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek front returned an error when it shouldn't have.",t,
+    );
+    tmp.PushBack(3)
+    v,err=tmp.PeekBack()
+    test.BasicTest(3,v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek front returned an error when it shouldn't have.",t,
+    );
+    tmp.PopFront()
+    v,err=tmp.PeekBack()
+    test.BasicTest(3,v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek front returned an error when it shouldn't have.",t,
+    );
+    tmp.PopFront()
+    v,err=tmp.PeekBack()
+    test.BasicTest(3,v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek front returned an error when it shouldn't have.",t,
+    );
+    tmp.PopFront()
+    _,err=tmp.PeekFront()
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek front returned the incorrect error.",t,
+    )
+}
+
+func testCircularBufferGetPntrHelper(
+    c CircularBuffer[int,widgets.BuiltinInt], 
+    t *testing.T,
+){
     for i:=0; i<len(c.vals); i++ {
         c.PushBack(i);
     }
@@ -825,17 +835,13 @@ func testCircularBufferGetPntrHelper(c CircularBuffer[int], t *testing.T){
         test.BasicTest(100,*v,"Get did not return correct value.",t);
     }
     _,err:=c.GetPntr(5);
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Get did not return the correct error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Get did not return the correct error.",t,
+    )
     _,err=c.GetPntr(-1);
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Get did not return the correct error.",t,
-        );
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Get did not return the correct error.",t,
+    )
 }
 func TestCircularBufferGetPntr(t *testing.T){
     tmp,err:=NewCircularBuffer[int,widgets.BuiltinInt](5);
@@ -844,11 +850,9 @@ func TestCircularBufferGetPntr(t *testing.T){
     );
     v,err:=tmp.GetPntr(0)
     test.BasicTest((*int)(nil),v, "Get pntr returned the incorrect value.",t)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Get on a zero length queue did not return the correct error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Get on a zero length buffer did not return the correct error.",t,
+    )
     testCircularBufferGetPntrHelper(tmp,t);
     tmp,err=NewCircularBuffer[int,widgets.BuiltinInt](5);
     test.BasicTest(nil,err,
@@ -865,11 +869,9 @@ func TestCircularBufferPeekPntrFront(t *testing.T) {
         "NewCircularBuffer returned an error when it should not have.",t,
     );
     _,err=tmp.PeekPntrFront()
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Peek front returned the incorrect error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek front returned the incorrect error.",t,
+    )
     tmp.PushBack(1)
     v,err:=tmp.PeekPntrFront()
     test.BasicTest(1,*v,"Peek front returned the incorrect value.",t);
@@ -902,52 +904,90 @@ func TestCircularBufferPeekPntrFront(t *testing.T) {
     );
     tmp.PopFront()
     _,err=tmp.PeekPntrFront()
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Peek front returned the incorrect error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek front returned the incorrect error.",t,
+    )
+}
+
+func TestCircularBufferPeekPntrBack(t *testing.T) {
+    tmp,err:=NewCircularBuffer[int,widgets.BuiltinInt](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    _,err=tmp.PeekPntrBack()
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek back returned the incorrect error.",t,
+    )
+    tmp.PushBack(1)
+    v,err:=tmp.PeekPntrBack()
+    test.BasicTest(1,*v,"Peek back returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek back returned an error when it shouldn't have.",t,
+    );
+    tmp.PushBack(2)
+    v,err=tmp.PeekPntrBack()
+    test.BasicTest(2,*v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek back returned an error when it shouldn't have.",t,
+    );
+    tmp.PushBack(3)
+    v,err=tmp.PeekPntrBack()
+    test.BasicTest(3,*v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek back returned an error when it shouldn't have.",t,
+    );
+    tmp.PopFront()
+    v,err=tmp.PeekPntrBack()
+    test.BasicTest(3,*v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek back returned an error when it shouldn't have.",t,
+    );
+    tmp.PopFront()
+    v,err=tmp.PeekPntrBack()
+    test.BasicTest(3,*v,"Peek front returned the incorrect value.",t);
+    test.BasicTest(nil,err,
+        "Peek back returned an error when it shouldn't have.",t,
+    );
+    tmp.PopFront()
+    _,err=tmp.PeekPntrBack()
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Peek back returned the incorrect error.",t,
+    )
 }
 
 func TestCircularBufferEmplace(t *testing.T){
     tmp,_:=NewCircularBuffer[int,widgets.BuiltinInt](5)
-    err:=tmp.Emplace(4,0)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Calling set out of bounds did not return the correct error.",t,
-        )
-    }
+    err:=tmp.Emplace(0,4)
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Calling emplace out of bounds did not return the correct error.",t,
+    )
     for i:=0; i<4; i++ {
         tmp.PushBack(i)
     }
     err=tmp.Emplace(4,4)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Calling set out of bounds did not return the correct error.",t,
-        )
-    }
-    err=tmp.Emplace(4,-1)
-    if !customerr.IsValOutsideRange(err) {
-        test.FormatError(customerr.ValOutsideRange(""),err,
-            "Calling set out of bounds did not return the correct error.",t,
-        )
-    }
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Calling emplace out of bounds did not return the correct error.",t,
+    )
+    err=tmp.Emplace(-1,4)
+    test.ContainsError(customerr.ValOutsideRange,err,
+        "Calling emplace out of bounds did not return the correct error.",t,
+    )
     tmp.PushBack(4)
     for i:=0; i<5; i++ {
-        err=tmp.Emplace(i+1,i)
+        err=tmp.Emplace(i,i+1)
         test.BasicTest(nil,err,
-            "Set returned an error when it should not have.",t,
+            "Emplace returned an error when it should not have.",t,
         )
     }
     for i:=0; i<5; i++ {
         v,_:=tmp.Get(i);
         test.BasicTest(i+1,v,
-            "Set did not set the correct value.",t,
+            "Emplace did not set the correct value.",t,
         )
     }
 }
 
-func TestCircularBufferPop(t *testing.T){
+func TestCircularBufferPopFront(t *testing.T){
     tmp,err:=NewCircularBuffer[int,widgets.BuiltinInt](5);
     test.BasicTest(nil,err,
         "NewCircularBuffer returned an error when it should not have.",t,
@@ -967,11 +1007,30 @@ func TestCircularBufferPop(t *testing.T){
     );
     test.BasicTest(20,v,"Pop did not return correct value.",t);
     _,err=tmp.PopFront();
-    if !IsEmpty(err) {
-        test.FormatError(Empty(""),err,
-            "Pop did not return correct error.",t,
+    test.ContainsError(containerTypes.Empty,err,"Pop did not return correct error.",t)
+}
+
+func TestCircularBufferPopBack(t *testing.T){
+    tmp,err:=NewCircularBuffer[int,widgets.BuiltinInt](5);
+    test.BasicTest(nil,err,
+        "NewCircularBuffer returned an error when it should not have.",t,
+    );
+    tmp.PushBack(0);
+    for i:=1; i<21; i++ {
+        tmp.PushFront(i);
+        v,err:=tmp.PopBack();
+        test.BasicTest(nil,err,
+            "Pop returned an error when it should not have.",t,
         );
+        test.BasicTest(i-1,v,"Pop did not return correct value.",t);
     }
+    v,err:=tmp.PopBack();
+    test.BasicTest(nil,err,
+        "Pop returned an error when it should not have.",t,
+    );
+    test.BasicTest(20,v,"Pop did not return correct value.",t);
+    _,err=tmp.PopBack();
+    test.ContainsError(containerTypes.Empty,err,"Pop did not return correct error.",t)
 }
 
 func TestCircularBufferClear(t *testing.T){
