@@ -4,25 +4,27 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/test"
 )
 
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Vector -factory=generateVector -info
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Vector -factory=generateSyncedVector -info
-// //go:generate interfaceTest -type=Vector -category=dynamic -interface=Queue -info
-// //go:generate interfaceTest -type=Vector -category=dynamic -interface=Stack -info
-// //go:generate interfaceTest -type=Vector -category=dynamic -interface=Deque -info
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Vector -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Vector -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Deque -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Deque -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Queue -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Queue -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Stack -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Stack -factory=generateSyncedVector
 
-func generateVector() dynamicContainers.Vector[int,int] {
-    rv,_:=NewVector[int,widgets.BuiltinInt](0)
-    return &rv
+func generateVector() Vector[int,widgets.BuiltinInt] {
+    v,_:=NewVector[int,widgets.BuiltinInt](0)
+    return v
 }
 
-func generateSyncedVector() dynamicContainers.Vector[int,int] {
-    rv,_:=NewSyncedVector[int,widgets.BuiltinInt](0)
-    return &rv
+func generateSyncedVector() SyncedVector[int,widgets.BuiltinInt] {
+    v,_:=NewSyncedVector[int,widgets.BuiltinInt](0)
+    return v
 }
 
 func TestVectorTypeCasting(t *testing.T){

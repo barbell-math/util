@@ -26,6 +26,9 @@ type Length interface { Length() int }
 // An interface that allows access to the containers capacity.
 type Capacity interface { Capacity() int }
 
+// An iterface that allows a container to be cleared, deleting all values.
+type Clear interface { Clear() }
+
 // An interface that defines what it means to have static capacity. Note that
 // there is no DynamicCapacity interface, meaning that all containers are
 // considered to be dynamic by default and are only static if explicity stated
@@ -66,7 +69,6 @@ type DeleteOps[K any, V any] interface {
 type DeleteKeyedOps[K any, V any] interface {
     DeleteOps[K,V]
     Delete(idx K) error
-    Clear()
 }
 
 // An interface the enforces the implementation of read-only first element access.

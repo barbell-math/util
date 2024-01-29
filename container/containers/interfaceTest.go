@@ -83,14 +83,26 @@ func main() {
 	f.WriteString("import (\n")
 	f.WriteString("    \"testing\"\n")
 	f.WriteString("    \"github.com/barbell-math/util/container/tests\"\n")
+	f.WriteString("    \"github.com/barbell-math/util/container/dynamicContainers\"\n")
 	f.WriteString(")\n\n")
+	f.WriteString(fmt.Sprintf(
+		"func %sTo%sInterfaceFactory() %sContainers.%s[int,int] {\n",
+		VALS.Type,VALS.Interface,VALS.Cat.String(),VALS.Interface,
+	))
+	f.WriteString(fmt.Sprintf("    v:= %s()\n", VALS.Factory))
+	f.WriteString(fmt.Sprintf(
+		"    var rv %sContainers.%s[int,int]=&v\n",
+		VALS.Cat.String(),VALS.Interface,
+	))
+	f.WriteString("    return rv\n")
+	f.WriteString("}\n\n")
 
 	for _,iterFunc:=range(testFuncs) {
 		f.WriteString(fmt.Sprintf(
 			"func Test%s_%s(t *testing.T){\n"+
-			"    tests.%s(%s,t)\n"+
-			"}\n",
-			VALS.Type,iterFunc.Name,iterFunc.Name,VALS.Factory,
+			"    tests.%s(%sTo%sInterfaceFactory,t)\n"+
+			"}\n\n",
+			VALS.Type,iterFunc.Name,iterFunc.Name,VALS.Type,VALS.Interface,
 		))
 	}
 
@@ -140,7 +152,7 @@ func fileName() string {
 		case Static: category="Static"
 	}
 	return fmt.Sprintf(
-		"%s_%s_%sInterface_test.go",
+		"./%s_%s_%sInterface_test.go",
 		VALS.CapType,
 		category,
 		VALS.Interface,
@@ -148,11 +160,11 @@ func fileName() string {
 }
 
 func viableFuncs() []*ast.FuncDecl {
-	set:=token.NewFileSet()
+	fSet:=token.NewFileSet()
 	if VALS.ShowInfo {
 		fmt.Println("Locating appropriate funcs from tests dir.")
 	}
-    packs,err:=parser.ParseDir(set, "../tests", nil, 0)
+    packs,err:=parser.ParseDir(fSet, "../tests/", nil, 0)
 	if err != nil {
         fmt.Println("ERROR | Failed to parse package:", err)
         os.Exit(1)
@@ -169,7 +181,7 @@ func viableFuncs() []*ast.FuncDecl {
 					if VALS.ShowInfo {
 						fmt.Print("Found func: ",fd.Name,"| Status: ")
 					}
-					if ok,info:=hasViableSignature(fd,srcFile); ok {
+					if ok,info:=hasViableSignature(fd,srcFile,fSet); ok {
 						if VALS.ShowInfo {
 							fmt.Println("Accepted")
 						}
@@ -186,41 +198,26 @@ func viableFuncs() []*ast.FuncDecl {
 	return rv
 }
 
-func hasViableSignature(fn *ast.FuncDecl, srcFile *os.File) (bool,string) {
+func hasViableSignature(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet) (bool,string) {
 	if len(fn.Type.Params.List)!=2 {
 		return false,"Did not have two parameters."
 	}
-	if ok,info:=viableFirstParam(fn,srcFile); !ok {
+	if ok,info:=viableFirstParam(fn,srcFile, fSet); !ok {
 		return false,fmt.Sprintf("First Param error: %s",info)
 	}
-	if ok,info:=viableSecondParam(fn,srcFile); !ok {
+	if ok,info:=viableSecondParam(fn,srcFile, fSet); !ok {
 		return false,fmt.Sprintf("Second Param error: %s",info)
 	}
 	return true,""
 }
 
-func viableFirstParam(fn *ast.FuncDecl, srcFile *os.File) (bool,string) {
+func viableFirstParam(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet) (bool,string) {
 	if fn.Type.Params.List[0].Names[0].Name!=FirstParamName {
 		return false, fmt.Sprintf("Was not named %s",FirstParamName)
 	}
 	if f,ok:=fn.Type.Params.List[0].Type.(*ast.FuncType); ok {
-		if f.TypeParams!=nil {
-			return false, "Expected a function that accepted not arguments."
-		}
-		if f.Results.NumFields()!=1 {
-			return false,"Expected a function that returned a single value."
-		}
-		if _,err:=srcFile.Seek(int64(f.Results.Pos())-1,0); err!=nil {
-			return false,fmt.Sprintf("An error occurred seeking to the required location in the src file.\n%s",err.Error())
-		}
-		src:=make([]byte,f.Results.End()-f.Results.Pos())
-		if _,err:=srcFile.Read(src); err==nil {
-			expSrcType:=fmt.Sprintf("%sContainers.%s*",VALS.Cat.String(),VALS.Interface)
-			if match,_:=regexp.Match(expSrcType,src); !match {
-				return false,fmt.Sprintf("Src type was not correct.\nExpected: %s\nGot: %s\n",expSrcType,string(src))
-			}
-		} else {
-			return false,fmt.Sprintf("An error ocurred reading it's return type from the src file.\n%s",err.Error())
+		if res,info:=isViableFactory(f,srcFile,fSet); !res {
+			return false,info
 		}
 	} else {
 		return false,"Expected a function"
@@ -228,11 +225,33 @@ func viableFirstParam(fn *ast.FuncDecl, srcFile *os.File) (bool,string) {
 	return true,""
 }
 
-func viableSecondParam(fn *ast.FuncDecl, srcFile *os.File) (bool,string) {
+func isViableFactory(f *ast.FuncType, srcFile *os.File, fSet *token.FileSet) (bool,string) {
+	if f.TypeParams!=nil {
+		return false, "Expected a function that accepted not arguments."
+	}
+	if f.Results.NumFields()!=1 {
+		return false,"Expected a function that returned a single value."
+	}
+	if _,err:=srcFile.Seek(int64(fSet.Position(f.Results.Pos()).Offset),0); err!=nil {
+		return false,fmt.Sprintf("An error occurred seeking to the required location in the src file.\n%s",err.Error())
+	}
+	src:=make([]byte,f.Results.End()-f.Results.Pos())
+	if _,err:=srcFile.Read(src); err==nil {
+		expSrcType:=fmt.Sprintf("%sContainers.%s*",VALS.Cat.String(),VALS.Interface)
+		if match,_:=regexp.Match(expSrcType,src); !match {
+			return false,fmt.Sprintf("Src type was not correct.\nExpected: '%s'\nGot: '%s'\n",expSrcType,string(src))
+		}
+	} else {
+		return false,fmt.Sprintf("An error ocurred reading it's return type from the src file.\n%s",err.Error())
+	}
+	return true,""
+}
+
+func viableSecondParam(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet) (bool,string) {
 	if fn.Type.Params.List[1].Names[0].Name!=SecondParamName {
 		return false,fmt.Sprintf("Was not named: %s",SecondParamName)
 	}
-	if _,err:=srcFile.Seek(int64(fn.Type.Params.List[1].Pos())-1,0); err!=nil {
+	if _,err:=srcFile.Seek(int64(fSet.Position(fn.Type.Params.List[1].Pos()).Offset),0); err!=nil {
 		return false,fmt.Sprintf("An error occurred seeking to the required location in the src file.\n%s",err.Error())
 	}
 	src:=make([]byte,fn.Type.Params.List[1].End()-fn.Type.Params.List[1].Pos())
