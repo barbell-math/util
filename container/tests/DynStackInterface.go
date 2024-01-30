@@ -9,14 +9,14 @@ import (
 	"github.com/barbell-math/util/test"
 )
 
-func stackReadInterface[T ~int, U any](c dynamicContainers.ReadStack[T, U])   {}
-func stackWriteInterface[T ~int, U any](c dynamicContainers.WriteStack[T, U]) {}
-func stackInterface[T ~int, U any](c dynamicContainers.Stack[T, U])           {}
+func stackReadInterface[U any](c dynamicContainers.ReadStack[U])   {}
+func stackWriteInterface[U any](c dynamicContainers.WriteStack[U]) {}
+func stackInterface[U any](c dynamicContainers.Stack[U])           {}
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.RWSyncable] interface.
-func StackInterfaceSyncableInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceSyncableInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	var container containerTypes.RWSyncable = factory()
@@ -25,8 +25,8 @@ func StackInterfaceSyncableInterface[K ~int, V any](
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Length] interface.
-func StackInterfaceLengthInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceLengthInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	var container containerTypes.Length = factory()
@@ -35,8 +35,8 @@ func StackInterfaceLengthInterface[K ~int, V any](
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Capacity] interface.
-func StackInterfaceCapacityInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceCapacityInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	var container containerTypes.Capacity = factory()
@@ -45,8 +45,8 @@ func StackInterfaceCapacityInterface[K ~int, V any](
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Clear] interface.
-func StackInterfaceClearInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceClearInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	var container containerTypes.Clear = factory()
@@ -55,8 +55,8 @@ func StackInterfaceClearInterface[K ~int, V any](
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemRead] interface.
-func StackInterfaceLastElemReadInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceLastElemReadInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	var container containerTypes.LastElemRead[V] = factory()
@@ -65,8 +65,8 @@ func StackInterfaceLastElemReadInterface[K ~int, V any](
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemWrite] interface.
-func StackInterfaceLastElemWriteInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceLastElemWriteInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	var container containerTypes.LastElemWrite[V] = factory()
@@ -75,8 +75,8 @@ func StackInterfaceLastElemWriteInterface[K ~int, V any](
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemDelete] interface.
-func StackInterfaceLastElemDeleteInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceLastElemDeleteInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	var container containerTypes.LastElemDelete[V] = factory()
@@ -85,35 +85,35 @@ func StackInterfaceLastElemDeleteInterface[K ~int, V any](
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.StackRead] interface.
-func ReadStackInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func ReadStackInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	stackReadInterface[K, V](factory())
+	stackReadInterface[V](factory())
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.WriteStack] interface.
-func WriteStackInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func WriteStackInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	stackWriteInterface[K, V](factory())
+	stackWriteInterface[V](factory())
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.Stack] interface.
-func StackInterfaceInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	stackInterface[K, V](factory())
+	stackInterface[V](factory())
 }
 
 // Tests that the value supplied by the factory does not implement the 
 // [staticContainers.Stack] interface.
-func StackInterfaceStaticCapacityInterface[K ~int, V any](
-	factory func() dynamicContainers.Stack[K, V],
+func StackInterfaceStaticCapacityInterface[V any](
+	factory func() dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	test.Panics(
@@ -129,7 +129,7 @@ func StackInterfaceStaticCapacityInterface[K ~int, V any](
 
 // Tests the Clear method functionality of a dynamic Stack.
 func StackInterfaceClear(
-	factory func() dynamicContainers.Stack[int, int],
+	factory func() dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
 	container := factory()
@@ -143,7 +143,7 @@ func StackInterfaceClear(
 
 // Tests the PeekPntrBack method functionality of a dynamic Stack.
 func StackInterfacePeekPntrBack(
-	factory func() dynamicContainers.Stack[int, int],
+	factory func() dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
 	container := factory()
@@ -174,7 +174,7 @@ func StackInterfacePeekPntrBack(
 
 // Tests the PeekBack method functionality of a dynamic Stack.
 func StackInterfacePeekBack(
-	factory func() dynamicContainers.Stack[int, int],
+	factory func() dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
 	container := factory()
@@ -202,7 +202,7 @@ func StackInterfacePeekBack(
 
 // Tests the PopBack method functionality of a dynamic Stack.
 func StackInterfacePopBack(
-	factory func() dynamicContainers.Stack[int, int],
+	factory func() dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
 	container := factory()
@@ -226,7 +226,7 @@ func StackInterfacePopBack(
 
 // Tests the PushBack method functionality of a dynamic Stack.
 func StackInterfacePushBack(
-	factory func() dynamicContainers.Stack[int, int],
+	factory func() dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
 	container := factory()
@@ -240,11 +240,22 @@ func StackInterfacePushBack(
 			"Push front did not put the value in the correct place.", t,
 		)
 	}
+	container=factory()
+	for i := 0; i < 6; i+=2 {
+		container.PushBack(i,i+1)
+		test.BasicTest(i+2, container.Length(),
+			"Push front did not add the value correctly.", t,
+		)
+		iterV, _ := container.PeekBack()
+		test.BasicTest(i+1, iterV,
+			"Push front did not put the value in the correct place.", t,
+		)
+	}
 }
 
 // Tests the ForcePushBack method functionality of a dynamic Stack.
 func StackInterfaceForcePushBack(
-	factory func() dynamicContainers.Stack[int, int],
+	factory func() dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
 	container := factory()
@@ -255,6 +266,17 @@ func StackInterfaceForcePushBack(
 		)
 		iterV, _ := container.PeekBack()
 		test.BasicTest(i, iterV,
+			"Push front did not put the value in the correct place.", t,
+		)
+	}
+	container=factory()
+	for i := 0; i < 6; i+=2 {
+		container.ForcePushBack(i,i+1)
+		test.BasicTest(i+2, container.Length(),
+			"Push front did not add the value correctly.", t,
+		)
+		iterV, _ := container.PeekBack()
+		test.BasicTest(i+1, iterV,
 			"Push front did not put the value in the correct place.", t,
 		)
 	}

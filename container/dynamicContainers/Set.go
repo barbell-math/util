@@ -3,22 +3,25 @@ package dynamicContainers
 import "github.com/barbell-math/util/container/containerTypes"
 
 // An iterface that only allows read operations on a set.
-type ReadSet[K uint64, V any] interface {
+type ReadSet[V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Length
 	//containerTypes.Capacity
-	containerTypes.ReadOps[K,V]
+	containerTypes.ReadOps[uint64,V]
 }
 // An iterface that only allows write operations on a set.
-type WriteSet[K uint64, V any] interface {
+type WriteSet[V any] interface {
 	containerTypes.RWSyncable
+	containerTypes.Clear
 	containerTypes.Length
 	//containerTypes.Capacity
-	containerTypes.WriteOps[K,V]
+	// containerTypes.WriteOps[K,V]
+	containerTypes.WriteUniqueOps[uint64,V]
+	containerTypes.DeleteOps[uint64,V]
 }
 // An interface that represents a set with no rectrictions on reading or
 // writing.
-type Set[K uint64, V any] interface {
-	ReadSet[K,V]
-	WriteSet[K,V]
+type Set[V any] interface {
+	ReadSet[V]
+	WriteSet[V]
 }

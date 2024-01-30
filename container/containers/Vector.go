@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/customerr"
@@ -206,12 +207,45 @@ func (v *Vector[T,U])Emplace(idx int, val T) error {
     return getIndexOutOfBoundsError(idx,0,len(*v))
 }
 
-// Appends the supplied values to the vector. This function will never return
+// TODO -impl when dyn map interface and associated tests are created
+func (v *Vector[T,U])EmplaceUnique(idx int, vals T) error {
+    return nil
+}
+
+// Append the supplied values to the vector. This function will never return
 // an error.
 func (v *Vector[T,U])Append(vals ...T) error {
     v.Lock()
     defer v.Unlock()
     *v=append(*v, vals...)
+    return nil
+}
+
+// AppendUnique will append the supplied values to the vector if they are not
+// already present in the vector (unique). All unique values will be appended to
+// the vector until the first non-unique value is found. If a non-unique value
+// is encountered then no more values will be appended and a 
+// [containerTypes.Duplicate] error will be returned that 
+// will be wrapped with a message that prints the duplicated value.
+//
+// The time complexity of AppendUnique is O(n*m) where n is the number of values
+// in the vector and m is the number of values to append. For a more efficient
+// implementation of this method use a different container, such as [Set].
+func (v *Vector[T,U])AppendUnique(vals ...T) error {
+    v.Lock()
+    defer v.Unlock()
+    found:=false
+    w:=widgets.NewWidget[T,U]()
+    for _,iterV:=range(vals) {
+        for j:=0; j<len(*v) && !found; j++ {
+            found=w.Eq(&iterV,&(*v)[j])
+        }
+        if !found {
+            *v=append(*v,iterV)
+        } else {
+            return customerr.Wrap(containerTypes.Duplicate,"Value: %v",iterV)
+        }
+    }
     return nil
 }
 
@@ -365,38 +399,38 @@ func (v *Vector[T,U])PopBack() (T,error) {
 
 // Pushes an element to the back of the vector. Equivalent to appending a single
 // value to the end of the vector.
-func (v *Vector[T,U])PushBack(val T) error {
+func (v *Vector[T,U])PushBack(vals ...T) error {
     v.Lock()
     defer v.Unlock()
-    *v=append(*v, val)
+    *v=append(*v, vals...)
     return nil
 }
 
 // Pushes an element to the front of the vector. Equivalent to inserting a single
 // value at the front of the vector.
-func (v *Vector[T,U])PushFront(val T) error {
+func (v *Vector[T,U])PushFront(vals ...T) error {
     v.Lock()
     defer v.Unlock()
-    *v=append(Vector[T,U]{val}, (*v)...)
+    *v=append(vals, (*v)...)
     return nil
 }
 
 // Pushes an element to the back of the vector. Equivalent to appending a single
 // value to the end of the vector. Has the same behavior as PushBack because
 // the underlying vector grows as needed.
-func (v *Vector[T,U])ForcePushBack(val T) {
+func (v *Vector[T,U])ForcePushBack(vals ...T) {
     v.Lock()
     defer v.Unlock()
-    *v=append(*v, val)
+    *v=append(*v, vals...)
 }
 
 // Pushes an element to the front of the vector. Equivalent to inserting a single
 // value at the front of the vector. Has the same behavior as PushBack because
 // the underlying vector grows as needed.
-func (v *Vector[T,U])ForcePushFront(val T) {
+func (v *Vector[T,U])ForcePushFront(vals ...T) {
     v.Lock()
     defer v.Unlock()
-    *v=append(Vector[T,U]{val}, (*v)...)
+    *v=append(vals, (*v)...)
 }
 
 // Returns an iterator that iterates over the values in the vector. The vector
@@ -424,6 +458,42 @@ func (v *Vector[T,U])PntrElems() iter.Iter[*T] {
         func() error { v.RUnlock(); return nil },
     )
 }
+
+// TODO - impl
+func (v *Vector[T,U])UnorderedLt(other dynamicContainers.Vector[T]) bool {
+    return false
+}
+
+// TODO - impl
+func (v *Vector[T,U])UnorderedEq(other dynamicContainers.Vector[T]) bool {
+    return false
+}
+
+// TODO - impl
+func (v *Vector[T,U])Intersection(other dynamicContainers.Vector[T]) dynamicContainers.Vector[T] {
+    return nil
+}
+
+// TODO - impl
+func (v *Vector[T,U])Union(other dynamicContainers.Vector[T]) dynamicContainers.Vector[T] {
+    return nil
+}
+
+// TODO - impl
+func (v *Vector[T,U])Difference(other dynamicContainers.Vector[T]) dynamicContainers.Vector[T] {
+    return nil
+}
+
+// TODO - impl
+func (v *Vector[T,U])IsSuperset(other dynamicContainers.Vector[T]) bool {
+    return false
+}
+
+// TODO - impl
+func (v *Vector[T,U])IsSubset(other dynamicContainers.Vector[T]) bool {
+    return false
+}
+
 
 // TODO - use new generic types to implement equality
 // // Returns true if the vectors are equal. The supplied comparison function will

@@ -11,8 +11,6 @@
 // using go:generate in the [containers] package. This allows for many container
 // types to be tested against the same set of interface functionality.
 //
-// Due to this package only testing interface values there are several methods
-// that are used by all of the tests, namely Get, Length, Append, and PushBack. 
-// If these methods do not work then basically all of the functions in this 
-// package will fail.
+// Due to this package only testing interface values many tests will rely on
+// multiple functions from the interface working correctly.
 package tests

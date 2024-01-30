@@ -38,6 +38,21 @@ type StaticCapacity interface {
     Full() bool
 }
 
+type Comparisons[OI any, OIR any, K any, V any] interface {
+    UnorderedLt(other OIR) bool
+    UnorderedEq(other OIR) bool
+    Intersection(other OIR) OI
+    Union(other OIR) OI
+    Difference(other OIR) OI
+    IsSuperset(other OIR) bool
+    IsSubset(other OIR) bool
+}
+
+type KeyedComparisons[OIR any, K any, V any] interface {
+    KeyedLt(other OIR) bool
+    KeyedEq(other OIR) bool
+}
+
 // An interface the enforces implementation of read-only, value-only, operations.
 type ReadOps[K any, V any] interface {
     Contains(v V) bool
@@ -48,6 +63,16 @@ type ReadKeyedOps[K any, V any] interface {
     Get(k K) (V,error)
     GetPntr(k K) (*V,error)
     KeyOf(v V) (K,bool)
+}
+
+// An interface the enforces implementation of write-only, value-only, unique valued, operations.
+type WriteUniqueOps[K any, V any] interface {
+    AppendUnique(vals ...V) error
+}
+
+// An interface the enforces implementation of write-only, key/value, unique valued, operations.
+type WriteUniqueKeyedOps[K any, V any] interface {
+    EmplaceUnique(idx K, v V) error
 }
 
 // An interface the enforces implementation of write-only, value-only, operations.
@@ -78,8 +103,8 @@ type FirstElemRead[V any] interface {
 }
 // An interface the enforces the implementation of write-only first element access.
 type FirstElemWrite[V any] interface {
-    PushFront(v V) error;
-    ForcePushFront(v V)
+    PushFront(v ...V) error;
+    ForcePushFront(v ...V)
 }
 // An interface the enforces the implementation of delete-only first element access.
 type FirstElemDelete[V any] interface {
@@ -93,8 +118,8 @@ type LastElemRead[V any] interface {
 }
 // An interface the enforces the implementation of write-only last element access.
 type LastElemWrite[V any] interface {
-    PushBack(v V) (error);
-    ForcePushBack(v V)
+    PushBack(v ...V) (error);
+    ForcePushBack(v ...V)
 }
 // An interface the enforces the implementation of delete-only last element access.
 type LastElemDelete[V any] interface {

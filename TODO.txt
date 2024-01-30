@@ -1,7 +1,13 @@
-// Set
+// Make set interface tests
+// Add set interface to vector
+// Implement Set - can set implement vector?? no...
+// implement map (vector cannot implement) How to represent in memory (dual sets seems bad...)
 // Fix CSV
+// Make static interface tests - vector, queue, stack, deque, set
+// Re-instate circular buffer tests
 // Static Vector (Array?) - no way to dynamically represent, probably no?
 // Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New
 // Tree, graph...
 // Precompiled nfa/dfa - use go:generate comments!
+// argparse
 // https://go.dev/doc/modules/publishing

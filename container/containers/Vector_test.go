@@ -8,14 +8,16 @@ import (
 	"github.com/barbell-math/util/test"
 )
 
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Vector -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Vector -factory=generateSyncedVector
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Deque -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Deque -factory=generateSyncedVector
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Queue -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Queue -factory=generateSyncedVector
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Stack -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Stack -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Deque -genericDecl=[int] -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Deque -genericDecl=[int] -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Queue -genericDecl=[int] -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Queue -genericDecl=[int] -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Stack -genericDecl=[int] -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Stack -genericDecl=[int] -factory=generateSyncedVector
+//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateVector
+//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedVector
 
 func generateVector() Vector[int,widgets.BuiltinInt] {
     v,_:=NewVector[int,widgets.BuiltinInt](0)

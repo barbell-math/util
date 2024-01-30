@@ -47,12 +47,13 @@ type Values struct {
     Interface string
     ShowInfo bool
 	Cat Category
+	GenericDecl string
 	strCategory string
 	Factory string
 }
 
 var VALS Values
-var REQUIRED_ARGS []string=[]string{"type","category","interface","factory"}
+var REQUIRED_ARGS []string=[]string{"type","category","interface","factory","genericDecl"}
 
 func main() {
 	setupFlags()
@@ -86,13 +87,13 @@ func main() {
 	f.WriteString("    \"github.com/barbell-math/util/container/dynamicContainers\"\n")
 	f.WriteString(")\n\n")
 	f.WriteString(fmt.Sprintf(
-		"func %sTo%sInterfaceFactory() %sContainers.%s[int,int] {\n",
-		VALS.Type,VALS.Interface,VALS.Cat.String(),VALS.Interface,
+		"func %sTo%sInterfaceFactory() %sContainers.%s%s {\n",
+		VALS.Type,VALS.Interface,VALS.Cat.String(),VALS.Interface,VALS.GenericDecl,
 	))
 	f.WriteString(fmt.Sprintf("    v:= %s()\n", VALS.Factory))
 	f.WriteString(fmt.Sprintf(
-		"    var rv %sContainers.%s[int,int]=&v\n",
-		VALS.Cat.String(),VALS.Interface,
+		"    var rv %sContainers.%s%s=&v\n",
+		VALS.Cat.String(),VALS.Interface,VALS.GenericDecl,
 	))
 	f.WriteString("    return rv\n")
 	f.WriteString("}\n\n")
@@ -115,6 +116,7 @@ func setupFlags() {
     flag.BoolVar(&VALS.ShowInfo,"info",false,"Print debug information.")
 	flag.StringVar(&VALS.strCategory,"category","","Either static or dynamic.")
 	flag.StringVar(&VALS.Factory,"factory","","The factory that will produce containers to test.")
+	flag.StringVar(&VALS.GenericDecl,"genericDecl","","The generic type signature to use.")
 }
 
 func parseArgs() {
@@ -140,6 +142,12 @@ func checkRequiredArgs() {
 	if len(requiredCopy)>0 {
 		fmt.Println("ERROR | Not all required flags were passed.")
 		fmt.Println("The following flags must be added: ",requiredCopy)
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+	if len(VALS.GenericDecl)<2 || VALS.GenericDecl[0]!='[' || VALS.GenericDecl[len(VALS.GenericDecl)-1]!=']' {
+		fmt.Println("ERROR | The supplied generic declaration was not valid.")
+		fmt.Println("Expected a value of the form '[*]' where * represent the generic types.")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
