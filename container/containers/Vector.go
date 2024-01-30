@@ -166,12 +166,19 @@ func (v *Vector[T,U])GetPntr(idx int) (*T,error){
 // otherwise. All equality comparisons are performed by the generic U widget
 // type that the vector was initialized with.
 func (v *Vector[T, U])Contains(val T) bool {
+    return v.ContainsPntr(&val)
+}
+
+// ContainsPntr will return true if the supplied value is in the vector, false
+// otherwise. All equality comparisons are performed by the generic U widget
+// type that the vector was initialized with.
+func (v *Vector[T, U])ContainsPntr(val *T) bool {
     v.RLock()
     defer v.RUnlock()
     found:=false
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v) && !found; i++ {
-        found=w.Eq(&val,&(*v)[i])
+        found=w.Eq(val,&(*v)[i])
     }
     return found
 }
@@ -460,37 +467,48 @@ func (v *Vector[T,U])PntrElems() iter.Iter[*T] {
 }
 
 // TODO - impl
-func (v *Vector[T,U])UnorderedLt(other dynamicContainers.Vector[T]) bool {
-    return false
+func (v *Vector[T,U])UnorderedEq(
+    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+) bool {
+    rv:=(len(*v)==other.Length())
+    for i:=0; i<len(*v) && rv; i++ {
+        rv=other.ContainsPntr(&(*v)[i])
+    }
+    return rv
 }
 
 // TODO - impl
-func (v *Vector[T,U])UnorderedEq(other dynamicContainers.Vector[T]) bool {
-    return false
-}
-
-// TODO - impl
-func (v *Vector[T,U])Intersection(other dynamicContainers.Vector[T]) dynamicContainers.Vector[T] {
+func (v *Vector[T,U])Intersection(
+    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+) dynamicContainers.Vector[T] {
     return nil
 }
 
 // TODO - impl
-func (v *Vector[T,U])Union(other dynamicContainers.Vector[T]) dynamicContainers.Vector[T] {
+func (v *Vector[T,U])Union(
+    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+) dynamicContainers.Vector[T] {
     return nil
 }
 
 // TODO - impl
-func (v *Vector[T,U])Difference(other dynamicContainers.Vector[T]) dynamicContainers.Vector[T] {
+func (v *Vector[T,U])Difference(
+    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+) dynamicContainers.Vector[T] {
     return nil
 }
 
 // TODO - impl
-func (v *Vector[T,U])IsSuperset(other dynamicContainers.Vector[T]) bool {
+func (v *Vector[T,U])IsSuperset(
+    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+) bool {
     return false
 }
 
 // TODO - impl
-func (v *Vector[T,U])IsSubset(other dynamicContainers.Vector[T]) bool {
+func (v *Vector[T,U])IsSubset(
+    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+) bool {
     return false
 }
 

@@ -13,7 +13,7 @@ func vectorReadInterface[U any](c dynamicContainers.ReadVector[U])   {}
 func vectorWriteInterface[U any](c dynamicContainers.WriteVector[U]) {}
 func vectorInterface[U any](c dynamicContainers.Vector[U])           {}
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.RWSyncable] interface.
 func VectorInterfaceSyncableInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -23,7 +23,7 @@ func VectorInterfaceSyncableInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.Length] interface.
 func VectorInterfaceLengthInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -33,7 +33,7 @@ func VectorInterfaceLengthInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.Capacity] interface.
 func VectorInterfaceCapacityInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -43,7 +43,7 @@ func VectorInterfaceCapacityInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.Clear] interface.
 func VectorInterfaceClearInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -53,17 +53,17 @@ func VectorInterfaceClearInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.WriteOps] interface.
 func VectorInterfaceWriteOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteOps[int,V] = factory()
+	var container containerTypes.WriteOps[int, V] = factory()
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedWriteOps] interface.
 func VectorInterfaceWriteKeyedOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -73,7 +73,7 @@ func VectorInterfaceWriteKeyedOpsInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.ReadOps] interface.
 func VectorInterfaceReadOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -83,7 +83,7 @@ func VectorInterfaceReadOpsInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedReadOps] interface.
 func VectorInterfaceReadKeyedOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -93,7 +93,7 @@ func VectorInterfaceReadKeyedOpsInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.DeleteOps] interface.
 func VectorInterfaceDeleteOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -103,7 +103,7 @@ func VectorInterfaceDeleteOpsInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedDeleteOps] interface.
 func VectorInterfaceDeleteKeyedOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -113,7 +113,7 @@ func VectorInterfaceDeleteKeyedOpsInterface[V any](
 	_ = container
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [dynamicContainers.VectorRead] interface.
 func ReadVectorInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -122,7 +122,7 @@ func ReadVectorInterface[V any](
 	vectorReadInterface[V](factory())
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [dynamicContainers.WriteVector] interface.
 func WriteVectorInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -131,7 +131,7 @@ func WriteVectorInterface[V any](
 	vectorWriteInterface[V](factory())
 }
 
-// Tests that the value supplied by the factory implements the 
+// Tests that the value supplied by the factory implements the
 // [dynamicContainers.Vector] interface.
 func VectorInterfaceInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -140,7 +140,7 @@ func VectorInterfaceInterface[V any](
 	vectorInterface[V](factory())
 }
 
-// Tests that the value supplied by the factory does not implement the 
+// Tests that the value supplied by the factory does not implement the
 // [staticContainers.Vector] interface.
 func VectorInterfaceStaticCapacityInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -244,6 +244,39 @@ func vectorContainsHelper(
 
 // Tests the Contains method functionality of a dynamic vector.
 func VectorInterfaceContains(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	vectorContainsHelper(factory(), 0, t)
+	vectorContainsHelper(factory(), 1, t)
+	vectorContainsHelper(factory(), 2, t)
+	vectorContainsHelper(factory(), 5, t)
+}
+
+func vectorContainsPntrHelper(
+	v dynamicContainers.Vector[int],
+	l int,
+	t *testing.T,
+) {
+	for i := 0; i < l; i++ {
+		v.Append(i)
+	}
+	for i := 0; i < l; i++ {
+		test.BasicTest(true, v.ContainsPntr(&i),
+			"Contains returned a false negative.", t,
+		)
+	}
+	tmp:=-1
+	test.BasicTest(false, v.ContainsPntr(&tmp),
+		"Contains returned a false positive.", t,
+	)
+	test.BasicTest(false, v.ContainsPntr(&l),
+		"Contains returned a false positive.", t,
+	)
+}
+
+// Tests the ContainsPntr method functionality of a dynamic vector.
+func VectorInterfaceContainsPntr(
 	factory func() dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
@@ -503,86 +536,126 @@ func VectorInterfaceClear(
 	test.BasicTest(0, container.Capacity(), "Clear did not reset the underlying vector.", t)
 }
 
-// func VectorInterfaceEq(t *testing.T){
-//     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
-//     v2:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
-//     comp:=func(l *int, r *int) bool { return *l==*r }
-//     test.BasicTest(true,v.Eq(&v2,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Eq(&v,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     v.Delete(3)
-//     test.BasicTest(false,v.Eq(&v2,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     test.BasicTest(false,v2.Eq(&v,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     v=Vector[int,widgets.BuiltinInt]([]int{0})
-//     v2=Vector[int,widgets.BuiltinInt]([]int{0})
-//     test.BasicTest(true,v.Eq(&v2,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Eq(&v,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     v.Delete(0)
-//     test.BasicTest(false,v.Eq(&v2,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     test.BasicTest(false,v2.Eq(&v,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     v=Vector[int,widgets.BuiltinInt]([]int{})
-//     v2=Vector[int,widgets.BuiltinInt]([]int{})
-//     test.BasicTest(true,v.Eq(&v2,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Eq(&v,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-// }
-//
+// Tests the UnorderedEq method functionality of a dynamic vector.
+func VectorInterfaceUnorderedEq(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	v := factory()
+	v.Append(1, 2, 3)
+	v2 := factory()
+	v2.Append(1, 2, 3)
+	test.BasicTest(true, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	test.BasicTest(true, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	v.Pop(3,1)
+	test.BasicTest(false, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	test.BasicTest(false, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false positive.", t,
+	)
+
+	// v.Append(3)
+	// v2 = factory()
+	// v.Append(3, 1, 2)
+	// test.BasicTest(true, v.UnorderedEq(v2), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+	// test.BasicTest(true, v2.UnorderedEq(v), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+	// v.Pop(3,1)
+	// test.BasicTest(false, v.UnorderedEq(v2), 
+	// 	"UnorderedEq returned a false positive.", t,
+	// )
+	// test.BasicTest(false, v2.UnorderedEq(v), 
+	// 	"UnorderedEq returned a false positive.", t,
+	// )
+	// v.Append(3)
+	// v2 = factory()
+	// v.Append(2, 3, 1)
+	// test.BasicTest(true, v.UnorderedEq(v2), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+	// test.BasicTest(true, v2.UnorderedEq(v), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+	// v.Pop(3,1)
+	// test.BasicTest(false, v.UnorderedEq(v2), 
+	// 	"UnorderedEq returned a false positive.", t,
+	// )
+	// test.BasicTest(false, v2.UnorderedEq(v), 
+	// 	"UnorderedEq returned a false positive.", t,
+	// )
+	// v = factory()
+	// v.Append(0)
+	// v2 = factory()
+	// v2.Append(0)
+	// test.BasicTest(true, v.UnorderedEq(v2), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+	// test.BasicTest(true, v2.UnorderedEq(v), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+	// v.Delete(0)
+	// test.BasicTest(false, v.UnorderedEq(v2), 
+	// 	"UnorderedEq returned a false positive.", t,
+	// )
+	// test.BasicTest(false, v2.UnorderedEq(v), 
+	// 	"UnorderedEq returned a false positive.", t,
+	// )
+	// v = factory()
+	// v2 = factory()
+	// test.BasicTest(true, v.UnorderedEq(v2), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+	// test.BasicTest(true, v2.UnorderedEq(v), 
+	// 	"UnorderedEq returned a false negative.", t,
+	// )
+}
+
 // func VectorInterfaceNeq(t *testing.T){
 //     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
 //     v2:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
 //     comp:=func(l *int, r *int) bool { return *l==*r }
-//     test.BasicTest(false,v.Neq(&v2,comp),
+//     test.BasicTest(false,v.Neq(&v2),
 // 	"Neq returned a false positive.",t,
 //     )
-//     test.BasicTest(false,v2.Neq(&v,comp),
+//     test.BasicTest(false,v2.Neq(&v),
 // 	"Neq returned a false positive.",t,
 //     )
 //     v.Delete(3)
-//     test.BasicTest(true,v.Neq(&v2,comp),
+//     test.BasicTest(true,v.Neq(&v2),
 // 	"Neq returned a false negative.",t,
 //     )
-//     test.BasicTest(true,v2.Neq(&v,comp),
+//     test.BasicTest(true,v2.Neq(&v),
 // 	"Neq returned a false negative.",t,
 //     )
 //     v=Vector[int,widgets.BuiltinInt]([]int{0})
 //     v2=Vector[int,widgets.BuiltinInt]([]int{0})
-//     test.BasicTest(false,v.Neq(&v2,comp),
+//     test.BasicTest(false,v.Neq(&v2),
 // 	"Neq returned a false positive.",t,
 //     )
-//     test.BasicTest(false,v2.Neq(&v,comp),
+//     test.BasicTest(false,v2.Neq(&v),
 // 	"Neq returned a false positive.",t,
 //     )
 //     v.Delete(0)
-//     test.BasicTest(true,v.Neq(&v2,comp),
+//     test.BasicTest(true,v.Neq(&v2),
 // 	"Neq returned a false negative.",t,
 //     )
-//     test.BasicTest(true,v2.Neq(&v,comp),
+//     test.BasicTest(true,v2.Neq(&v),
 // 	"Neq returned a false negative.",t,
 //     )
 //     v=Vector[int,widgets.BuiltinInt]([]int{})
 //     v2=Vector[int,widgets.BuiltinInt]([]int{})
-//     test.BasicTest(false,v.Neq(&v2,comp),
+//     test.BasicTest(false,v.Neq(&v2),
 // 	"Neq returned a false positive.",t,
 //     )
-//     test.BasicTest(false,v2.Neq(&v,comp),
+//     test.BasicTest(false,v2.Neq(&v),
 // 	"Neq returned a false positive.",t,
 //     )
 // }

@@ -9,7 +9,18 @@ type ReadVector[V any] interface {
 	containerTypes.Capacity
 	containerTypes.ReadOps[int,V]
 	containerTypes.ReadKeyedOps[int,V]
-	containerTypes.Comparisons[Vector[V],ReadVector[V],int,V]
+	containerTypes.Comparisons[
+		Vector[V],
+		interface { containerTypes.ReadOps[int,V]; containerTypes.Length },
+		int,
+		V,
+	]
+	// containerTypes.KeyedComparisons[
+	// 	Vector[V],
+	// 	interface { containerTypes.ReadKeyedOps[int,V]; containerTypes.Length },
+	// 	int,
+	// 	V,
+	// ]
 }
 // An interface that only allows write operations on a vector.
 type WriteVector[V any] interface {

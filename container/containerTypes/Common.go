@@ -39,7 +39,6 @@ type StaticCapacity interface {
 }
 
 type Comparisons[OI any, OIR any, K any, V any] interface {
-    UnorderedLt(other OIR) bool
     UnorderedEq(other OIR) bool
     Intersection(other OIR) OI
     Union(other OIR) OI
@@ -48,14 +47,14 @@ type Comparisons[OI any, OIR any, K any, V any] interface {
     IsSubset(other OIR) bool
 }
 
-type KeyedComparisons[OIR any, K any, V any] interface {
-    KeyedLt(other OIR) bool
+type KeyedComparisons[OI any, OIR any, K any, V any] interface {
     KeyedEq(other OIR) bool
 }
 
 // An interface the enforces implementation of read-only, value-only, operations.
 type ReadOps[K any, V any] interface {
     Contains(v V) bool
+    ContainsPntr(v *V) bool
 }
 // An interface the enforces implementation of read-only, key/value, operations.
 type ReadKeyedOps[K any, V any] interface {
