@@ -5,7 +5,7 @@ import (
 
 	"github.com/barbell-math/util/algo/iter"
 	// "github.com/barbell-math/util/container/staticContainers"
-	"github.com/barbell-math/util/container/widgets"
+	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/test"
 )
 

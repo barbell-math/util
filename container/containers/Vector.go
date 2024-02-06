@@ -4,9 +4,9 @@ import (
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/container/dynamicContainers"
+	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/containerTypes"
-	"github.com/barbell-math/util/container/widgets"
+	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/customerr"
 )
 
@@ -229,15 +229,11 @@ func (v *Vector[T,U])Append(vals ...T) error {
 }
 
 // AppendUnique will append the supplied values to the vector if they are not
-// already present in the vector (unique). All unique values will be appended to
-// the vector until the first non-unique value is found. If a non-unique value
-// is encountered then no more values will be appended and a 
-// [containerTypes.Duplicate] error will be returned that 
-// will be wrapped with a message that prints the duplicated value.
-//
-// The time complexity of AppendUnique is O(n*m) where n is the number of values
-// in the vector and m is the number of values to append. For a more efficient
-// implementation of this method use a different container, such as [Set].
+// already present in the vector (unique). Non-unique values will not be 
+// appended. This function will never return an error. The time complexity of 
+// AppendUnique is O(n*m) where n is the number of values in the vector and m 
+// is the number of values to append. For a more efficient implementation of 
+// this method use a different container, such as [Set].
 func (v *Vector[T,U])AppendUnique(vals ...T) error {
     v.Lock()
     defer v.Unlock()
@@ -249,8 +245,6 @@ func (v *Vector[T,U])AppendUnique(vals ...T) error {
         }
         if !found {
             *v=append(*v,iterV)
-        } else {
-            return customerr.Wrap(containerTypes.Duplicate,"Value: %v",iterV)
         }
     }
     return nil
@@ -315,6 +309,8 @@ func (v *Vector[T,U])Delete(idx int) error {
     if idx<0 || idx>=len(*v) {
         return getIndexOutOfBoundsError(idx,0,len(*v))
     } else if idx>=0 && idx<len(*v) && len(*v)>0 {
+        w:=widgets.NewWidget[T,U]()
+        w.Zero(&(*v)[idx])
         *v=append((*v)[:idx],(*v)[idx+1:]...)
     }
     return nil
@@ -325,6 +321,10 @@ func (v *Vector[T,U])Delete(idx int) error {
 func (v *Vector[T,U])Clear() {
     v.Lock()
     defer v.Unlock()
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<len(*v); i++ {
+        w.Zero(&(*v)[i])
+    }
     *v=make(Vector[T,U], 0)
 }
 
@@ -405,7 +405,9 @@ func (v *Vector[T,U])PopBack() (T,error) {
 }
 
 // Pushes an element to the back of the vector. Equivalent to appending a single
-// value to the end of the vector.
+// value to the end of the vector. Values will be pushed back in the order that
+// they are given. For example, calling push back on [0,1,2] with vals of [3,4]
+// will result in [0,1,2,3,4].
 func (v *Vector[T,U])PushBack(vals ...T) error {
     v.Lock()
     defer v.Unlock()
@@ -414,7 +416,9 @@ func (v *Vector[T,U])PushBack(vals ...T) error {
 }
 
 // Pushes an element to the front of the vector. Equivalent to inserting a single
-// value at the front of the vector.
+// value at the front of the vector. Values will be pushed to the front in the 
+// order that they are given. For example, calling push front on [0,1,2] with 
+// vals of [3,4] will result in [3,4,0,1,2].
 func (v *Vector[T,U])PushFront(vals ...T) error {
     v.Lock()
     defer v.Unlock()
@@ -443,7 +447,7 @@ func (v *Vector[T,U])ForcePushFront(vals ...T) {
 // Returns an iterator that iterates over the values in the vector. The vector
 // will have a read lock the entire time the iteration is being performed. The
 // lock will not be applied until the iterator is consumed.
-func (v *Vector[T,U])Elems() iter.Iter[T] {
+func (v *Vector[T,U])Vals() iter.Iter[T] {
     return iter.SequentialElems[T](
         len(*v),
         func(i int) (T, error) { return (*v)[i],nil },
@@ -456,7 +460,7 @@ func (v *Vector[T,U])Elems() iter.Iter[T] {
 // Returns an iterator that iterates over the pointers to ithe values in the 
 // vector. The vector will have a read lock the entire time the iteration is 
 // being performed. The lock will not be applied until the iterator is consumed.
-func (v *Vector[T,U])PntrElems() iter.Iter[*T] {
+func (v *Vector[T,U])ValPntrs() iter.Iter[*T] {
     return iter.SequentialElems[*T](
         len(*v),
         func(i int) (*T, error) { return &(*v)[i],nil },
@@ -466,10 +470,21 @@ func (v *Vector[T,U])PntrElems() iter.Iter[*T] {
     )
 }
 
-// TODO - impl
+// Returns true if the elements in v are all contained in other and the elements
+// of other are all contained in v, regardless of position. Returns false 
+// otherwise. This implementation of UnorderedEq is dependent on the time 
+// complexity of the implementation of the ContainesPntr method on other. In 
+// big-O it might look something like this, O(n*O(other.ContainsPntr))), where n 
+// is the number of elements in v and O(other.ContainsPntr(m)) represents the 
+// time complexity of the containsPntr method on other with m values. Read locks 
+// will be placed on both this vector and the other vector.
 func (v *Vector[T,U])UnorderedEq(
-    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+    other dynamicContainers.ComparisonsOtherConstraint[T],
 ) bool {
+    v.RLock()
+    other.RLock()
+    defer v.RUnlock()
+    defer other.RUnlock()
     rv:=(len(*v)==other.Length())
     for i:=0; i<len(*v) && rv; i++ {
         rv=other.ContainsPntr(&(*v)[i])
@@ -478,36 +493,74 @@ func (v *Vector[T,U])UnorderedEq(
 }
 
 // TODO - impl
+func (v *Vector[T,U])KeyedEq(
+    other dynamicContainers.KeyedComparisonsOtherConstraint[int,T],
+) bool {
+    return false
+}
+
+// Populates the vector with the intersection of values from the l and r 
+// containers. This implementation of intersection is dependent on the time 
+// complexity of the implementation of the ContainesPntr method on l and r. In 
+// big-O it might look something like this,
+// O(O(l.ContainsPntr(n))*O(r.ContainsPntr(m))), where O(other.ContainsPntr(n)) 
+// represents the time complexity of the containsPntr method on l with n values.
+// Read locks will be placed on l and r and write locks will be placed on the
+// vector that is being populated.
 func (v *Vector[T,U])Intersection(
-    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
-) dynamicContainers.Vector[T] {
-    return nil
+    l dynamicContainers.ComparisonsOtherConstraint[T],
+    r dynamicContainers.ComparisonsOtherConstraint[T],
+) {
+    l.RLock()
+    r.RLock()
+    v.Lock()
+    defer l.RUnlock()
+    defer r.RUnlock()
+    defer v.Unlock()
+    // rv:=Vector[T,U]{}
+    // for i:=0; i<len(*v); i++ {
+    //     if other.ContainsPntr(&(*v)[i]) {
+    //         rv=append(rv,(*v)[i])
+    //     }
+    // }
+    // return &rv
 }
 
 // TODO - impl
 func (v *Vector[T,U])Union(
-    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
-) dynamicContainers.Vector[T] {
-    return nil
+    l dynamicContainers.ComparisonsOtherConstraint[T],
+    r dynamicContainers.ComparisonsOtherConstraint[T],
+) {
+    // v.RLock()
+    // other.RLock()
+    // defer v.RUnlock()
+    // defer other.RUnlock()
+    // rv:=make(Vector[T,U],0,(len(*v)+other.Length())/2)
+    // rv.AppendUnique(*v...)
+    // // for i:=0; i<other.Length(); i++ {
+    // //     val,_:=other.Get(i)
+    // //     rv.AppendUnique(val)
+    // // }
+    // return &rv
 }
 
 // TODO - impl
 func (v *Vector[T,U])Difference(
-    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
-) dynamicContainers.Vector[T] {
-    return nil
+    l dynamicContainers.ComparisonsOtherConstraint[T],
+    r dynamicContainers.ComparisonsOtherConstraint[T],
+) {
 }
 
 // TODO - impl
 func (v *Vector[T,U])IsSuperset(
-    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+    other dynamicContainers.ComparisonsOtherConstraint[T],
 ) bool {
     return false
 }
 
 // TODO - impl
 func (v *Vector[T,U])IsSubset(
-    other interface { containerTypes.ReadOps[int,T]; containerTypes.Length },
+    other dynamicContainers.ComparisonsOtherConstraint[T],
 ) bool {
     return false
 }

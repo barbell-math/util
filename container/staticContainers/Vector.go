@@ -8,7 +8,7 @@ type ReadVector[K ~int, V any] interface {
 	containerTypes.Length
 	containerTypes.Capacity
     containerTypes.StaticCapacity
-	containerTypes.ReadOps[K,V]
+	containerTypes.ReadOps[V]
 	containerTypes.ReadKeyedOps[K,V]
 	containerTypes.LastElemRead[V]
 	containerTypes.FirstElemRead[V]

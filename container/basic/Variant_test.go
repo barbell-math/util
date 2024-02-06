@@ -1,10 +1,9 @@
-package containers
+package basic
 
 import (
 	"testing"
 
 	"github.com/barbell-math/util/test"
-	"github.com/barbell-math/util/container/staticContainers"
 )
 
 type testStruct struct {
@@ -36,15 +35,4 @@ func TestVariantB(t *testing.T){
     test.BasicTest(tmp,newV.ValBOr(testStruct{}),
         "Variant did not return correct value.",t,
     );
-}
-
-func interfaceTestHelper[T any, U any](v staticContainers.Variant[T,U]){}
-func TestVariantInterface(t *testing.T){
-    tmp:=5;
-    v:=Variant[int,float64]{};
-    interfaceTestHelper[int,float64](v);
-    interfaceV:=v.SetValA(tmp);
-    interfaceTestHelper(interfaceV);
-    interfaceV2:=v.SetValB(5.00);
-    interfaceTestHelper(interfaceV2);
 }

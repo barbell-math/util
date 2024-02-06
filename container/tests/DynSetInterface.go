@@ -58,7 +58,7 @@ func SetInterfaceReadOpsInterface[V any](
 	factory func() dynamicContainers.Set[V],
 	t *testing.T,
 ) {
-	var container containerTypes.ReadOps[uint64, V] = factory()
+	var container containerTypes.ReadOps[V] = factory()
 	_ = container
 }
 
@@ -162,9 +162,9 @@ func SetInterfaceAppendUnique(
 		)
 	}
 	for i:=0; i<5; i++ {
-		err:=container.AppendUnique(i)
-		test.ContainsError(containerTypes.Duplicate,err,
-			"AppendUnique allowed a duplicate value to be appended.",t,
+		container.AppendUnique(i)
+		test.BasicTest(5,container.Length(),
+			"Container had non-unique values added to it.",t,
 		)
 	}
 	container=factory()
@@ -203,3 +203,126 @@ func SetInterfacePop(
 		)
 	}
 }
+
+// Tests the UnorderedEq method functionality of a dynamic set.
+func SetInterfaceUnorderedEq(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+) {
+	v := factory()
+	v.AppendUnique(1, 2, 3)
+	v2 := factory()
+	v2.AppendUnique(1, 2, 3)
+	test.BasicTest(true, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	test.BasicTest(true, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	v.Pop(3,1)
+	test.BasicTest(false, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	test.BasicTest(false, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	v.AppendUnique(3)
+	v2 = factory()
+	v2.AppendUnique(3, 1, 2)
+	test.BasicTest(true, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	test.BasicTest(true, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	v.Pop(3,1)
+	test.BasicTest(false, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	test.BasicTest(false, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	v.AppendUnique(3)
+	v2 = factory()
+	v2.AppendUnique(2, 3, 1)
+	test.BasicTest(true, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	test.BasicTest(true, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	v.Pop(3,1)
+	test.BasicTest(false, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	test.BasicTest(false, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	v = factory()
+	v.AppendUnique(0)
+	v2 = factory()
+	v2.AppendUnique(0)
+	test.BasicTest(true, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	test.BasicTest(true, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	v.Pop(0,1)
+	test.BasicTest(false, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	test.BasicTest(false, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false positive.", t,
+	)
+	v = factory()
+	v2 = factory()
+	test.BasicTest(true, v.UnorderedEq(v2), 
+		"UnorderedEq returned a false negative.", t,
+	)
+	test.BasicTest(true, v2.UnorderedEq(v), 
+		"UnorderedEq returned a false negative.", t,
+	)
+}
+// 
+// func setIntersectionHelper(
+// 	l dynamicContainers.Set[int],
+// 	r dynamicContainers.Set[int],
+// 	exp []int,
+// 	t *testing.T,
+// ){
+// 	tester:=func(c dynamicContainers.Set[int]) {
+// 		test.BasicTest(len(exp),c.Length(),
+// 			"Intersection produced a set of the wrong length.",t,
+// 		)
+// 		for _,v:=range(exp) {
+// 			test.BasicTest(true,c.Contains(v),
+// 				"Intersection did not contain the correct values.",t,
+// 			)
+// 		}
+// 	}
+// 	tester(l.Intersection(r))
+// 	tester(r.Intersection(l))
+// }
+// 
+// // Tests the Intersection method functionality of a dynamic set.
+// func SetInterfaceIntersection(
+// 	factory func() dynamicContainers.Set[int],
+// 	t *testing.T,
+// ) {
+// 	v:=factory()
+// 	v2:=factory()
+// 	setIntersectionHelper(v,v2,[]int{},t)
+// 	v.AppendUnique(1)
+// 	setIntersectionHelper(v,v2,[]int{},t)
+// 	v2.AppendUnique(1)
+// 	setIntersectionHelper(v,v2,[]int{1},t)
+// 	v2.AppendUnique(2)
+// 	setIntersectionHelper(v,v2,[]int{1},t)
+// 	v.AppendUnique(2)
+// 	setIntersectionHelper(v,v2,[]int{1,2},t)
+// 	v.AppendUnique(3)
+// 	setIntersectionHelper(v,v2,[]int{1,2},t)
+// 	v2.AppendUnique(3)
+// 	setIntersectionHelper(v,v2,[]int{1,2,3},t)
+// }

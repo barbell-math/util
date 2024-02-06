@@ -20,6 +20,9 @@ func (c *customWidget)Lt(l *customWidget, r *customWidget) bool {
 func (c *customWidget)Hash(v *customWidget) uint64 {
     return uint64(v.a)
 }
+func (c *customWidget)Zero(v *customWidget) {
+    *v=customWidget{}
+}
 
 func TestCustomWidgetInVector(t *testing.T){
     v:=make(Vector[customWidget,*customWidget],0)

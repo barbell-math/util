@@ -2,14 +2,16 @@ package dynamicContainers
 
 import "github.com/barbell-math/util/container/containerTypes"
 
-// An iterface that only allows read operations on a set.
+// An interface that only allows read operations on a set.
 type ReadSet[V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Length
 	//containerTypes.Capacity
-	containerTypes.ReadOps[uint64,V]
+	containerTypes.ReadOps[V]
+	// TODO - replace with ReadSet[V]: https://github.com/golang/go/issues/65362
+	containerTypes.Comparisons[ComparisonsOtherConstraint[V], int, V]
 }
-// An iterface that only allows write operations on a set.
+// An interface that only allows write operations on a set.
 type WriteSet[V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Clear

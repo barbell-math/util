@@ -7,20 +7,16 @@ type ReadVector[V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Length
 	containerTypes.Capacity
-	containerTypes.ReadOps[int,V]
+	containerTypes.ReadOps[V]
 	containerTypes.ReadKeyedOps[int,V]
-	containerTypes.Comparisons[
-		Vector[V],
-		interface { containerTypes.ReadOps[int,V]; containerTypes.Length },
+	// TODO - replace with ReadVector[V]: https://github.com/golang/go/issues/65362
+	// no - would restrict set - read keyed ops not supported and also not needed
+	containerTypes.Comparisons[ComparisonsOtherConstraint[V], int, V]
+	containerTypes.KeyedComparisons[
+		KeyedComparisonsOtherConstraint[int,V],
 		int,
 		V,
 	]
-	// containerTypes.KeyedComparisons[
-	// 	Vector[V],
-	// 	interface { containerTypes.ReadKeyedOps[int,V]; containerTypes.Length },
-	// 	int,
-	// 	V,
-	// ]
 }
 // An interface that only allows write operations on a vector.
 type WriteVector[V any] interface {

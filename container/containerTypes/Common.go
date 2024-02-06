@@ -3,7 +3,11 @@
 // to allow for very specific sub-types of containers to be specified.
 package containerTypes
 
-import "math"
+import (
+	"math"
+
+	"github.com/barbell-math/util/algo/iter"
+)
 
 
 const (
@@ -38,38 +42,50 @@ type StaticCapacity interface {
     Full() bool
 }
 
-type Comparisons[OI any, OIR any, K any, V any] interface {
-    UnorderedEq(other OIR) bool
-    Intersection(other OIR) OI
-    Union(other OIR) OI
-    Difference(other OIR) OI
-    IsSuperset(other OIR) bool
-    IsSubset(other OIR) bool
+type Comparisons[OI any, K any, V any] interface {
+    UnorderedEq(other OI) bool
+    Intersection(l OI, r OI)
+    Union(l OI, r OI)
+    Difference(l OI, r OI)
+    IsSuperset(other OI) bool
+    IsSubset(other OI) bool
 }
 
-type KeyedComparisons[OI any, OIR any, K any, V any] interface {
-    KeyedEq(other OIR) bool
+type KeyedComparisons[OI any, K any, V any] interface {
+    KeyedEq(other OI) bool
 }
+
+// TODO
+// Add copy?? - would need to add widget support
+//  Copy(v V) OI
 
 // An interface the enforces implementation of read-only, value-only, operations.
-type ReadOps[K any, V any] interface {
+type ReadOps[V any] interface {
+    Vals() iter.Iter[V]
+    ValPntrs() iter.Iter[*V]
     Contains(v V) bool
     ContainsPntr(v *V) bool
 }
 // An interface the enforces implementation of read-only, key/value, operations.
 type ReadKeyedOps[K any, V any] interface {
-    ReadOps[K,V]
+    ReadOps[V]
     Get(k K) (V,error)
     GetPntr(k K) (*V,error)
     KeyOf(v V) (K,bool)
+    // KeyRange() func(k K) bool
+    // KeyPntrRange() func(k *K) bool
+    // KeyValRange() func(k K, v V) bool
+    // KeyValPntrRange() func(k *K, v *V) bool
 }
 
-// An interface the enforces implementation of write-only, value-only, unique valued, operations.
+// An interface the enforces implementation of write-only, value-only, unique 
+// valued, operations.
 type WriteUniqueOps[K any, V any] interface {
     AppendUnique(vals ...V) error
 }
 
-// An interface the enforces implementation of write-only, key/value, unique valued, operations.
+// An interface the enforces implementation of write-only, key/value, unique 
+// valued, operations.
 type WriteUniqueKeyedOps[K any, V any] interface {
     EmplaceUnique(idx K, v V) error
 }

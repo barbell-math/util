@@ -2,14 +2,14 @@ package dynamicContainers
 
 import "github.com/barbell-math/util/container/containerTypes"
 
-// An interface that only allows read operations on a vector.
+// An interface that only allows read operations on a queue.
 type ReadQueue[V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Length
 	containerTypes.Capacity
 	containerTypes.FirstElemRead[V]
 }
-// An interface that only allows write operations on a vector.
+// An interface that only allows write operations on a queue.
 type WriteQueue[V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Clear
@@ -18,7 +18,7 @@ type WriteQueue[V any] interface {
 	containerTypes.LastElemWrite[V]
 	containerTypes.FirstElemDelete[V]
 }
-// An interface that represents a vector with no restrictions on reading or
+// An interface that represents a queue with no restrictions on reading or
 // writing.
 type Queue[V any] interface {
 	ReadQueue[V]

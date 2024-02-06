@@ -1,7 +1,7 @@
-package iter;
+package iter
 
 import (
-    "github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/customerr"
 )
 
 type forEachParallelResult[T any, U any] struct {

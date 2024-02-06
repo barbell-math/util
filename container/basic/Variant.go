@@ -1,10 +1,8 @@
-package containers
+package basic
 
 import (
 	"reflect"
 	"unsafe"
-
-	"github.com/barbell-math/util/container/staticContainers"
 )
 
 
@@ -52,7 +50,7 @@ func (v Variant[A,B])dataStart() unsafe.Pointer {
 // Sets the variant to hold value type A, initilized with the value passed to 
 // the function. After calling this method the variant will panic if value
 // type B is attempted to be accessed.
-func (v Variant[A,B]) SetValA(newVal A) staticContainers.Variant[A,B] {
+func (v Variant[A,B]) SetValA(newVal A) Variant[A,B] {
 	v.initData()
 	v.data[0]=byte(aVal)
 	*(*A)(v.dataStart())=newVal
@@ -62,7 +60,7 @@ func (v Variant[A,B]) SetValA(newVal A) staticContainers.Variant[A,B] {
 // Sets the variant to hold value type B, initilized with the value passed to 
 // the function. After calling this method the variant will panic if value
 // type A is attempted to be accessed.
-func (v Variant[A,B]) SetValB(newVal B) staticContainers.Variant[A,B] {
+func (v Variant[A,B]) SetValB(newVal B) Variant[A,B] {
 	v.initData()
 	v.data[0]=byte(bVal)
 	*(*B)(v.dataStart())=newVal

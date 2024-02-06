@@ -18,6 +18,10 @@ type (
         Lt(l *T, r *T) bool
         // Returns a hash value that represent the currently wrapped value.
         Hash(v *T) uint64
+        // Zero's the supplied value. Equivalent to a destructor except Go does
+        // not have manual memory management so this is mainly just to prenent
+        // things like dangling pointers.
+        Zero(v *T)
     }
 
     // The base widget implementation that all the containers in the [containers]
@@ -43,10 +47,20 @@ func NewWidget[T any, I WidgetInterface[T]]() Widget[T,I] {
     return Widget[T, I]{iFace: iFaceImpl}
 }
 
+func (w *Widget[T, I])Zero(v *T) {
+    w.iFace.Zero(v)
+}
+
 // Compares the left (l) and right (r) values and returns true is l==r using the
 // Eq function from the interface that was supplied as a generic type.
 func (w *Widget[T, I])Eq(l *T, r *T) bool {
     return w.iFace.Eq(l,r)
+}
+
+// Compares the left (l) and right (r) values and returns true is l!=r using the
+// Eq function from the interface that was supplied as a generic type.
+func (w *Widget[T, I])Neq(l *T, r *T) bool {
+    return !w.iFace.Eq(l,r)
 }
 
 // Compares the left (l) and right (r) values and returns true is l<r using the
@@ -55,12 +69,31 @@ func (w *Widget[T, I])Lt(l *T, r *T) bool {
     return w.iFace.Lt(l,r)
 }
 
+// Compares the left (l) and right (r) values and returns true is l<=r using the
+// Lt and Eq functions from the interface that was supplied as a generic type.
+func (w *Widget[T, I])Lte(l *T, r *T) bool {
+    return w.iFace.Lt(l,r) || w.iFace.Eq(l,r)
+}
+
+// Compares the left (l) and right (r) values and returns true is l>r using the
+// Lt and Eq functions from the interface that was supplied as a generic type.
+func (w *Widget[T, I])Gt(l *T, r *T) bool {
+    return !w.iFace.Lt(l,r) && !w.iFace.Eq(l,r)
+}
+
+// Compares the left (l) and right (r) values and returns true is l>=r using the
+// Lt function from the interface that was supplied as a generic type.
+func (w *Widget[T, I])Gte(l *T, r *T) bool {
+    return !w.iFace.Lt(l,r)
+}
+
 // Generates a hash for the given value using the hash function from the interface
 // that was supplied as a generic type.
 func (w *Widget[T, I])Hash(v *T) uint64 {
     return w.iFace.Hash(v)
 }
 
+// TODO - add pntr types
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=byte
 
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=int

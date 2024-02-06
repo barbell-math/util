@@ -1,4 +1,4 @@
-package containers;
+package basic;
 
 type Pair[T any, U any] struct {
     A T;

@@ -4,8 +4,9 @@ import (
 	"sync"
 
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
-	"github.com/barbell-math/util/container/widgets"
 	"github.com/barbell-math/util/customerr"
 )
 
@@ -19,7 +20,7 @@ type (
     CircularBuffer[T any, U widgets.WidgetInterface[T]] struct {
         vals []T;
         numElems int;
-        startEnd Pair[int,int];
+        startEnd basic.Pair[int,int];
     };
     
     // A synchronized version of CircularBuffer. All operations will be wrapped 
@@ -49,7 +50,7 @@ func NewCircularBuffer[T any, U widgets.WidgetInterface[T]](
     // the buffer wraps around. You have been warned.
     return CircularBuffer[T,U]{
         vals: make([]T,size),
-        startEnd: Pair[int, int]{A: 0, B: size-1},
+        startEnd: basic.Pair[int, int]{A: 0, B: size-1},
     },nil;
 }
 
@@ -442,7 +443,7 @@ func (c *CircularBuffer[T,U])Clear() {
     defer c.Unlock()
     c.vals=make([]T,len(c.vals))
     c.numElems=0
-    c.startEnd=Pair[int, int]{A: 0, B: len(c.vals)-1}
+    c.startEnd=basic.Pair[int, int]{A: 0, B: len(c.vals)-1}
 }
 
 // Returns an iterator that iterates over the values in the circular buffer. The 

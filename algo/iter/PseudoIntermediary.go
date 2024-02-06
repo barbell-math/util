@@ -118,6 +118,7 @@ func (i Iter[T])Teardown(teardown func() error) Iter[T] {
 }
 
 // TODO - reimplement after circular queue is finished
+// TODO - delete after implementing in containers
 // // This function is an intermediary.
 // //
 // //Window cannot be tested here because it would cause a circular import with the 

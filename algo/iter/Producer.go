@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/barbell-math/util/container/staticContainers"
+	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/customerr"
 )
 
@@ -118,12 +118,12 @@ func mapOp[K comparable, V any](
 // it changed while being iterated over behavior is undefined.
 func MapElems[K comparable, V any](
     m map[K]V, 
-    factory func() staticContainers.Pair[K,V],
-) Iter[staticContainers.Pair[K,V]] {
+    factory func() basic.Pair[K,V],
+) Iter[basic.Pair[K,V]] {
     cont:=make(chan bool)
     c:=mapOp(cont,m)
     i:=-1;
-    return func(f IteratorFeedback) (staticContainers.Pair[K,V],error,bool) {
+    return func(f IteratorFeedback) (basic.Pair[K,V],error,bool) {
         i++;
         if i<len(m) && f!=Break {
             cont <- true
@@ -133,7 +133,7 @@ func MapElems[K comparable, V any](
             return v,nil,true;
         }
         close(cont)
-        return nil,nil,false
+        return basic.Pair[K,V]{},nil,false
     }
 }
 
@@ -232,19 +232,19 @@ func FileLines(path string) Iter[string] {
 func Zip[T any, U any](
     i1 Iter[T], 
     i2 Iter[U], 
-    factory func() staticContainers.Pair[T,U],
-) Iter[staticContainers.Pair[T,U]] {
-    return func(f IteratorFeedback) (staticContainers.Pair[T, U], error, bool) {
+    factory func() basic.Pair[T,U],
+) Iter[basic.Pair[T,U]] {
+    return func(f IteratorFeedback) (basic.Pair[T, U], error, bool) {
         if f==Break {
-            return nil,customerr.AppendError(i1.Stop(),i2.Stop()),false
+            return basic.Pair[T, U]{},customerr.AppendError(i1.Stop(),i2.Stop()),false
         }
         iVal1,err1,cont1:=i1(f)
         if err1!=nil {
-            return nil,err1,false
+            return basic.Pair[T,U]{},err1,false
         }
         iVal2,err2,cont2:=i2(f)
         if err2!=nil {
-            return nil,err2,false
+            return basic.Pair[T,U]{},err2,false
         }
         p:=factory()
         p.SetA(iVal1)
@@ -263,17 +263,17 @@ func Zip[T any, U any](
 func Join[T any, U any](
     i1 Iter[T],
     i2 Iter[U],
-    factory func() staticContainers.Variant[T,U],
+    factory func() basic.Variant[T,U],
     decider func(left T, right U) bool,
-) Iter[staticContainers.Variant[T,U]] {
+) Iter[basic.Variant[T,U]] {
     var i1Val T;
     var i2Val U;
     var err1, err2 error;
     cont1, cont2:=true, true;
     getI1Val, getI2Val:=true, true;
-    return func(f IteratorFeedback) (staticContainers.Variant[T,U], error, bool) {
+    return func(f IteratorFeedback) (basic.Variant[T,U], error, bool) {
         if f==Break {
-            return nil, customerr.AppendError(i1.Stop(),i2.Stop()), false;
+            return basic.Variant[T,U]{}, customerr.AppendError(i1.Stop(),i2.Stop()), false;
         }
         if getI1Val && cont1 && err1==nil {
             i1Val,err1,cont1=i1(f);
@@ -282,7 +282,7 @@ func Join[T any, U any](
             i2Val,err2,cont2=i2(f);
         }
         if err1!=nil || err2!=nil {
-            return nil,customerr.AppendError(err1,err2),false;
+            return basic.Variant[T,U]{},customerr.AppendError(err1,err2),false;
         }
         if cont1 && cont2 {
             d:=decider(i1Val,i2Val);
@@ -316,7 +316,7 @@ func Join[T any, U any](
 func JoinSame[T any](
     i1 Iter[T],
     i2 Iter[T],
-    factory func() staticContainers.Variant[T,T],
+    factory func() basic.Variant[T,T],
     decider func(left T, right T) bool,
 ) Iter[T] {
     var tmp T;
