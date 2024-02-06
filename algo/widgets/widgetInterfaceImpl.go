@@ -60,7 +60,11 @@ func main() {
 		"// Provides a hash function for the value that it is wrapping.\n"+
 		generateHashFunction()+
 		"// Zeros the supplied value.\n"+
-		generateZeroFunction(),
+		generateZeroFunction()+
+		"// Copys the value that was supplied to it.\n"+
+		"func (a Builtin{{ .CapType }})Copy(v *{{ .Type }}) {{ .Type }} {\n"+
+		"	return *v\n"+
+		"}\n\n",
 	)
 	if err!=nil {
 		fmt.Println("ERROR | An error occurred parsing the template.")

@@ -6,7 +6,6 @@ import (
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/containerTypes"
-	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/customerr"
 )
 
@@ -457,6 +456,11 @@ func (v *Vector[T,U])Vals() iter.Iter[T] {
     )
 }
 
+// // TODO - impl and add range to iter
+// func (v *Vector[T,U])Keys() iter.Iter[T] {
+// 
+// }
+
 // Returns an iterator that iterates over the pointers to ithe values in the 
 // vector. The vector will have a read lock the entire time the iteration is 
 // being performed. The lock will not be applied until the iterator is consumed.
@@ -479,7 +483,7 @@ func (v *Vector[T,U])ValPntrs() iter.Iter[*T] {
 // time complexity of the containsPntr method on other with m values. Read locks 
 // will be placed on both this vector and the other vector.
 func (v *Vector[T,U])UnorderedEq(
-    other dynamicContainers.ComparisonsOtherConstraint[T],
+    other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
     v.RLock()
     other.RLock()
@@ -494,7 +498,7 @@ func (v *Vector[T,U])UnorderedEq(
 
 // TODO - impl
 func (v *Vector[T,U])KeyedEq(
-    other dynamicContainers.KeyedComparisonsOtherConstraint[int,T],
+    other containerTypes.KeyedComparisonsOtherConstraint[int,T],
 ) bool {
     return false
 }
@@ -502,65 +506,92 @@ func (v *Vector[T,U])KeyedEq(
 // Populates the vector with the intersection of values from the l and r 
 // containers. This implementation of intersection is dependent on the time 
 // complexity of the implementation of the ContainesPntr method on l and r. In 
-// big-O it might look something like this,
-// O(O(l.ContainsPntr(n))*O(r.ContainsPntr(m))), where O(other.ContainsPntr(n)) 
-// represents the time complexity of the containsPntr method on l with n values.
-// Read locks will be placed on l and r and write locks will be placed on the
-// vector that is being populated.
+// big-O it might look something like this, O(n*O(r.ContainsPntr(m))), where 
+// O(r.ContainsPntr(n)) represents the time complexity of the containsPntr 
+// method on l with n values. Read locks will be placed on l and r and a write 
+// lock will be placed on the vector that is being populated.
+//
+// This vector will be cleared before storing the result. When clearing, the
+// new resulting vector will be initialized with zero capacity and a enough
+// backing memory to store (l.Length()+r.Length())/2 elements before 
+// reallocating. This means that there should be at most 1 reallocation beyond
+// this initial allocation, and that additional allocation should only occur 
+// when the length of the intersection is greater than the average length of the 
+// l and r vectors. This logic is predicated on the fact that intersections will
+// likely be much smaller than the original vectors.
 func (v *Vector[T,U])Intersection(
-    l dynamicContainers.ComparisonsOtherConstraint[T],
-    r dynamicContainers.ComparisonsOtherConstraint[T],
+    l containerTypes.ComparisonsOtherConstraint[T],
+    r containerTypes.ComparisonsOtherConstraint[T],
 ) {
-    l.RLock()
     r.RLock()
+    l.RLock()
     v.Lock()
-    defer l.RUnlock()
     defer r.RUnlock()
+    defer l.RUnlock()
     defer v.Unlock()
-    // rv:=Vector[T,U]{}
-    // for i:=0; i<len(*v); i++ {
-    //     if other.ContainsPntr(&(*v)[i]) {
-    //         rv=append(rv,(*v)[i])
-    //     }
-    // }
-    // return &rv
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<len(*v); i++ {
+        w.Zero(&(*v)[i])
+    }
+    *v=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
+    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if r.ContainsPntr(val) {
+            // Need to copy because val is comming from another vector.
+            *v=append(*v, w.Copy(val)) 
+        }
+        return iter.Continue,nil
+    })
 }
 
 // TODO - impl
 func (v *Vector[T,U])Union(
-    l dynamicContainers.ComparisonsOtherConstraint[T],
-    r dynamicContainers.ComparisonsOtherConstraint[T],
+    l containerTypes.ComparisonsOtherConstraint[T],
+    r containerTypes.ComparisonsOtherConstraint[T],
 ) {
-    // v.RLock()
-    // other.RLock()
-    // defer v.RUnlock()
-    // defer other.RUnlock()
-    // rv:=make(Vector[T,U],0,(len(*v)+other.Length())/2)
-    // rv.AppendUnique(*v...)
-    // // for i:=0; i<other.Length(); i++ {
-    // //     val,_:=other.Get(i)
-    // //     rv.AppendUnique(val)
-    // // }
-    // return &rv
+    r.RLock()
+    l.RLock()
+    v.Lock()
+    defer r.RUnlock()
+    defer l.RUnlock()
+    defer v.Unlock()
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<len(*v); i++ {
+        w.Zero(&(*v)[i])
+    }
+    *v=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
+    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if !v.ContainsPntr(val) {
+            // Need to copy because val is comming from another vector.
+            *v=append(*v, w.Copy(val)) 
+        }
+        return iter.Continue,nil
+    })
+    r.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if !v.ContainsPntr(val) {
+            // Need to copy because val is comming from another vector.
+            *v=append(*v, w.Copy(val)) 
+        }
+        return iter.Continue,nil
+    })
 }
 
 // TODO - impl
 func (v *Vector[T,U])Difference(
-    l dynamicContainers.ComparisonsOtherConstraint[T],
-    r dynamicContainers.ComparisonsOtherConstraint[T],
+    l containerTypes.ComparisonsOtherConstraint[T],
+    r containerTypes.ComparisonsOtherConstraint[T],
 ) {
 }
 
 // TODO - impl
 func (v *Vector[T,U])IsSuperset(
-    other dynamicContainers.ComparisonsOtherConstraint[T],
+    other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
     return false
 }
 
 // TODO - impl
 func (v *Vector[T,U])IsSubset(
-    other dynamicContainers.ComparisonsOtherConstraint[T],
+    other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
     return false
 }

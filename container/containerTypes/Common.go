@@ -42,6 +42,8 @@ type StaticCapacity interface {
     Full() bool
 }
 
+// An interface that defines what value-only comparisons can be performed on a
+// container.
 type Comparisons[OI any, K any, V any] interface {
     UnorderedEq(other OI) bool
     Intersection(l OI, r OI)
@@ -51,8 +53,27 @@ type Comparisons[OI any, K any, V any] interface {
     IsSubset(other OI) bool
 }
 
+// An interface that defines what key/value comparisons can be performed on a
+// container that has keyed values.
 type KeyedComparisons[OI any, K any, V any] interface {
     KeyedEq(other OI) bool
+}
+
+// An interface that defines what kinds values can be passed to the methods in
+// the [Comparisons] interface.
+type ComparisonsOtherConstraint[V any] interface {
+    ReadOps[V]
+    RWSyncable
+    Length
+}
+
+// An interface that defines what kinds values can be passed to the methods in
+// the [KeyedComparisons] interface.
+type KeyedComparisonsOtherConstraint[K any, V any] interface {
+    ReadKeyedOps[K,V]
+    ReadOps[V] // TODO - needed??
+    RWSyncable
+    Length
 }
 
 // TODO

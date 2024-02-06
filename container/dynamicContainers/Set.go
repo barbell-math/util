@@ -8,8 +8,11 @@ type ReadSet[V any] interface {
 	containerTypes.Length
 	//containerTypes.Capacity
 	containerTypes.ReadOps[V]
-	// TODO - replace with ReadSet[V]: https://github.com/golang/go/issues/65362
-	containerTypes.Comparisons[ComparisonsOtherConstraint[V], int, V]
+	containerTypes.Comparisons[
+		containerTypes.ComparisonsOtherConstraint[V], 
+		int, 
+		V,
+	]
 }
 // An interface that only allows write operations on a set.
 type WriteSet[V any] interface {

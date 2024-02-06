@@ -3,6 +3,7 @@ package tests
 import (
 	"testing"
 
+	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/customerr"
@@ -535,6 +536,69 @@ func VectorInterfaceClear(
 	test.BasicTest(0, container.Length(), "Clear did not reset the underlying vector.", t)
 	test.BasicTest(0, container.Capacity(), "Clear did not reset the underlying vector.", t)
 }
+
+func testVectorValsHelper(
+    factory func() dynamicContainers.Vector[int],
+    l int, 
+    t *testing.T,
+){
+	container:=factory()
+    for i:=0; i<l; i++ {
+        container.Append(i);
+    }
+    cnt:=0
+    container.Vals().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+        cnt++
+        test.BasicTest(index,val,"Element was skipped while iterating.",t);
+        return iter.Continue,nil;
+    });
+    test.BasicTest(l,cnt,
+        "All the elements were not iterated over.",t,
+    )
+}
+func TestVectorVals(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+){
+    testVectorValsHelper(factory,0,t);
+    testVectorValsHelper(factory,1,t);
+    testVectorValsHelper(factory,2,t);
+    testVectorValsHelper(factory,5,t);
+}
+
+func testVectorPntrValsHelper(
+	factory func() dynamicContainers.Vector[int],
+    l int, 
+    t *testing.T,
+){
+	container:=factory()
+    for i:=0; i<l; i++ {
+        container.Append(i);
+    }
+    cnt:=0
+    container.ValPntrs().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
+        cnt++
+        test.BasicTest(index,*val,"Element was skipped while iterating.",t);
+        *val=100;
+        return iter.Continue,nil;
+    });
+    container.Vals().ForEach(func(index int, val int) (iter.IteratorFeedback, error) {
+        test.BasicTest(100,val,"Element was not updated while iterating.",t);
+        return iter.Continue,nil;
+    });
+    test.BasicTest(l,cnt,
+        "All the elements were not iterated over.",t,
+    )
+}
+func TestVectorValPntrs(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+){
+    testVectorPntrValsHelper(factory,0,t);
+    testVectorPntrValsHelper(factory,1,t);
+    testVectorPntrValsHelper(factory,2,t);
+}
+
 
 // func VectorInterfaceNeq(t *testing.T){
 //     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})

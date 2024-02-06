@@ -9,11 +9,13 @@ type ReadVector[V any] interface {
 	containerTypes.Capacity
 	containerTypes.ReadOps[V]
 	containerTypes.ReadKeyedOps[int,V]
-	// TODO - replace with ReadVector[V]: https://github.com/golang/go/issues/65362
-	// no - would restrict set - read keyed ops not supported and also not needed
-	containerTypes.Comparisons[ComparisonsOtherConstraint[V], int, V]
+	containerTypes.Comparisons[
+		containerTypes.ComparisonsOtherConstraint[V], 
+		int, 
+		V,
+	]
 	containerTypes.KeyedComparisons[
-		KeyedComparisonsOtherConstraint[int,V],
+		containerTypes.KeyedComparisonsOtherConstraint[int,V],
 		int,
 		V,
 	]

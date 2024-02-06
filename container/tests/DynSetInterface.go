@@ -284,45 +284,49 @@ func SetInterfaceUnorderedEq(
 		"UnorderedEq returned a false negative.", t,
 	)
 }
-// 
-// func setIntersectionHelper(
-// 	l dynamicContainers.Set[int],
-// 	r dynamicContainers.Set[int],
-// 	exp []int,
-// 	t *testing.T,
-// ){
-// 	tester:=func(c dynamicContainers.Set[int]) {
-// 		test.BasicTest(len(exp),c.Length(),
-// 			"Intersection produced a set of the wrong length.",t,
-// 		)
-// 		for _,v:=range(exp) {
-// 			test.BasicTest(true,c.Contains(v),
-// 				"Intersection did not contain the correct values.",t,
-// 			)
-// 		}
-// 	}
-// 	tester(l.Intersection(r))
-// 	tester(r.Intersection(l))
-// }
-// 
-// // Tests the Intersection method functionality of a dynamic set.
-// func SetInterfaceIntersection(
-// 	factory func() dynamicContainers.Set[int],
-// 	t *testing.T,
-// ) {
-// 	v:=factory()
-// 	v2:=factory()
-// 	setIntersectionHelper(v,v2,[]int{},t)
-// 	v.AppendUnique(1)
-// 	setIntersectionHelper(v,v2,[]int{},t)
-// 	v2.AppendUnique(1)
-// 	setIntersectionHelper(v,v2,[]int{1},t)
-// 	v2.AppendUnique(2)
-// 	setIntersectionHelper(v,v2,[]int{1},t)
-// 	v.AppendUnique(2)
-// 	setIntersectionHelper(v,v2,[]int{1,2},t)
-// 	v.AppendUnique(3)
-// 	setIntersectionHelper(v,v2,[]int{1,2},t)
-// 	v2.AppendUnique(3)
-// 	setIntersectionHelper(v,v2,[]int{1,2,3},t)
-// }
+
+func setIntersectionHelper(
+	l dynamicContainers.Set[int],
+	r dynamicContainers.Set[int],
+	exp []int,
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+	tester:=func(c dynamicContainers.Set[int]) {
+		test.BasicTest(len(exp),c.Length(),
+			"Intersection produced a set of the wrong length.",t,
+		)
+		for _,v:=range(exp) {
+			test.BasicTest(true,c.Contains(v),
+				"Intersection did not contain the correct values.",t,
+			)
+		}
+	}
+	res:=factory()
+	res.Intersection(l,r)
+	tester(res)
+	res.Intersection(r,l)
+	tester(res)
+}
+
+// Tests the Intersection method functionality of a dynamic set.
+func SetInterfaceIntersection(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+) {
+	v:=factory()
+	v2:=factory()
+	setIntersectionHelper(v,v2,[]int{},factory,t)
+	v.AppendUnique(1)
+	setIntersectionHelper(v,v2,[]int{},factory,t)
+	v2.AppendUnique(1)
+	setIntersectionHelper(v,v2,[]int{1},factory,t)
+	v2.AppendUnique(2)
+	setIntersectionHelper(v,v2,[]int{1},factory,t)
+	v.AppendUnique(2)
+	setIntersectionHelper(v,v2,[]int{1,2},factory,t)
+	v.AppendUnique(3)
+	setIntersectionHelper(v,v2,[]int{1,2},factory,t)
+	v2.AppendUnique(3)
+	setIntersectionHelper(v,v2,[]int{1,2,3},factory,t)
+}
