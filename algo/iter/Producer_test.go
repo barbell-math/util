@@ -36,6 +36,48 @@ func TestValElem(t *testing.T) {
 	valElemIterHelper(2, fmt.Errorf("NEW ERROR"), 5, t)
 }
 
+func TestRange(t *testing.T){
+	res,err:=Range[int](0,0,0).Collect()
+	test.SlicesMatch[int]([]int{},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](0,0,1).Collect()
+	test.SlicesMatch[int]([]int{},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+
+	res,err=Range[int](0,1,1).Collect()
+	test.SlicesMatch[int]([]int{0},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](0,2,1).Collect()
+	test.SlicesMatch[int]([]int{0,1},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](0,5,1).Collect()
+	test.SlicesMatch[int]([]int{0,1,2,3,4},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](1,0,-1).Collect()
+	test.SlicesMatch[int]([]int{1},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](1,-1,-1).Collect()
+	test.SlicesMatch[int]([]int{1,0},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](1,-4,-1).Collect()
+	test.SlicesMatch[int]([]int{1,0,-1,-2,-3},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+
+	res,err=Range[int](0,1,2).Collect()
+	test.SlicesMatch[int]([]int{0},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](1,0,-2).Collect()
+	test.SlicesMatch[int]([]int{1},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+
+	res,err=Range[int](0,4,2).Collect()
+	test.SlicesMatch[int]([]int{0,2},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+	res,err=Range[int](0,-4,-2).Collect()
+	test.SlicesMatch[int]([]int{0,-2},res,t)
+	test.BasicTest(nil,err,"Range returned an error when it shouldn't have.",t)
+}
+
 func sliceElemsIterHelper[T any](vals []T, t *testing.T) {
 	sIter := SliceElems(vals)
 	for i := 0; i < len(vals); i++ {

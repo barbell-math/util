@@ -1,3 +1,3 @@
 module github.com/barbell-math/util
 
-go 1.20
+go 1.21

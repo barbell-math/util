@@ -38,6 +38,26 @@ func ValElem[T any](val T, err error, repeat int) Iter[T] {
 	}
 }
 
+// This funciton is a Producer.
+//
+// Range returns an iterator that produces a sequence of values according to the
+// values that are given as parameters. The sequence of values that will be 
+// returned starts with the start value, and increments by the amount specified
+// by the jump parameter. It will stop once it reaches the stop value, 
+// exclusively, meaning the last value will not be included. There are no
+// conditions to check for infinite loops. A jump of 0 will always result in a
+// infinite loop as long as start!=stop. No errors will ever be returned by
+// this producer.
+func Range[
+	T ~int | ~int8 | ~int16 | ~int32 | ~int64,
+](start T, stop T, jump T) Iter[T] {
+	cntr:=start-jump
+	return func(f IteratorFeedback) (T, error, bool) {
+		cntr+=jump
+		return cntr, nil, (jump>=0 && cntr<stop) || (jump<0 && cntr>stop)
+	}
+}
+
 // This function is a Producer.
 //
 // SliceElems returns an iterator that iterates over the supplied slices

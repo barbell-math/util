@@ -44,19 +44,19 @@ type StaticCapacity interface {
 
 // An interface that defines what value-only comparisons can be performed on a
 // container.
-type Comparisons[OI any, K any, V any] interface {
-    UnorderedEq(other OI) bool
-    Intersection(l OI, r OI)
-    Union(l OI, r OI)
-    Difference(l OI, r OI)
-    IsSuperset(other OI) bool
-    IsSubset(other OI) bool
+type Comparisons[K any, V any] interface {
+    UnorderedEq(other ComparisonsOtherConstraint[V]) bool
+    Intersection(l ComparisonsOtherConstraint[V], r ComparisonsOtherConstraint[V])
+    Union(l ComparisonsOtherConstraint[V], r ComparisonsOtherConstraint[V])
+    Difference(l ComparisonsOtherConstraint[V], r ComparisonsOtherConstraint[V])
+    IsSuperset(other ComparisonsOtherConstraint[V]) bool
+    IsSubset(other ComparisonsOtherConstraint[V]) bool
 }
 
 // An interface that defines what key/value comparisons can be performed on a
 // container that has keyed values.
-type KeyedComparisons[OI any, K any, V any] interface {
-    KeyedEq(other OI) bool
+type KeyedComparisons[K any, V any] interface {
+    KeyedEq(other KeyedComparisonsOtherConstraint[K,V]) bool
 }
 
 // An interface that defines what kinds values can be passed to the methods in
@@ -89,10 +89,10 @@ type ReadOps[V any] interface {
 }
 // An interface the enforces implementation of read-only, key/value, operations.
 type ReadKeyedOps[K any, V any] interface {
-    ReadOps[V]
     Get(k K) (V,error)
     GetPntr(k K) (*V,error)
     KeyOf(v V) (K,bool)
+    Keys() iter.Iter[K]
     // KeyRange() func(k K) bool
     // KeyPntrRange() func(k *K) bool
     // KeyValRange() func(k K, v V) bool
@@ -112,12 +112,11 @@ type WriteUniqueKeyedOps[K any, V any] interface {
 }
 
 // An interface the enforces implementation of write-only, value-only, operations.
-type WriteOps[K any, V any] interface {
+type WriteOps[V any] interface {
     Append(vals ...V) error
 }
 // An interface the enforces implementation of write-only, key/value, operations.
 type WriteKeyedOps[K any, V any] interface {
-    WriteOps[K,V]
     Emplace(idx K, v V) error;
     Push(idx K, v ...V) error;
 }

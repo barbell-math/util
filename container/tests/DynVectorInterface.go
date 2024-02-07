@@ -60,7 +60,7 @@ func VectorInterfaceWriteOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteOps[int, V] = factory()
+	var container containerTypes.WriteOps[V] = factory()
 	_ = container
 }
 

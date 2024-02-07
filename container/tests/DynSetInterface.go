@@ -330,3 +330,209 @@ func SetInterfaceIntersection(
 	v2.AppendUnique(3)
 	setIntersectionHelper(v,v2,[]int{1,2,3},factory,t)
 }
+
+func setUnionHelper(
+	l dynamicContainers.Set[int],
+	r dynamicContainers.Set[int],
+	exp []int,
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+	tester:=func(c dynamicContainers.Set[int]) {
+		test.BasicTest(len(exp),c.Length(),
+			"Union produced a set of the wrong length.",t,
+		)
+		for _,v:=range(exp) {
+			test.BasicTest(true,c.Contains(v),
+				"Union did not contain the correct values.",t,
+			)
+		}
+	}
+	res:=factory()
+	res.Union(l,r)
+	tester(res)
+	res.Union(r,l)
+	tester(res)
+}
+
+// Tests the Union method functionality of a dynamic set.
+func SetInterfaceUnion(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+) {
+	v:=factory()
+	v2:=factory()
+	setUnionHelper(v,v2,[]int{},factory,t)
+	v.AppendUnique(1)
+	setUnionHelper(v,v2,[]int{1},factory,t)
+	v2.AppendUnique(1)
+	setUnionHelper(v,v2,[]int{1},factory,t)
+	v2.AppendUnique(2)
+	setUnionHelper(v,v2,[]int{1,2},factory,t)
+	v.AppendUnique(2)
+	setUnionHelper(v,v2,[]int{1,2},factory,t)
+	v.AppendUnique(3)
+	setUnionHelper(v,v2,[]int{1,2,3},factory,t)
+	v2.AppendUnique(3)
+	setUnionHelper(v,v2,[]int{1,2,3},factory,t)
+}
+
+func setDifferenceHelper(
+	l dynamicContainers.Set[int],
+	r dynamicContainers.Set[int],
+	exp []int,
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+	tester:=func(c dynamicContainers.Set[int]) {
+		test.BasicTest(len(exp),c.Length(),
+			"Union produced a set of the wrong length.",t,
+		)
+		for _,v:=range(exp) {
+			test.BasicTest(true,c.Contains(v),
+				"Union did not contain the correct values.",t,
+			)
+		}
+	}
+	res:=factory()
+	res.Difference(l,r)
+	tester(res)
+}
+
+// Tests the Difference method functionality of a dynamic set.
+func SetInterfaceDifference(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+) {
+	v:=factory()
+	v2:=factory()
+	setDifferenceHelper(v,v2,[]int{},factory,t)
+	setDifferenceHelper(v2,v,[]int{},factory,t)
+	v.AppendUnique(1)
+	setDifferenceHelper(v,v2,[]int{1},factory,t)
+	setDifferenceHelper(v2,v,[]int{},factory,t)
+	v2.AppendUnique(1)
+	setDifferenceHelper(v,v2,[]int{},factory,t)
+	setDifferenceHelper(v2,v,[]int{},factory,t)
+	v2.AppendUnique(2)
+	setDifferenceHelper(v,v2,[]int{},factory,t)
+	setDifferenceHelper(v2,v,[]int{2},factory,t)
+	v.AppendUnique(2)
+	setDifferenceHelper(v,v2,[]int{},factory,t)
+	setDifferenceHelper(v2,v,[]int{},factory,t)
+	v.AppendUnique(3)
+	setDifferenceHelper(v,v2,[]int{3},factory,t)
+	setDifferenceHelper(v2,v,[]int{},factory,t)
+	v2.AppendUnique(3)
+	setDifferenceHelper(v,v2,[]int{},factory,t)
+	setDifferenceHelper(v2,v,[]int{},factory,t)
+	v.AppendUnique(4,5,6)
+	setDifferenceHelper(v,v2,[]int{4,5,6},factory,t)
+	setDifferenceHelper(v2,v,[]int{},factory,t)
+}
+
+func SetInterfaceIsSuperset(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+	v:=factory()
+	v2:=factory()
+	test.BasicTest(true,v.IsSuperset(v2),
+		"Superset returned a false negative.",t,
+	)
+	v.AppendUnique(1)
+	test.BasicTest(true,v.IsSuperset(v2),
+		"Superset returned a false negative.",t,
+	)
+	test.BasicTest(false,v2.IsSuperset(v),
+		"Superset returned a false positive.",t,
+	)
+	v2.AppendUnique(1)
+	test.BasicTest(true,v.IsSuperset(v2),
+		"Superset returned a false negative.",t,
+	)
+	test.BasicTest(true,v2.IsSuperset(v),
+		"Superset returned a false negative.",t,
+	)
+	v2.AppendUnique(2)
+	test.BasicTest(false,v.IsSuperset(v2),
+		"Superset returned a false positive.",t,
+	)
+	test.BasicTest(true,v2.IsSuperset(v),
+		"Superset returned a false negative.",t,
+	)
+	v2.AppendUnique(3)
+	test.BasicTest(false,v.IsSuperset(v2),
+		"Superset returned a false positive.",t,
+	)
+	test.BasicTest(true,v2.IsSuperset(v),
+		"Superset returned a false negative.",t,
+	)
+	v.AppendUnique(2,3)
+	test.BasicTest(true,v.IsSuperset(v2),
+		"Superset returned a false negative.",t,
+	)
+	test.BasicTest(true,v2.IsSuperset(v),
+		"Superset returned a false negative.",t,
+	)
+	v.AppendUnique(4,5)
+	test.BasicTest(true,v.IsSuperset(v2),
+		"Superset returned a false negative.",t,
+	)
+	test.BasicTest(false,v2.IsSuperset(v),
+		"Superset returned a false positive.",t,
+	)
+}
+
+func SetInterfaceIsSubset(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+	v:=factory()
+	v2:=factory()
+	test.BasicTest(true,v.IsSubset(v2),
+		"Subset returned a false negative.",t,
+	)
+	v.AppendUnique(1)
+	test.BasicTest(false,v.IsSubset(v2),
+		"Subset returned a false positive.",t,
+	)
+	test.BasicTest(true,v2.IsSubset(v),
+		"Subset returned a false negative.",t,
+	)
+	v2.AppendUnique(1)
+	test.BasicTest(true,v.IsSubset(v2),
+		"Subset returned a false negative.",t,
+	)
+	test.BasicTest(true,v2.IsSubset(v),
+		"Subset returned a false negative.",t,
+	)
+	v2.AppendUnique(2)
+	test.BasicTest(true,v.IsSubset(v2),
+		"Subset returned a false negative.",t,
+	)
+	test.BasicTest(false,v2.IsSubset(v),
+		"Subset returned a false positive.",t,
+	)
+	v2.AppendUnique(3)
+	test.BasicTest(true,v.IsSubset(v2),
+		"Subset returned a false negative.",t,
+	)
+	test.BasicTest(false,v2.IsSubset(v),
+		"Subset returned a false positive.",t,
+	)
+	v.AppendUnique(2,3)
+	test.BasicTest(true,v.IsSubset(v2),
+		"Subset returned a false negative.",t,
+	)
+	test.BasicTest(true,v2.IsSubset(v),
+		"Subset returned a false negative.",t,
+	)
+	v.AppendUnique(4,5)
+	test.BasicTest(false,v.IsSubset(v2),
+		"Subset returned a false positive.",t,
+	)
+	test.BasicTest(true,v2.IsSubset(v),
+		"Subset returned a false negative.",t,
+	)
+}

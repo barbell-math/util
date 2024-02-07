@@ -477,7 +477,7 @@ func (v *Vector[T,U])ValPntrs() iter.Iter[*T] {
 // Returns true if the elements in v are all contained in other and the elements
 // of other are all contained in v, regardless of position. Returns false 
 // otherwise. This implementation of UnorderedEq is dependent on the time 
-// complexity of the implementation of the ContainesPntr method on other. In 
+// complexity of the implementation of the ContainsPntr method on other. In 
 // big-O it might look something like this, O(n*O(other.ContainsPntr))), where n 
 // is the number of elements in v and O(other.ContainsPntr(m)) represents the 
 // time complexity of the containsPntr method on other with m values. Read locks 
@@ -505,14 +505,14 @@ func (v *Vector[T,U])KeyedEq(
 
 // Populates the vector with the intersection of values from the l and r 
 // containers. This implementation of intersection is dependent on the time 
-// complexity of the implementation of the ContainesPntr method on l and r. In 
-// big-O it might look something like this, O(n*O(r.ContainsPntr(m))), where 
-// O(r.ContainsPntr(n)) represents the time complexity of the containsPntr 
-// method on l with n values. Read locks will be placed on l and r and a write 
-// lock will be placed on the vector that is being populated.
+// complexity of the implementation of the ContainsPntr method on l and r. In 
+// big-O it might look something like this, O(n*O(r.ContainsPntr)), where 
+// O(r.ContainsPntr) represents the time complexity of the containsPntr 
+// method on r. Read locks will be placed on l and r and a write lock will be 
+// placed on the vector that is being populated.
 //
 // This vector will be cleared before storing the result. When clearing, the
-// new resulting vector will be initialized with zero capacity and a enough
+// new resulting vector will be initialized with zero capacity and enough
 // backing memory to store (l.Length()+r.Length())/2 elements before 
 // reallocating. This means that there should be at most 1 reallocation beyond
 // this initial allocation, and that additional allocation should only occur 
@@ -536,14 +536,28 @@ func (v *Vector[T,U])Intersection(
     *v=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if r.ContainsPntr(val) {
-            // Need to copy because val is comming from another vector.
+            // Need to copy because val is comming from another container.
             *v=append(*v, w.Copy(val)) 
         }
         return iter.Continue,nil
     })
 }
 
-// TODO - impl
+// Populates the vector with the union of values from the l and r containers. 
+// The time complexity of this union operation will look like this in big-O: 
+// O((n+m)*(n+m)), where n is the number of values in l and m is the number of
+// values in n. Read locks will be placed on l and r and a write lock will be 
+// placed on the vector that is being populated.
+//
+// This vector will be cleared before storing the result. When clearing, the
+// new resulting vector will be initialized with zero capacity and enough
+// backing memory to store the average of the maximum and minimum possible
+// union sizes before reallocating. This means that there should be at most 1 
+// reallocation beyond this initial allocation, and that additional allocation 
+// should only occur when the length of the union is greater than the average 
+// length of the minumum and maximum possible union sizes. This logic is 
+// predicated on the fact that unions will likely be much smaller than the 
+// original vectors.
 func (v *Vector[T,U])Union(
     l containerTypes.ComparisonsOtherConstraint[T],
     r containerTypes.ComparisonsOtherConstraint[T],
@@ -558,42 +572,106 @@ func (v *Vector[T,U])Union(
     for i:=0; i<len(*v); i++ {
         w.Zero(&(*v)[i])
     }
-    *v=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
+    minLen:=max(l.Length(),r.Length())
+    maxLen:=l.Length()+r.Length()
+    *v=make(Vector[T, U], 0, (maxLen+minLen)/2)
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !v.ContainsPntr(val) {
-            // Need to copy because val is comming from another vector.
+            // Need to copy because val is comming from another container.
             *v=append(*v, w.Copy(val)) 
         }
         return iter.Continue,nil
     })
     r.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !v.ContainsPntr(val) {
-            // Need to copy because val is comming from another vector.
+            // Need to copy because val is comming from another container.
             *v=append(*v, w.Copy(val)) 
         }
         return iter.Continue,nil
     })
 }
 
-// TODO - impl
+// Populates the vector with the result of taking the difference of r from l.
+// This implementation of difference is dependent on the time complexity of the 
+// implementation of the ContainsPntr method on r. In big-O it might look 
+// something like this, O(n*O(r.ContainsPntr)), where O(r.ContainsPntr) 
+// represents the time complexity of the containsPntr method on r. Read locks 
+// will be placed on l and r and a write lock will be placed on the vector that 
+// is being populated.
+//
+// This vector will be cleared before storing the result. When clearing, the
+// new resulting vector will be initialized with zero capacity and enough
+// backing memory to store half the length of l. This means that there should be 
+// at most 1 reallocation beyond this initial allocation, and that additional 
+// allocation should only occur when the length of the difference is greater 
+// than half the length of l. This logic is predicated on the fact that 
+// differences will likely be much smaller than the original vector.
 func (v *Vector[T,U])Difference(
     l containerTypes.ComparisonsOtherConstraint[T],
     r containerTypes.ComparisonsOtherConstraint[T],
 ) {
+    r.RLock()
+    l.RLock()
+    v.Lock()
+    defer r.RUnlock()
+    defer l.RUnlock()
+    defer v.Unlock()
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<len(*v); i++ {
+        w.Zero(&(*v)[i])
+    }
+    *v=make(Vector[T, U], 0, l.Length()/2)
+    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if !r.ContainsPntr(val) {
+            // Need to copy because val is comming from another container.
+            *v=append(*v, w.Copy(val)) 
+        }
+        return iter.Continue,nil
+    })
 }
 
-// TODO - impl
+// Returns true if this vector is a superset to other. This implementation has
+// a time complexity of O(n*m), where n is the number of values in this vector
+// and m is the number of values in other. Read locks will be placed on both
+// this vector and the other vector.
 func (v *Vector[T,U])IsSuperset(
     other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
-    return false
+    v.RLock()
+    other.RLock()
+    defer v.RUnlock()
+    defer other.RUnlock()
+    rv:=(len(*v)>=other.Length())
+    if !rv {
+        return false
+    }
+    other.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if rv=v.ContainsPntr(val); !rv {
+            return iter.Break,nil
+        }
+        return iter.Continue,nil
+    })
+    return rv
 }
 
-// TODO - impl
+// Returns true if this vector is a subset to other. This implementation has a
+// time complexity that is dependent on the ContainsPntr method of other. In 
+// big-O terms it may look somwthing like this: O(n*O(other.ContainsPntr)), 
+// where n is the number of elements in the current vector and 
+// other.ContainsPntr represents the time complexity of the containsPntr method
+// on other. Read locks will be placed on both this vector and the other vector.
 func (v *Vector[T,U])IsSubset(
     other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
-    return false
+    v.RLock()
+    other.RLock()
+    defer v.RUnlock()
+    defer other.RUnlock()
+    rv:=(len(*v)<=other.Length())
+    for i:=0; i<len(*v) && rv; i++ {
+        rv=other.ContainsPntr(&(*v)[i])
+    }
+    return rv
 }
 
 
