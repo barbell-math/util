@@ -93,6 +93,7 @@ type ReadKeyedOps[K any, V any] interface {
     GetPntr(k K) (*V,error)
     KeyOf(v V) (K,bool)
     Keys() iter.Iter[K]
+    KeyPntrs() iter.Iter[*K]
     // KeyRange() func(k K) bool
     // KeyPntrRange() func(k *K) bool
     // KeyValRange() func(k K, v V) bool

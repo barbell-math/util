@@ -456,12 +456,7 @@ func (v *Vector[T,U])Vals() iter.Iter[T] {
     )
 }
 
-// // TODO - impl and add range to iter
-// func (v *Vector[T,U])Keys() iter.Iter[T] {
-// 
-// }
-
-// Returns an iterator that iterates over the pointers to ithe values in the 
+// Returns an iterator that iterates over the pointers to the values in the 
 // vector. The vector will have a read lock the entire time the iteration is 
 // being performed. The lock will not be applied until the iterator is consumed.
 func (v *Vector[T,U])ValPntrs() iter.Iter[*T] {
@@ -471,6 +466,30 @@ func (v *Vector[T,U])ValPntrs() iter.Iter[*T] {
     ).SetupTeardown(
         func() error { v.RLock(); return nil },
         func() error { v.RUnlock(); return nil },
+    )
+}
+
+// Returns an iterator that iterates over the keys (indexes) of the vector. The
+// vector will have a read lock the entire time the iteration is being performed.
+// The lock will not be applied until the iterator is consumed.
+func (v *Vector[T,U])Keys() iter.Iter[int] {
+    return iter.Range[int](0,len(*v),1).SetupTeardown(
+        func() error { v.RLock(); return nil },
+        func() error { v.RUnlock(); return nil },
+    )
+}
+
+// Returns an iterator that iterates over the keys (indexes) of the vector 
+// returning pointers to them. The vector will have a read lock the entire time 
+// the iteration is being performed. The lock will not be applied until the 
+// iterator is consumed.
+func (v *Vector[T,U])KeyPntrs() iter.Iter[*int] {
+    return iter.Map[int,*int](
+        iter.Range[int](0,len(*v),1).SetupTeardown(
+            func() error { v.RLock(); return nil },
+            func() error { v.RUnlock(); return nil },
+        ),
+        func(index, val int) (*int, error) { return &val,nil },
     )
 }
 

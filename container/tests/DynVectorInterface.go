@@ -599,6 +599,63 @@ func TestVectorValPntrs(
     testVectorPntrValsHelper(factory,2,t);
 }
 
+func testVectorKeysHelper(
+    factory func() dynamicContainers.Vector[int],
+    l int, 
+    t *testing.T,
+){
+	container:=factory()
+    for i:=0; i<l; i++ {
+        container.Append(i);
+    }
+    cnt:=0
+    container.Keys().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+        cnt++
+        test.BasicTest(index,val,"Keys were skipped while iterating.",t);
+        return iter.Continue,nil;
+    });
+    test.BasicTest(l,cnt,
+        "All the keys were not iterated over.",t,
+    )
+}
+func TestVectorKeys(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+){
+    testVectorKeysHelper(factory,0,t);
+    testVectorKeysHelper(factory,1,t);
+    testVectorKeysHelper(factory,2,t);
+    testVectorKeysHelper(factory,5,t);
+}
+
+func testVectorKeyPntrsHelper(
+    factory func() dynamicContainers.Vector[int],
+    l int, 
+    t *testing.T,
+){
+	container:=factory()
+    for i:=0; i<l; i++ {
+        container.Append(i);
+    }
+    cnt:=0
+    container.KeyPntrs().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
+        cnt++
+        test.BasicTest(index,*val,"Keys were skipped while iterating.",t);
+        return iter.Continue,nil;
+    });
+    test.BasicTest(l,cnt,
+        "All the keys were not iterated over.",t,
+    )
+}
+func TestVectorKeyPntrs(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+){
+    testVectorKeyPntrsHelper(factory,0,t);
+    testVectorKeyPntrsHelper(factory,1,t);
+    testVectorKeyPntrsHelper(factory,2,t);
+    testVectorKeyPntrsHelper(factory,5,t);
+}
 
 // func VectorInterfaceNeq(t *testing.T){
 //     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
