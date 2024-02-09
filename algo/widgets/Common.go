@@ -22,10 +22,6 @@ type (
         // not have manual memory management so this is mainly just to prenent
         // things like dangling pointers.
         Zero(v *T)
-        // Copys the supplied value. Equivalent to a copy constructor except Go
-        // does not have manual memory management so this is mainly just to 
-        // provide a way to manage resources if needed.
-        Copy(v *T) T
     }
 
     // The base widget implementation that all the containers in the [containers]
@@ -55,12 +51,6 @@ func NewWidget[T any, I WidgetInterface[T]]() Widget[T,I] {
 // supplied as a generic type.
 func (w *Widget[T, I])Zero(v *T) {
     w.iFace.Zero(v)
-}
-
-// Copys the supplied value using the logic defined by the interface that was
-// supplied as a generic type.
-func (w *Widget[T, I])Copy(v *T) T {
-    return w.iFace.Copy(v)
 }
 
 // Compares the left (l) and right (r) values and returns true is l==r using the

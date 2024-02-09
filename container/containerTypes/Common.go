@@ -106,10 +106,9 @@ type WriteUniqueKeyedOps[K any, V any] interface {
 
 // TODO
 // Map interface tests
-// Should I keep copy?? - ambiguous about when to use, copy with write ops, read ops?? NO, passing value/returing values implicitly copys them with no safe guard
-// Add copy??
-//  CopyVals(other OI)
-//  CopyKeyed(other OI)
+// Add arith to widgets - map will need it for sequential ops, separate widget type?? Probably should be
+// ZeroVal() T
+// UnitVal() T
 
 // An interface that enforces implementation of write-only, value-only, operations.
 type WriteOps[V any] interface {

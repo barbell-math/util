@@ -16,7 +16,8 @@ type (
     // attached to it so it can be passed to functions that use the interfaces
     // defined in the [containerTypes], [staticContainers], or
     // [dynamicContainers] packages. The type constraints on the generics
-    // define the logic for how equality comparisons will be handled.
+    // define the logic for how value specific operations, such as equality 
+    // comparisons, will be handled.
     Vector[T any, U widgets.WidgetInterface[T]] []T
 
     // A synchronized version of Vector. All operations will be wrapped in the
@@ -600,7 +601,7 @@ func (v *Vector[T,U])Intersection(
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if r.ContainsPntr(val) {
             // Need to copy because val is comming from another container.
-            *v=append(*v, w.Copy(val)) 
+            *v=append(*v, *val) 
         }
         return iter.Continue,nil
     })
@@ -641,14 +642,14 @@ func (v *Vector[T,U])Union(
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !v.ContainsPntr(val) {
             // Need to copy because val is comming from another container.
-            *v=append(*v, w.Copy(val)) 
+            *v=append(*v, *val) 
         }
         return iter.Continue,nil
     })
     r.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !v.ContainsPntr(val) {
             // Need to copy because val is comming from another container.
-            *v=append(*v, w.Copy(val)) 
+            *v=append(*v, *val) 
         }
         return iter.Continue,nil
     })
@@ -687,7 +688,7 @@ func (v *Vector[T,U])Difference(
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !r.ContainsPntr(val) {
             // Need to copy because val is comming from another container.
-            *v=append(*v, w.Copy(val)) 
+            *v=append(*v, *val) 
         }
         return iter.Continue,nil
     })
