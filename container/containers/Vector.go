@@ -5,6 +5,7 @@ import (
 
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/customerr"
 )
@@ -201,20 +202,36 @@ func (v *Vector[T, U])KeyOf(val T) (int,bool) {
     return rv,found
 }
 
-// Emplace (sets) the value at the specified index. Returns an error if the 
-// index is >= the length of the vector.
-func (v *Vector[T,U])Emplace(idx int, val T) error {
+// Sets the value at the specified index. Returns an error if the index is >= 
+// the length of the vector.
+func (v *Vector[T,U])Set(vals ...basic.Pair[int,T]) error {
     v.Lock()
     defer v.Unlock()
-    if idx>=0 && idx<len(*v) && len(*v)>0 {
-        (*v)[idx]=val
-        return nil
+    for _,iterV:=range(vals) {
+        if iterV.A>=0 && iterV.A<len(*v) && len(*v)>0 {
+            (*v)[iterV.A]=iterV.B
+        } else {
+            return getIndexOutOfBoundsError(iterV.A,0,len(*v))
+        }
     }
-    return getIndexOutOfBoundsError(idx,0,len(*v))
+    return nil
 }
 
-// TODO -impl when dyn map interface and associated tests are created
-func (v *Vector[T,U])EmplaceUnique(idx int, vals T) error {
+// Sets the supplied values sequentially starting at the supplied index and
+// continuing sequentailly after that. Returns and error if any index that is
+// attempted to be set is >= the length of the vector. If an error occurs, all 
+// values will be set up until the value that caused the error.
+func (v *Vector[T,U])SetSequential(idx int, vals ...T) error {
+    v.Lock()
+    defer v.Unlock()
+    if idx>=len(*v) {
+        return getIndexOutOfBoundsError(idx,0,len(*v))
+    }
+    numCopyableVals:=min(len(*v)-idx,len(vals))
+    copy((*v)[idx:idx+numCopyableVals],vals[0:numCopyableVals])
+    if idx+len(vals)>len(*v) {
+        return getIndexOutOfBoundsError(len(*v),0,len(*v)) 
+    }
     return nil
 }
 
@@ -249,11 +266,32 @@ func (v *Vector[T,U])AppendUnique(vals ...T) error {
     return nil
 }
 
-// Pushes (inserts) the supplied values at the given index. Returns an error if 
-// the index is >= the length of the vector.
+// Insert will insert the supplied values into the vector. The values will be
+// inserted in the order that they are given. The time complexity of this
+// insert method is O(n^2)
+func (v *Vector[T, U])Insert(vals ...basic.Pair[int,T]) error {
+    v.Lock()
+    defer v.Unlock()
+    for i:=0; i<len(vals); i++ {
+        if vals[i].A>=0 && vals[i].A<len(*v) && len(*v)>0 {
+            var tmp T
+            *v=append(*v, tmp)
+            copy((*v)[vals[i].A+1:], (*v)[vals[i].A:])
+            (*v)[vals[i].A] = vals[i].B
+        } else if vals[i].A==len(*v) {
+            *v=append(*v,vals[i].B)
+        } else {
+            return getIndexOutOfBoundsError(vals[i].A,0,len(*v))
+        }
+    }
+    return nil
+}
+
+// Inserts the supplied values at the given index. Returns an error if the index
+// is >= the length of the vector.
 // For time complexity see the InsertVector section of:
 // https://go.dev/wiki/SliceTricks
-func (v *Vector[T,U])Push(idx int, vals ...T) error {
+func (v *Vector[T,U])InsertSequential(idx int, vals ...T) error {
     v.Lock()
     defer v.Unlock()
     if idx>=0 && idx<len(*v) && len(*v)>0 {
@@ -479,26 +517,12 @@ func (v *Vector[T,U])Keys() iter.Iter[int] {
     )
 }
 
-// Returns an iterator that iterates over the keys (indexes) of the vector 
-// returning pointers to them. The vector will have a read lock the entire time 
-// the iteration is being performed. The lock will not be applied until the 
-// iterator is consumed.
-func (v *Vector[T,U])KeyPntrs() iter.Iter[*int] {
-    return iter.Map[int,*int](
-        iter.Range[int](0,len(*v),1).SetupTeardown(
-            func() error { v.RLock(); return nil },
-            func() error { v.RUnlock(); return nil },
-        ),
-        func(index, val int) (*int, error) { return &val,nil },
-    )
-}
-
 // Returns true if the elements in v are all contained in other and the elements
 // of other are all contained in v, regardless of position. Returns false 
 // otherwise. This implementation of UnorderedEq is dependent on the time 
 // complexity of the implementation of the ContainsPntr method on other. In 
 // big-O it might look something like this, O(n*O(other.ContainsPntr))), where n 
-// is the number of elements in v and O(other.ContainsPntr(m)) represents the 
+// is the number of elements in v and O(other.ContainsPntr) represents the 
 // time complexity of the containsPntr method on other with m values. Read locks 
 // will be placed on both this vector and the other vector.
 func (v *Vector[T,U])UnorderedEq(
@@ -515,11 +539,31 @@ func (v *Vector[T,U])UnorderedEq(
     return rv
 }
 
-// TODO - impl
+// Returns true if all the key value pairs in v are all contained in other and 
+// the key value pairs are all contained in v. Returns false otherwise. This 
+// implementation of KeyedEq is dependent on the time complexity of the 
+// implementation of the GetPntr method on other. In big-O it might look 
+// something like this, O(n*O(other.GetPntr))), where n is the number of 
+// elements in v and O(other.ContainsPntr) represents the time complexity of 
+// the containsPntr method on other with m values. Read locks will be placed on 
+// both this vector and the other vector.
 func (v *Vector[T,U])KeyedEq(
     other containerTypes.KeyedComparisonsOtherConstraint[int,T],
 ) bool {
-    return false
+    v.RLock()
+    other.RLock()
+    defer v.RUnlock()
+    defer other.RUnlock()
+    w:=widgets.NewWidget[T,U]()
+    rv:=(len(*v)==other.Length())
+    for i:=0; i<len(*v) && rv; i++ {
+        if otherV,err:=other.GetPntr(i); err!=nil {
+            rv=false
+        } else {
+            rv=w.Eq(&(*v)[i],otherV)
+        }
+    }
+    return rv
 }
 
 // Populates the vector with the intersection of values from the l and r 

@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/container/basic"
 )
 
 
@@ -76,88 +77,102 @@ type KeyedComparisonsOtherConstraint[K any, V any] interface {
     Length
 }
 
-// TODO
-// Add copy?? - would need to add widget support
-//  Copy(v V) OI
-
-// An interface the enforces implementation of read-only, value-only, operations.
+// An interface that enforces implementation of read-only, value-only, operations.
 type ReadOps[V any] interface {
     Vals() iter.Iter[V]
     ValPntrs() iter.Iter[*V]
     Contains(v V) bool
     ContainsPntr(v *V) bool
 }
-// An interface the enforces implementation of read-only, key/value, operations.
+// An interface that enforces implementation of read-only, key/value, operations.
 type ReadKeyedOps[K any, V any] interface {
     Get(k K) (V,error)
     GetPntr(k K) (*V,error)
     KeyOf(v V) (K,bool)
     Keys() iter.Iter[K]
-    KeyPntrs() iter.Iter[*K]
-    // KeyRange() func(k K) bool
-    // KeyPntrRange() func(k *K) bool
-    // KeyValRange() func(k K, v V) bool
-    // KeyValPntrRange() func(k *K, v *V) bool
 }
 
-// An interface the enforces implementation of write-only, value-only, unique 
+// An interface that enforces implementation of write-only, value-only, unique 
 // valued, operations.
 type WriteUniqueOps[K any, V any] interface {
     AppendUnique(vals ...V) error
 }
 
-// An interface the enforces implementation of write-only, key/value, unique 
+// An interface that enforces implementation of write-only, key/value, unique 
 // valued, operations.
 type WriteUniqueKeyedOps[K any, V any] interface {
     EmplaceUnique(idx K, v V) error
 }
 
-// An interface the enforces implementation of write-only, value-only, operations.
+// TODO
+// Map interface tests
+// Should I keep copy?? - ambiguous about when to use, copy with write ops, read ops?? NO, passing value/returing values implicitly copys them with no safe guard
+// Add copy??
+//  CopyVals(other OI)
+//  CopyKeyed(other OI)
+
+// An interface that enforces implementation of write-only, value-only, operations.
 type WriteOps[V any] interface {
     Append(vals ...V) error
 }
-// An interface the enforces implementation of write-only, key/value, operations.
+// An interface that enforces implementation of write-only, key/value, operations.
 type WriteKeyedOps[K any, V any] interface {
-    Emplace(idx K, v V) error;
-    Push(idx K, v ...V) error;
+    Set(kvPairs ...basic.Pair[K,V]) error;
+    SetSequential(k K, v ...V) error;
+}
+// An interface that enforces implementation of write-only, key/value, 
+// dynamic key, operations. A dynamic key operation is an operation that allows
+// changing the value of a key but also allows changing of the keys as a
+// result of that operation.
+type WriteDynKeyedOps[K any, V any] interface {
+    Insert(kvPairs ...basic.Pair[K,V]) error
+    InsertSequential(idx K, v ...V) error
+}
+// An interface that enforces implementation of write-only, key/value, 
+// static key, operations. A static key operation is an operation that allows
+// changing the value of a key but does not allow changing of the keys as a
+// result of that operation.
+type WriteStaticKeyedOps[K any, V any] interface {
+    Emplace(kvPairs ...basic.Pair[K,V]) error;
+    EmplaceSequential(idk K, v ...V) error;
 }
 
-// An interface the enforces implementation of delete-only, value-only, operations.
+// An interface that enforces implementation of delete-only, value-only, operations.
 type DeleteOps[K any, V any] interface {
     Pop(v V, num int) int
 }
-// An interface the enforces implementation of delete-only, key/value, operations.
+// An interface that enforces implementation of delete-only, key/value, operations.
 type DeleteKeyedOps[K any, V any] interface {
     DeleteOps[K,V]
     Delete(idx K) error
 }
 
-// An interface the enforces the implementation of read-only first element access.
+// An interface that enforces the implementation of read-only first element access.
 type FirstElemRead[V any] interface {
     PeekFront() (V,error);
     PeekPntrFront() (*V,error);
 }
-// An interface the enforces the implementation of write-only first element access.
+// An interface that enforces the implementation of write-only first element access.
 type FirstElemWrite[V any] interface {
     PushFront(v ...V) error;
     ForcePushFront(v ...V)
 }
-// An interface the enforces the implementation of delete-only first element access.
+// An interface that enforces the implementation of delete-only first element access.
 type FirstElemDelete[V any] interface {
     PopFront() (V,error);
 }
 
-// An interface the enforces the implementation of read-only last element access.
+// An interface that enforces the implementation of read-only last element access.
 type LastElemRead[V any] interface {
     PeekBack() (V,error);
     PeekPntrBack() (*V,error);
 }
-// An interface the enforces the implementation of write-only last element access.
+// An interface that enforces the implementation of write-only last element access.
 type LastElemWrite[V any] interface {
     PushBack(v ...V) (error);
     ForcePushBack(v ...V)
 }
-// An interface the enforces the implementation of delete-only last element access.
+// An interface that enforces the implementation of delete-only last element access.
 type LastElemDelete[V any] interface {
     PopBack() (V,error);
 }

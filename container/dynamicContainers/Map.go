@@ -16,6 +16,8 @@ type WriteMap[K any, V any] interface {
 	containerTypes.Clear
 	containerTypes.Length
 	containerTypes.WriteKeyedOps[K,V]
+	containerTypes.WriteDynKeyedOps[K,V]
+	containerTypes.WriteStaticKeyedOps[K,V]
 	containerTypes.DeleteOps[K,V]
 	containerTypes.DeleteKeyedOps[K,V]
 }
