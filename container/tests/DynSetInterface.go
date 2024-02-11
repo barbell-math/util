@@ -89,6 +89,40 @@ func SetInterfaceStaticCapacityInterface[V any](
 	)
 }
 
+// Tests the ContainsPntr method functionality of a dynamic set.
+func SetInterfaceContainsPntr(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+	container:=factory()
+	for i:=0; i<5; i++ {
+		container.AppendUnique(i)
+	}
+	for i:=0; i<5; i++ {
+		test.BasicTest(true,container.ContainsPntr(&i),
+			"ContainsPntr returned a false negative",t,
+		)
+	}
+	v:=5
+	test.BasicTest(false,container.ContainsPntr(&v),
+		"ContainsPntr returned a false positive.",t,
+	)
+	v=-1
+	test.BasicTest(false,container.ContainsPntr(&v),
+		"ContainsPntr returned a false positive.",t,
+	)
+	container.Pop(0,1)
+	v=0
+	test.BasicTest(false,container.ContainsPntr(&v),
+		"ContainsPntr returned a false positive.",t,
+	)
+	for i:=1; i<5; i++ {
+		test.BasicTest(true,container.ContainsPntr(&i),
+			"ContainsPntr returned a false negative",t,
+		)
+	}
+}
+
 // Tests the Contains method functionality of a dynamic set.
 func SetInterfaceContains(
 	factory func() dynamicContainers.Set[int],

@@ -27,3 +27,11 @@ func getIndexOutOfBoundsError(idx int, upper int, lower int) error {
         ),
     )
 }
+
+func getDuplicateValueError[T any](v T) error {
+    return customerr.Wrap(
+        containerTypes.Duplicate,
+        "The supplied value is already in the container: %v",
+        v,
+    )
+}

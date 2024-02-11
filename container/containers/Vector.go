@@ -163,14 +163,16 @@ func (v *Vector[T,U])GetPntr(idx int) (*T,error){
 
 // Contains will return true if the supplied value is in the vector, false
 // otherwise. All equality comparisons are performed by the generic U widget
-// type that the vector was initialized with.
+// type that the vector was initialized with. The time complexity of Contains
+// on a vector is O(n).
 func (v *Vector[T, U])Contains(val T) bool {
     return v.ContainsPntr(&val)
 }
 
 // ContainsPntr will return true if the supplied value is in the vector, false
 // otherwise. All equality comparisons are performed by the generic U widget
-// type that the vector was initialized with.
+// type that the vector was initialized with. The time complexity of
+// ContainsPntr on a vector is O(n).
 func (v *Vector[T, U])ContainsPntr(val *T) bool {
     v.RLock()
     defer v.RUnlock()
@@ -248,7 +250,7 @@ func (v *Vector[T,U])Append(vals ...T) error {
 // appended. This function will never return an error. The time complexity of 
 // AppendUnique is O(n*m) where n is the number of values in the vector and m 
 // is the number of values to append. For a more efficient implementation of 
-// this method use a different container, such as [Set].
+// this method use a different container, such as [HashSet].
 func (v *Vector[T,U])AppendUnique(vals ...T) error {
     v.Lock()
     defer v.Unlock()
@@ -772,7 +774,7 @@ func (c *Vector[T, U])Hash(other *Vector[T,U]) hash.Hash {
     if len(*other)>0 {
         rv=w.Hash(&(*other)[0])    
         for i:=1; i<len(*other); i++ {
-            rv=rv.Combine(uint64(w.Hash(&(*other)[i])))
+            rv=rv.Combine(w.Hash(&(*other)[i]))
         }
     }
     return rv
