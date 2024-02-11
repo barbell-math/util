@@ -152,7 +152,9 @@ func MapElems[K comparable, V any](
 			v.SetB(m[v.GetA()])
 			return v, nil, true
 		}
-		close(cont)
+		if f==Break {
+			close(cont)
+		}
 		return basic.Pair[K, V]{}, nil, false
 	}
 }
@@ -161,8 +163,8 @@ func MapElems[K comparable, V any](
 //
 // MapElems returns an iterator that iterates over a maps key values. Do not
 // confuse this with the Map intermediary function. This producer will never
-// return an error. This producer is not thread safe. If the underlying map value
-// it changed while being iterated over behavior is undefined.
+// return an error. This producer is not thread safe. If the underlying map 
+// value it changed while being iterated over behavior is undefined.
 func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
 	cont := make(chan bool)
 	c := mapOp(cont, m)
@@ -173,7 +175,9 @@ func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
 			cont <- true
 			return (<-c), nil, true
 		}
-		close(cont)
+		if f==Break {
+			close(cont)
+		}
 		var tmp K
 		return tmp, nil, false
 	}
@@ -195,7 +199,9 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
 			cont <- true
 			return m[<-c], nil, true
 		}
-		close(cont)
+		if f==Break {
+			close(cont)
+		}
 		var tmp V
 		return tmp, nil, false
 	}
