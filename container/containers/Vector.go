@@ -600,7 +600,6 @@ func (v *Vector[T,U])Intersection(
     *v=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if r.ContainsPntr(val) {
-            // Need to copy because val is comming from another container.
             *v=append(*v, *val) 
         }
         return iter.Continue,nil
@@ -610,7 +609,7 @@ func (v *Vector[T,U])Intersection(
 // Populates the vector with the union of values from the l and r containers. 
 // The time complexity of this union operation will look like this in big-O: 
 // O((n+m)*(n+m)), where n is the number of values in l and m is the number of
-// values in n. Read locks will be placed on l and r and a write lock will be 
+// values in r. Read locks will be placed on l and r and a write lock will be 
 // placed on the vector that is being populated.
 //
 // This vector will be cleared before storing the result. When clearing, the
@@ -641,14 +640,12 @@ func (v *Vector[T,U])Union(
     *v=make(Vector[T, U], 0, (maxLen+minLen)/2)
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !v.ContainsPntr(val) {
-            // Need to copy because val is comming from another container.
             *v=append(*v, *val) 
         }
         return iter.Continue,nil
     })
     r.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !v.ContainsPntr(val) {
-            // Need to copy because val is comming from another container.
             *v=append(*v, *val) 
         }
         return iter.Continue,nil
@@ -687,7 +684,6 @@ func (v *Vector[T,U])Difference(
     *v=make(Vector[T, U], 0, l.Length()/2)
     l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
         if !r.ContainsPntr(val) {
-            // Need to copy because val is comming from another container.
             *v=append(*v, *val) 
         }
         return iter.Continue,nil

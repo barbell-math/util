@@ -266,10 +266,14 @@ func (h *HashSet[T,U])Intersection(
     defer h.Unlock()
     defer l.RUnlock()
     defer r.RUnlock()
+    w:=widgets.NewWidget[T,U]()
+    for _,iterV:=range(h.internalHashSetImpl) {
+        w.Zero(&iterV)
+    }
     h.internalHashSetImpl=make(internalHashSetImpl[T],(l.Length()+r.Length())/2)
-    r.Vals().ForEach(func(index int, val T) (iter.IteratorFeedback, error) {
-        if l.ContainsPntr(&val) {
-            h.appendOp(&val)
+    r.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if l.ContainsPntr(val) {
+            h.appendOp(val)
         }
         return iter.Continue,nil
     })
@@ -279,26 +283,87 @@ func (h *HashSet[T,U])Union(
     l containerTypes.ComparisonsOtherConstraint[T],
     r containerTypes.ComparisonsOtherConstraint[T],
 ) {
-
+    h.Lock()
+    l.RLock()
+    r.RLock()
+    defer h.Unlock()
+    defer l.RUnlock()
+    defer r.RUnlock()
+    w:=widgets.NewWidget[T,U]()
+    for _,iterV:=range(h.internalHashSetImpl) {
+        w.Zero(&iterV)
+    }
+    minLen:=max(l.Length(),r.Length())
+    maxLen:=l.Length()+r.Length()
+    h.internalHashSetImpl=make(internalHashSetImpl[T],(minLen+maxLen)/2)
+    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        h.appendOp(val)
+        return iter.Continue,nil
+    })
+    r.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        h.AppendUnique(*val)
+        return iter.Continue,nil
+    })
 }
 
 func (h *HashSet[T,U])Difference(
     l containerTypes.ComparisonsOtherConstraint[T],
     r containerTypes.ComparisonsOtherConstraint[T],
 ) {
-
+    r.RLock()
+    l.RLock()
+    h.Lock()
+    defer r.RUnlock()
+    defer l.RUnlock()
+    defer h.Unlock()
+    w:=widgets.NewWidget[T,U]()
+    for _,iterV:=range(h.internalHashSetImpl) {
+        w.Zero(&iterV)
+    }
+    h.internalHashSetImpl=make(internalHashSetImpl[T],len(h.internalHashSetImpl)/2)
+    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if !r.ContainsPntr(val) {
+            h.appendOp(val)
+        }
+        return iter.Continue,nil
+    })
 }
 
 func (h *HashSet[T,U])IsSuperset(
     other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
-    return false
+    h.RLock()
+    other.RLock()
+    defer h.RUnlock()
+    defer other.RUnlock()
+    rv:=(len(h.internalHashSetImpl)>=other.Length())
+    if !rv {
+        return false
+    }
+    other.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
+        if rv=h.ContainsPntr(val); !rv {
+            return iter.Break,nil
+        }
+        return iter.Continue,nil
+    })
+    return rv
 }
 
 func (h *HashSet[T,U])IsSubset(
     other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
-    return false
+    h.RLock()
+    other.RLock()
+    defer h.RUnlock()
+    defer other.RUnlock()
+    rv:=(len(h.internalHashSetImpl)<=other.Length())
+    for _,iterV:=range(h.internalHashSetImpl) {
+        rv=other.ContainsPntr(&iterV)
+        if !rv {
+            break
+        }
+    }
+    return rv
 }
 
 func (h *HashSet[T, U])Eq(l *HashSet[T,U], r *HashSet[T,U]) bool {
