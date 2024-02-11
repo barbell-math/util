@@ -5,6 +5,14 @@ import (
 	"github.com/barbell-math/util/customerr"
 )
 
+
+func getSizeError(size int) error {
+    return customerr.Wrap(
+	customerr.ValOutsideRange,
+	"Size must be >=0. Got: %d",size,
+    )
+}
+
 func getIndexOutOfBoundsError(idx int, upper int, lower int) error {
     return customerr.AppendError(
         customerr.Wrap(

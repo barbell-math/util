@@ -4,6 +4,8 @@
 // Basically all of the code in this package is generated with go:generate comments.
 package widgets
 
+import "github.com/barbell-math/util/algo/hash"
+
 
 type (
     // The interface that defines what it means to be a widget. This interface
@@ -17,7 +19,7 @@ type (
         // A function that should return true if the current value is less than other.
         Lt(l *T, r *T) bool
         // Returns a hash value that represent the currently wrapped value.
-        Hash(v *T) uint64
+        Hash(v *T) hash.Hash
         // Zero's the supplied value. Equivalent to a destructor except Go does
         // not have manual memory management so this is mainly just to prenent
         // things like dangling pointers.
@@ -91,7 +93,7 @@ func (w *Widget[T, I])Gte(l *T, r *T) bool {
 
 // Generates a hash for the given value using the hash function from the interface
 // that was supplied as a generic type.
-func (w *Widget[T, I])Hash(v *T) uint64 {
+func (w *Widget[T, I])Hash(v *T) hash.Hash {
     return w.iFace.Hash(v)
 }
 

@@ -3,10 +3,8 @@ package containers
 import (
 	"testing"
 
-	// "github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/test"
-	// "github.com/barbell-math/util/test"
 )
 
 //go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateVector

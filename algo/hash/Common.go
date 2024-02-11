@@ -1,6 +1,10 @@
 package hash
 
 
-func Combine(l uint64, r uint64) uint64 {
-	return l^(r+0x517cc1b727220a95+(r<<6)+(r>>2))
+type (
+	Hash uint64
+)
+
+func (h Hash)Combine(other uint64) Hash {
+	return Hash(uint64(h)^(other+0x517cc1b727220a95+(other<<6)+(other>>2)))
 }

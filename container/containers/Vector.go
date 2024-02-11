@@ -46,10 +46,7 @@ type (
 // widget, including equality, are not preserved.
 func NewVector[T any, U widgets.WidgetInterface[T]](size int) (Vector[T,U],error) {
     if size<0 {
-	 return Vector[T,U]{}, customerr.Wrap(
-	    customerr.ValOutsideRange,
-	    "Size must be >=0. Got: %d",size,
-    	)	
+        return Vector[T, U]{}, getSizeError(size)
     }
     return make(Vector[T,U],size),nil
 }
@@ -767,15 +764,15 @@ func (v *Vector[T, U])Lt(l *Vector[T,U], r *Vector[T,U]) bool {
 // hashes that are produced from the elements of the vector are combined in a
 // way that maintains identity, making it so the hash will represent the same
 // equality operation that [Vector.KeyedEq] and [Vector.Eq] provide.
-func (c *Vector[T, U])Hash(other *Vector[T,U]) uint64 {
+func (c *Vector[T, U])Hash(other *Vector[T,U]) hash.Hash {
     other.RLock()
     defer other.RUnlock()
-    var rv uint64=0
+    var rv hash.Hash=0
     w:=widgets.NewWidget[T,U]()
     if len(*other)>0 {
         rv=w.Hash(&(*other)[0])    
         for i:=1; i<len(*other); i++ {
-            rv=hash.Combine(rv,w.Hash(&(*other)[i]))
+            rv=rv.Combine(uint64(w.Hash(&(*other)[i])))
         }
     }
     return rv

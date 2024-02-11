@@ -105,7 +105,6 @@ type WriteUniqueKeyedOps[K any, V any] interface {
 }
 
 // TODO
-// make vector be a widget for itself - allows vecs of vecs
 // make set
 // Add arith to widgets - map will need it for sequential ops, separate widget type?? Probably should be
 // ZeroVal() T

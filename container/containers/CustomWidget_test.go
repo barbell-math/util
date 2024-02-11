@@ -3,6 +3,7 @@ package containers
 import (
 	"testing"
 
+	"github.com/barbell-math/util/algo/hash"
 	"github.com/barbell-math/util/test"
 )
 
@@ -17,8 +18,8 @@ func (c *customWidget)Eq(l *customWidget, r *customWidget) bool {
 func (c *customWidget)Lt(l *customWidget, r *customWidget) bool {
     return l.a<r.a
 }
-func (c *customWidget)Hash(v *customWidget) uint64 {
-    return uint64(v.a)
+func (c *customWidget)Hash(v *customWidget) hash.Hash {
+    return hash.Hash(v.a)
 }
 func (c *customWidget)Zero(v *customWidget) {
     *v=customWidget{}
@@ -46,10 +47,10 @@ func TestCustomWidgetInVector(t *testing.T){
     test.BasicTest(true,v[0].Lt(&v[1],&v[0]),
         "The correct less than function was not called.",t,
     )
-    test.BasicTest(uint64(10),v[0].Hash(&v[0]),
+    test.BasicTest(hash.Hash(10),v[0].Hash(&v[0]),
         "The correct hash function was not called.",t,
     )
-    test.BasicTest(uint64(9),v[0].Hash(&v[1]),
+    test.BasicTest(hash.Hash(9),v[0].Hash(&v[1]),
         "The correct hash function was not called.",t,
     )
 }

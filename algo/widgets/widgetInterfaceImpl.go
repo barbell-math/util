@@ -112,10 +112,11 @@ func checkRequiredArgs() {
 }
 
 func generateImports() string {
+	commonImport:="import \"github.com/barbell-math/util/algo/hash\"\n\n"
 	if VALS.Type=="string" {
-		return "import \"hash/maphash\"\n\n"
+		return "import \"hash/maphash\"\n"+commonImport
 	}
-	return ""
+	return commonImport
 }
 
 func generateGlobals() string {
@@ -141,23 +142,24 @@ func generateHashFunction() string {
 		case "uint16": fallthrough
 		case "uint32": fallthrough
 		case "uint64":
-			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) uint64 {\n"+
-				"    return uint64(*v)\n"+
+			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n"+
+				"    return hash.Hash(*v)\n"+
 			    "}\n\n"
 		case "float32": fallthrough
 		case "float64":
-			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) uint64 {\n"+
+			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n"+
 				"    panic(\"Floats are not hashable!\")\n"+
 			    "}\n\n"
 		case "string":
-			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) uint64 {\n"+
-				"    return maphash.String(RANDOM_SEED_{{ .Type }},*(v))\n"+
+			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n"+
+				"    return hash.Hash(maphash.String(RANDOM_SEED_{{ .Type }},*(v)))\n"+
 			    "}\n\n"
 		default:
-			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) uint64 {\n"+
+			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n"+
 				"    // this will fail compilation (on purpose!)\n"+
 				"    // the supplied type was not hashable!\n"+
-				"    return int(-1)\n"+
+				"    panic(\"Supplied type was not hashable!\")\n"+
+				"    return hash.Hash(-1)\n"+
 			    "}\n\n"
 	}
 }
@@ -185,12 +187,11 @@ func generateZeroFunction() string {
 				"    *v=\"\"\n"+
 				"}\n\n"
 		default:
-			return "func (a Builtin{{ .CapType }})Zero(v *{{ .Type }}) uint64 {\n"+
+			return "func (a Builtin{{ .CapType }})Zero(v *{{ .Type }}) {\n"+
 				"    // this will fail compilation (on purpose!)\n"+
 				"    // the supplied type was not found in the zero table!\n"+
+				"	panic(\"The supplied type does not have a zeor value.\")\n"+
 				"    return int(-1)\n"+
 			    "}\n\n"
 	}
 }
-
-
