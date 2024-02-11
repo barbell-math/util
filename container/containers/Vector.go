@@ -3,6 +3,7 @@ package containers
 import (
 	"sync"
 
+	"github.com/barbell-math/util/algo/hash"
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
@@ -738,25 +739,50 @@ func (v *Vector[T,U])IsSubset(
     return rv
 }
 
+// An equality function that implements the [algo.widget.WidgetInterface] 
+// interface. Internally this is equivalent to [Vector.KeyedEq]. Returns true
+// if l==r, false otherwise.
+func (v *Vector[T, U])Eq(l *Vector[T,U], r *Vector[T,U]) bool {
+    return l.KeyedEq(r)
+}
 
-// TODO - use new generic types to implement equality
-// // Returns true if the vectors are equal. The supplied comparison function will
-// // be used when comparing values in the vector.
-// func (v *Vector[T,U])Eq(other *Vector[T,U], comp func(l *T, r *T) bool) bool {
-//     v.RLock()
-//     defer v.RUnlock()
-//     rv:=(len(*v)==len(*other))
-//     for i:=0; i<len(*other) && rv; i++ {
-//         rv=(rv && comp(&(*v)[i],&(*other)[i]))
-//     }
-//     return rv
-// }
-// 
-// // Returns true if the vectors are not equal. The supplied comparison function 
-// // will be used when comparing values in the vector.
-// func (v *Vector[T,U])Neq(
-//     other *Vector[T,U], 
-//     comp func(l *T, r *T) bool,
-// ) bool {
-//     return !v.Eq(other,comp)
-// }
+// A function that implements the less than operation on vectors. The l and r
+// vectors will be compared lexographically.
+func (v *Vector[T, U])Lt(l *Vector[T,U], r *Vector[T,U]) bool {
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<min(len(*l),len(*r)); i++ {
+        if w.Lt(&(*l)[i],&(*r)[i]) {
+            return true
+        } else if w.Gt(&(*l)[i],&(*r)[i]) {
+            return false
+        }
+    }
+    if len(*l)>=len(*r) {
+        return false
+    }
+    return true
+}
+
+// A function that returns a hash of a vector. To do this all of the individual
+// hashes that are produced from the elements of the vector are combined in a
+// way that maintains identity, making it so the hash will represent the same
+// equality operation that [Vector.KeyedEq] and [Vector.Eq] provide.
+func (c *Vector[T, U])Hash(other *Vector[T,U]) uint64 {
+    other.RLock()
+    defer other.RUnlock()
+    var rv uint64=0
+    w:=widgets.NewWidget[T,U]()
+    if len(*other)>0 {
+        rv=w.Hash(&(*other)[0])    
+        for i:=1; i<len(*other); i++ {
+            rv=hash.Combine(rv,w.Hash(&(*other)[i]))
+        }
+    }
+    return rv
+}
+
+// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// Internally this is equivalent to [vector.Clear].
+func (v *Vector[T, U])Zero(other *Vector[T,U]) {
+    other.Clear()
+}

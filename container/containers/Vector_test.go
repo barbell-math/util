@@ -5,6 +5,7 @@ import (
 
 	// "github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/test"
 	// "github.com/barbell-math/util/test"
 )
 
@@ -39,86 +40,129 @@ func TestVectorTypeCasting(t *testing.T){
     _=v2
 }
 
-// func TestVectorEq(t *testing.T){
-//     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
-//     v2:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
-//     comp:=func(l *int, r *int) bool { return *l==*r }
-//     test.BasicTest(true,v.Eq(&v2,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Eq(&v,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     v.Delete(3)
-//     test.BasicTest(false,v.Eq(&v2,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     test.BasicTest(false,v2.Eq(&v,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     v=Vector[int,widgets.BuiltinInt]([]int{0})
-//     v2=Vector[int,widgets.BuiltinInt]([]int{0})
-//     test.BasicTest(true,v.Eq(&v2,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Eq(&v,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     v.Delete(0)
-//     test.BasicTest(false,v.Eq(&v2,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     test.BasicTest(false,v2.Eq(&v,comp),
-// 	"Eq returned a false positive.",t,
-//     )
-//     v=Vector[int,widgets.BuiltinInt]([]int{})
-//     v2=Vector[int,widgets.BuiltinInt]([]int{})
-//     test.BasicTest(true,v.Eq(&v2,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Eq(&v,comp),
-// 	"Eq returned a false negative.",t,
-//     )
-// }
-// 
-// func TestVectorNeq(t *testing.T){
-//     v:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
-//     v2:=Vector[int,widgets.BuiltinInt]([]int{0,1,2,3})
-//     comp:=func(l *int, r *int) bool { return *l==*r }
-//     test.BasicTest(false,v.Neq(&v2,comp),
-// 	"Neq returned a false positive.",t,
-//     )
-//     test.BasicTest(false,v2.Neq(&v,comp),
-// 	"Neq returned a false positive.",t,
-//     )
-//     v.Delete(3)
-//     test.BasicTest(true,v.Neq(&v2,comp),
-// 	"Neq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Neq(&v,comp),
-// 	"Neq returned a false negative.",t,
-//     )
-//     v=Vector[int,widgets.BuiltinInt]([]int{0})
-//     v2=Vector[int,widgets.BuiltinInt]([]int{0})
-//     test.BasicTest(false,v.Neq(&v2,comp),
-// 	"Neq returned a false positive.",t,
-//     )
-//     test.BasicTest(false,v2.Neq(&v,comp),
-// 	"Neq returned a false positive.",t,
-//     )
-//     v.Delete(0)
-//     test.BasicTest(true,v.Neq(&v2,comp),
-// 	"Neq returned a false negative.",t,
-//     )
-//     test.BasicTest(true,v2.Neq(&v,comp),
-// 	"Neq returned a false negative.",t,
-//     )
-//     v=Vector[int,widgets.BuiltinInt]([]int{})
-//     v2=Vector[int,widgets.BuiltinInt]([]int{})
-//     test.BasicTest(false,v.Neq(&v2,comp),
-// 	"Neq returned a false positive.",t,
-//     )
-//     test.BasicTest(false,v2.Neq(&v,comp),
-// 	"Neq returned a false positive.",t,
-//     )
-// }
+func TestWidgetInterface(t *testing.T){
+    var widget widgets.WidgetInterface[Vector[string,widgets.BuiltinString]]
+    v,_:=NewVector[string,widgets.BuiltinString](0)
+    widget=&v
+    _=widget
+}
+
+func TestVectorOfVectorsEquality(t *testing.T){
+    v1:=Vector[
+	Vector[string,widgets.BuiltinString],
+	*Vector[string,widgets.BuiltinString],
+    ]{
+	{"a","b","c"},
+	{"d","e","f"},
+	{"h","i","j"},
+    }
+    v2:=Vector[
+	Vector[string,widgets.BuiltinString],
+	*Vector[string,widgets.BuiltinString],
+    ]{
+	{"a","b","c"},
+	{"d","e","f"},
+	{"h","i","j"},
+    }
+    test.BasicTest(true,v1.Eq(&v1,&v2),
+	"The widget equality check did not return true when it should have.",t,
+    )
+    test.BasicTest(true,v1.Eq(&v2,&v1),
+	"The widget equality check did not return true when it should have.",t,
+    )
+    v1[0][0]="blah"
+    test.BasicTest(false,v1.Eq(&v1,&v2),
+	"The widget equality check did not return true when it should have.",t,
+    )
+    test.BasicTest(false,v1.Eq(&v2,&v1),
+	"The widget equality check did not return true when it should have.",t,
+    )
+}
+
+func TestVectorOfVectorsLt(t *testing.T){
+    v1:=Vector[
+	Vector[string,widgets.BuiltinString],
+	*Vector[string,widgets.BuiltinString],
+    ]{
+	{"a","b","c"},
+	{"d","e","f"},
+	{"h","i","j"},
+    }
+    v2:=Vector[
+	Vector[string,widgets.BuiltinString],
+	*Vector[string,widgets.BuiltinString],
+    ]{
+	{"a","b","c"},
+	{"d","e","f"},
+	{"h","i","j"},
+    }
+    test.BasicTest(false,v1.Lt(&v1,&v2),
+	"The widget Lt method did not return false when comparing equal vectors.",t,
+    )
+    test.BasicTest(false,v1.Lt(&v2,&v1),
+	"The widget Lt method did not return false when comparing equal vectors.",t,
+    )
+    v1[0][0]="A"
+    test.BasicTest(true,v1.Lt(&v1,&v2),
+	"The widget Lt method did not returned a false negative.",t,
+    )
+    test.BasicTest(false,v1.Lt(&v2,&v1),
+	"The widget Lt method did not returned a false positive.",t,
+    )
+    v1[0][0]="a"
+    v1[0][1]="B"
+    test.BasicTest(true,v1.Lt(&v1,&v2),
+	"The widget Lt method did not returned a false negative.",t,
+    )
+    test.BasicTest(false,v1.Lt(&v2,&v1),
+	"The widget Lt method did not returned a false positive.",t,
+    )
+    v1[0][1]="b"
+    v1.Delete(2)
+    test.BasicTest(true,v1.Lt(&v1,&v2),
+	"The widget Lt method did not returned a false negative.",t,
+    )
+    test.BasicTest(false,v1.Lt(&v2,&v1),
+	"The widget Lt method did not returned a false positive.",t,
+    )
+    v2.Delete(1)
+    v2.Delete(1)
+    test.BasicTest(false,v1.Lt(&v1,&v2),
+	"The widget Lt method did not returned a false positive.",t,
+    )
+    test.BasicTest(true,v1.Lt(&v2,&v1),
+	"The widget Lt method did not returned a false negative.",t,
+    )
+}
+
+func TestVectorOfVectorsHash(t *testing.T){
+    v1:=Vector[
+	Vector[string,widgets.BuiltinString],
+	*Vector[string,widgets.BuiltinString],
+    ]{
+	{"a","b","c"},
+	{"d","e","f"},
+	{"h","i","j"},
+    }
+    v2:=Vector[
+	Vector[string,widgets.BuiltinString],
+	*Vector[string,widgets.BuiltinString],
+    ]{
+	{"a","b","c"},
+	{"d","e","f"},
+	{"h","i","j"},
+    }
+    test.BasicTest(v1.Hash(&v1),v2.Hash(&v2),
+	"The widget hash method did not return the same value for identical vectors.",t,
+    )
+    v1[0][0]="blah"
+    test.BasicTest(false,v1.Hash(&v1)==v2.Hash(&v2),
+	"The widget hash method did not return different values for different vectors.",t,
+    )
+}
+
+func TestVectorZero(t *testing.T){
+    v:=Vector[int,widgets.BuiltinInt]{1,2,3}
+    v.Zero(&v)
+    test.SlicesMatch[int]([]int{},v,t)
+}

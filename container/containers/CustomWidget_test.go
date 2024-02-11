@@ -23,9 +23,6 @@ func (c *customWidget)Hash(v *customWidget) uint64 {
 func (c *customWidget)Zero(v *customWidget) {
     *v=customWidget{}
 }
-func (c *customWidget)Copy(v *customWidget) customWidget {
-    return *v
-}
 
 func TestCustomWidgetInVector(t *testing.T){
     v:=make(Vector[customWidget,*customWidget],0)

@@ -105,10 +105,16 @@ type WriteUniqueKeyedOps[K any, V any] interface {
 }
 
 // TODO
-// Map interface tests
+// make vector be a widget for itself - allows vecs of vecs
+// make set
 // Add arith to widgets - map will need it for sequential ops, separate widget type?? Probably should be
 // ZeroVal() T
 // UnitVal() T
+// Map interface tests
+// make map
+// reimpl circular buffer
+// make static container tests
+// add window producer it iterface file
 
 // An interface that enforces implementation of write-only, value-only, operations.
 type WriteOps[V any] interface {
