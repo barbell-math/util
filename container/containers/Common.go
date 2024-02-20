@@ -1,6 +1,9 @@
+// This package hold the concrete implementations of the containers.
 package containers
 
 import (
+	"fmt"
+
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/customerr"
@@ -18,6 +21,10 @@ func addressableSafeValIter[T any](
             return iterOp(index,&val)
         })
     }
+}
+
+func getNonAddressablePanicText(thingName string) string {
+    return fmt.Sprintf("A %s is not addressable!",thingName)
 }
 
 func getSizeError(size int) error {

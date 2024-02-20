@@ -26,6 +26,19 @@ type (
         Zero(v *T)
     }
 
+    ArithWidgetInterface[T any] interface {
+        WidgetInterface[T]
+        ZeroVal() T
+        UnitVal() T
+        Neg(v *T)
+        Add(res *T, l *T, r *T)
+        Sub(res *T, l *T, r *T)
+        Mul(res *T, l *T, r *T)
+        Div(res *T, l *T, r *T)
+        Pow(res *T, bottom *T, top *T)
+        Mod(res *T, l *T, r *T)
+    }
+
     // The base widget implementation that all the containers in the [containers]
     // package use as a type restriction. This type must be instantiaed with the
     // [NewWidget] function; zero valued Widget's are not valid and will result
@@ -40,6 +53,10 @@ type (
     Widget[T any, I WidgetInterface[T]] struct {
         iFace I
     }
+
+    ArithWidget[T any, I ArithWidgetInterface[T]] struct {
+        iFace I
+    }
 )
 
 // Creates a new widget and sets its internal state so that it is valid and can
@@ -47,6 +64,11 @@ type (
 func NewWidget[T any, I WidgetInterface[T]]() Widget[T,I] {
     var iFaceImpl I
     return Widget[T, I]{iFace: iFaceImpl}
+}
+
+func NewArithWidget[T any, I ArithWidgetInterface[T]]() ArithWidget[T,I] {
+    var iFaceImpl I
+    return ArithWidget[T,I]{iFace: iFaceImpl}
 }
 
 // Zeros the supplied value using the logic defined by the interface that was

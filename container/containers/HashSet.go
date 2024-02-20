@@ -154,7 +154,7 @@ func (h *SyncedHashSet[T, U])Vals() iter.Iter[T] {
 
 // Panics, hash sets are not addressable.
 func (h *HashSet[T,U])ValPntrs() iter.Iter[*T] {
-    panic("A hash set is not addressable!")
+    panic(getNonAddressablePanicText("hash set"))
 }
 
 // Description: Contains will return true if the supplied value is in the hash 

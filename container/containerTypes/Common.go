@@ -114,10 +114,7 @@ type WriteUniqueKeyedOps[K any, V any] interface {
 }
 
 // TODO
-// make set
 // Add arith to widgets - map will need it for sequential ops, separate widget type?? Probably should be
-// ZeroVal() T
-// UnitVal() T
 // Map interface tests
 // make map
 // reimpl circular buffer
