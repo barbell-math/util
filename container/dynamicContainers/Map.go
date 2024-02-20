@@ -2,6 +2,7 @@ package dynamicContainers
 
 import "github.com/barbell-math/util/container/containerTypes"
 
+// An interface that only allows read operations on a map.
 type ReadMap[K any, V any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Length

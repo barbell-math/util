@@ -14,16 +14,6 @@ func queueWriteInterface[U any](c dynamicContainers.WriteQueue[U]) {}
 func queueInterface[U any](c dynamicContainers.Queue[U])           {}
 
 // Tests that the value supplied by the factory implements the 
-// [containerTypes.RWSyncable] interface.
-func QueueInterfaceSyncableInterface[V any](
-	factory func() dynamicContainers.Queue[V],
-	t *testing.T,
-) {
-	var container containerTypes.RWSyncable = factory()
-	_ = container
-}
-
-// Tests that the value supplied by the factory implements the 
 // [containerTypes.Length] interface.
 func QueueInterfaceLengthInterface[V any](
 	factory func() dynamicContainers.Queue[V],

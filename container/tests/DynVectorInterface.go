@@ -16,12 +16,12 @@ func vectorWriteInterface[U any](c dynamicContainers.WriteVector[U]) {}
 func vectorInterface[U any](c dynamicContainers.Vector[U])           {}
 
 // Tests that the value supplied by the factory implements the
-// [containerTypes.RWSyncable] interface.
-func VectorInterfaceSyncableInterface[V any](
+// [containerTypes.Addressable] interface.
+func VectorInterfaceAddressableInterface[V any](
 	factory func() dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.RWSyncable = factory()
+	var container containerTypes.Addressable = factory()
 	_ = container
 }
 
@@ -233,6 +233,7 @@ func VectorInterfaceGetPntr(
 		"Get pntr did not return the correct error with invalid index.", t,
 	)
 }
+
 
 func vectorContainsHelper(
 	v dynamicContainers.Vector[int],
@@ -728,9 +729,17 @@ func TestVectorValPntrs(
 	factory func() dynamicContainers.Vector[int],
 	t *testing.T,
 ){
-    testVectorPntrValsHelper(factory,0,t);
-    testVectorPntrValsHelper(factory,1,t);
-    testVectorPntrValsHelper(factory,2,t);
+	container:=factory()
+	if container.IsAddressable() {
+		testVectorPntrValsHelper(factory,0,t);
+    	testVectorPntrValsHelper(factory,1,t);
+    	testVectorPntrValsHelper(factory,2,t);
+	} else {
+		test.Panics(
+			func() { container.ValPntrs() },
+			"Val pointers did not panic when is addressable is false.",t,
+		)
+	}
 }
 
 func testVectorKeysHelper(

@@ -13,16 +13,6 @@ func setWriteInterface[U any](c dynamicContainers.WriteSet[U]) {}
 func setInterface[U any](c dynamicContainers.Set[U])           {}
 
 // Tests that the value supplied by the factory implements the 
-// [containerTypes.RWSyncable] interface.
-func SetInterfaceSyncableInterface[V any](
-	factory func() dynamicContainers.Set[V],
-	t *testing.T,
-) {
-	var container containerTypes.RWSyncable = factory()
-	_ = container
-}
-
-// Tests that the value supplied by the factory implements the 
 // [containerTypes.Length] interface.
 func SetInterfaceLengthInterface[V any](
 	factory func() dynamicContainers.Set[V],
@@ -320,6 +310,7 @@ func SetInterfaceUnorderedEq(
 }
 
 func setIntersectionHelper(
+	res dynamicContainers.Set[int],
 	l dynamicContainers.Set[int],
 	r dynamicContainers.Set[int],
 	exp []int,
@@ -336,7 +327,6 @@ func setIntersectionHelper(
 			)
 		}
 	}
-	res:=factory()
 	res.Intersection(l,r)
 	tester(res)
 	res.Intersection(r,l)
@@ -350,22 +340,31 @@ func SetInterfaceIntersection(
 ) {
 	v:=factory()
 	v2:=factory()
-	setIntersectionHelper(v,v2,[]int{},factory,t)
+	setIntersectionHelper(factory(),v,v2,[]int{},factory,t)
 	v.AppendUnique(1)
-	setIntersectionHelper(v,v2,[]int{},factory,t)
+	setIntersectionHelper(factory(),v,v2,[]int{},factory,t)
 	v2.AppendUnique(1)
-	setIntersectionHelper(v,v2,[]int{1},factory,t)
+	setIntersectionHelper(factory(),v,v2,[]int{1},factory,t)
 	v2.AppendUnique(2)
-	setIntersectionHelper(v,v2,[]int{1},factory,t)
+	setIntersectionHelper(factory(),v,v2,[]int{1},factory,t)
 	v.AppendUnique(2)
-	setIntersectionHelper(v,v2,[]int{1,2},factory,t)
+	setIntersectionHelper(factory(),v,v2,[]int{1,2},factory,t)
 	v.AppendUnique(3)
-	setIntersectionHelper(v,v2,[]int{1,2},factory,t)
+	setIntersectionHelper(factory(),v,v2,[]int{1,2},factory,t)
 	v2.AppendUnique(3)
-	setIntersectionHelper(v,v2,[]int{1,2,3},factory,t)
+	setIntersectionHelper(factory(),v,v2,[]int{1,2,3},factory,t)
+
+	if !v.IsSynced() {
+		v=factory()
+		v2=factory()
+		v.AppendUnique(1,2,3,4)
+		v2.AppendUnique(2,4)
+		setIntersectionHelper(v,v,v2,[]int{2,4},factory,t)
+	}
 }
 
 func setUnionHelper(
+	res dynamicContainers.Set[int],
 	l dynamicContainers.Set[int],
 	r dynamicContainers.Set[int],
 	exp []int,
@@ -382,7 +381,6 @@ func setUnionHelper(
 			)
 		}
 	}
-	res:=factory()
 	res.Union(l,r)
 	tester(res)
 	res.Union(r,l)
@@ -396,41 +394,46 @@ func SetInterfaceUnion(
 ) {
 	v:=factory()
 	v2:=factory()
-	setUnionHelper(v,v2,[]int{},factory,t)
+	setUnionHelper(factory(),v,v2,[]int{},factory,t)
 	v.AppendUnique(1)
-	setUnionHelper(v,v2,[]int{1},factory,t)
+	setUnionHelper(factory(),v,v2,[]int{1},factory,t)
 	v2.AppendUnique(1)
-	setUnionHelper(v,v2,[]int{1},factory,t)
+	setUnionHelper(factory(),v,v2,[]int{1},factory,t)
 	v2.AppendUnique(2)
-	setUnionHelper(v,v2,[]int{1,2},factory,t)
+	setUnionHelper(factory(),v,v2,[]int{1,2},factory,t)
 	v.AppendUnique(2)
-	setUnionHelper(v,v2,[]int{1,2},factory,t)
+	setUnionHelper(factory(),v,v2,[]int{1,2},factory,t)
 	v.AppendUnique(3)
-	setUnionHelper(v,v2,[]int{1,2,3},factory,t)
+	setUnionHelper(factory(),v,v2,[]int{1,2,3},factory,t)
 	v2.AppendUnique(3)
-	setUnionHelper(v,v2,[]int{1,2,3},factory,t)
+	setUnionHelper(factory(),v,v2,[]int{1,2,3},factory,t)
+
+	if !v.IsSynced() {
+		v=factory()
+		v2=factory()
+		v.AppendUnique(1,2,3,4)
+		v2.AppendUnique(2,4,5,6)
+		setUnionHelper(v,v,v2,[]int{1,2,3,4,5,6},factory,t)
+	}
 }
 
 func setDifferenceHelper(
+	res dynamicContainers.Set[int],
 	l dynamicContainers.Set[int],
 	r dynamicContainers.Set[int],
 	exp []int,
 	factory func() dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	tester:=func(c dynamicContainers.Set[int]) {
-		test.BasicTest(len(exp),c.Length(),
-			"Union produced a set of the wrong length.",t,
-		)
-		for _,v:=range(exp) {
-			test.BasicTest(true,c.Contains(v),
-				"Union did not contain the correct values.",t,
-			)
-		}
-	}
-	res:=factory()
 	res.Difference(l,r)
-	tester(res)
+	test.BasicTest(len(exp),res.Length(),
+		"Difference produced a set of the wrong length.",t,
+	)
+	for _,v:=range(exp) {
+		test.BasicTest(true,res.Contains(v),
+			"Difference did not contain the correct values.",t,
+		)
+	}
 }
 
 // Tests the Difference method functionality of a dynamic set.
@@ -440,29 +443,37 @@ func SetInterfaceDifference(
 ) {
 	v:=factory()
 	v2:=factory()
-	setDifferenceHelper(v,v2,[]int{},factory,t)
-	setDifferenceHelper(v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
 	v.AppendUnique(1)
-	setDifferenceHelper(v,v2,[]int{1},factory,t)
-	setDifferenceHelper(v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{1},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
 	v2.AppendUnique(1)
-	setDifferenceHelper(v,v2,[]int{},factory,t)
-	setDifferenceHelper(v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
 	v2.AppendUnique(2)
-	setDifferenceHelper(v,v2,[]int{},factory,t)
-	setDifferenceHelper(v2,v,[]int{2},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{2},factory,t)
 	v.AppendUnique(2)
-	setDifferenceHelper(v,v2,[]int{},factory,t)
-	setDifferenceHelper(v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
 	v.AppendUnique(3)
-	setDifferenceHelper(v,v2,[]int{3},factory,t)
-	setDifferenceHelper(v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{3},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
 	v2.AppendUnique(3)
-	setDifferenceHelper(v,v2,[]int{},factory,t)
-	setDifferenceHelper(v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
 	v.AppendUnique(4,5,6)
-	setDifferenceHelper(v,v2,[]int{4,5,6},factory,t)
-	setDifferenceHelper(v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(),v,v2,[]int{4,5,6},factory,t)
+	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+
+	if !v.IsSynced() {
+		v=factory()
+		v2=factory()
+		v.AppendUnique(1,2,3,4)
+		v2.AppendUnique(2,4)
+		setDifferenceHelper(v,v,v2,[]int{1,3},factory,t)
+	}
 }
 
 func SetInterfaceIsSuperset(

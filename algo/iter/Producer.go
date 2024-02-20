@@ -3,6 +3,7 @@ package iter
 import (
 	"bufio"
 	"os"
+	// "time"
 
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/customerr"
@@ -121,11 +122,13 @@ func mapOp[K comparable, V any](
 	go func() {
 		for k, _ := range m {
 			if _cont, ok := <-cont; !_cont || !ok {
-				close(c)
-				return
+				break
 			}
 			c <- k
 		}
+		var tmp K
+		c <- tmp
+		close(c)
 	}()
 	return c
 }
@@ -154,6 +157,7 @@ func MapElems[K comparable, V any](
 		}
 		if f==Break {
 			close(cont)
+			_=<-c
 		}
 		return basic.Pair[K, V]{}, nil, false
 	}
@@ -177,6 +181,7 @@ func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
 		}
 		if f==Break {
 			close(cont)
+			_=<-c
 		}
 		var tmp K
 		return tmp, nil, false
@@ -201,6 +206,8 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
 		}
 		if f==Break {
 			close(cont)
+			_=<-c
+			// time.Sleep(1*time.Second)
 		}
 		var tmp V
 		return tmp, nil, false

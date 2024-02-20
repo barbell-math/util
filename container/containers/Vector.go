@@ -65,36 +65,29 @@ func NewSyncedVector[T any, U widgets.WidgetInterface[T]](
     },err
 }
 
-// A empty pass through function that performs no action. Vector will call all 
-// the appropriate locking methods despite not being synced, just nothing will
-// happen. This is done so that SyncedVector can simply embed a Vector and
-// override the appropriate locking methods to implement the correct behavior
-// without needing to make any additional changes such as wrapping every single
-// method from Vector.
+// Converts the supplied vector to a syncronized vector. Beware: The original 
+// non-synced vector will remain useable.
+func (v *Vector[T, U])ToSynced() SyncedVector[T,U] {
+    return SyncedVector[T, U]{
+        RWMutex: &sync.RWMutex{},
+        Vector: *v,
+    }
+}
+
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
 func (v *Vector[T,U])Lock() { }
 
-// A empty pass through function that performs no action. Vector will call all 
-// the appropriate locking methods despite not being synced, just nothing will
-// happen. This is done so that SyncedVector can simply embed a Vector and
-// override the appropriate locking methods to implement the correct behavior
-// without needing to make any additional changes such as wrapping every single
-// method from Vector.
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
 func (v *Vector[T,U])Unlock() { }
 
-// A empty pass through function that performs no action. Vector will call all 
-// the appropriate locking methods despite not being synced, just nothing will
-// happen. This is done so that SyncedVector can simply embed a Vector and
-// override the appropriate locking methods to implement the correct behavior
-// without needing to make any additional changes such as wrapping every single
-// method from Vector.
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
 func (v *Vector[T,U])RLock() { }
 
-// A empty pass through function that performs no action. Vector will call all 
-// the appropriate locking methods despite not being synced, just nothing will
-// happen. This is done so that SyncedVector can simply embed a Vector and
-// override the appropriate locking methods to implement the correct behavior
-// without needing to make any additional changes such as wrapping every single
-// method from Vector.
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
 func (v *Vector[T,U])RUnlock() { }
 
 // The SyncedVector method to override the Vector pass through function and 
@@ -113,69 +106,155 @@ func (v *SyncedVector[T,U])RLock() { v.RWMutex.RLock() }
 // actually apply the mutex operation.
 func (v *SyncedVector[T,U])RUnlock() { v.RWMutex.RUnlock() }
 
-// Returns the length of the vector.
+// Returns true, vectors are addressable.
+func (v *Vector[T, U])IsAddressable() bool { return true }
+
+// Returns false, a vector is not synced.
+func (h *Vector[T, U])IsSynced() bool { return false }
+
+// Returns true, a synced vector is synced. :O
+func (h *SyncedVector[T, U])IsSynced() bool { return true }
+
+
+// Description: Returns the length of the vector.
+//
+// Time Complexity: O(1)
 func (v *Vector[T,U])Length() int {
-    v.RLock()
-    defer v.RUnlock()
     return len(*v)
 }
-
-// Returns the capacity of the vector.
-func (v *Vector[T,U])Capacity() int {
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Length] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T, U])Length() int {
     v.RLock()
     defer v.RUnlock()
-    return cap(*v)
+    return v.Vector.Length()
 }
 
-// Sets the capacity of the underlying slice. If the new capacity is less than
-// the old capacity then values at the end of the list will be dropped. Performs
-// a copy operations, making the time complexity O(N).
+// Description: Returns the capacity of the vector.
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])Capacity() int {
+    return cap(*v)
+}
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Capacity] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T, U])Capacity() int {
+    v.RLock()
+    defer v.RUnlock()
+    return v.Vector.Capacity()
+}
+
+// Description: Sets the capacity of the underlying slice. If the new capacity 
+// is less than the old capacity then values at the end of the slice will be 
+// dropped. 
+//
+// Time Complexity: O(n) because a copy operation is performed.
 func (v *Vector[T,U])SetCapacity(c int) error {
-    v.Lock()
-    defer v.Unlock()
+    w:=widgets.NewWidget[T,U]()
+    for i:=c+1; i<len(*v); i++ {
+        w.Zero(&(*v)[i]) 
+    }
     tmp:=make(Vector[T,U],c)
     copy(tmp,*v)
     *v=tmp
     return nil
 }
-
-// Gets the value at the specified index. Returns an error if the index is 
-// >= the length of the vector.
-func (v *Vector[T,U])Get(idx int) (T,error){
-    if _v,err:=v.GetPntr(idx); err==nil {
-        return *_v,nil
-    } else {
-        var tmp T
-        return tmp,err
-    }
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.SetCapacity] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), same as [Vector.SetCapacity].
+func (v *SyncedVector[T, U])SetCapacity(c int) error {
+    v.Lock()
+    defer v.Unlock()
+    return v.Vector.SetCapacity(c)
 }
 
-// Gets a pointer to the value at the specified index. Returns an error if the 
+// Description: Gets the value at the specified index. Returns an error if the 
 // index is >= the length of the vector.
-func (v *Vector[T,U])GetPntr(idx int) (*T,error){
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])Get(idx int) (T,error){
+    if idx>=0 && idx<len(*v) && len(*v)>0 {
+        return (*v)[idx],nil
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(idx,0,len(*v))
+}
+// Description: Places a read lock on the underlying vector and then gets the 
+// value at the specified index. Exhibits the same behavior as the [Vector.Get]
+// method. The underlying [Vector.Get] method is not called to avoid copying the 
+// return value twice, which could be inefficient with a large value for the T 
+// generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T, U])Get(idx int) (T,error) {
     v.RLock()
     defer v.RUnlock()
+    if idx>=0 && idx<len(v.Vector) && len(v.Vector)>0 {
+        return (v.Vector)[idx],nil
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(idx,0,len(v.Vector))
+}
+
+// Description: Gets a pointer to the value at the specified index. Returns an 
+// error if the index is >= the length of the vector.
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])GetPntr(idx int) (*T,error){
     if idx>=0 && idx<len(*v) && len(*v)>0 {
         return &(*v)[idx],nil
     }
     return nil,getIndexOutOfBoundsError(idx,0,len(*v))
 }
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.GetPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T, U])GetPntr(idx int) (*T,error) {
+    v.RLock()
+    defer v.RUnlock()
+    return v.Vector.GetPntr(idx)
+}
 
-// Contains will return true if the supplied value is in the vector, false
-// otherwise. All equality comparisons are performed by the generic U widget
-// type that the vector was initialized with. The time complexity of Contains
-// on a vector is O(n).
+// Description: Contains will return true if the supplied value is in the 
+// vector, false otherwise. All equality comparisons are performed by the 
+// generic U widget type that the vector was initialized with. 
+//
+// Time Complexity: O(n) (linear search)
 func (v *Vector[T, U])Contains(val T) bool {
     return v.ContainsPntr(&val)
 }
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.ContainsPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (v *SyncedVector[T, U])Contains(val T) bool {
+    return v.Vector.ContainsPntr(&val)
+}
 
-// ContainsPntr will return true if the supplied value is in the vector, false
-// otherwise. All equality comparisons are performed by the generic U widget
-// type that the vector was initialized with. The time complexity of
-// ContainsPntr on a vector is O(n).
+// Description: ContainsPntr will return true if the supplied value is in the 
+// vector, false otherwise. All equality comparisons are performed by the 
+// generic U widget type that the vector was initialized with.
+//
+// Time Complexity: O(n) (linear search)
 func (v *Vector[T, U])ContainsPntr(val *T) bool {
-    v.RLock()
-    defer v.RUnlock()
     found:=false
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v) && !found; i++ {
@@ -183,31 +262,77 @@ func (v *Vector[T, U])ContainsPntr(val *T) bool {
     }
     return found
 }
-
-// KeyOf will return the index of the first occurrence of the supplied value
-// in the vector. If the value is not found then the returned index will be -1
-// and the boolean flag will be set to false. If the value is found then the
-// boolean flag will be set to true. All equality comparisons are performed by 
-// the generic U widget type that the vector was initialized with.
-func (v *Vector[T, U])KeyOf(val T) (int,bool) {
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.ContainsPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (v *SyncedVector[T, U])ContainsPntr(val *T) bool {
     v.RLock()
     defer v.RUnlock()
+    return v.Vector.ContainsPntr(val)
+}
+
+// Description: KeyOf will return the index of the first occurrence of the 
+// supplied value in the vector. If the value is not found then the returned 
+// index will be -1 and the boolean flag will be set to false. If the value is 
+// found then the boolean flag will be set to true. All equality comparisons are 
+// performed by the generic U widget type that the vector was initialized with.
+//
+// Time Complexity: O(n) (linear search)
+func (v *Vector[T, U])KeyOf(val T) (int,bool) {
+    return v.keyOfImpl(&val)
+}
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.KeyOf] implemenation method. The [Vector.KeyOf]
+// method is not called directly to avoid copying the val variable twice, which
+// could be expensive with a large type for the T generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (v *SyncedVector[T, U])KeyOf(val T) (int, bool) {
+    v.RLock()
+    defer v.RUnlock()
+    return v.Vector.keyOfImpl(&val)
+}
+
+func (v *Vector[T, U])keyOfImpl(val *T) (int,bool) {
     rv:=-1
     found:=false
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v) && !found; i++ {
-        if found=w.Eq(&val,&(*v)[i]); found {
+        if found=w.Eq(val,&(*v)[i]); found {
             rv=i
         }
     }
     return rv,found
 }
 
-// Sets the value at the specified index. Returns an error if the index is >= 
-// the length of the vector.
+// Description: Sets the value at the specified index. Returns an error if the 
+// index is >= the length of the vector.
+//
+// Time Complexity: O(m), where m=len(vals)
 func (v *Vector[T,U])Set(vals ...basic.Pair[int,T]) error {
+    return v.setImpl(vals)
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Set] implementaiton method. The [Vector.Set]
+// method is not called directly to avoid copying the vals varargs twice, which
+// could be expensize with a large type for the T generic or a large number of
+// values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(m), where m=len(vals)
+func (v *SyncedVector[T, U])Set(vals ...basic.Pair[int,T]) error {
     v.Lock()
     defer v.Unlock()
+    return v.Vector.setImpl(vals)
+}
+
+func (v *Vector[T, U])setImpl(vals []basic.Pair[int,T]) error {
     for _,iterV:=range(vals) {
         if iterV.A>=0 && iterV.A<len(*v) && len(*v)>0 {
             (*v)[iterV.A]=iterV.B
@@ -218,13 +343,31 @@ func (v *Vector[T,U])Set(vals ...basic.Pair[int,T]) error {
     return nil
 }
 
-// Sets the supplied values sequentially starting at the supplied index and
-// continuing sequentailly after that. Returns and error if any index that is
-// attempted to be set is >= the length of the vector. If an error occurs, all 
-// values will be set up until the value that caused the error.
+// Description: Sets the supplied values sequentially starting at the supplied 
+// index and continuing sequentailly after that. Returns and error if any index 
+// that is attempted to be set is >= the length of the vector. If an error 
+// occurs, all values will be set up until the value that caused the error.
+//
+// Time Complexity: O(m), where m=len(vals)
 func (v *Vector[T,U])SetSequential(idx int, vals ...T) error {
+    return v.setSequentialImpl(idx,vals)
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.SetSequential] implementation method. The
+// [Vector.SetSequential] method is not called directly to avoid copying the
+// vals varargs twice, which could be expensive with a large type for the T
+// generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(m), where m=len(vals)
+func (v *SyncedVector[T, U])SetSequential(idx int, vals ...T) error {
     v.Lock()
     defer v.Unlock()
+    return v.Vector.setSequentialImpl(idx,vals)
+}
+
+func (v *Vector[T, U])setSequentialImpl(idx int, vals []T) error {
     if idx>=len(*v) {
         return getIndexOutOfBoundsError(idx,0,len(*v))
     }
@@ -236,43 +379,101 @@ func (v *Vector[T,U])SetSequential(idx int, vals ...T) error {
     return nil
 }
 
-// Append the supplied values to the vector. This function will never return
-// an error.
+// Description: Append the supplied values to the vector. This function will 
+// never return an error.
+//
+// Time Complexity: Best case O(m), worst case O(n+m) (reallocation), where
+// m=len(vals).
 func (v *Vector[T,U])Append(vals ...T) error {
+    return v.appendImpl(vals)
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Append] implementation method. The [Vector.Append] 
+// method is not called directly to avoid copying the vals varargs twice, which 
+// could be expensive with a large type for the T generic or a large number of 
+// values.
+//
+// Lock Type: Write
+//
+// Time Complexity: Best case O(m) (no reallocation), worst case O(n+m) 
+// (reallocation), where m=len(vals).
+func (v *SyncedVector[T,U])Append(vals ...T) error {
     v.Lock()
     defer v.Unlock()
+    return v.appendImpl(vals)
+}
+
+func (v *Vector[T, U])appendImpl(vals []T) error {
     *v=append(*v, vals...)
     return nil
 }
 
-// AppendUnique will append the supplied values to the vector if they are not
-// already present in the vector (unique). Non-unique values will not be 
-// appended. This function will never return an error. The time complexity of 
-// AppendUnique is O(n*m) where n is the number of values in the vector and m 
-// is the number of values to append. For a more efficient implementation of 
-// this method use a different container, such as [HashSet].
+// Description: AppendUnique will append the supplied values to the vector if 
+// they are not already present in the vector (unique). Non-unique values will 
+// not be appended. This function will never return an error. 
+//
+// Time Complexity: Best case O(m) (no reallocation), worst case O(n+m) 
+// (reallocation), where m=len(vals).
 func (v *Vector[T,U])AppendUnique(vals ...T) error {
+    for i:=0; i<len(vals); i++ {
+        v.appendUniqueImpl(&vals[i])
+    }
+    return nil
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.AppendUnique] implementaion method. The 
+// [Vector.AppendUnique] method is not called directly to avoid copying the vals 
+// varargs twice, which could be expensive with a large type for the T generic 
+// or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: Best case O(m) (no reallocation), worst case O(n+m) 
+// (reallocation), where m=len(vals).
+func (v *SyncedVector[T,U])AppendUnique(vals ...T) error {
     v.Lock()
     defer v.Unlock()
-    found:=false
-    w:=widgets.NewWidget[T,U]()
-    for _,iterV:=range(vals) {
-        for j:=0; j<len(*v) && !found; j++ {
-            found=w.Eq(&iterV,&(*v)[j])
-        }
-        if !found {
-            *v=append(*v,iterV)
-        }
+    for i:=0; i<len(vals); i++ {
+        v.Vector.appendUniqueImpl(&vals[i])
     }
     return nil
 }
 
-// Insert will insert the supplied values into the vector. The values will be
-// inserted in the order that they are given. The time complexity of this
-// insert method is O(n^2)
+func (v *Vector[T, U])appendUniqueImpl(val *T) error {
+    found:=false
+    w:=widgets.NewWidget[T,U]()
+    for j:=0; j<len(*v) && !found; j++ {
+        found=w.Eq(val,&(*v)[j])
+    }
+    if !found {
+        *v=append(*v,*val)
+    }
+    return nil
+}
+
+// Description: Insert will insert the supplied values into the vector. The 
+// values will be inserted in the order that they are given. 
+//
+// Time Complexity: O(n^2)
 func (v *Vector[T, U])Insert(vals ...basic.Pair[int,T]) error {
+    return v.insertImpl(vals)
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Insert] implementation method. The [Vector.Insert] 
+// method is not called directly to avoid copying the vals varargs twice, which 
+// could be expensive with a large type for the T generic or a large number of 
+// values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n^2)
+func (v *SyncedVector[T, U])Insert(vals ...basic.Pair[int,T]) error {
     v.Lock()
     defer v.Unlock()
+    return v.Vector.insertImpl(vals)
+}
+
+func (v *Vector[T, U])insertImpl(vals []basic.Pair[int,T]) error {
     for i:=0; i<len(vals); i++ {
         if vals[i].A>=0 && vals[i].A<len(*v) && len(*v)>0 {
             var tmp T
@@ -288,13 +489,31 @@ func (v *Vector[T, U])Insert(vals ...basic.Pair[int,T]) error {
     return nil
 }
 
-// Inserts the supplied values at the given index. Returns an error if the index
-// is >= the length of the vector.
-// For time complexity see the InsertVector section of:
+// Description: Inserts the supplied values at the given index. Returns an error 
+// if the index is >= the length of the vector.
+//
+// Time Complexity: O(n^2). For time complexity see the InsertVector section of
 // https://go.dev/wiki/SliceTricks
 func (v *Vector[T,U])InsertSequential(idx int, vals ...T) error {
+    return v.insertSequentialImpl(idx,vals)
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.InsertSequential] implementation method. The 
+// [Vector.InsertSequential] method is not called directly to avoid copying the 
+// vals varargs twice, which could be expensive with a large type for the T 
+// generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n^2). For time complexity see the InsertVector section of
+// https://go.dev/wiki/SliceTricks
+func (v *SyncedVector[T,U])InsertSequential(idx int, vals ...T) error {
     v.Lock()
     defer v.Unlock()
+    return v.Vector.insertSequentialImpl(idx,vals)
+}
+
+func (v *Vector[T, U])insertSequentialImpl(idx int, vals []T) error {
     if idx>=0 && idx<len(*v) && len(*v)>0 {
         *v=append((*v)[:idx],append(vals,(*v)[idx:]...)...) 
         return nil
@@ -305,21 +524,42 @@ func (v *Vector[T,U])InsertSequential(idx int, vals ...T) error {
     return getIndexOutOfBoundsError(idx,0,len(*v))
 }
 
-// Pop will remove the first num occurrences of val in the vector. All equality 
-// comparisons are performed by the generic U widget type that the vector was 
-// initialized with. If num is <=0 then no values will be poped and the vector
-// will not change.
+// Description: Pop will remove the first num occurrences of val in the vector. 
+// All equality comparisons are performed by the generic U widget type that the 
+// vector was initialized with. If num is <=0 then no values will be poped and 
+// the vector will not change.
+//
+// Time Complexity: O(n^2)
 func (v *Vector[T, U])Pop(val T, num int) int {
+    if num<=0 {
+        return 0
+    }
+    return v.popImpl(&val,num)
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Pop] implementation method. The [Vector.Pop] 
+// method is not called directly to avoid copying the vals varargs twice, which 
+// could be expensive with a large type for the T generic or a large number of 
+// values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n^2)
+func (v *SyncedVector[T, U])Pop(val T, num int) int {
     if num<=0 {
         return 0
     }
     v.Lock()
     defer v.Unlock()
+    return v.Vector.popImpl(&val,num)
+}
+
+func (v *Vector[T, U])popImpl(val *T, num int) int {
     cntr:=0
     prevIndex:=-1
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v); i++ {
-        if w.Eq(&val,&(*v)[i]) && cntr+1<=num {
+        if w.Eq(val,&(*v)[i]) && cntr+1<=num {
             if prevIndex==-1 {  // Initial value found
                 prevIndex=i
             } else {
@@ -339,11 +579,11 @@ func (v *Vector[T, U])Pop(val T, num int) int {
     return cntr
 }
 
-// Deletes the value at the specified index. Returns an error if the index is 
-// >= the length of the vector.
+// Description: Deletes the value at the specified index. Returns an error if 
+// the index is >= the length of the vector.
+//
+// Time Complexity: O(n)
 func (v *Vector[T,U])Delete(idx int) error {
-    v.Lock()
-    defer v.Unlock()
     if idx<0 || idx>=len(*v) {
         return getIndexOutOfBoundsError(idx,0,len(*v))
     } else if idx>=0 && idx<len(*v) && len(*v)>0 {
@@ -353,72 +593,167 @@ func (v *Vector[T,U])Delete(idx int) error {
     }
     return nil
 }
-
-// Clears all values from the vector. Equivalent to making a new vector and
-// setting it equal to the current one.
-func (v *Vector[T,U])Clear() {
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Delete] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])Delete(idx int) error {
     v.Lock()
     defer v.Unlock()
+    return v.Vector.Delete(idx)
+}
+
+// Description: Clears all values from the vector. Equivalent to making a new 
+// vector and setting it equal to the current one.
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])Clear() {
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<len(*v); i++ {
         w.Zero(&(*v)[i])
     }
     *v=make(Vector[T,U], 0)
 }
-
-// Returns the value at index 0 if one is present. If the vector has no elements
-// then an error is returned.
-func (v *Vector[T,U])PeekFront() (T,error) {
-    v.RLock()
-    defer v.RUnlock()
-    if _v,err:=v.PeekPntrFront(); err==nil {
-        return *_v,err
-    } else {
-        var tmp T
-        return tmp,err
-    }
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Clear] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T, U])Clear() {
+    v.Lock()
+    defer v.Unlock()
+    v.Vector.Clear()
 }
 
-// Returns a pointer to the value at index 0 if one is present. If the vector 
+// Description: Returns the value at index 0 if one is present. If the vector 
 // has no elements then an error is returned.
-func (v *Vector[T,U])PeekPntrFront() (*T,error) {
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])PeekFront() (T,error) {
+    if len(*v)>0 {
+        return (*v)[0],nil
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(0,0,len(*v))
+}
+// Description: Places a read lock on the underlying vector and then attempts to 
+// return the value at index 0 if one is present. Exhibits the same behavior as
+// the [Vector.PeekFront] method. The underlying [Vector.PeekFront] method is 
+// not called to avoid copying the value twice, which could be inefficient with 
+// a large type for the T generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T, U])PeekFront() (T,error) {
     v.RLock()
     defer v.RUnlock()
+    if len(v.Vector)>0 {
+        return (v.Vector)[0],nil
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(0,0,len(v.Vector))
+}
+
+// Description: Returns a pointer to the value at index 0 if one is present. If 
+// the vector has no elements then an error is returned.
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])PeekPntrFront() (*T,error) {
     if len(*v)>0 {
         return &(*v)[0],nil
     }
     return nil,getIndexOutOfBoundsError(0,0,len(*v))
 }
-
-// Returns the value at index len(v)-1 if one is present. If the vector has no 
-// elements then an error is returned.
-func (v *Vector[T,U])PeekBack() (T,error) {
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.PeekPntrFront] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T, U])PeekPntrFront() (*T,error) {
     v.RLock()
     defer v.RUnlock()
-    if _v,err:=v.PeekPntrBack(); err==nil {
-        return *_v,err
-    } else {
-        var tmp T
-        return tmp,err
-    }
+    return v.Vector.PeekPntrFront()
 }
 
-// Returns a pointer to the value at index len(v)-1 if one is present. If the 
+// Description: Returns the value at index len(v)-1 if one is present. If the 
 // vector has no elements then an error is returned.
-func (v *Vector[T,U])PeekPntrBack() (*T,error) {
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])PeekBack() (T,error) {
+    if len(*v)>0 {
+        return (*v)[len(*v)-1],nil
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(0,0,len(*v))
+}
+// Description: Places a read lock on the underlying vector and then attempts to 
+// return the value at index len(v)-1 if one is present. Exhibits the same 
+// behavior as the [Vector.PeekBack] method. The underlying [Vector.PeekBack] 
+// method is not called to avoid copying the value twice, which could be 
+// inefficient with a large type for the T generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T,U])PeekBack() (T,error) {
     v.RLock()
     defer v.RUnlock()
+    if len(v.Vector)>0 {
+        return (v.Vector)[len(v.Vector)-1],nil
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(0,0,len(v.Vector))
+}
+
+// Description: Returns a pointer to the value at index len(v)-1 if one is 
+// present. If the vector has no elements then an error is returned.
+//
+// Time Complexity: O(1)
+func (v *Vector[T,U])PeekPntrBack() (*T,error) {
     if len(*v)>0 {
         return &(*v)[len(*v)-1],nil
     }
     return nil,getIndexOutOfBoundsError(0,0,len(*v))
 }
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.PeekPntrBack] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T,U])PeekPntrBack() (*T,error) {
+    v.RLock()
+    defer v.RUnlock()
+    return v.Vector.PeekPntrBack()
+}
 
-// Returns and removes the element at the front of the vector. Returns an error
-// if the vector has no elements.
+// Description: Returns and removes the element at the front of the vector. 
+// Returns an error if the vector has no elements.
+//
+// Time Complexity: O(n)
 func (v *Vector[T,U])PopFront() (T,error) {
+    return v.popFontImpl()
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.PopFront] implementation method. The 
+// [Vector.PopFront] method is not called directly to avoid copying the return
+// value twice, which could be expensive with a large type for the T generic.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])PopFront() (T,error) {
     v.Lock()
     defer v.Unlock()
+    return v.Vector.popFontImpl()
+}
+
+func (v *Vector[T, U])popFontImpl() (T,error) {
     if len(*v)>0 {
         rv:=(*v)[0]
         *v=(*v)[1:]
@@ -428,11 +763,28 @@ func (v *Vector[T,U])PopFront() (T,error) {
     return tmp,customerr.Wrap(containerTypes.Empty,"Nothing to pop!")
 }
 
-// Returns and removes the element at the back of the vector. Returns an error
-// if the vector has no elements.
+// Description: Returns and removes the element at the back of the vector. 
+// Returns an error if the vector has no elements.
+//
+// Time Complexity: O(1)
 func (v *Vector[T,U])PopBack() (T,error) {
+    return v.popBackImpl()
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.PopFront] implementation method. The 
+// [Vector.PopBack] method is not called directly to avoid copying the return
+// value twice, which could be expensive with a large type for the T generic.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(1)
+func (v *SyncedVector[T,U])PopBack() (T,error) {
     v.Lock()
     defer v.Unlock()
+    return v.Vector.popBackImpl()
+}
+
+func (v *Vector[T, U])popBackImpl() (T,error) {
     if len(*v)>0 {
         rv:=(*v)[len(*v)-1]
         *v=(*v)[:len(*v)-1]
@@ -442,119 +794,232 @@ func (v *Vector[T,U])PopBack() (T,error) {
     return tmp,customerr.Wrap(containerTypes.Empty,"Nothing to pop!")
 }
 
-// Pushes an element to the back of the vector. Equivalent to appending a single
-// value to the end of the vector. Values will be pushed back in the order that
-// they are given. For example, calling push back on [0,1,2] with vals of [3,4]
-// will result in [0,1,2,3,4].
+// Description: Pushes an element to the back of the vector. Equivalent to 
+// appending values to the end of the vector. Values will be pushed back in the 
+// order that they are given. For example, calling push back on [0,1,2] with 
+// vals of [3,4] will result in [0,1,2,3,4].
+//
+// Time Complexity: best case O(m) (no reallocation), worst case O(n+m) (with
+// reallocation), where m=len(vals)
 func (v *Vector[T,U])PushBack(vals ...T) error {
-    v.Lock()
-    defer v.Unlock()
     *v=append(*v, vals...)
     return nil
 }
+// Description: Places a write lock on the underlying vector and then appends 
+// values to the end of the vector. Exhibits the same behavior as 
+// [Vector.PushBack]. The underlying [Vector.PushBack] method is not called to 
+// avoid copying the list of values twice, which could be inefficient with a 
+// large type for the T generic or many values.
+//
+// Lock Type: Write
+//
+// Time Complexity: best case O(m) (no reallocation), worst case O(n+m) (with
+// reallocation), where m=len(vals)
+func (v *SyncedVector[T, U])PushBack(vals ...T) error {
+    v.Lock()
+    defer v.Unlock()
+    v.Vector=append(v.Vector, vals...)
+    return nil
+}
 
-// Pushes an element to the front of the vector. Equivalent to inserting a single
-// value at the front of the vector. Values will be pushed to the front in the 
-// order that they are given. For example, calling push front on [0,1,2] with 
-// vals of [3,4] will result in [3,4,0,1,2].
+// Description: Pushes an element to the front of the vector. Equivalent to 
+// inserting a single value at the front of the vector. Values will be pushed to 
+// the front in the order that they are given. For example, calling push front 
+// on [0,1,2] with vals of [3,4] will result in [3,4,0,1,2].
+//
+// Time Complexity: O(n+m), where m=len(vals)
 func (v *Vector[T,U])PushFront(vals ...T) error {
-    v.Lock()
-    defer v.Unlock()
     *v=append(vals, (*v)...)
     return nil
 }
-
-// Pushes an element to the back of the vector. Equivalent to appending a single
-// value to the end of the vector. Has the same behavior as PushBack because
-// the underlying vector grows as needed.
-func (v *Vector[T,U])ForcePushBack(vals ...T) {
+// Description: Places a write lock on the underlying vector and then pushes 
+// values to the front of the vector. Exhibits the same behavior as 
+// [Vector.PusFront]. The underlying [Vector.PushFront] method is not called to 
+// avoid copying the list of values twice, which could be inefficient with a 
+// large type for the T generic or many values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n+m), where m=len(vals)
+func (v *SyncedVector[T, U])PushFront(vals ...T) error {
     v.Lock()
     defer v.Unlock()
+    v.Vector=append(vals, v.Vector...)
+    return nil
+}
+
+// Description: Pushes an element to the back of the vector. Equivalent to 
+// appending a single value to the end of the vector. Has the same behavior as 
+// PushBack because the underlying vector grows as needed.
+//
+// Time Complexity: O(m), where m=len(vals)
+func (v *Vector[T,U])ForcePushBack(vals ...T) {
     *v=append(*v, vals...)
 }
-
-// Pushes an element to the front of the vector. Equivalent to inserting a single
-// value at the front of the vector. Has the same behavior as PushBack because
-// the underlying vector grows as needed.
-func (v *Vector[T,U])ForcePushFront(vals ...T) {
+// Description: Places a write lock on the underlying vector and then pushes 
+// values to the front of the vector. Exhibits the same behavior as 
+// [Vector.ForcePushBack]. The underlying [Vector.ForcePushBack] method is not 
+// called to avoid copying the list of values twice, which could be inefficient 
+// with a large type for the T generic or many values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(m), where m=len(vals)
+func (v *SyncedVector[T, U])ForcePushBack(vals ...T) {
     v.Lock()
     defer v.Unlock()
-    *v=append(vals, (*v)...)
+    v.Vector=append(v.Vector, vals...)
 }
 
-// Returns an iterator that iterates over the values in the vector. The vector
-// will have a read lock the entire time the iteration is being performed. The
-// lock will not be applied until the iterator is consumed.
+// Description: Pushes an element to the front of the vector. Equivalent to 
+// inserting a single value at the front of the vector. Has the same behavior as 
+// PushBack because the underlying vector grows as needed.
+//
+// Time Complexity: O(n+m), where m=len(vals)
+func (v *Vector[T,U])ForcePushFront(vals ...T) {
+    *v=append(vals, (*v)...)
+}
+// Description: Places a write lock on the underlying vector and then pushes 
+// values to the front of the vector. Exhibits the same behavior as 
+// [Vector.ForcePushFront]. The underlying [Vector.ForcePushFront] method is not 
+// called to avoid copying the list of values twice, which could be inefficient 
+// with a large type for the T generic or many values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n+m), where m=len(vals)
+func (v *SyncedVector[T, U])ForcePushFront(vals ...T) {
+    v.Lock()
+    defer v.Unlock()
+    v.Vector=append(vals, v.Vector...)
+}
+
+// Description: Returns an iterator that iterates over the values in the vector.
+//
+// Time Complexity: O(n)
 func (v *Vector[T,U])Vals() iter.Iter[T] {
     return iter.SequentialElems[T](
         len(*v),
         func(i int) (T, error) { return (*v)[i],nil },
-    ).SetupTeardown(
+    )
+}
+// Description: Modifies the iterator chain returned by the unerlying 
+// [Vector.Vals] method such that a read lock will be placed on the underlying 
+// vector when iterator is consumer. The vector will have a read lock the entire 
+// time the iteration is being performed. The lock will not be applied until the 
+// iterator starts to be consumed.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])Vals() iter.Iter[T] {
+    return v.Vector.Vals().SetupTeardown(
         func() error { v.RLock(); return nil },
         func() error { v.RUnlock(); return nil },
     )
 }
 
-// Returns an iterator that iterates over the pointers to the values in the 
-// vector. The vector will have a read lock the entire time the iteration is 
-// being performed. The lock will not be applied until the iterator is consumed.
+// Description: Returns an iterator that iterates over the pointers to the 
+// values in the vector. The vector will have a read lock the entire time the 
+// iteration is being performed. The lock will not be applied until the iterator 
+// is consumed.
+//
+// Time Complexity: O(n)
 func (v *Vector[T,U])ValPntrs() iter.Iter[*T] {
     return iter.SequentialElems[*T](
         len(*v),
         func(i int) (*T, error) { return &(*v)[i],nil },
-    ).SetupTeardown(
+    )
+}
+// Description: Modifies the iterator chain returned by the unerlying 
+// [Vector.ValPntrs] method such that a read lock will be placed on the 
+// underlying vector when iterator is consumed. The vector will have a read lock 
+// the entire time the iteration is being performed. The lock will not be 
+// applied until the iterator starts to be consumed.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])ValPntrs() iter.Iter[*T] {
+    return v.Vector.ValPntrs().SetupTeardown(
         func() error { v.RLock(); return nil },
         func() error { v.RUnlock(); return nil },
     )
 }
 
-// Returns an iterator that iterates over the keys (indexes) of the vector. The
-// vector will have a read lock the entire time the iteration is being performed.
-// The lock will not be applied until the iterator is consumed.
+// Description: Returns an iterator that iterates over the keys (indexes) of the 
+// vector. The vector will have a read lock the entire time the iteration is 
+// being performed. The lock will not be applied until the iterator is consumed.
+//
+// Time Complexity: O(n)
 func (v *Vector[T,U])Keys() iter.Iter[int] {
-    return iter.Range[int](0,len(*v),1).SetupTeardown(
+    return iter.Range[int](0,len(*v),1)
+}
+// Description: Modifies the iterator chain returned by the unerlying 
+// [Vector.Keys] method such that a read lock will be placed on the underlying 
+// vector when iterator is consumed. The vector will have a read lock the entire 
+// time the iteration is being performed. The lock will not be applied until the 
+// iterator starts to be consumed.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])Keys() iter.Iter[int] {
+    return v.Vector.Keys().SetupTeardown(
         func() error { v.RLock(); return nil },
         func() error { v.RUnlock(); return nil },
     )
 }
 
-// Returns true if the elements in v are all contained in other and the elements
-// of other are all contained in v, regardless of position. Returns false 
-// otherwise. This implementation of UnorderedEq is dependent on the time 
-// complexity of the implementation of the ContainsPntr method on other. In 
-// big-O it might look something like this, O(n*O(other.ContainsPntr))), where n 
-// is the number of elements in v and O(other.ContainsPntr) represents the 
-// time complexity of the containsPntr method on other with m values. Read locks 
-// will be placed on both this vector and the other vector.
+// Description: Returns true if the elements in v are all contained in other and 
+// the elements of other are all contained in v, regardless of position. Returns 
+// false otherwise. 
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the ContainsPntr method on other. In big-O it might look something like this, 
+// O(n*O(other.ContainsPntr))), where O(other.ContainsPntr) represents the time 
+// complexity of the ContainsPntr method on other with m values.
 func (v *Vector[T,U])UnorderedEq(
     other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
-    v.RLock()
-    other.RLock()
-    defer v.RUnlock()
-    defer other.RUnlock()
     rv:=(len(*v)==other.Length())
     for i:=0; i<len(*v) && rv; i++ {
         rv=other.ContainsPntr(&(*v)[i])
     }
     return rv
 }
-
-// Returns true if all the key value pairs in v are all contained in other and 
-// the key value pairs are all contained in v. Returns false otherwise. This 
-// implementation of KeyedEq is dependent on the time complexity of the 
-// implementation of the GetPntr method on other. In big-O it might look 
-// something like this, O(n*O(other.GetPntr))), where n is the number of 
-// elements in v and O(other.ContainsPntr) represents the time complexity of 
-// the containsPntr method on other with m values. Read locks will be placed on 
-// both this vector and the other vector.
-func (v *Vector[T,U])KeyedEq(
-    other containerTypes.KeyedComparisonsOtherConstraint[int,T],
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.UnorderedEq] method. Attempts to place a read lock 
+// on other but whether or not that happens is implementation dependent.
+//
+// Lock Type: Read on this vector, read on other
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the ContainsPntr method on other. In big-O it might look something like this, 
+// O(n*O(other.ContainsPntr))), where O(other.ContainsPntr) represents the time 
+// complexity of the ContainsPntr method on other with m values.
+func (v *SyncedVector[T, U])UnorderedEq(
+    other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
     v.RLock()
     other.RLock()
     defer v.RUnlock()
     defer other.RUnlock()
+    return v.Vector.UnorderedEq(other)
+}
+
+// Description: Returns true if all the key value pairs in v are all contained 
+// in other and the key value pairs in other are all contained in v. Returns 
+// false otherwise. 
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the GetPntr method on other. In big-O it might look something like this, 
+// O(n*O(other.GetPntr))), where n is the number of elements in v and 
+// O(other.ContainsPntr) represents the time complexity of the containsPntr 
+// method on other.
+func (v *Vector[T,U])KeyedEq(
+    other containerTypes.KeyedComparisonsOtherConstraint[int,T],
+) bool {
     w:=widgets.NewWidget[T,U]()
     rv:=(len(*v)==other.Length())
     for i:=0; i<len(*v) && rv; i++ {
@@ -566,108 +1031,125 @@ func (v *Vector[T,U])KeyedEq(
     }
     return rv
 }
-
-// Populates the vector with the intersection of values from the l and r 
-// containers. This implementation of intersection is dependent on the time 
-// complexity of the implementation of the ContainsPntr method on l and r. In 
-// big-O it might look something like this, O(n*O(r.ContainsPntr)), where 
-// O(r.ContainsPntr) represents the time complexity of the containsPntr 
-// method on r. Read locks will be placed on l and r and a write lock will be 
-// placed on the vector that is being populated.
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.KeyedEq] method. Attempts to place a read lock on 
+// other but whether or not that happens is implementation dependent.
 //
-// This vector will be cleared before storing the result. When clearing, the
-// new resulting vector will be initialized with zero capacity and enough
-// backing memory to store (l.Length()+r.Length())/2 elements before 
+// Lock Type: Read on this vector, read on other
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the GetPntr method on other. In big-O it might look something like this, 
+// O(n*O(other.GetPntr))), where n is the number of elements in v and 
+// O(other.ContainsPntr) represents the time complexity of the containsPntr 
+// method on other.
+func (v *SyncedVector[T, U])KeyedEq(
+    other containerTypes.KeyedComparisonsOtherConstraint[int,T],
+) bool {
+    v.RLock()
+    other.RLock()
+    defer v.RUnlock()
+    defer other.RUnlock()
+    return v.Vector.KeyedEq(other)
+}
+
+// Description: Populates the vector with the intersection of values from the l 
+// and r containers. This vector will be cleared before storing the result. When 
+// clearing, the new resulting vector will be initialized with zero length and 
+// enough backing capacity to store (l.Length()+r.Length())/2 elements before 
 // reallocating. This means that there should be at most 1 reallocation beyond
 // this initial allocation, and that additional allocation should only occur 
 // when the length of the intersection is greater than the average length of the 
 // l and r vectors. This logic is predicated on the fact that intersections will
 // likely be much smaller than the original vectors.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the ContainsPntr method on l and r. In big-O it might look something like 
+// this, O(O(r.ContainsPntr)*O(l.ContainsPntr)), where O(r.ContainsPntr) 
+// represents the time complexity of the containsPntr method on r and 
+// O(l.ContainsPntr) represents the time complexity of the containsPntr method
+// on l.
 func (v *Vector[T,U])Intersection(
     l containerTypes.ComparisonsOtherConstraint[T],
     r containerTypes.ComparisonsOtherConstraint[T],
 ) {
+    newV:=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
+    addressableSafeValIter[T](
+        l,
+        func( index int, val *T) (iter.IteratorFeedback, error) {
+            if r.ContainsPntr(val) {
+                newV=append(newV, *val) 
+            }
+            return iter.Continue,nil
+        },
+    )
+    v.Clear()
+    *v=newV
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Intersection] method. Attempts to place a read 
+// lock on l and r but whether or not that happens is implementation dependent.
+//
+// Lock Type: Write on this vector, read on l and r
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the ContainsPntr method on l and r. In big-O it might look something like 
+// this, O(O(r.ContainsPntr)*O(l.ContainsPntr)), where O(r.ContainsPntr) 
+// represents the time complexity of the containsPntr method on r and 
+// O(l.ContainsPntr) represents the time complexity of the containsPntr method
+// on l.
+func (v *SyncedVector[T, U])Intersection(
+    l containerTypes.ComparisonsOtherConstraint[T],
+    r containerTypes.ComparisonsOtherConstraint[T],
+) {
     r.RLock()
     l.RLock()
     v.Lock()
     defer r.RUnlock()
     defer l.RUnlock()
     defer v.Unlock()
-    w:=widgets.NewWidget[T,U]()
-    for i:=0; i<len(*v); i++ {
-        w.Zero(&(*v)[i])
-    }
-    *v=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
-    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
-        if r.ContainsPntr(val) {
-            *v=append(*v, *val) 
-        }
-        return iter.Continue,nil
-    })
+    v.Vector.Intersection(l,r)
 }
 
-// Populates the vector with the union of values from the l and r containers. 
-// The time complexity of this union operation will look like this in big-O: 
-// O((n+m)*(n+m)), where n is the number of values in l and m is the number of
-// values in r. Read locks will be placed on l and r and a write lock will be 
-// placed on the vector that is being populated.
-//
-// This vector will be cleared before storing the result. When clearing, the
-// new resulting vector will be initialized with zero capacity and enough
-// backing memory to store the average of the maximum and minimum possible
-// union sizes before reallocating. This means that there should be at most 1 
-// reallocation beyond this initial allocation, and that additional allocation 
-// should only occur when the length of the union is greater than the average 
-// length of the minumum and maximum possible union sizes. This logic is 
+// Description: Populates the vector with the union of values from the l and r 
+// containers. This vector will be cleared before storing the result. When 
+// clearing, the new resulting vector will be initialized with zero capacity and 
+// enough backing memory to store the average of the maximum and minimum 
+// possible union sizes before reallocating. This means that there should be at 
+// most 1 reallocation beyond this initial allocation, and that additional 
+// allocation should only occur when the length of the union is greater than the 
+// average length of the minumum and maximum possible union sizes. This logic is 
 // predicated on the fact that unions will likely be much smaller than the 
 // original vectors.
+//
+// Time Complexity: O((n+m)*(n+m)), where n is the number of values in l and m 
+// is the number of values in r.
 func (v *Vector[T,U])Union(
     l containerTypes.ComparisonsOtherConstraint[T],
     r containerTypes.ComparisonsOtherConstraint[T],
 ) {
-    r.RLock()
-    l.RLock()
-    v.Lock()
-    defer r.RUnlock()
-    defer l.RUnlock()
-    defer v.Unlock()
-    w:=widgets.NewWidget[T,U]()
-    for i:=0; i<len(*v); i++ {
-        w.Zero(&(*v)[i])
-    }
     minLen:=max(l.Length(),r.Length())
     maxLen:=l.Length()+r.Length()
-    *v=make(Vector[T, U], 0, (maxLen+minLen)/2)
-    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
-        if !v.ContainsPntr(val) {
-            *v=append(*v, *val) 
+    newV:=make(Vector[T, U], 0, (maxLen+minLen)/2)
+    oper:= func(index int, val *T) (iter.IteratorFeedback, error) {
+        if !newV.ContainsPntr(val) {
+            newV=append(newV, *val) 
         }
         return iter.Continue,nil
-    })
-    r.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
-        if !v.ContainsPntr(val) {
-            *v=append(*v, *val) 
-        }
-        return iter.Continue,nil
-    })
+    }
+    addressableSafeValIter[T](l,oper)
+    addressableSafeValIter[T](r,oper)
+    v.Clear()
+    *v=newV
 }
-
-// Populates the vector with the result of taking the difference of r from l.
-// This implementation of difference is dependent on the time complexity of the 
-// implementation of the ContainsPntr method on r. In big-O it might look 
-// something like this, O(n*O(r.ContainsPntr)), where O(r.ContainsPntr) 
-// represents the time complexity of the containsPntr method on r. Read locks 
-// will be placed on l and r and a write lock will be placed on the vector that 
-// is being populated.
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Union] method. Attempts to place a read lock on l 
+// and r but whether or not that happens is implementation dependent.
 //
-// This vector will be cleared before storing the result. When clearing, the
-// new resulting vector will be initialized with zero capacity and enough
-// backing memory to store half the length of l. This means that there should be 
-// at most 1 reallocation beyond this initial allocation, and that additional 
-// allocation should only occur when the length of the difference is greater 
-// than half the length of l. This logic is predicated on the fact that 
-// differences will likely be much smaller than the original vector.
-func (v *Vector[T,U])Difference(
+// Lock Type: Write on this vector, read on l and r
+//
+// Time Complexity: O((n+m)*(n+m)), where n is the number of values in l and m 
+// is the number of values in r.
+func (v *SyncedVector[T, U])Union(
     l containerTypes.ComparisonsOtherConstraint[T],
     r containerTypes.ComparisonsOtherConstraint[T],
 ) {
@@ -677,67 +1159,151 @@ func (v *Vector[T,U])Difference(
     defer r.RUnlock()
     defer l.RUnlock()
     defer v.Unlock()
-    w:=widgets.NewWidget[T,U]()
-    for i:=0; i<len(*v); i++ {
-        w.Zero(&(*v)[i])
-    }
-    *v=make(Vector[T, U], 0, l.Length()/2)
-    l.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
-        if !r.ContainsPntr(val) {
-            *v=append(*v, *val) 
-        }
-        return iter.Continue,nil
-    })
+    v.Vector.Union(l,r)
 }
 
-// Returns true if this vector is a superset to other. This implementation has
-// a time complexity of O(n*m), where n is the number of values in this vector
-// and m is the number of values in other. Read locks will be placed on both
-// this vector and the other vector.
+// Description: Populates the vector with the result of taking the difference of 
+// r from l. This vector will be cleared before storing the result. When 
+// clearing, the new resulting vector will be initialized with zero capacity and 
+// enough backing memory to store half the length of l. This means that there 
+// should be at most 1 reallocation beyond this initial allocation, and that 
+// additional allocation should only occur when the length of the difference is 
+// greater than half the length of l. This logic is predicated on the fact that 
+// differences will likely be much smaller than the original vector.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the ContainsPntr method on l and r. In big-O it might look something like 
+// this, O(O(r.ContainsPntr)*O(l.ContainsPntr)), where O(r.ContainsPntr) 
+// represents the time complexity of the containsPntr method on r and 
+// O(l.ContainsPntr) represents the time complexity of the containsPntr method
+// on l.
+func (v *Vector[T,U])Difference(
+    l containerTypes.ComparisonsOtherConstraint[T],
+    r containerTypes.ComparisonsOtherConstraint[T],
+) {
+    newV:=make(Vector[T, U], 0, l.Length()/2)
+    addressableSafeValIter[T](
+        l,
+        func(index int, val *T) (iter.IteratorFeedback, error) {
+            if !r.ContainsPntr(val) {
+                newV=append(newV, *val)
+            }
+            return iter.Continue,nil
+        },
+    )
+    v.Clear()
+    *v=newV
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.Difference] method. Attempts to place a read lock 
+// on l and r but whether or not that happens is implementation dependent.
+//
+// Lock Type: Write on this vector, read on l and r
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the ContainsPntr method on l and r. In big-O it might look something like 
+// this, O(O(r.ContainsPntr)*O(l.ContainsPntr)), where O(r.ContainsPntr) 
+// represents the time complexity of the containsPntr method on r and 
+// O(l.ContainsPntr) represents the time complexity of the containsPntr method
+// on l.
+func (v *SyncedVector[T, U])Difference(
+    l containerTypes.ComparisonsOtherConstraint[T],
+    r containerTypes.ComparisonsOtherConstraint[T],
+) {
+    r.RLock()
+    l.RLock()
+    v.Lock()
+    defer r.RUnlock()
+    defer l.RUnlock()
+    defer v.Unlock()
+    v.Vector.Difference(l,r)
+}
+
+// Description: Returns true if this vector is a superset to other. 
+//
+// Time Complexity: O(n*m), where n is the number of values in this vector and 
+// m is the number of values in other.
 func (v *Vector[T,U])IsSuperset(
     other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
-    v.RLock()
-    other.RLock()
-    defer v.RUnlock()
-    defer other.RUnlock()
     rv:=(len(*v)>=other.Length())
     if !rv {
         return false
     }
-    other.ValPntrs().ForEach(func(index int, val *T) (iter.IteratorFeedback, error) {
-        if rv=v.ContainsPntr(val); !rv {
-            return iter.Break,nil
-        }
-        return iter.Continue,nil
-    })
+    addressableSafeValIter[T](
+        other,
+        func(index int, val *T) (iter.IteratorFeedback, error) {
+            if rv=v.ContainsPntr(val); !rv {
+                return iter.Break,nil
+            }
+            return iter.Continue,nil
+        },
+    )
     return rv
 }
-
-// Returns true if this vector is a subset to other. This implementation has a
-// time complexity that is dependent on the ContainsPntr method of other. In 
-// big-O terms it may look somwthing like this: O(n*O(other.ContainsPntr)), 
-// where n is the number of elements in the current vector and 
-// other.ContainsPntr represents the time complexity of the containsPntr method
-// on other. Read locks will be placed on both this vector and the other vector.
-func (v *Vector[T,U])IsSubset(
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.IsSuperset] method. Attempts to place a read lock 
+// on other but whether or not that happens is implementation dependent.
+//
+// Lock Type: Read on this vector, read on other
+//
+// Time Complexity: O(n*m), where n is the number of values in this vector and 
+// m is the number of values in other.
+func (v *SyncedVector[T, U])IsSuperset(
     other containerTypes.ComparisonsOtherConstraint[T],
 ) bool {
     v.RLock()
     other.RLock()
     defer v.RUnlock()
     defer other.RUnlock()
+    return v.Vector.IsSuperset(other)
+}
+
+// Description: Returns true if this vector is a subset to other. 
+//
+// Time Complexity: Dependent on the ContainsPntr method of other. In big-O 
+// terms it may look somwthing like this: O(n*O(other.ContainsPntr)), where n is 
+// the number of elements in the current vector and other.ContainsPntr 
+// represents the time complexity of the containsPntr method on other.
+func (v *Vector[T,U])IsSubset(
+    other containerTypes.ComparisonsOtherConstraint[T],
+) bool {
     rv:=(len(*v)<=other.Length())
     for i:=0; i<len(*v) && rv; i++ {
         rv=other.ContainsPntr(&(*v)[i])
     }
     return rv
 }
+// Description: Places a read lock on the underlying vector and then calls the 
+// underlying vectors [Vector.IsSubset] method. Attempts to place a read lock on 
+// other but whether or not that happens is implementation dependent.
+//
+// Lock Type: Read on this vector, read on other
+//
+// Time Complexity: Dependent on the ContainsPntr method of other. In big-O 
+// terms it may look somwthing like this: O(n*O(other.ContainsPntr)), where n is 
+// the number of elements in the current vector and other.ContainsPntr 
+// represents the time complexity of the containsPntr method on other.
+func (v *SyncedVector[T, U])IsSubset(
+    other containerTypes.ComparisonsOtherConstraint[T],
+) bool {
+    v.RLock()
+    other.RLock()
+    defer v.RUnlock()
+    defer other.RUnlock()
+    return v.Vector.IsSubset(other)
+}
 
 // An equality function that implements the [algo.widget.WidgetInterface] 
 // interface. Internally this is equivalent to [Vector.KeyedEq]. Returns true
 // if l==r, false otherwise.
 func (v *Vector[T, U])Eq(l *Vector[T,U], r *Vector[T,U]) bool {
+    return l.KeyedEq(r)
+}
+// An equality function that implements the [algo.widget.WidgetInterface] 
+// interface. Internally this is equivalent to [SyncedVector.KeyedEq]. Returns 
+// true if l==r, false otherwise.
+func (v *SyncedVector[T, U])Eq(l *SyncedVector[T,U], r *SyncedVector[T,U]) bool {
     return l.KeyedEq(r)
 }
 
@@ -757,14 +1323,22 @@ func (v *Vector[T, U])Lt(l *Vector[T,U], r *Vector[T,U]) bool {
     }
     return true
 }
+// A function that implements the less than operation on vectors. The l and r
+// vectors will be compared lexographically. Read locks are placed on l and r
+// before calling the underlying vectors [Vector.Lt] method.
+func (v *SyncedVector[T, U])Lt(l *SyncedVector[T,U], r *SyncedVector[T,U]) bool {
+    l.RLock()
+    r.RLock()
+    defer l.RUnlock()
+    defer r.RUnlock()
+    return l.Vector.Lt(&l.Vector,&r.Vector)
+}
 
 // A function that returns a hash of a vector. To do this all of the individual
 // hashes that are produced from the elements of the vector are combined in a
 // way that maintains identity, making it so the hash will represent the same
 // equality operation that [Vector.KeyedEq] and [Vector.Eq] provide.
 func (c *Vector[T, U])Hash(other *Vector[T,U]) hash.Hash {
-    other.RLock()
-    defer other.RUnlock()
     var rv hash.Hash=0
     w:=widgets.NewWidget[T,U]()
     if len(*other)>0 {
@@ -775,9 +1349,21 @@ func (c *Vector[T, U])Hash(other *Vector[T,U]) hash.Hash {
     }
     return rv
 }
+// Places a read lock on the underlying vector of other and then calls others
+// underlying vector [Vector.IsSubset] method.
+func (v *SyncedVector[T, U])Hash(other *SyncedVector[T,U]) hash.Hash {
+    other.RLock()
+    defer other.RUnlock()
+    return v.Vector.Hash(&v.Vector)
+}
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
-// Internally this is equivalent to [vector.Clear].
+// Internally this is equivalent to [Vector.Clear].
 func (v *Vector[T, U])Zero(other *Vector[T,U]) {
     other.Clear()
+}
+// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// Internally this is equivalent to [SyncedVector.Clear].
+func (v *SyncedVector[T, U])Zero(other *SyncedVector[T,U]) {
+    other.Vector.Clear()
 }

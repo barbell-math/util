@@ -5,6 +5,7 @@ import "github.com/barbell-math/util/container/containerTypes"
 // An interface that only allows read operations on a set.
 type ReadSet[V any] interface {
 	containerTypes.RWSyncable
+	containerTypes.Addressable
 	containerTypes.Length
 	containerTypes.ReadOps[V]
 	containerTypes.Comparisons[uint64,V]

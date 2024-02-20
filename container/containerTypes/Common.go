@@ -17,13 +17,19 @@ const (
     PopAll int=math.MaxInt
 )
 
-// The interface that the RWMutex exposes.
+// An interface that exposes the RWMutex's interface as well as a convience
+// function that will be used to determine if something is synced or if it
+// simply implements this interface as a pass through.
 type RWSyncable interface {
     Lock()
-    Unlock()
     RLock()
+    Unlock()
     RUnlock()
+    IsSynced() bool
 }
+
+// An interface that determines if a container is addressable or not.
+type Addressable interface { IsAddressable() bool }
 
 // An interface that allows access to the containers length.
 type Length interface { Length() int }
@@ -63,18 +69,20 @@ type KeyedComparisons[K any, V any] interface {
 // An interface that defines what kinds values can be passed to the methods in
 // the [Comparisons] interface.
 type ComparisonsOtherConstraint[V any] interface {
-    ReadOps[V]
     RWSyncable
+    Addressable
     Length
+    ReadOps[V]
 }
 
 // An interface that defines what kinds values can be passed to the methods in
 // the [KeyedComparisons] interface.
 type KeyedComparisonsOtherConstraint[K any, V any] interface {
-    ReadKeyedOps[K,V]
-    ReadOps[V] // TODO - needed??
     RWSyncable
+    Addressable
     Length
+    ReadOps[V] // TODO - needed??
+    ReadKeyedOps[K,V]
 }
 
 // An interface that enforces implementation of read-only, value-only, operations.
@@ -84,6 +92,7 @@ type ReadOps[V any] interface {
     Contains(v V) bool
     ContainsPntr(v *V) bool
 }
+
 // An interface that enforces implementation of read-only, key/value, operations.
 type ReadKeyedOps[K any, V any] interface {
     Get(k K) (V,error)
@@ -169,9 +178,8 @@ type FirstElemDelete[V any] interface {
 // An interface that enforces the implementation of read-only last element access.
 type LastElemRead[V any] interface {
     PeekBack() (V,error);
-    PeekPntrBack() (*V,error);
+    PeekPntrBack() (*V,error)
 }
-// An interface that enforces the implementation of write-only last element access.
 type LastElemWrite[V any] interface {
     PushBack(v ...V) (error);
     ForcePushBack(v ...V)

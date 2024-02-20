@@ -219,3 +219,16 @@ func TestMapValsConsume(t *testing.T){
         "Consuming the val iterator returned an error when it should not have.",t,
     )
 }
+
+func TestMapElemsChanClosing(t *testing.T) {
+    test.NoPanic(
+        func() {
+            m:=map[string]int{"test": 1, "test2": 2, "test3": 3}
+            for i:=0; i<10000; i++ {
+                MapVals[string,int](m).Consume()
+                m["four"]=i
+            }
+        },
+        "Writing to the map after iteration finished paniced. (Means channel did not immediately close.)",t,
+    )
+}

@@ -1,10 +1,24 @@
 package containers
 
 import (
+	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/customerr"
 )
 
+
+func addressableSafeValIter[T any](
+    other containerTypes.ComparisonsOtherConstraint[T],
+    iterOp func(index int, val *T) (iter.IteratorFeedback,error),
+) {
+    if other.IsAddressable() {
+        other.ValPntrs().ForEach(iterOp)
+    } else {
+        other.Vals().ForEach(func(index int, val T) (iter.IteratorFeedback, error) {
+            return iterOp(index,&val)
+        })
+    }
+}
 
 func getSizeError(size int) error {
     return customerr.Wrap(

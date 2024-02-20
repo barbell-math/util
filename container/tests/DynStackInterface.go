@@ -14,16 +14,6 @@ func stackWriteInterface[U any](c dynamicContainers.WriteStack[U]) {}
 func stackInterface[U any](c dynamicContainers.Stack[U])           {}
 
 // Tests that the value supplied by the factory implements the 
-// [containerTypes.RWSyncable] interface.
-func StackInterfaceSyncableInterface[V any](
-	factory func() dynamicContainers.Stack[V],
-	t *testing.T,
-) {
-	var container containerTypes.RWSyncable = factory()
-	_ = container
-}
-
-// Tests that the value supplied by the factory implements the 
 // [containerTypes.Length] interface.
 func StackInterfaceLengthInterface[V any](
 	factory func() dynamicContainers.Stack[V],
