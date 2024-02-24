@@ -648,7 +648,7 @@ func (h *HashSet[T, U])Hash(other *HashSet[T,U]) hash.Hash {
     w:=widgets.NewWidget[T,U]()
     rv=hash.Hash(0)
     for _,v:=range(other.internalHashSetImpl) {
-        rv=rv.Combine(w.Hash(&v))
+        rv=rv.CombineUnordered(w.Hash(&v))
     }
     return rv
 }

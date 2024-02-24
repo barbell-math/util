@@ -75,7 +75,7 @@ func SetInterfaceStaticCapacityInterface[V any](
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
-		"Code did not panic when casting a dynamic set to a static set.", t,
+		t,
 	)
 }
 
@@ -89,27 +89,17 @@ func SetInterfaceContainsPntr(
 		container.AppendUnique(i)
 	}
 	for i:=0; i<5; i++ {
-		test.BasicTest(true,container.ContainsPntr(&i),
-			"ContainsPntr returned a false negative",t,
-		)
+		test.True(container.ContainsPntr(&i),t)
 	}
 	v:=5
-	test.BasicTest(false,container.ContainsPntr(&v),
-		"ContainsPntr returned a false positive.",t,
-	)
+	test.False(container.ContainsPntr(&v),t)
 	v=-1
-	test.BasicTest(false,container.ContainsPntr(&v),
-		"ContainsPntr returned a false positive.",t,
-	)
+	test.False(container.ContainsPntr(&v),t)
 	container.Pop(0,1)
 	v=0
-	test.BasicTest(false,container.ContainsPntr(&v),
-		"ContainsPntr returned a false positive.",t,
-	)
+	test.False(container.ContainsPntr(&v),t)
 	for i:=1; i<5; i++ {
-		test.BasicTest(true,container.ContainsPntr(&i),
-			"ContainsPntr returned a false negative",t,
-		)
+		test.True(container.ContainsPntr(&i),t)
 	}
 }
 
@@ -123,24 +113,14 @@ func SetInterfaceContains(
 		container.AppendUnique(i)
 	}
 	for i:=0; i<5; i++ {
-		test.BasicTest(true,container.Contains(i),
-			"Contains returned a false negative",t,
-		)
+		test.True(container.Contains(i),t)
 	}
-	test.BasicTest(false,container.Contains(5),
-		"Contains returned a false positive.",t,
-	)
-	test.BasicTest(false,container.Contains(-1),
-		"Contains returned a false positive.",t,
-	)
+	test.False(container.Contains(5),t)
+	test.False(container.Contains(-1),t)
 	container.Pop(0,1)
-	test.BasicTest(false,container.Contains(0),
-		"Contains returned a false positive.",t,
-	)
+	test.False(container.Contains(0),t)
 	for i:=1; i<5; i++ {
-		test.BasicTest(true,container.Contains(i),
-			"Contains returned a false negative",t,
-		)
+		test.True(container.Contains(i),t)
 	}
 }
 
@@ -150,19 +130,13 @@ func SetInterfaceClear(
 	t *testing.T,
 ){
 	container:=factory()
-	test.BasicTest(0,container.Length(),
-		"Container was initilized with values in it.",t,
-	)
+	test.Eq(0,container.Length(),t)
 	for i:=0; i<5; i++ {
 		container.AppendUnique(i)
 	}
-	test.BasicTest(5,container.Length(),
-		"Container did not save all values.",t,
-	)
+	test.Eq(5,container.Length(),t)
 	container.Clear()
-	test.BasicTest(0,container.Length(),
-		"Container did not remove all values and set length to 0.",t,
-	)
+	test.Eq(0,container.Length(),t)
 }
 
 // Tests the AppendUnique method functionality of a dynamic set.
@@ -171,37 +145,25 @@ func SetInterfaceAppendUnique(
 	t *testing.T,
 ){
 	container:=factory()
-	test.BasicTest(0,container.Length(),
-		"Container was initilized with values in it.",t,
-	)
+	test.Eq(0,container.Length(),t)
 	for i:=0; i<5; i++ {
 		err:=container.AppendUnique(i)
-		test.BasicTest(nil,err,
-			"AppendUnique returned an error when it shouldn't have.",t,
-		)
+		test.Nil(err,t)
 	}
 	for i:=0; i<5; i++ {
-		test.BasicTest(true,container.Contains(i),
-			"Appending a value did not place it in the container.",t,
-		)
+		test.True(container.Contains(i),t)
 	}
 	for i:=0; i<5; i++ {
 		container.AppendUnique(i)
-		test.BasicTest(5,container.Length(),
-			"Container had non-unique values added to it.",t,
-		)
+		test.Eq(5,container.Length(),t)
 	}
 	container=factory()
-	test.BasicTest(0,container.Length(),
-		"Container was initilized with values in it.",t,
-	)
+	test.Eq(0,container.Length(),t)
 	for i:=0; i<6; i+=2 {
 		container.AppendUnique(i,i+1)
 	}
 	for i:=0; i<6; i++ {
-		test.BasicTest(true,container.Contains(i),
-			"Appending a value did not place it in the container.",t,
-		)
+		test.True(container.Contains(i),t)
 	}
 }
 
@@ -211,20 +173,14 @@ func SetInterfacePop(
 	t *testing.T,
 ){
 	container:=factory()
-	test.BasicTest(0,container.Length(),
-		"Container was initilized with values in it.",t,
-	)
+	test.Eq(0,container.Length(),t)
 	for i:=0; i<5; i++ {
 		container.AppendUnique(i)
 	}
 	for i:=0; i<5; i++ {
-		test.BasicTest(true,container.Contains(i),
-			"The container contain the value originally.",t,
-		)
+		test.True(container.Contains(i),t)
 		container.Pop(i,1)
-		test.BasicTest(false,container.Contains(i),
-			"The container did not remove the value.",t,
-		)
+		test.False(container.Contains(i),t)
 	}
 }
 
@@ -237,76 +193,40 @@ func SetInterfaceUnorderedEq(
 	v.AppendUnique(1, 2, 3)
 	v2 := factory()
 	v2.AppendUnique(1, 2, 3)
-	test.BasicTest(true, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false negative.", t,
-	)
+	test.True(v.UnorderedEq(v2),t)
+	test.True(v2.UnorderedEq(v),t)
 	v.Pop(3,1)
-	test.BasicTest(false, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false positive.", t,
-	)
+	test.False(v.UnorderedEq(v2),t)
+	test.False(v2.UnorderedEq(v),t)
 	v.AppendUnique(3)
 	v2 = factory()
 	v2.AppendUnique(3, 1, 2)
-	test.BasicTest(true, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false negative.", t,
-	)
+	test.True(v.UnorderedEq(v2),t)
+	test.True(v2.UnorderedEq(v),t)
 	v.Pop(3,1)
-	test.BasicTest(false, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false positive.", t,
-	)
+	test.False(v.UnorderedEq(v2),t)
+	test.False(v2.UnorderedEq(v),t)
 	v.AppendUnique(3)
 	v2 = factory()
 	v2.AppendUnique(2, 3, 1)
-	test.BasicTest(true, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false negative.", t,
-	)
+	test.True(v.UnorderedEq(v2),t)
+	test.True(v2.UnorderedEq(v),t)
 	v.Pop(3,1)
-	test.BasicTest(false, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false positive.", t,
-	)
+	test.False(v.UnorderedEq(v2),t)
+	test.False(v2.UnorderedEq(v),t)
 	v = factory()
 	v.AppendUnique(0)
 	v2 = factory()
 	v2.AppendUnique(0)
-	test.BasicTest(true, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false negative.", t,
-	)
+	test.True(v.UnorderedEq(v2),t)
+	test.True(v2.UnorderedEq(v),t)
 	v.Pop(0,1)
-	test.BasicTest(false, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false positive.", t,
-	)
+	test.False(v.UnorderedEq(v2),t)
+	test.False(v2.UnorderedEq(v),t)
 	v = factory()
 	v2 = factory()
-	test.BasicTest(true, v.UnorderedEq(v2), 
-		"UnorderedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.UnorderedEq(v), 
-		"UnorderedEq returned a false negative.", t,
-	)
+	test.True(v.UnorderedEq(v2),t)
+	test.True(v2.UnorderedEq(v),t)
 }
 
 func setIntersectionHelper(
@@ -318,13 +238,9 @@ func setIntersectionHelper(
 	t *testing.T,
 ){
 	tester:=func(c dynamicContainers.Set[int]) {
-		test.BasicTest(len(exp),c.Length(),
-			"Intersection produced a set of the wrong length.",t,
-		)
+		test.Eq(len(exp),c.Length(),t)
 		for _,v:=range(exp) {
-			test.BasicTest(true,c.Contains(v),
-				"Intersection did not contain the correct values.",t,
-			)
+			test.True(c.Contains(v),t)
 		}
 	}
 	res.Intersection(l,r)
@@ -372,13 +288,9 @@ func setUnionHelper(
 	t *testing.T,
 ){
 	tester:=func(c dynamicContainers.Set[int]) {
-		test.BasicTest(len(exp),c.Length(),
-			"Union produced a set of the wrong length.",t,
-		)
+		test.Eq(len(exp),c.Length(),t)
 		for _,v:=range(exp) {
-			test.BasicTest(true,c.Contains(v),
-				"Union did not contain the correct values.",t,
-			)
+			test.True(c.Contains(v),t)
 		}
 	}
 	res.Union(l,r)
@@ -426,13 +338,9 @@ func setDifferenceHelper(
 	t *testing.T,
 ){
 	res.Difference(l,r)
-	test.BasicTest(len(exp),res.Length(),
-		"Difference produced a set of the wrong length.",t,
-	)
+	test.Eq(len(exp),res.Length(),t)
 	for _,v:=range(exp) {
-		test.BasicTest(true,res.Contains(v),
-			"Difference did not contain the correct values.",t,
-		)
+		test.True(res.Contains(v),t)
 	}
 }
 
@@ -482,51 +390,25 @@ func SetInterfaceIsSuperset(
 ){
 	v:=factory()
 	v2:=factory()
-	test.BasicTest(true,v.IsSuperset(v2),
-		"Superset returned a false negative.",t,
-	)
+	test.True(v.IsSuperset(v2),t)
 	v.AppendUnique(1)
-	test.BasicTest(true,v.IsSuperset(v2),
-		"Superset returned a false negative.",t,
-	)
-	test.BasicTest(false,v2.IsSuperset(v),
-		"Superset returned a false positive.",t,
-	)
+	test.True(v.IsSuperset(v2),t)
+	test.False(v2.IsSuperset(v),t)
 	v2.AppendUnique(1)
-	test.BasicTest(true,v.IsSuperset(v2),
-		"Superset returned a false negative.",t,
-	)
-	test.BasicTest(true,v2.IsSuperset(v),
-		"Superset returned a false negative.",t,
-	)
+	test.True(v.IsSuperset(v2),t)
+	test.True(v2.IsSuperset(v),t)
 	v2.AppendUnique(2)
-	test.BasicTest(false,v.IsSuperset(v2),
-		"Superset returned a false positive.",t,
-	)
-	test.BasicTest(true,v2.IsSuperset(v),
-		"Superset returned a false negative.",t,
-	)
+	test.False(v.IsSuperset(v2),t)
+	test.True(v2.IsSuperset(v),t)
 	v2.AppendUnique(3)
-	test.BasicTest(false,v.IsSuperset(v2),
-		"Superset returned a false positive.",t,
-	)
-	test.BasicTest(true,v2.IsSuperset(v),
-		"Superset returned a false negative.",t,
-	)
+	test.False(v.IsSuperset(v2),t)
+	test.True(v2.IsSuperset(v),t)
 	v.AppendUnique(2,3)
-	test.BasicTest(true,v.IsSuperset(v2),
-		"Superset returned a false negative.",t,
-	)
-	test.BasicTest(true,v2.IsSuperset(v),
-		"Superset returned a false negative.",t,
-	)
+	test.True(v.IsSuperset(v2),t)
+	test.True(v2.IsSuperset(v),t)
 	v.AppendUnique(4,5)
-	test.BasicTest(true,v.IsSuperset(v2),
-		"Superset returned a false negative.",t,
-	)
-	test.BasicTest(false,v2.IsSuperset(v),
-		"Superset returned a false positive.",t,
-	)
+	test.True(v.IsSuperset(v2),t)
+	test.False(v2.IsSuperset(v),t)
 }
 
 func SetInterfaceIsSubset(
@@ -535,49 +417,23 @@ func SetInterfaceIsSubset(
 ){
 	v:=factory()
 	v2:=factory()
-	test.BasicTest(true,v.IsSubset(v2),
-		"Subset returned a false negative.",t,
-	)
+	test.True(v.IsSubset(v2),t)
 	v.AppendUnique(1)
-	test.BasicTest(false,v.IsSubset(v2),
-		"Subset returned a false positive.",t,
-	)
-	test.BasicTest(true,v2.IsSubset(v),
-		"Subset returned a false negative.",t,
-	)
+	test.False(v.IsSubset(v2),t)
+	test.True(v2.IsSubset(v),t)
 	v2.AppendUnique(1)
-	test.BasicTest(true,v.IsSubset(v2),
-		"Subset returned a false negative.",t,
-	)
-	test.BasicTest(true,v2.IsSubset(v),
-		"Subset returned a false negative.",t,
-	)
+	test.True(v.IsSubset(v2),t)
+	test.True(v2.IsSubset(v),t)
 	v2.AppendUnique(2)
-	test.BasicTest(true,v.IsSubset(v2),
-		"Subset returned a false negative.",t,
-	)
-	test.BasicTest(false,v2.IsSubset(v),
-		"Subset returned a false positive.",t,
-	)
+	test.True(v.IsSubset(v2),t)
+	test.False(v2.IsSubset(v),t)
 	v2.AppendUnique(3)
-	test.BasicTest(true,v.IsSubset(v2),
-		"Subset returned a false negative.",t,
-	)
-	test.BasicTest(false,v2.IsSubset(v),
-		"Subset returned a false positive.",t,
-	)
+	test.True(v.IsSubset(v2),t)
+	test.False(v2.IsSubset(v),t)
 	v.AppendUnique(2,3)
-	test.BasicTest(true,v.IsSubset(v2),
-		"Subset returned a false negative.",t,
-	)
-	test.BasicTest(true,v2.IsSubset(v),
-		"Subset returned a false negative.",t,
-	)
+	test.True(v.IsSubset(v2),t)
+	test.True(v2.IsSubset(v),t)
 	v.AppendUnique(4,5)
-	test.BasicTest(false,v.IsSubset(v2),
-		"Subset returned a false positive.",t,
-	)
-	test.BasicTest(true,v2.IsSubset(v),
-		"Subset returned a false negative.",t,
-	)
+	test.False(v.IsSubset(v2),t)
+	test.True(v2.IsSubset(v),t)
 }

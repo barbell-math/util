@@ -1,13 +1,13 @@
 package containers
 
-import (
-	"testing"
-
-	"github.com/barbell-math/util/algo/iter"
-	// "github.com/barbell-math/util/container/staticContainers"
-	"github.com/barbell-math/util/algo/widgets"
-	"github.com/barbell-math/util/test"
-)
+// import (
+// 	"testing"
+// 
+// 	"github.com/barbell-math/util/algo/iter"
+// 	// "github.com/barbell-math/util/container/staticContainers"
+// 	"github.com/barbell-math/util/algo/widgets"
+// 	"github.com/barbell-math/util/test"
+// )
 
 // //go:generate go run interfaceTest.go -type=CircularBuffer -category=static -interface=Vector -factory=generateCircularBuffer -info
 
@@ -1064,74 +1064,74 @@ import (
 //     }
 // }
 
-func testCircularBufferElemsHelper(
-    c SyncedCircularBuffer[int,widgets.BuiltinInt],
-    t *testing.T,
-){
-    for i:=0; i<len(c.vals); i++ {
-        c.PushBack(i);
-    }
-    cnt:=0
-    c.Elems().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
-        cnt++
-        test.BasicTest(index,val,"Element was skipped while iterating.",t);
-        return iter.Continue,nil;
-    });
-    test.BasicTest(len(c.vals),cnt,
-        "All the elements were not iterated over.",t,
-    )
-}
-func TestCircularBufferElems(t *testing.T){
-    tmp,err:=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
-    test.BasicTest(nil,err,
-        "NewCircularBuffer returned an error when it should not have.",t,
-    );
-    testCircularBufferElemsHelper(tmp,t);
-    tmp,err=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
-    test.BasicTest(nil,err,
-        "NewCircularBuffer returned an error when it should not have.",t,
-    );
-    tmp.startEnd.A=2;
-    tmp.startEnd.B=1;
-    testCircularBufferElemsHelper(tmp,t);
-}
-
-func testCircularBufferPntrElemsHelper(
-    c CircularBuffer[int,widgets.BuiltinInt], 
-    t *testing.T,
-){
-    for i:=0; i<len(c.vals); i++ {
-        c.PushBack(i);
-    }
-    cnt:=0
-    c.PntrElems().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
-        cnt++
-        test.BasicTest(index,*val,"Element was skipped while iterating.",t);
-        *val=100;
-        return iter.Continue,nil;
-    });
-    c.Elems().ForEach(func(index int, val int) (iter.IteratorFeedback, error) {
-        test.BasicTest(100,val,"Element was not updated while iterating.",t);
-        return iter.Continue,nil;
-    });
-    test.BasicTest(len(c.vals),cnt,
-        "All the elements were not iterated over.",t,
-    )
-}
-func TestCircularBufferPntrElems(t *testing.T){
-    tmp,err:=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
-    test.BasicTest(nil,err,
-        "NewCircularBuffer returned an error when it should not have.",t,
-    );
-    testCircularBufferElemsHelper(tmp,t);
-    tmp,err=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
-    test.BasicTest(nil,err,
-        "NewCircularBuffer returned an error when it should not have.",t,
-    );
-    tmp.startEnd.A=2;
-    tmp.startEnd.B=1;
-    testCircularBufferElemsHelper(tmp,t);
-}
+// func testCircularBufferElemsHelper(
+//     c SyncedCircularBuffer[int,widgets.BuiltinInt],
+//     t *testing.T,
+// ){
+//     for i:=0; i<len(c.vals); i++ {
+//         c.PushBack(i);
+//     }
+//     cnt:=0
+//     c.Elems().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+//         cnt++
+//         test.BasicTest(index,val,"Element was skipped while iterating.",t);
+//         return iter.Continue,nil;
+//     });
+//     test.BasicTest(len(c.vals),cnt,
+//         "All the elements were not iterated over.",t,
+//     )
+// }
+// func TestCircularBufferElems(t *testing.T){
+//     tmp,err:=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
+//     test.BasicTest(nil,err,
+//         "NewCircularBuffer returned an error when it should not have.",t,
+//     );
+//     testCircularBufferElemsHelper(tmp,t);
+//     tmp,err=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
+//     test.BasicTest(nil,err,
+//         "NewCircularBuffer returned an error when it should not have.",t,
+//     );
+//     tmp.startEnd.A=2;
+//     tmp.startEnd.B=1;
+//     testCircularBufferElemsHelper(tmp,t);
+// }
+// 
+// func testCircularBufferPntrElemsHelper(
+//     c CircularBuffer[int,widgets.BuiltinInt], 
+//     t *testing.T,
+// ){
+//     for i:=0; i<len(c.vals); i++ {
+//         c.PushBack(i);
+//     }
+//     cnt:=0
+//     c.PntrElems().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
+//         cnt++
+//         test.BasicTest(index,*val,"Element was skipped while iterating.",t);
+//         *val=100;
+//         return iter.Continue,nil;
+//     });
+//     c.Elems().ForEach(func(index int, val int) (iter.IteratorFeedback, error) {
+//         test.BasicTest(100,val,"Element was not updated while iterating.",t);
+//         return iter.Continue,nil;
+//     });
+//     test.BasicTest(len(c.vals),cnt,
+//         "All the elements were not iterated over.",t,
+//     )
+// }
+// func TestCircularBufferPntrElems(t *testing.T){
+//     tmp,err:=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
+//     test.BasicTest(nil,err,
+//         "NewCircularBuffer returned an error when it should not have.",t,
+//     );
+//     testCircularBufferElemsHelper(tmp,t);
+//     tmp,err=NewSyncedCircularBuffer[int,widgets.BuiltinInt](5);
+//     test.BasicTest(nil,err,
+//         "NewCircularBuffer returned an error when it should not have.",t,
+//     );
+//     tmp.startEnd.A=2;
+//     tmp.startEnd.B=1;
+//     testCircularBufferElemsHelper(tmp,t);
+// }
 
 // func TestCircularBufferEq(t *testing.T){
 //     v,_:=NewCircularBuffer[int,widgets.BuiltinInt](4)

@@ -62,19 +62,11 @@ func TestVectorOfVectorsEquality(t *testing.T){
 	{"d","e","f"},
 	{"h","i","j"},
     }
-    test.BasicTest(true,v1.Eq(&v1,&v2),
-	"The widget equality check did not return true when it should have.",t,
-    )
-    test.BasicTest(true,v1.Eq(&v2,&v1),
-	"The widget equality check did not return true when it should have.",t,
-    )
+    test.True(v1.Eq(&v1,&v2),t)
+    test.True(v1.Eq(&v2,&v1),t)
     v1[0][0]="blah"
-    test.BasicTest(false,v1.Eq(&v1,&v2),
-	"The widget equality check did not return true when it should have.",t,
-    )
-    test.BasicTest(false,v1.Eq(&v2,&v1),
-	"The widget equality check did not return true when it should have.",t,
-    )
+    test.False(v1.Eq(&v1,&v2),t)
+    test.False(v1.Eq(&v2,&v1),t)
 }
 
 func TestVectorOfVectorsLt(t *testing.T){
@@ -94,43 +86,23 @@ func TestVectorOfVectorsLt(t *testing.T){
 	{"d","e","f"},
 	{"h","i","j"},
     }
-    test.BasicTest(false,v1.Lt(&v1,&v2),
-	"The widget Lt method did not return false when comparing equal vectors.",t,
-    )
-    test.BasicTest(false,v1.Lt(&v2,&v1),
-	"The widget Lt method did not return false when comparing equal vectors.",t,
-    )
+    test.False(v1.Lt(&v1,&v2),t)
+    test.False(v1.Lt(&v2,&v1),t)
     v1[0][0]="A"
-    test.BasicTest(true,v1.Lt(&v1,&v2),
-	"The widget Lt method did not returned a false negative.",t,
-    )
-    test.BasicTest(false,v1.Lt(&v2,&v1),
-	"The widget Lt method did not returned a false positive.",t,
-    )
+    test.True(v1.Lt(&v1,&v2),t)
+    test.False(v1.Lt(&v2,&v1),t)
     v1[0][0]="a"
     v1[0][1]="B"
-    test.BasicTest(true,v1.Lt(&v1,&v2),
-	"The widget Lt method did not returned a false negative.",t,
-    )
-    test.BasicTest(false,v1.Lt(&v2,&v1),
-	"The widget Lt method did not returned a false positive.",t,
-    )
+    test.True(v1.Lt(&v1,&v2),t)
+    test.False(v1.Lt(&v2,&v1),t)
     v1[0][1]="b"
     v1.Delete(2)
-    test.BasicTest(true,v1.Lt(&v1,&v2),
-	"The widget Lt method did not returned a false negative.",t,
-    )
-    test.BasicTest(false,v1.Lt(&v2,&v1),
-	"The widget Lt method did not returned a false positive.",t,
-    )
+    test.True(v1.Lt(&v1,&v2),t)
+    test.False(v1.Lt(&v2,&v1),t)
     v2.Delete(1)
     v2.Delete(1)
-    test.BasicTest(false,v1.Lt(&v1,&v2),
-	"The widget Lt method did not returned a false positive.",t,
-    )
-    test.BasicTest(true,v1.Lt(&v2,&v1),
-	"The widget Lt method did not returned a false negative.",t,
-    )
+    test.False(v1.Lt(&v1,&v2),t)
+    test.True(v1.Lt(&v2,&v1),t)
 }
 
 func TestVectorOfVectorsHash(t *testing.T){
@@ -150,22 +122,16 @@ func TestVectorOfVectorsHash(t *testing.T){
 	{"d","e","f"},
 	{"h","i","j"},
     }
-    test.BasicTest(v1.Hash(&v1),v2.Hash(&v2),
-	"The widget hash method did not return the same value for identical vectors.",t,
-    )
+    test.Eq(v1.Hash(&v1),v2.Hash(&v2),t)
     v1[0][0]="blah"
-    test.BasicTest(false,v1.Hash(&v1)==v2.Hash(&v2),
-	"The widget hash method did not return different values for different vectors.",t,
-    )
+    test.False(v1.Hash(&v1)==v2.Hash(&v2),t)
     h:=v1.Hash(&v1)
     for i:=0; i<100; i++ {
-	test.BasicTest(h,v1.Hash(&v1),"The hash value changed!",t)
+	test.Eq(h,v1.Hash(&v1),t)
     }
     v3:=Vector[int,widgets.BuiltinInt]{500,600,700}
     v4:=Vector[int,widgets.BuiltinInt]{700,600,500}
-    test.BasicTest(false,v3.Hash(&v3)==v4.Hash(&v4),
-	"The widget hash method did not return different values for reversed vectors.",t,
-    )
+    test.False(v3.Hash(&v3)==v4.Hash(&v4),t)
 }
 
 func TestVectorZero(t *testing.T){

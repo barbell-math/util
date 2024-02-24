@@ -113,7 +113,7 @@ func StackInterfaceStaticCapacityInterface[V any](
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
-		"Code did not panic when casting a dynamic Stack to a static vector.", t,
+		t,
 	)
 }
 
@@ -127,8 +127,8 @@ func StackInterfaceClear(
 		container.PushBack(i)
 	}
 	container.Clear()
-	test.BasicTest(0, container.Length(), "Clear did not reset the underlying Stack.", t)
-	test.BasicTest(0, container.Capacity(), "Clear did not reset the underlying Stack.", t)
+	test.Eq(0, container.Length(), t)
+	test.Eq(0, container.Capacity(), t)
 }
 
 // Tests the PeekPntrBack method functionality of a dynamic Stack.
@@ -138,28 +138,16 @@ func StackInterfacePeekPntrBack(
 ) {
 	container := factory()
 	_v, err := container.PeekPntrBack()
-	test.BasicTest((*int)(nil), _v,
-		"Peek pntr back did not return the correct value.", t,
-	)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Peek pntr back returned an incorrect error.", t,
-	)
+	test.NilPntr[int](_v,t)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	container.PushBack(1)
 	_v, err = container.PeekPntrBack()
-	test.BasicTest(1, *_v,
-		"Peek pntr back did not return the correct value.", t,
-	)
-	test.BasicTest(nil, err,
-		"Peek pntr back returned an error when it shouldn't have.", t,
-	)
+	test.Eq(1, *_v,t)
+	test.Nil(err,t)
 	container.PushBack(2)
 	_v, err = container.PeekPntrBack()
-	test.BasicTest(2, *_v,
-		"Peek pntr back did not return the correct value.", t,
-	)
-	test.BasicTest(nil, err,
-		"Peek pntr back returned an error when it shouldn't have.", t,
-	)
+	test.Eq(2, *_v,t)
+	test.Nil(err,t)
 }
 
 // Tests the PeekBack method functionality of a dynamic Stack.
@@ -169,25 +157,15 @@ func StackInterfacePeekBack(
 ) {
 	container := factory()
 	_, err := container.PeekBack()
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Peek back returned an incorrect error.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	container.PushBack(1)
 	_v, err := container.PeekBack()
-	test.BasicTest(1, _v,
-		"Peek back did not return the correct value.", t,
-	)
-	test.BasicTest(nil, err,
-		"Peek back returned an error when it shouldn't have.", t,
-	)
+	test.Eq(1, _v,t)
+	test.Nil(err,t)
 	container.PushBack(2)
 	_v, err = container.PeekBack()
-	test.BasicTest(2, _v,
-		"Peek back did not return the correct value.", t,
-	)
-	test.BasicTest(nil, err,
-		"Peek back returned an error when it shouldn't have.", t,
-	)
+	test.Eq(2, _v,t)
+	test.Nil(err,t)
 }
 
 // Tests the PopBack method functionality of a dynamic Stack.
@@ -201,17 +179,11 @@ func StackInterfacePopBack(
 	}
 	for i := 3; i >= 0; i-- {
 		f, err := container.PopBack()
-		test.BasicTest(i, f,
-			"Pop front returned the incorrect value.", t,
-		)
-		test.BasicTest(nil, err,
-			"Pop front returned an error when it shoudn't have.", t,
-		)
+		test.Eq(i, f,t)
+		test.Nil(err,t)
 	}
 	_, err := container.PopBack()
-	test.ContainsError(containerTypes.Empty, err,
-		"Pop front returned an incorrect error.", t,
-	)
+	test.ContainsError(containerTypes.Empty, err,t)
 }
 
 // Tests the PushBack method functionality of a dynamic Stack.
@@ -222,24 +194,16 @@ func StackInterfacePushBack(
 	container := factory()
 	for i := 0; i < 4; i++ {
 		container.PushBack(i)
-		test.BasicTest(i+1, container.Length(),
-			"Push back did not add the value correctly.", t,
-		)
+		test.Eq(i+1, container.Length(),t)
 		iterV, _ := container.PeekBack()
-		test.BasicTest(i, iterV,
-			"Push front did not put the value in the correct place.", t,
-		)
+		test.Eq(i, iterV,t)
 	}
 	container=factory()
 	for i := 0; i < 6; i+=2 {
 		container.PushBack(i,i+1)
-		test.BasicTest(i+2, container.Length(),
-			"Push front did not add the value correctly.", t,
-		)
+		test.Eq(i+2, container.Length(),t)
 		iterV, _ := container.PeekBack()
-		test.BasicTest(i+1, iterV,
-			"Push front did not put the value in the correct place.", t,
-		)
+		test.Eq(i+1, iterV,t)
 	}
 }
 
@@ -251,23 +215,15 @@ func StackInterfaceForcePushBack(
 	container := factory()
 	for i := 0; i < 4; i++ {
 		container.ForcePushBack(i)
-		test.BasicTest(i+1, container.Length(),
-			"Push back did not add the value correctly.", t,
-		)
+		test.Eq(i+1, container.Length(),t)
 		iterV, _ := container.PeekBack()
-		test.BasicTest(i, iterV,
-			"Push front did not put the value in the correct place.", t,
-		)
+		test.Eq(i, iterV,t)
 	}
 	container=factory()
 	for i := 0; i < 6; i+=2 {
 		container.ForcePushBack(i,i+1)
-		test.BasicTest(i+2, container.Length(),
-			"Push front did not add the value correctly.", t,
-		)
+		test.Eq(i+2, container.Length(),t)
 		iterV, _ := container.PeekBack()
-		test.BasicTest(i+1, iterV,
-			"Push front did not put the value in the correct place.", t,
-		)
+		test.Eq(i+1, iterV,t)
 	}
 }

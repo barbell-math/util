@@ -25,13 +25,9 @@ func TestHashSetEquality(t *testing.T) {
     s1.AppendUnique(0,1,2,3,4)
     s2,_:=NewHashSet[int,widgets.BuiltinInt](0)
     s2.AppendUnique(0,1,2,3,4)
-    test.BasicTest(true,s1.Eq(&s1,&s2),
-        "Hash sets did not return eq with the same set of values.",t,
-    )
+    test.True(s1.Eq(&s1,&s2),t)
     s2.AppendUnique(5)
-    test.BasicTest(false,s1.Eq(&s1,&s2),
-        "Hash sets did not return eq with different sets of values.",t,
-    )
+    test.False(s1.Eq(&s1,&s2),t)
 }
 
 func TestHashSetLt(t *testing.T) {
@@ -43,7 +39,7 @@ func TestHashSetLt(t *testing.T) {
             s2.AppendUnique(0,1,2,3,4)
             s1.Lt(&s1,&s2)
         },
-        "Hash set did not panic when calling Lt.",t,
+        t,
     ) 
 }
 
@@ -52,19 +48,15 @@ func TestHashSetHash(t *testing.T) {
     s1.AppendUnique(0,1,2,3,4)
     s2,_:=NewHashSet[int,widgets.BuiltinInt](0)
     s2.AppendUnique(0,1,2,3,4)
-    test.BasicTest(s1.Hash(&s1),s2.Hash(&s2),
-        "Hashes were not the same with the same set of values.",t,
-    )
+    test.Eq(s1.Hash(&s1),s2.Hash(&s2),t)
     s2.AppendUnique(5)
-    test.BasicTest(false,s1.Hash(&s1)==s2.Hash(&s2),
-        "Hashes were not different with different sets of values.",t,
-    )
+    test.False(s1.Hash(&s1)==s2.Hash(&s2),t)
     for i:=5; i<100; i++ {
         s2.AppendUnique(i*100)
     }
     h:=s1.Hash(&s1)
     for i:=0; i<100; i++ {
-	test.BasicTest(h,s1.Hash(&s1),"The hash value changed!",t)
+	test.Eq(h,s1.Hash(&s1),t)
     }
 }
 
@@ -72,7 +64,5 @@ func TestHashSetZero(t *testing.T) {
     s1,_:=NewHashSet[int,widgets.BuiltinInt](0)
     s1.AppendUnique(0,1,2,3,4)
     s1.Zero(&s1)
-    test.BasicTest(0,s1.Length(),
-        "The hash set was not cleared properly.",t,
-    )
+    test.Eq(0,s1.Length(),t)
 }

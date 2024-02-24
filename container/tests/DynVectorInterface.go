@@ -166,7 +166,7 @@ func VectorInterfaceStaticCapacityInterface[V any](
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
-		"Code did not panic when casting a dynamic vector to a static vector.", t,
+		t,
 	)
 }
 
@@ -177,29 +177,19 @@ func VectorInterfaceGet(
 ) {
 	container := factory()
 	_, err := container.Get(0)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Get did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	for i := 0; i < 5; i++ {
 		container.Append(i)
 	}
 	for i := 0; i < 5; i++ {
 		_v, err := container.Get(i)
-		test.BasicTest(i, _v,
-			"Get did not return the correct value.", t,
-		)
-		test.BasicTest(nil, err,
-			"Get returned an error when it shouldn't have.", t,
-		)
+		test.Eq(i, _v,t)
+		test.Eq(nil, err,t)
 	}
 	_, err = container.Get(-1)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Get did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	_, err = container.Get(6)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Get did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
 
 // Tests the GetPntr method functionality of a dynamic vector.
@@ -209,29 +199,19 @@ func VectorInterfaceGetPntr(
 ) {
 	container := factory()
 	_, err := container.GetPntr(0)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Get did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	for i := 0; i < 5; i++ {
 		container.Append(i)
 	}
 	for i := 0; i < 5; i++ {
 		_v, err := container.GetPntr(i)
-		test.BasicTest(i, *_v,
-			"Get did not return the correct value.", t,
-		)
-		test.BasicTest(nil, err,
-			"Get returned an error when it shouldn't have.", t,
-		)
+		test.Eq(i, *_v,t)
+		test.Eq(nil, err,t)
 	}
 	_, err = container.GetPntr(-1)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Get pntr did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	_, err = container.GetPntr(6)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Get pntr did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
 
 
@@ -244,16 +224,10 @@ func vectorContainsHelper(
 		v.Append(i)
 	}
 	for i := 0; i < l; i++ {
-		test.BasicTest(true, v.Contains(i),
-			"Contains returned a false negative.", t,
-		)
+		test.True(v.Contains(i),t)
 	}
-	test.BasicTest(false, v.Contains(-1),
-		"Contains returned a false positive.", t,
-	)
-	test.BasicTest(false, v.Contains(l),
-		"Contains returned a false positive.", t,
-	)
+	test.False(v.Contains(-1),t)
+	test.False(v.Contains(l),t)
 }
 
 // Tests the Contains method functionality of a dynamic vector.
@@ -276,17 +250,11 @@ func vectorContainsPntrHelper(
 		v.Append(i)
 	}
 	for i := 0; i < l; i++ {
-		test.BasicTest(true, v.ContainsPntr(&i),
-			"Contains returned a false negative.", t,
-		)
+		test.True(v.ContainsPntr(&i),t)
 	}
 	tmp:=-1
-	test.BasicTest(false, v.ContainsPntr(&tmp),
-		"Contains returned a false positive.", t,
-	)
-	test.BasicTest(false, v.ContainsPntr(&l),
-		"Contains returned a false positive.", t,
-	)
+	test.False(v.ContainsPntr(&tmp),t)
+	test.False(v.ContainsPntr(&l),t)
 }
 
 // Tests the ContainsPntr method functionality of a dynamic vector.
@@ -310,21 +278,13 @@ func vectorKeyOfHelper(
 	}
 	for i := 0; i < l; i++ {
 		k, found := v.KeyOf(i)
-		test.BasicTest(i, k,
-			"KeyOf did not return the correct index.", t,
-		)
-		test.BasicTest(true, found,
-			"KeyOf returned a false negative.", t,
-		)
+		test.Eq(i, k,t)
+		test.True(found,t)
 	}
 	_, found := v.KeyOf(-1)
-	test.BasicTest(false, found,
-		"KeyOf returned a false positive.", t,
-	)
+	test.False(found,t)
 	_, found = v.KeyOf(-1)
-	test.BasicTest(false, v.Contains(l),
-		"KeyOf returned a false positive.", t,
-	)
+	test.False(v.Contains(l),t)
 }
 
 // Tests the KeyOf method functionality of a dynamic vector.
@@ -345,32 +305,22 @@ func VectorInterfaceSet(
 ) {
 	container := factory()
 	err := container.Set(basic.Pair[int, int]{0,6})
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Set did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	for i := 0; i < 5; i++ {
 		container.Append(i)
 	}
 	for i := 0; i < 5; i++ {
 		err := container.Set(basic.Pair[int,int]{i, i+1})
-		test.BasicTest(nil, err,
-			"Get returned an error when it shouldn't have.", t,
-		)
+		test.Nil(err,t)
 	}
 	for i := 0; i < 5; i++ {
 		iterV, _ := container.Get(i)
-		test.BasicTest(i+1, iterV,
-			"Set did not set the value correctly.", t,
-		)
+		test.Eq(i+1, iterV,t)
 	}
 	err = container.Set(basic.Pair[int,int]{-1, 6})
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Set did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 	err = container.Set(basic.Pair[int,int]{6, 6})
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Set did not return the correct error with invalid index.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
 
 func vectorSetSequentialHelper(
@@ -385,19 +335,13 @@ func vectorSetSequentialHelper(
 		container.Append(i)
 	}
 	err:=container.SetSequential(idx,vals...)
-	test.BasicTest(nil,err,
-		"Set sequential returned an error when it should not have.",t,
-	)
+	test.Nil(err,t)
 	for i:=0; i<container.Length(); i++ {
 		iterV,_:=container.Get(i)
 		if i>=idx && i<idx+len(vals) {
-			test.BasicTest(vals[i-idx],iterV,
-				"SetSequential did not set the correct values.",t,
-			)
+			test.Eq(vals[i-idx],iterV,t)
 		} else {
-			test.BasicTest(i,iterV,
-				"SetSequential changed values it should not have.",t,
-			)
+			test.Eq(i,iterV,t)
 		}
 	}
 }
@@ -428,16 +372,12 @@ func VectorInterfaceAppend(
 	}
 	for i := 0; i < 5; i++ {
 		iterV, _ := container.Get(i)
-		test.BasicTest(i, iterV,
-			"Append did not add the value correctly.", t,
-		)
+		test.Eq(i, iterV,t)
 	}
 	container.Append(5, 6, 7)
 	for i := 0; i < 8; i++ {
 		iterV, _ := container.Get(i)
-		test.BasicTest(i, iterV,
-			"Append did not add the value correctly.", t,
-		)
+		test.Eq(i, iterV,t)
 	}
 }
 
@@ -460,24 +400,16 @@ func vectorInsertHelper(
 		container.Append(i)
 	}
 	err:=container.Insert(vals...)
-	test.BasicTest(nil,err,
-		"Inserting returned an error when it should not have.",t,
-	)
-	test.BasicTest(l+len(vals),container.Length(),
-		"The container did not have the correct number of values.",t,
-	)
+	test.Nil(err,t)
+	test.Eq(l+len(vals),container.Length(),t)
 	offset:=0
 	for i:=0; i<container.Length(); i++ {
 		iterV,_:=container.Get(i)
 		if v,ok:=indexContained(i); ok {
-			test.BasicTest(v.B,iterV,
-				"Insert did not put the value at the correct index.",t,
-			)
+			test.Eq(v.B,iterV,t)
 			offset++
 		} else {
-			test.BasicTest(i-offset,iterV,
-				"Insert moved existing values incorrectly.",t,
-			)
+			test.Eq(i-offset,iterV,t)
 		}
 	}
 }
@@ -488,9 +420,7 @@ func VectorInterfaceInsert(
 ){
 	container:=factory()
 	err:=container.Insert(basic.Pair[int, int]{1,0})
-	test.ContainsError(containerTypes.KeyError,err,
-		"Inserting past the end of the vector did not result in an error.",t,
-	)
+	test.ContainsError(containerTypes.KeyError,err,t)
 	for i:=0; i<20; i++ {
 		vals:=[]basic.Pair[int,int]{}
 		vectorInsertHelper(factory,vals,i,t)
@@ -520,12 +450,8 @@ func vectorInsertSequentialHelper(
 		container.Append(i)
 	}
 	err := container.InsertSequential(idx, l-1)
-	test.BasicTest(nil, err,
-		"InsertSequential returned an error when it shouldn't have.", t,
-	)
-	test.BasicTest(l, container.Length(),
-		"InsertSequential did not increment the number of elements.", t,
-	)
+	test.Nil(err,t)
+	test.Eq(l, container.Length(),t)
 	for i := 0; i < container.Length(); i++ {
 		var exp int
 		v, _ := container.Get(i)
@@ -536,9 +462,7 @@ func vectorInsertSequentialHelper(
 		} else {
 			exp = i - 1
 		}
-		test.BasicTest(exp, v,
-			"InsertSequential did not put the value in the correct place.", t,
-		)
+		test.Eq(exp, v,t)
 	}
 }
 
@@ -556,9 +480,7 @@ func VectorInterfaceInsertSequential(
 	}
 	for i := 0; i < 5; i++ {
 		iterV, _ := container.Get(i)
-		test.BasicTest(i, iterV,
-			"InsertSequential did not put the values in the correct place.", t,
-		)
+		test.Eq(i, iterV,t)
 	}
 	container = factory()
 	container.InsertSequential(0,0,1,2)
@@ -566,9 +488,7 @@ func VectorInterfaceInsertSequential(
 	container.InsertSequential(3,3)
 	for i := 0; i < 6; i++ {
 		iterV, _ := container.Get(i)
-		test.BasicTest(i, iterV,
-			"InsertSequential did not put the values in the correct place.", t,
-		)
+		test.Eq(i, iterV,t)
 	}
 	for i := 0; i < 5; i++ {
 		vectorInsertSequentialHelper(factory, i, 5, t)
@@ -606,20 +526,14 @@ func vectorPopHelper(
 			exp.Append(i)
 		}
 	}
-	test.BasicTest(exp.Length(), container.Length(),
-		"Pop did not remove value from the list correctly.", t,
-	)
-	test.BasicTest(cntr, n,
-		"Pop did not pop the correct number of values.", t,
-	)
+	test.Eq(exp.Length(), container.Length(),t)
+	test.Eq(cntr, n,t)
 	// fmt.Println("EXP:    ",exp)
 	// fmt.Println("Final:  ",v)
 	for i := 0; i < container.Length(); i++ {
 		iterV, _ := container.Get(i)
 		expIterV, _ := exp.Get(i)
-		test.BasicTest(expIterV, iterV,
-			"Pop did not shift the values correctly.", t,
-		)
+		test.Eq(expIterV, iterV,t)
 	}
 }
 
@@ -646,16 +560,14 @@ func VectorInterfaceDelete(
 	}
 	for i := container.Length() - 1; i >= 0; i-- {
 		container.Delete(i)
-		test.BasicTest(i, container.Length(), "Delete removed to many values.", t)
+		test.Eq(i, container.Length(), t)
 		for j := 0; j < i; j++ {
 			iterV, _ := container.Get(j)
-			test.BasicTest(j, iterV, "Delete changed the wrong value.", t)
+			test.Eq(j, iterV, t)
 		}
 	}
 	err := container.Delete(0)
-	test.ContainsError(customerr.ValOutsideRange, err,
-		"Delete returned an incorrect error.", t,
-	)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
 
 // Tests the Clear method functionality of a dynamic vector.
@@ -668,8 +580,8 @@ func VectorInterfaceClear(
 		container.Append(i)
 	}
 	container.Clear()
-	test.BasicTest(0, container.Length(), "Clear did not reset the underlying vector.", t)
-	test.BasicTest(0, container.Capacity(), "Clear did not reset the underlying vector.", t)
+	test.Eq(0, container.Length(), t)
+	test.Eq(0, container.Capacity(), t)
 }
 
 func testVectorValsHelper(
@@ -684,12 +596,10 @@ func testVectorValsHelper(
     cnt:=0
     container.Vals().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
         cnt++
-        test.BasicTest(index,val,"Element was skipped while iterating.",t);
+        test.Eq(index,val,t);
         return iter.Continue,nil;
     });
-    test.BasicTest(l,cnt,
-        "All the elements were not iterated over.",t,
-    )
+    test.Eq(l,cnt,t)
 }
 func TestVectorVals(
 	factory func() dynamicContainers.Vector[int],
@@ -713,17 +623,15 @@ func testVectorPntrValsHelper(
     cnt:=0
     container.ValPntrs().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
         cnt++
-        test.BasicTest(index,*val,"Element was skipped while iterating.",t);
+        test.Eq(index,*val,t);
         *val=100;
         return iter.Continue,nil;
     });
     container.Vals().ForEach(func(index int, val int) (iter.IteratorFeedback, error) {
-        test.BasicTest(100,val,"Element was not updated while iterating.",t);
+        test.Eq(100,val,t);
         return iter.Continue,nil;
     });
-    test.BasicTest(l,cnt,
-        "All the elements were not iterated over.",t,
-    )
+    test.Eq(l,cnt,t)
 }
 func TestVectorValPntrs(
 	factory func() dynamicContainers.Vector[int],
@@ -737,7 +645,7 @@ func TestVectorValPntrs(
 	} else {
 		test.Panics(
 			func() { container.ValPntrs() },
-			"Val pointers did not panic when is addressable is false.",t,
+			t,
 		)
 	}
 }
@@ -754,12 +662,10 @@ func testVectorKeysHelper(
     cnt:=0
     container.Keys().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
         cnt++
-        test.BasicTest(index,val,"Keys were skipped while iterating.",t);
+        test.Eq(index,val,t);
         return iter.Continue,nil;
     });
-    test.BasicTest(l,cnt,
-        "All the keys were not iterated over.",t,
-    )
+    test.Eq(l,cnt,t)
 }
 func TestVectorKeys(
 	factory func() dynamicContainers.Vector[int],
@@ -780,58 +686,30 @@ func VectorInterfaceKeyedEq(
 	v.Append(1, 2, 3)
 	v2 := factory()
 	v2.Append(1, 2, 3)
-	test.BasicTest(true, v.KeyedEq(v2), 
-		"KeyedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.KeyedEq(v), 
-		"KeyedEq returned a false negative.", t,
-	)
+	test.True(v.KeyedEq(v2),t)
+	test.True(v2.KeyedEq(v),t)
 	v.Pop(3,1)
-	test.BasicTest(false, v.KeyedEq(v2), 
-		"KeyedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.KeyedEq(v), 
-		"KeyedEq returned a false positive.", t,
-	)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
 	v.Append(3)
 	v2 = factory()
 	v2.Append(3, 1, 2)
-	test.BasicTest(false, v.KeyedEq(v2), 
-		"KeyedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.KeyedEq(v), 
-		"KeyedEq returned a false positive.", t,
-	)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
 	v.Pop(3,1)
-	test.BasicTest(false, v.KeyedEq(v2), 
-		"KeyedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.KeyedEq(v), 
-		"KeyedEq returned a false positive.", t,
-	)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
 	v = factory()
 	v.Append(0)
 	v2 = factory()
 	v2.Append(0)
-	test.BasicTest(true, v.KeyedEq(v2), 
-		"KeyedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.KeyedEq(v), 
-		"KeyedEq returned a false negative.", t,
-	)
+	test.True(v.KeyedEq(v2), t)
+	test.True(v2.KeyedEq(v), t)
 	v.Pop(0,1)
-	test.BasicTest(false, v.KeyedEq(v2), 
-		"KeyedEq returned a false positive.", t,
-	)
-	test.BasicTest(false, v2.KeyedEq(v), 
-		"KeyedEq returned a false positive.", t,
-	)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
 	v = factory()
 	v2 = factory()
-	test.BasicTest(true, v.KeyedEq(v2), 
-		"KeyedEq returned a false negative.", t,
-	)
-	test.BasicTest(true, v2.KeyedEq(v), 
-		"KeyedEq returned a false negative.", t,
-	)
+	test.True(v.KeyedEq(v2), t)
+	test.True(v2.KeyedEq(v), t)
 }
