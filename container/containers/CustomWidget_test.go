@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/algo/hash"
+	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/test"
 )
 
@@ -53,4 +54,9 @@ func TestCustomWidgetInVector(t *testing.T){
     test.BasicTest(hash.Hash(9),v[0].Hash(&v[1]),
         "The correct hash function was not called.",t,
     )
+}
+
+func TestCustomWidgetPntr(t *testing.T) {
+    v:=make(Vector[*customWidget,widgets.Pntr[customWidget,*customWidget]],0)
+    v2:=make(Vector[*string,widgets.Pntr[string,*widgets.BuiltinString]],0)
 }

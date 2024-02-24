@@ -157,6 +157,10 @@ func TestVectorOfVectorsHash(t *testing.T){
     test.BasicTest(false,v1.Hash(&v1)==v2.Hash(&v2),
 	"The widget hash method did not return different values for different vectors.",t,
     )
+    h:=v1.Hash(&v1)
+    for i:=0; i<100; i++ {
+	test.BasicTest(h,v1.Hash(&v1),"The hash value changed!",t)
+    }
     v3:=Vector[int,widgets.BuiltinInt]{500,600,700}
     v4:=Vector[int,widgets.BuiltinInt]{700,600,500}
     test.BasicTest(false,v3.Hash(&v3)==v4.Hash(&v4),

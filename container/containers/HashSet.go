@@ -634,8 +634,9 @@ func (h *SyncedHashSet[T, U])Eq(
     return l.UnorderedEq(r)
 }
 
+// Panics, sets cannot be compared for order.
 func (h *HashSet[T, U])Lt(l *HashSet[T,U], r *HashSet[T,U]) bool {
-    return false
+    panic("Sets cannot be compared relative to each other.")
 }
 
 // A function that returns a hash of a hash set. To do this all of the individual
@@ -645,11 +646,9 @@ func (h *HashSet[T, U])Lt(l *HashSet[T,U], r *HashSet[T,U]) bool {
 func (h *HashSet[T, U])Hash(other *HashSet[T,U]) hash.Hash {
     var rv hash.Hash=0
     w:=widgets.NewWidget[T,U]()
-    if len(other.internalHashSetImpl)>0 {
-        rv=hash.Hash(0)
-        for _,v:=range(other.internalHashSetImpl) {
-            rv=rv.Combine(w.Hash(&v))
-        }
+    rv=hash.Hash(0)
+    for _,v:=range(other.internalHashSetImpl) {
+        rv=rv.Combine(w.Hash(&v))
     }
     return rv
 }
