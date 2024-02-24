@@ -21,12 +21,10 @@ func TestMapElemsStopEarly(t *testing.T){
             cntr+=1
             return val.GetA()=="test2",nil
         })
-        test.BasicTest(true,found,"ation did not find the value.",t)
+        test.True(found,t)
         caseHit=(caseHit || cntr<3)
     }
-    test.BasicTest(true,caseHit,
-        "The case being tested was not hit. Run tests again.",t,
-    )
+    test.True(caseHit,t)
 }
 
 func mapElemsHelper[K comparable, V any](m map[K]V, t *testing.T){
@@ -34,23 +32,13 @@ func mapElemsHelper[K comparable, V any](m map[K]V, t *testing.T){
     mIter:=MapElems[K,V](m,f);
     for i:=0; i<len(m); i++ {
         mV,mErr,mBool:=mIter(Continue);
-        test.BasicTest(mV.GetB(),m[mV.GetA()],
-            "An incorrect pair was returned while ating over the map.",t,
-        )
-        test.BasicTest(nil,mErr,
-            "MapElems ation produced an error when it shouldn't have.",t,
-        )
-        test.BasicTest(true,mBool,
-            "MapElems ation stoped when it should not have.",t,
-        )
+        test.Eq(mV.GetB(),m[mV.GetA()],t)
+        test.Nil(mErr,t)
+        test.True(mBool,t)
     }
     _,mErr,mBool:=mIter(Continue)
-    test.BasicTest(nil,mErr,
-        "MapElems ation produced an error when it shouldn't have.",t,
-    )
-    test.BasicTest(false,mBool,
-        "MapElems ations did not stop when it should have.",t,
-    )
+    test.Nil(mErr,t)
+    test.False(mBool,t)
 }
 func TestMapElems(t *testing.T){
     mapElemsHelper(map[string]int{},t);
@@ -61,23 +49,17 @@ func TestMapElems(t *testing.T){
 
 func TestMapElemsConsume(t *testing.T){
     f:=func() basic.Pair[string,int] { return basic.Pair[string,int]{} }
-    test.BasicTest(nil,MapElems[string,int](map[string]int{},f).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
-    )
-    test.BasicTest(
-        nil,
-        MapElems[string,int](map[string]int{"test": 1},f).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
-    )
-    test.BasicTest(
-        nil,
+    test.Nil(MapElems[string,int](map[string]int{},f).Consume(),t)
+    test.Nil(MapElems[string,int](map[string]int{"test": 1},f).Consume(),t)
+    test.Nil(
         MapElems[string,int](map[string]int{"test": 1, "test2": 2},f).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
+        t,
     )
-    test.BasicTest(
-        nil,
-        MapElems[string,int](map[string]int{"test": 1, "test2": 2, "test3": 3},f).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
+    test.Nil(
+        MapElems[string,int](
+            map[string]int{"test": 1, "test2": 2, "test3": 3},f,
+        ).Consume(),
+        t,
     )
 }
 
@@ -90,12 +72,10 @@ func TestMapKeysStopEarly(t *testing.T){
             cntr+=1
             return val=="test2",nil
         })
-        test.BasicTest(true,found,"ation did not find the value.",t)
+        test.True(found,t)
         caseHit=(caseHit || cntr<3)
     }
-    test.BasicTest(true,caseHit,
-        "The case being tested was not hit. Run tests again.",t,
-    )
+    test.True(caseHit,t)
 }
 
 func mapKeysHelper[K comparable, V any](m map[K]V, t *testing.T){
@@ -103,23 +83,13 @@ func mapKeysHelper[K comparable, V any](m map[K]V, t *testing.T){
     for i:=0; i<len(m); i++ {
         mV,mErr,mBool:=mIter(Continue);
         _,ok:=m[mV]
-        test.BasicTest(true,ok,
-            "An incorrect key was returned while ating over the map.",t,
-        )
-        test.BasicTest(nil,mErr,
-            "MapElems ation produced an error when it shouldn't have.",t,
-        )
-        test.BasicTest(true,mBool,
-            "MapElems ation stoped when it should not have.",t,
-        )
+        test.True(ok,t)
+        test.Nil(mErr,t)
+        test.True(mBool,t)
     }
     _,mErr,mBool:=mIter(Continue)
-    test.BasicTest(nil,mErr,
-        "MapElems ation produced an error when it shouldn't have.",t,
-    )
-    test.BasicTest(false,mBool,
-        "MapElems ations did not stop when it should have.",t,
-    )
+    test.Nil(mErr,t)
+    test.False(mBool,t)
 }
 func TestMapKeys(t *testing.T){
     mapKeysHelper(map[string]int{},t);
@@ -129,23 +99,17 @@ func TestMapKeys(t *testing.T){
 }
 
 func TestMapKeysConsume(t *testing.T){
-    test.BasicTest(nil,MapKeys[string,int](map[string]int{}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
-    )
-    test.BasicTest(
-        nil,
-        MapKeys[string,int](map[string]int{"test": 1}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
-    )
-    test.BasicTest(
-        nil,
+    test.Nil(MapKeys[string,int](map[string]int{}).Consume(),t)
+    test.Nil(MapKeys[string,int](map[string]int{"test": 1}).Consume(),t)
+    test.Nil(
         MapKeys[string,int](map[string]int{"test": 1, "test2": 2}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
+        t,
     )
-    test.BasicTest(
-        nil,
-        MapKeys[string,int](map[string]int{"test": 1, "test2": 2, "test3": 3}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
+    test.Nil(
+        MapKeys[string,int](
+            map[string]int{"test": 1, "test2": 2, "test3": 3},
+        ).Consume(),
+        t,
     )
 }
 
@@ -158,12 +122,10 @@ func TestMapValsStopEarly(t *testing.T){
             cntr+=1
             return val==2,nil
         })
-        test.BasicTest(true,found,"ation did not find the value.",t)
+        test.True(found,t)
         caseHit=(caseHit || cntr<3)
     }
-    test.BasicTest(true,caseHit,
-        "The case being tested was not hit. Run tests again.",t,
-    )
+    test.True(caseHit,t)
 }
 
 func mapValsHelper[K comparable, V comparable](m map[K]V, t *testing.T){
@@ -174,23 +136,13 @@ func mapValsHelper[K comparable, V comparable](m map[K]V, t *testing.T){
         for _,v:=range(m) {
             found=(found || v==mV)
         }
-        test.BasicTest(true,found,
-            "An incorrect value was returned while ating over the map.",t,
-        )
-        test.BasicTest(nil,mErr,
-            "MapElems ation produced an error when it shouldn't have.",t,
-        )
-        test.BasicTest(true,mBool,
-            "MapElems ation stoped when it should not have.",t,
-        )
+        test.True(found,t)
+        test.Nil(mErr,t)
+        test.True(mBool,t)
     }
     _,mErr,mBool:=mIter(Continue)
-    test.BasicTest(nil,mErr,
-        "MapElems ation produced an error when it shouldn't have.",t,
-    )
-    test.BasicTest(false,mBool,
-        "MapElems ations did not stop when it should have.",t,
-    )
+    test.Nil(mErr,t)
+    test.False(mBool,t)
 }
 func TestMapVals(t *testing.T){
     mapValsHelper(map[string]int{},t);
@@ -200,23 +152,17 @@ func TestMapVals(t *testing.T){
 }
 
 func TestMapValsConsume(t *testing.T){
-    test.BasicTest(nil,MapVals[string,int](map[string]int{}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
-    )
-    test.BasicTest(
-        nil,
-        MapVals[string,int](map[string]int{"test": 1}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
-    )
-    test.BasicTest(
-        nil,
+    test.Nil(MapVals[string,int](map[string]int{}).Consume(),t)
+    test.Nil(MapVals[string,int](map[string]int{"test": 1}).Consume(),t)
+    test.Nil(
         MapVals[string,int](map[string]int{"test": 1, "test2": 2}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
+        t,
     )
-    test.BasicTest(
-        nil,
-        MapVals[string,int](map[string]int{"test": 1, "test2": 2, "test3": 3}).Consume(),
-        "Consuming the val iterator returned an error when it should not have.",t,
+    test.Nil(
+        MapVals[string,int](
+            map[string]int{"test": 1, "test2": 2, "test3": 3},
+        ).Consume(),
+        t,
     )
 }
 
@@ -229,6 +175,6 @@ func TestMapElemsChanClosing(t *testing.T) {
                 m["four"]=i
             }
         },
-        "Writing to the map after iteration finished paniced. (Means channel did not immediately close.)",t,
+        t,
     )
 }

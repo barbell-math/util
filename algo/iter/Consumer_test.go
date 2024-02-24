@@ -18,10 +18,8 @@ func TestStop(t *testing.T) {
 			}
 			return Continue, val, nil
 		}).Stop()
-	test.BasicTest(1, cntr, "Stop did not stop iteration correctly.", t)
-	test.BasicTest(newErr, err,
-		"Stop did not call parent iterators with break command.", t,
-	)
+	test.Eq(1, cntr, t)
+	test.Eq(newErr, err,t)
 }
 
 func forEachIterHelper[T any](
@@ -36,10 +34,10 @@ func forEachIterHelper[T any](
 			i++
 			return Continue, nil
 		})
-	test.BasicTest(nil, err, "ForEach returned an error when it shouldn't have.", t)
-	test.BasicTest(len(cpy), len(vals), "ForEach changed size of slice.", t)
+	test.Nil(err, t)
+	test.Eq(len(cpy), len(vals), t)
 	for i, v := range cpy {
-		test.BasicTest(op(i, v), vals[i], "ForEach did not mutate elements properly.", t)
+		test.Eq(op(i, v), vals[i], t)
 	}
 }
 func TestForEach(t *testing.T) {
@@ -67,10 +65,8 @@ func TestForEachEarlyStopBool(t *testing.T) {
 			}
 			return Continue, nil
 		})
-	test.BasicTest(4, cntr, "ForEach did not stop after signaling to stop.", t)
-	test.BasicTest(nil, err,
-		"ForEach returned an error when it was not supposed to.", t,
-	)
+	test.Eq(4, cntr, t)
+	test.Nil(err,t)
 }
 
 func TestForEachEarlyStopErr(t *testing.T) {
@@ -83,7 +79,7 @@ func TestForEachEarlyStopErr(t *testing.T) {
 			}
 			return Continue, nil
 		})
-	test.BasicTest(4, cntr, "ForEach did not stop after signaling to stop.", t)
+	test.Eq(4, cntr, t)
 	if err == nil {
 		fmt.Println(
 			"ForEach did not return an error when it was supposed to.", t,
