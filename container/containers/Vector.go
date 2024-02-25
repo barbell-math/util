@@ -115,7 +115,6 @@ func (h *Vector[T, U])IsSynced() bool { return false }
 // Returns true, a synced vector is synced. :O
 func (h *SyncedVector[T, U])IsSynced() bool { return true }
 
-
 // Description: Returns the length of the vector.
 //
 // Time Complexity: O(1)
@@ -454,7 +453,7 @@ func (v *Vector[T, U])appendUniqueImpl(val *T) error {
 // Description: Insert will insert the supplied values into the vector. The 
 // values will be inserted in the order that they are given. 
 //
-// Time Complexity: O(n^2)
+// Time Complexity: O(n*m), where m=len(vals)
 func (v *Vector[T, U])Insert(vals ...basic.Pair[int,T]) error {
     return v.insertImpl(vals)
 }
@@ -466,7 +465,7 @@ func (v *Vector[T, U])Insert(vals ...basic.Pair[int,T]) error {
 //
 // Lock Type: Write
 //
-// Time Complexity: O(n^2)
+// Time Complexity: O(n*m), where m=len(vals)
 func (v *SyncedVector[T, U])Insert(vals ...basic.Pair[int,T]) error {
     v.Lock()
     defer v.Unlock()

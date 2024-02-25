@@ -56,11 +56,11 @@ func NoPanic(action func(), t *testing.T){
 
 func Eq(l any, r any, t *testing.T) {
     if r!=l {
-        _, f, l, _ := runtime.Caller(1)
+        _, f, line, _ := runtime.Caller(1)
         FormatError(
             l,r,
             "The supplied values were not equal but were expected to be.",
-            f,l,t,
+            f,line,t,
         )
     }
 }

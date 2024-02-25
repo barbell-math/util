@@ -69,7 +69,6 @@ func (v *HashSet[T, U])ToSynced() SyncedHashSet[T,U] {
     }
 }
 
-
 // A empty pass through function that performs no action. Needed for the
 // [containerTypes.Comparisons] interface.
 func (h *HashSet[T,U])Lock() { }
@@ -183,17 +182,7 @@ func (h *SyncedHashSet[T, U])Contains(v T) bool {
 //
 // Time Complexity: O(n) (linear search)
 func (h *HashSet[T,U])ContainsPntr(v *T) bool {
-    rv:=false
-    w:=widgets.NewWidget[T,U]()
-    vHash:=w.Hash(v)
-    for i:=0; !rv; i++ {
-        hashPlacement:=vHash+hash.Hash(i)
-        if iterV,foundPlace:=h.internalHashSetImpl[hashPlacement]; foundPlace {
-            rv=w.Eq(v,&iterV)
-        } else {
-            break
-        }
-    }
+    _,rv:=h.getHashPosition(v)
     return rv
 }
 // Description: Places a read lock on the underlying hash set and then calls the 
@@ -206,6 +195,17 @@ func (h *SyncedHashSet[T, U])ContainsPntr(v *T) bool {
     h.RLock()
     defer h.RUnlock()
     return h.HashSet.ContainsPntr(v)
+}
+
+func (h *HashSet[T, U])getHashPosition(v *T) (hash.Hash,bool) {
+    w:=widgets.NewWidget[T,U]()
+    for i:=w.Hash(v); ; i++ {
+        if iterV,found:=h.internalHashSetImpl[i]; found && w.Eq(v,&iterV) {
+            return i,true 
+        } else if !found {
+            return hash.Hash(0),false
+        }
+    }
 }
 
 // Description: AppendUnique will append the supplied values to the hash set if 
@@ -239,15 +239,11 @@ func (h *SyncedHashSet[T, U])AppendUnique(vals ...T) error {
     return nil
 }
 
-// Note - this function assumes the appropriate locks have already been placed
-// on the set.
 func (h *HashSet[T, U])appendOp(v *T) {
     w:=widgets.NewWidget[T,U]()
-    valHash:=w.Hash(v)
-    for j:=0; ; j++ {
-        hashPlacement:=valHash+hash.Hash(j)
-        if iterV,found:=h.internalHashSetImpl[hashPlacement]; !found {
-            h.internalHashSetImpl[hashPlacement]=*v
+    for i:=w.Hash(v); ; i++ {
+        if iterV,found:=h.internalHashSetImpl[i]; !found {
+            h.internalHashSetImpl[i]=*v
             break
         } else if w.Eq(v,&iterV) {
             break
@@ -284,18 +280,27 @@ func (h *SyncedHashSet[T, U])Pop(v T, num int) int {
 
 func (h *HashSet[T, U])popImpl(v *T, num int) int {
     w:=widgets.NewWidget[T,U]()
-    vHash:=w.Hash(v)
-    for i:=0; ; i++ {
-        hashPlacement:=vHash+hash.Hash(i)
-        if iterV,foundPlace:=h.internalHashSetImpl[hashPlacement]; foundPlace {
-            if found:=w.Eq(v,&iterV); found {
-                delete(h.internalHashSetImpl,hashPlacement)    
-                return 1
+    if i,cont:=h.getHashPosition(v); cont {
+        delete(h.internalHashSetImpl,i)
+        curPos:=i
+        for j:=i+1; ; j++ {
+            if iterV,found:=h.internalHashSetImpl[j]; found {
+                // If the hash of iterV is > the curPos then do not move it, it 
+                // is already in the correct position, but continue on this 
+                // collision chain to check for other values that could move.
+                if w.Hash(&iterV)>curPos {
+                    continue
+                }
+                h.internalHashSetImpl[curPos]=h.internalHashSetImpl[j]
+                delete(h.internalHashSetImpl,j)
+                curPos=j 
+            } else {
+                break
             }
-        } else {
-            return 0
         }
+        return 1
     }
+    return 0
 }
 
 // Description: Clears all values from the hash set. Equivalent to making a new 

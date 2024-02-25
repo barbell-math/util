@@ -3,6 +3,7 @@ package tests
 import (
 	"testing"
 
+	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/test"
@@ -77,6 +78,74 @@ func SetInterfaceStaticCapacityInterface[V any](
 		},
 		t,
 	)
+}
+
+func setValsHelper(
+    factory func() dynamicContainers.Set[int],
+    l int, 
+    t *testing.T,
+){
+	container:=factory()
+    for i:=0; i<l; i++ {
+        container.AppendUnique(i);
+    }
+    cnt:=0
+    container.Vals().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+        cnt++
+		test.True(container.Contains(val),t)
+        return iter.Continue,nil;
+    });
+    test.Eq(l,cnt,t)
+}
+// Tests the Vals method functionality of a dynamic set.
+func SetInterfaceVals(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+    setValsHelper(factory,0,t);
+    setValsHelper(factory,1,t);
+    setValsHelper(factory,2,t);
+    setValsHelper(factory,5,t);
+}
+
+func testSetPntrValsHelper(
+	factory func() dynamicContainers.Set[int],
+    l int, 
+    t *testing.T,
+){
+	container:=factory()
+    for i:=0; i<l; i++ {
+        container.AppendUnique(i);
+    }
+    cnt:=0
+    container.ValPntrs().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
+        cnt++
+        test.Eq(index,*val,t);
+        *val=100;
+        return iter.Continue,nil;
+    });
+    container.Vals().ForEach(func(index int, val int) (iter.IteratorFeedback, error) {
+        test.Eq(100,val,t);
+        return iter.Continue,nil;
+    });
+    test.Eq(l,cnt,t)
+}
+// Tests the ValPntrs method functionality of a dynamic set.
+func SetInterfaceValPntrs(
+	factory func() dynamicContainers.Set[int],
+	t *testing.T,
+){
+	container:=factory()
+	if container.IsAddressable() {
+		testSetPntrValsHelper(factory,0,t);
+    	testSetPntrValsHelper(factory,1,t);
+    	testSetPntrValsHelper(factory,2,t);
+	} else {
+		test.Panics(
+			func() { container.ValPntrs() },
+			t,
+		)
+	}
 }
 
 // Tests the ContainsPntr method functionality of a dynamic set.

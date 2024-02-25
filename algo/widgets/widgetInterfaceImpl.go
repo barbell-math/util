@@ -19,6 +19,22 @@ type Values struct {
 
 var VALS Values
 var REQUIRED_ARGS []string=[]string{"package","type"}
+var VALID_TYPES []string=[]string{
+	"byte",
+	"int",
+	"int8",
+	"int16",
+	"int32",
+	"int64",
+	"uint",
+	"uint8",
+	"uint16",
+	"uint32",
+	"uint64",
+	"float32",
+	"float64",
+	"string",
+}
 
 func main() {
 	setupFlags()
@@ -60,8 +76,8 @@ func main() {
 		"// Provides a hash function for the value that it is wrapping.\n"+
 		generateHashFunction()+
 		"// Zeros the supplied value.\n"+
-		generateZeroFunction(),
-		// generateArithFuncs(),
+		generateZeroFunction()+
+		generateArithFuncs(),
 	)
 	if err!=nil {
 		fmt.Println("ERROR | An error occurred parsing the template.")
@@ -108,6 +124,18 @@ func checkRequiredArgs() {
 		fmt.Println("ERROR | Not all required flags were passed.")
 		fmt.Println("The following flags must be added: ",requiredCopy)
 		flag.PrintDefaults()
+		os.Exit(1)
+	}
+	foundType:=false
+	for _,v:=range(VALID_TYPES) {
+		if foundType=(v==VALS.Type); foundType {
+			break
+		}
+	}
+	if !foundType {
+		fmt.Println("ERROR | The supplied type was not one of the types recognzed by this tool.")
+		fmt.Println("The following types are recognized: ",VALID_TYPES)
+		fmt.Println("The following type was recieved: ",VALS.Type)
 		os.Exit(1)
 	}
 }
@@ -194,5 +222,47 @@ func generateZeroFunction() string {
 				"	panic(\"The supplied type does not have a zeor value.\")\n"+
 				"    return int(-1)\n"+
 			    "}\n\n"
+	}
+}
+
+func generateArithFuncs() string {
+	switch VALS.Type {
+		case "byte": fallthrough
+		case "int": fallthrough
+		case "int8": fallthrough
+		case "int16": fallthrough
+		case "int32": fallthrough
+		case "int64": fallthrough
+		case "uint": fallthrough
+		case "uint8": fallthrough
+		case "uint16": fallthrough
+		case "uint32": fallthrough
+		case "uint64": fallthrough
+		case "float32": fallthrough
+		case "float64":
+			return "func (a Builtin{{ .CapType }})ZeroVal() {{ .Type }} {\n"+
+				"    return {{ .Type }}(0)\n"+
+				"}\n\n"+
+				"func (a Builtin{{ .CapType }})UnitVal() {{ .Type }} {\n"+
+				"    return {{ .Type }}(1)\n"+
+				"}\n\n"+
+				"func (a Builtin{{ .CapType }})Neg(v *{{ .Type }}) {\n"+
+				"    *v=-(*v)\n"+
+				"}\n\n"+
+				"func (a Builtin{{ .CapType }})Add(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n"+
+				"    *res=*l+*r\n"+
+				"}\n\n"+
+				"func (a Builtin{{ .CapType }})Sub(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n"+
+				"    *res=*l-*r\n"+
+				"}\n\n"+
+				"func (a Builtin{{ .CapType }})Mul(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n"+
+				"    *res=*l**r\n"+
+				"}\n\n"+
+				"func (a Builtin{{ .CapType }})Div(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n"+
+				"    *res=*l/ *r\n"+
+				"}\n\n"
+		case "string":
+			return "// A string is not an arithmitic aware widget. Strings are only base widgets.\n\n"
+		default: return ""
 	}
 }

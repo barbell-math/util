@@ -207,22 +207,31 @@ func VectorInterfaceGetPntr(
 	t *testing.T,
 ) {
 	container := factory()
-	_, err := container.GetPntr(0)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
-	for i := 0; i < 5; i++ {
-		container.Append(i)
+	if container.IsAddressable() {
+		_, err := container.GetPntr(0)
+		test.ContainsError(customerr.ValOutsideRange, err,t)
+		for i := 0; i < 5; i++ {
+			container.Append(i)
+		}
+		for i := 0; i < 5; i++ {
+			_v, err := container.GetPntr(i)
+			test.Eq(i, *_v,t)
+			test.Eq(nil, err,t)
+		}
+		_, err = container.GetPntr(-1)
+		test.ContainsError(customerr.ValOutsideRange, err,t)
+		_, err = container.GetPntr(6)
+		test.ContainsError(customerr.ValOutsideRange, err,t)
+	} else {
+		test.Panics(
+			func() {
+				container:=factory()
+				container.GetPntr(1)
+			},
+			t,
+		)
 	}
-	for i := 0; i < 5; i++ {
-		_v, err := container.GetPntr(i)
-		test.Eq(i, *_v,t)
-		test.Eq(nil, err,t)
-	}
-	_, err = container.GetPntr(-1)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
-	_, err = container.GetPntr(6)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
-
 
 func vectorContainsHelper(
 	v dynamicContainers.Vector[int],
@@ -610,7 +619,8 @@ func testVectorValsHelper(
     });
     test.Eq(l,cnt,t)
 }
-func TestVectorVals(
+// Tests the Vals method functionality of a dynamic vector.
+func VectorInterfaceVals(
 	factory func() dynamicContainers.Vector[int],
 	t *testing.T,
 ){
@@ -642,7 +652,8 @@ func testVectorPntrValsHelper(
     });
     test.Eq(l,cnt,t)
 }
-func TestVectorValPntrs(
+// Tests the ValPntrs method functionality of a dynamic vector.
+func VectorInterfaceValPntrs(
 	factory func() dynamicContainers.Vector[int],
 	t *testing.T,
 ){
@@ -676,7 +687,7 @@ func testVectorKeysHelper(
     });
     test.Eq(l,cnt,t)
 }
-func TestVectorKeys(
+func VectorInterfaceKeys(
 	factory func() dynamicContainers.Vector[int],
 	t *testing.T,
 ){

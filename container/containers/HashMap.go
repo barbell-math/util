@@ -3,6 +3,7 @@ package containers
 import (
 	"sync"
 
+	"github.com/barbell-math/util/algo/hash"
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
@@ -10,7 +11,7 @@ import (
 )
 
 type (
-    internalHashMapImpl[K any, V any] map[uint64]basic.Pair[K,V]
+    internalHashMapImpl[K any, V any] map[hash.Hash]basic.Pair[K,V]
 
     // A type to represent a map that dynamically grows as key value pairs are 
     // added. The set will maintain uniqueness and is internally implemented 
@@ -156,20 +157,57 @@ func (m *SyncedHashMap[K, V, KI, VI])ContainsPntr(v *V) bool {
     return false
 }
 
+// Description: Gets the value at the specified key. Returns a 
+// [containerTypes.KeyError] if the key is not found in the hash map.
+//
+// Time Complexity: O(1)
 func (m *HashMap[K, V, KI, VI])Get(k K) (V,error) {
+    w:=widgets.NewWidget[K,KI]()
+    vHash:=w.Hash(&k)
+    for i:=0; ; i++ {
+        hashPlacement:=vHash+hash.Hash(i)
+        if iterV,foundPlace:=m.internalHashMapImpl[hashPlacement]; foundPlace {
+            if w.Eq(&k,&iterV.A) {
+                return iterV.B, nil
+            }
+        } else {
+            break
+        }
+    }
     var tmp V
-    return tmp,nil
+    return tmp,containerTypes.KeyError
 }
+// Description: Places a read lock on the underlying hash map and then gets the 
+// value at the specified key. Exhibits the same behavior as the [HashMap.Get]
+// method. The underlying [HashMap.Get] method is not called to avoid copying 
+// the return value twice, which could be inefficient with a large value for the 
+// T generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
 func (m *SyncedHashMap[K, V, KI, VI])Get(k K) (V,error) {
+    m.RLock()
+    defer m.RUnlock()
+    w:=widgets.NewWidget[K,KI]()
+    vHash:=w.Hash(&k)
+    for i:=0; ; i++ {
+        hashPlacement:=vHash+hash.Hash(i)
+        if iterV,foundPlace:=m.internalHashMapImpl[hashPlacement]; foundPlace {
+            if w.Eq(&k,&iterV.A) {
+                return iterV.B, nil
+            }
+        } else {
+            break
+        }
+    }
     var tmp V
-    return tmp,nil
+    return tmp,containerTypes.KeyError
 }
 
+// Panics, hash maps are not addressable.
 func (m *HashMap[K, V, KI, VI])GetPntr(k K) (*V,error) {
-    return nil,nil
-}
-func (m *SyncedHashMap[K, V, KI, VI])GetPntr(k K) (*V,error) {
-    return nil,nil
+    panic(getNonAddressablePanicText("hash map"))
 }
 
 func (m *HashMap[K, V, KI, VI])KeyOf(v V) (K,bool) {
@@ -188,11 +226,48 @@ func (m *SyncedHashMap[K, V, KI, VI])Set(kvPairs ...basic.Pair[K,V]) error {
     return nil
 }
 
+// Description: Emplace will insert the supplied values into the hash map if 
+// they do not exist and will set they keys value if it already exists in the
+// hash map. The values will be inserted in the order that they are given. 
+//
+// Time Complexity: O(m), where m=len(vals)
 func (m *HashMap[K, V, KI, VI])Emplace(vals ...basic.Pair[K,V]) error {
+    for i:=0; i<len(vals); i++ {
+        m.emplaceImpl(&vals[i])
+    }
     return nil
 }
+// Description: Places a write lock on the underlying hash map and then calls 
+// the underlying hash maps [HashMap.Insert] implementation method. The 
+// [HashMap.Insert] method is not called directly to avoid copying the vals 
+// varargs twice, which could be expensive with a large type for the T generic 
+// or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n*m), where m=len(vals)
 func (m *SyncedHashMap[K, V, KI, VI])Emplace(vals ...basic.Pair[K,V]) error {
+    m.Lock()
+    defer m.Unlock()
+    for i:=0; i<len(vals); i++ {
+        m.emplaceImpl(&vals[i])
+    }
     return nil
+}
+
+func (m *HashMap[K, V, KI, VI])emplaceImpl(v *basic.Pair[K,V]) {
+    w:=widgets.NewWidget[K,KI]()
+    valHash:=w.Hash(&v.A)
+    for j:=0; ; j++ {
+        hashPlacement:=valHash+hash.Hash(j)
+        if iterV,found:=m.internalHashMapImpl[hashPlacement]; !found {
+            m.internalHashMapImpl[hashPlacement]=*v
+            break
+        } else if w.Eq(&v.A,&iterV.A) {
+            m.internalHashMapImpl[hashPlacement]=*v
+            break
+        }
+    }
 }
 
 func (m *HashMap[K, V, KI, VI])Pop(v V, num int) int {

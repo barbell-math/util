@@ -56,16 +56,6 @@ type (
         // guarintees are placed on res, l, and r. They may all be the same 
         // value. The implementation of this interface needs to recognize this.
         Div(res *T, l *T, r *T)
-        // Puts bottom to the power of top and places the results in res. No 
-        // uniqueness guarintees are placed on res, l, and r. They may all be 
-        // the same value. The implementation of this interface needs to 
-        // recognize this.
-        Pow(res *T, bottom *T, top *T)
-        // Computes the modulus of l and r and places the results in res. No 
-        // uniqueness guarintees are placed on res, l, and r. They may all be 
-        // the same value. The implementation of this interface needs to 
-        // recognize this.
-        Mod(res *T, l *T, r *T)
     }
 
     // The base widget implementation that all the containers in the [containers]
@@ -234,16 +224,6 @@ func (w *ArithWidget[T, I])Mul(res *T, l *T, r *T) {
 // supplied as a generic type.
 func (w *ArithWidget[T, I])Div(res *T, l *T, r *T) {
     w.iFace.Div(res,l,r)
-}
-
-// Computes the modulus of the supplied values using the function from the 
-// interface that was supplied as a generic type.
-func (w *ArithWidget[T, I])Mod(res *T, l *T, r *T) {
-    w.iFace.Mod(res,l,r)
-}
-
-func (w *ArithWidget[T, I])Pow(res *T, bottom *T, top *T) {
-    w.iFace.Pow(res,bottom,top)
 }
 
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=byte

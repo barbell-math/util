@@ -7,7 +7,7 @@ import (
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
-	"github.com/barbell-math/util/customerr"
+	// "github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )
 
@@ -146,7 +146,7 @@ func MapInterfaceGet(
 ) {
 	container := factory()
 	_, err := container.Get(0)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
+	test.ContainsError(containerTypes.KeyError, err,t)
 	for i := 0; i < 5; i++ {
 		container.Emplace(basic.Pair[int, int]{i,i})
 	}
@@ -156,43 +156,43 @@ func MapInterfaceGet(
 		test.Nil(err,t)
 	}
 	_, err = container.Get(-1)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
+	test.ContainsError(containerTypes.KeyError, err,t)
 	_, err = container.Get(6)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
+	test.ContainsError(containerTypes.KeyError, err,t)
 }
 
-// // Tests the GetPntr method functionality of a dynamic map.
-// func MapInterfaceGetPntr(
-// 	factory func() dynamicContainers.Map[int,int],
-// 	t *testing.T,
-// ) {
-// 	container := factory()
-// 	_, err := container.GetPntr(0)
-// 	test.ContainsError(customerr.ValOutsideRange, err,
-// 		"Get did not return the correct error with invalid index.", t,
-// 	)
-// 	for i := 0; i < 5; i++ {
-// 		container.Emplace(i,i)
-// 	}
-// 	for i := 0; i < 5; i++ {
-// 		_v, err := container.GetPntr(i)
-// 		test.BasicTest(i, *_v,
-// 			"Get did not return the correct value.", t,
-// 		)
-// 		test.BasicTest(nil, err,
-// 			"Get returned an error when it shouldn't have.", t,
-// 		)
-// 	}
-// 	_, err = container.GetPntr(-1)
-// 	test.ContainsError(customerr.ValOutsideRange, err,
-// 		"Get pntr did not return the correct error with invalid index.", t,
-// 	)
-// 	_, err = container.GetPntr(6)
-// 	test.ContainsError(customerr.ValOutsideRange, err,
-// 		"Get pntr did not return the correct error with invalid index.", t,
-// 	)
-// }
-// 
+// Tests the GetPntr method functionality of a dynamic map.
+func MapInterfaceGetPntr(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	container := factory()
+	if container.IsAddressable() {
+		_, err := container.GetPntr(0)
+		test.ContainsError(containerTypes.KeyError, err,t)
+		for i := 0; i < 5; i++ {
+			container.Emplace(basic.Pair[int, int]{i,i})
+		}
+		for i := 0; i < 5; i++ {
+			_v, err := container.GetPntr(i)
+			test.Eq(i, *_v,t)
+			test.Eq(nil, err,t)
+		}
+		_, err = container.GetPntr(-1)
+		test.ContainsError(containerTypes.KeyError, err,t)
+		_, err = container.GetPntr(6)
+		test.ContainsError(containerTypes.KeyError, err,t)
+	} else {
+		test.Panics(
+			func() {
+				container:=factory()
+				container.GetPntr(1)
+			},
+			t,
+		)
+	}
+}
+
 // func mapContainsHelper(
 // 	v dynamicContainers.Map[int,int],
 // 	l int,
