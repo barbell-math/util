@@ -21,6 +21,7 @@ type WriteVector[V any] interface {
 	containerTypes.Capacity
 	containerTypes.WriteOps[V]
 	containerTypes.WriteKeyedOps[int,V]
+	containerTypes.WriteKeyedSequentialOps[int,V]
 	containerTypes.WriteDynKeyedOps[int,V]
 	containerTypes.DeleteOps[int,V]
 	containerTypes.DeleteKeyedOps[int,V]

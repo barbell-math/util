@@ -66,7 +66,7 @@ func VectorInterfaceWriteOpsInterface[V any](
 }
 
 // Tests that the value supplied by the factory implements the
-// [containerTypes.KeyedWriteOps] interface.
+// [containerTypes.WriteKeyedOps] interface.
 func VectorInterfaceWriteKeyedOpsInterface[V any](
 	factory func() dynamicContainers.Vector[V],
 	t *testing.T,
@@ -75,6 +75,15 @@ func VectorInterfaceWriteKeyedOpsInterface[V any](
 	_ = container
 }
 
+// Tests that the value supplied by the factory implements the
+// [containerTypes.WriteKeyedSequentialOps] interface.
+func VectorInterfaceWriteKeyedSequentialOpsInterface[V any](
+	factory func() dynamicContainers.Vector[V],
+	t *testing.T,
+) {
+	var container containerTypes.WriteKeyedSequentialOps[int, V] = factory()
+	_ = container
+}
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedWriteOps] interface.

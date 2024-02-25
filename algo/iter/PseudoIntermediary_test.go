@@ -80,7 +80,7 @@ func mapIterHelper[T any](elems []T, t *testing.T) {
 	}).Collect()
 	test.Nil(err, t)
 	for i, v := range elems {
-		test.Eq(fmt.Sprintf("%v", v), mapped[i],t)
+		test.Eq(fmt.Sprintf("%v", v), mapped[i], t)
 	}
 }
 func TestMap(t *testing.T) {

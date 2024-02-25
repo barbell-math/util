@@ -61,6 +61,7 @@ func main() {
 		generateHashFunction()+
 		"// Zeros the supplied value.\n"+
 		generateZeroFunction(),
+		// generateArithFuncs(),
 	)
 	if err!=nil {
 		fmt.Println("ERROR | An error occurred parsing the template.")

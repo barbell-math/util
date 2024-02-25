@@ -15,11 +15,11 @@ func valElemIterHelper[T any](val T, err error, r int, t *testing.T) {
 		if i < r {
 			test.Eq(val, vIter, t)
 			test.Eq(err, eIter, t)
-			test.True(contIter,t)
+			test.True(contIter, t)
 		} else {
-			test.Eq(tmp, vIter,  t)
+			test.Eq(tmp, vIter, t)
 			test.Nil(eIter, t)
-			test.False(contIter,t)
+			test.False(contIter, t)
 		}
 	}
 }
@@ -32,61 +32,61 @@ func TestValElem(t *testing.T) {
 	valElemIterHelper(2, fmt.Errorf("NEW ERROR"), 5, t)
 }
 
-func TestRange(t *testing.T){
-	res,err:=Range[int](0,0,0).Collect()
-	test.SlicesMatch[int]([]int{},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](0,0,1).Collect()
-	test.SlicesMatch[int]([]int{},res,t)
-	test.Nil(err,t)
+func TestRange(t *testing.T) {
+	res, err := Range[int](0, 0, 0).Collect()
+	test.SlicesMatch[int]([]int{}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](0, 0, 1).Collect()
+	test.SlicesMatch[int]([]int{}, res, t)
+	test.Nil(err, t)
 
-	res,err=Range[int](0,1,1).Collect()
-	test.SlicesMatch[int]([]int{0},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](0,2,1).Collect()
-	test.SlicesMatch[int]([]int{0,1},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](0,5,1).Collect()
-	test.SlicesMatch[int]([]int{0,1,2,3,4},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](1,0,-1).Collect()
-	test.SlicesMatch[int]([]int{1},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](1,-1,-1).Collect()
-	test.SlicesMatch[int]([]int{1,0},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](1,-4,-1).Collect()
-	test.SlicesMatch[int]([]int{1,0,-1,-2,-3},res,t)
-	test.Nil(err,t)
+	res, err = Range[int](0, 1, 1).Collect()
+	test.SlicesMatch[int]([]int{0}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](0, 2, 1).Collect()
+	test.SlicesMatch[int]([]int{0, 1}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](0, 5, 1).Collect()
+	test.SlicesMatch[int]([]int{0, 1, 2, 3, 4}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](1, 0, -1).Collect()
+	test.SlicesMatch[int]([]int{1}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](1, -1, -1).Collect()
+	test.SlicesMatch[int]([]int{1, 0}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](1, -4, -1).Collect()
+	test.SlicesMatch[int]([]int{1, 0, -1, -2, -3}, res, t)
+	test.Nil(err, t)
 
-	res,err=Range[int](0,1,2).Collect()
-	test.SlicesMatch[int]([]int{0},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](1,0,-2).Collect()
-	test.SlicesMatch[int]([]int{1},res,t)
-	test.Nil(err,t)
+	res, err = Range[int](0, 1, 2).Collect()
+	test.SlicesMatch[int]([]int{0}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](1, 0, -2).Collect()
+	test.SlicesMatch[int]([]int{1}, res, t)
+	test.Nil(err, t)
 
-	res,err=Range[int](0,4,2).Collect()
-	test.SlicesMatch[int]([]int{0,2},res,t)
-	test.Nil(err,t)
-	res,err=Range[int](0,-4,-2).Collect()
-	test.SlicesMatch[int]([]int{0,-2},res,t)
-	test.Nil(err,t)
+	res, err = Range[int](0, 4, 2).Collect()
+	test.SlicesMatch[int]([]int{0, 2}, res, t)
+	test.Nil(err, t)
+	res, err = Range[int](0, -4, -2).Collect()
+	test.SlicesMatch[int]([]int{0, -2}, res, t)
+	test.Nil(err, t)
 }
 
 func sliceElemsIterHelper[T any](vals []T, t *testing.T) {
 	sIter := SliceElems(vals)
 	for i := 0; i < len(vals); i++ {
 		sV, sErr, sBool := sIter(Continue)
-		test.Eq(vals[i], sV,t)
-		test.Nil(sErr,t)
-		test.True(sBool,t)
+		test.Eq(vals[i], sV, t)
+		test.Nil(sErr, t)
+		test.True(sBool, t)
 	}
 	var tmp T
 	sV, sErr, sBool := sIter(Continue)
-	test.Eq(tmp, sV,t)
-	test.Nil(sErr,t)
-	test.False(sBool,t)
+	test.Eq(tmp, sV, t)
+	test.Nil(sErr, t)
+	test.False(sBool, t)
 }
 func TestSliceElems(t *testing.T) {
 	sliceElemsIterHelper([]string{"one", "two", "three"}, t)
@@ -99,15 +99,15 @@ func stringElemsIterHelper(vals string, t *testing.T) {
 	sIter := StrElems(vals)
 	for i := 0; i < len(vals); i++ {
 		sV, sErr, sBool := sIter(Continue)
-		test.Eq(vals[i], sV,t)
-		test.Nil(sErr,t)
-		test.True(sBool,t)
+		test.Eq(vals[i], sV, t)
+		test.Nil(sErr, t)
+		test.True(sBool, t)
 	}
 	var tmp string
 	sV, sErr, sBool := sIter(Continue)
-	test.Eq(tmp, sV,t)
-	test.Nil( sErr,t)
-	test.False(sBool,t)
+	test.Eq(tmp, sV, t)
+	test.Nil(sErr, t)
+	test.False(sBool, t)
 }
 func TestStringElems(t *testing.T) {
 	sliceElemsIterHelper([]string{"one", "two", "three"}, t)
@@ -120,15 +120,15 @@ func sequentialElemsIterHelper[T any](vals []T, t *testing.T) {
 	sIter := SequentialElems(len(vals), func(i int) (T, error) { return vals[i], nil })
 	for i := 0; i < len(vals); i++ {
 		sV, sErr, sBool := sIter(Continue)
-		test.Eq(vals[i], sV,t)
-		test.Nil(sErr,t)
-		test.True(sBool,t)
+		test.Eq(vals[i], sV, t)
+		test.Nil(sErr, t)
+		test.True(sBool, t)
 	}
 	var tmp T
 	sV, sErr, sBool := sIter(Continue)
-	test.Eq(tmp, sV,t)
-	test.Nil(sErr,t)
-	test.False(sBool,t)
+	test.Eq(tmp, sV, t)
+	test.Nil(sErr, t)
+	test.False(sBool, t)
 }
 func TestSequentialElems(t *testing.T) {
 	sequentialElemsIterHelper([]string{"one", "two", "three"}, t)
@@ -146,8 +146,8 @@ func testChanIterHelper(chanNum int, t *testing.T) {
 		close(c)
 	}(c, chanNum)
 	cnt, err := ChanElems(c).Count()
-	test.Eq(chanNum, cnt,t)
-	test.Nil(err,t)
+	test.Eq(chanNum, cnt, t)
+	test.Nil(err, t)
 }
 func TestChanElems(t *testing.T) {
 	testChanIterHelper(0, t)
@@ -160,14 +160,14 @@ func testFileLinesHelper(numLines int, path string, t *testing.T) {
 	fIter := FileLines(fmt.Sprintf("./testData/%s", path))
 	for i := 0; i < numLines; i++ {
 		fV, fErr, fBool := fIter(Continue)
-		test.Eq(fmt.Sprintf("%d", i+1), fV,t)
-		test.Nil(fErr,t)
-		test.True(fBool,t)
+		test.Eq(fmt.Sprintf("%d", i+1), fV, t)
+		test.Nil(fErr, t)
+		test.True(fBool, t)
 	}
 	fV, fErr, fBool := fIter(Continue)
-	test.Eq("", fV,t)
-	test.Nil(fErr,t)
-	test.False(fBool,t)
+	test.Eq("", fV, t)
+	test.Nil(fErr, t)
+	test.False(fBool, t)
 }
 func TestFileLines(t *testing.T) {
 	testFileLinesHelper(0, "emptyFile.txt", t)
@@ -181,8 +181,8 @@ func TestRecurseEmpty(t *testing.T) {
 		func(v int) bool { return true },
 		func(v int) Iter[int] { return NoElem[int]() },
 	).Collect()
-	test.Eq(0, len(v),t)
-	test.Nil(err,t)
+	test.Eq(0, len(v), t)
+	test.Nil(err, t)
 }
 
 func TestRecurseSingleValue(t *testing.T) {
@@ -191,9 +191,9 @@ func TestRecurseSingleValue(t *testing.T) {
 		func(v int) bool { return false },
 		func(v int) Iter[int] { return NoElem[int]() },
 	).Collect()
-	test.Eq(1, len(v),t)
-	test.Eq(0, v[0],t)
-	test.Nil(err,t)
+	test.Eq(1, len(v), t)
+	test.Eq(0, v[0], t)
+	test.Nil(err, t)
 }
 
 func TestRecurseSingleValueWithEmptyRecurse(t *testing.T) {
@@ -202,9 +202,9 @@ func TestRecurseSingleValueWithEmptyRecurse(t *testing.T) {
 		func(v int) bool { return true },
 		func(v int) Iter[int] { return NoElem[int]() },
 	).Collect()
-	test.Eq(1, len(v),t)
-	test.Eq(0, v[0],t)
-	test.Nil(err,t)
+	test.Eq(1, len(v), t)
+	test.Eq(0, v[0], t)
+	test.Nil(err, t)
 }
 
 func TestRecurseSingleValueWithSingleValueRecurse(t *testing.T) {
@@ -213,10 +213,10 @@ func TestRecurseSingleValueWithSingleValueRecurse(t *testing.T) {
 		func(v int) bool { return v == 0 },
 		func(v int) Iter[int] { return ValElem[int](1, nil, 1) },
 	).Collect()
-	test.Eq(2, len(v),t)
-	test.Eq(0, v[0],t)
-	test.Eq(1, v[1],t)
-	test.Nil(err,t)
+	test.Eq(2, len(v), t)
+	test.Eq(0, v[0], t)
+	test.Eq(1, v[1], t)
+	test.Nil(err, t)
 }
 
 func TestRecurse(t *testing.T) {
@@ -235,9 +235,9 @@ func TestRecurse(t *testing.T) {
 		},
 	).Collect()
 	exp := []int{0, 3, 11, 13, 5, 1, 7, 9, 2}
-	test.Eq(len(exp), len(vals),t)
+	test.Eq(len(exp), len(vals), t)
 	for i, v := range vals {
-		test.Eq(v, exp[i],t)
+		test.Eq(v, exp[i], t)
 	}
-	test.Nil(err,t)
+	test.Nil(err, t)
 }

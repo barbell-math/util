@@ -42,9 +42,9 @@ func ValElem[T any](val T, err error, repeat int) Iter[T] {
 // This funciton is a Producer.
 //
 // Range returns an iterator that produces a sequence of values according to the
-// values that are given as parameters. The sequence of values that will be 
+// values that are given as parameters. The sequence of values that will be
 // returned starts with the start value, and increments by the amount specified
-// by the jump parameter. It will stop once it reaches the stop value, 
+// by the jump parameter. It will stop once it reaches the stop value,
 // exclusively, meaning the last value will not be included. There are no
 // conditions to check for infinite loops. A jump of 0 will always result in a
 // infinite loop as long as start!=stop. No errors will ever be returned by
@@ -52,10 +52,10 @@ func ValElem[T any](val T, err error, repeat int) Iter[T] {
 func Range[
 	T ~int | ~int8 | ~int16 | ~int32 | ~int64,
 ](start T, stop T, jump T) Iter[T] {
-	cntr:=start-jump
+	cntr := start - jump
 	return func(f IteratorFeedback) (T, error, bool) {
-		cntr+=jump
-		return cntr, nil, (jump>=0 && cntr<stop) || (jump<0 && cntr>stop)
+		cntr += jump
+		return cntr, nil, (jump >= 0 && cntr < stop) || (jump < 0 && cntr > stop)
 	}
 }
 
@@ -155,9 +155,9 @@ func MapElems[K comparable, V any](
 			v.SetB(m[v.GetA()])
 			return v, nil, true
 		}
-		if f==Break {
+		if f == Break {
 			close(cont)
-			_=<-c
+			_ = <-c
 		}
 		return basic.Pair[K, V]{}, nil, false
 	}
@@ -167,7 +167,7 @@ func MapElems[K comparable, V any](
 //
 // MapElems returns an iterator that iterates over a maps key values. Do not
 // confuse this with the Map intermediary function. This producer will never
-// return an error. This producer is not thread safe. If the underlying map 
+// return an error. This producer is not thread safe. If the underlying map
 // value it changed while being iterated over behavior is undefined.
 func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
 	cont := make(chan bool)
@@ -179,9 +179,9 @@ func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
 			cont <- true
 			return (<-c), nil, true
 		}
-		if f==Break {
+		if f == Break {
 			close(cont)
-			_=<-c
+			_ = <-c
 		}
 		var tmp K
 		return tmp, nil, false
@@ -204,9 +204,9 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
 			cont <- true
 			return m[<-c], nil, true
 		}
-		if f==Break {
+		if f == Break {
 			close(cont)
-			_=<-c
+			_ = <-c
 			// time.Sleep(1*time.Second)
 		}
 		var tmp V

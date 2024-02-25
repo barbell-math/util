@@ -13,7 +13,7 @@ import (
 func collectIterHelper[T any](vals []T, t *testing.T) {
 	collected, err := SliceElems(vals).Collect()
 	test.SlicesMatch(vals, collected, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 func TestCollect(t *testing.T) {
 	collectIterHelper([]int{1, 2, 3, 4}, t)
@@ -25,11 +25,11 @@ func appendIterHelper[T any](orig []T, vals []T, t *testing.T) {
 	origLen := len(orig)
 	expLen := len(orig) + len(vals)
 	tmp, err := SliceElems(vals).AppendTo(&orig)
-	test.Eq(expLen, len(orig),t)
-	test.Eq(tmp, len(vals),t)
-	test.Nil(err,t)
+	test.Eq(expLen, len(orig), t)
+	test.Eq(tmp, len(vals), t)
+	test.Nil(err, t)
 	for i := origLen; i < len(orig); i++ {
-		test.Eq(vals[i-origLen], orig[i],t)
+		test.Eq(vals[i-origLen], orig[i], t)
 	}
 }
 func TestAppendTo(t *testing.T) {
@@ -46,17 +46,17 @@ func TestAll(t *testing.T) {
 		return val > 0, nil
 	})
 	test.True(res, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	res, err = SliceElems([]int{1, 2, 3, 4}).All(func(val int) (bool, error) {
 		return val < 0, nil
 	})
 	test.False(res, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	res, err = SliceElems([]int{1, 2, 3, 4}).All(func(val int) (bool, error) {
 		return val < 2, nil
 	})
 	test.False(res, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 
 func TestAny(t *testing.T) {
@@ -64,35 +64,35 @@ func TestAny(t *testing.T) {
 		return val > 0, nil
 	})
 	test.True(found, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	found, err = SliceElems([]int{1, 2, 3, 4}).Any(func(val int) (bool, error) {
 		return val < 2, nil
 	})
 	test.True(found, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	found, err = SliceElems([]int{1, 2, 3, 4}).Any(func(val int) (bool, error) {
 		return val < 0, nil
 	})
 	test.False(found, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 
 func findIterHelperFound[T comparable](elems []T, lookingFor T, t *testing.T) {
 	v, err, ok := SliceElems(elems).Find(func(val T) (bool, error) {
 		return val == lookingFor, nil
 	})
-	test.Eq(lookingFor, v,t)
-	test.True(ok,t)
-	test.Nil(err,t)
+	test.Eq(lookingFor, v, t)
+	test.True(ok, t)
+	test.Nil(err, t)
 }
 func findIterHelperNotFound[T comparable](elems []T, lookingFor T, t *testing.T) {
 	var tmp T
 	v, err, ok := SliceElems(elems).Find(func(val T) (bool, error) {
 		return val == lookingFor, nil
 	})
-	test.Eq(tmp, v,t)
-	test.False(ok,t)
-	test.Nil(err,t)
+	test.Eq(tmp, v, t)
+	test.False(ok, t)
+	test.Nil(err, t)
 }
 func TestFind(t *testing.T) {
 	findIterHelperFound([]int{1, 2, 3, 4}, 1, t)
@@ -110,7 +110,7 @@ func indexIterHelper[T comparable](elems []T,
 		return val == lookingFor, nil
 	})
 	test.Eq(expectedIndex, v, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 func TestIndex(t *testing.T) {
 	indexIterHelper([]int{1, 2, 3, 4}, 1, 0, t)
@@ -133,7 +133,7 @@ func TestIndexErrorFound(t *testing.T) {
 	})
 	test.Eq(3, cntr, t)
 	test.Eq(2, v, t)
-	test.NotNil(err,t)
+	test.NotNil(err, t)
 }
 
 func TestIndexErrorNotFound(t *testing.T) {
@@ -147,7 +147,7 @@ func TestIndexErrorNotFound(t *testing.T) {
 	})
 	test.Eq(3, cntr, t)
 	test.Eq(-1, v, t)
-	test.NotNil(err,t)
+	test.NotNil(err, t)
 }
 
 func nthIterHelper[T any](
@@ -159,7 +159,7 @@ func nthIterHelper[T any](
 	val, err, ok := SliceElems(vals).Nth(index)
 	test.Eq(expectedVal, val, t)
 	test.Eq(expectedError, ok, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 func TestNth(t *testing.T) {
 	nthIterHelper([]int{1, 2, 3, 4}, 0, 1, true, t)
@@ -174,13 +174,13 @@ func TestNth(t *testing.T) {
 func TestCount(t *testing.T) {
 	c, err := SliceElems([]int{1, 2, 3, 4}).Count()
 	test.Eq(4, c, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	c, err = SliceElems([]int{1}).Count()
 	test.Eq(1, c, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	c, err = SliceElems([]int{}).Count()
 	test.Eq(0, c, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 
 func toChanIterHelper[T any](vals []T, t *testing.T) {
@@ -217,13 +217,13 @@ func toFileIterHelperWithNewline(numVals int, src string, t *testing.T) {
 	SliceElems(vals).ToWriter(f, true)
 	f.Close()
 	f, err = os.Open(src)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	w := bufio.NewScanner(f)
 	for i := 0; w.Scan(); i++ {
-		test.Eq(fmt.Sprintf("%d", i), w.Text(),t)
+		test.Eq(fmt.Sprintf("%d", i), w.Text(), t)
 	}
 	err = os.Remove(src)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 func toFileIterHelperNoNewline(numVals int, src string, t *testing.T) {
 	correctVal := ""
@@ -239,13 +239,13 @@ func toFileIterHelperNoNewline(numVals int, src string, t *testing.T) {
 	SliceElems(vals).ToWriter(f, false)
 	f.Close()
 	f, err = os.Open(src)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	w := bufio.NewScanner(f)
 	for i := 0; w.Scan(); i++ {
-		test.Eq(correctVal, w.Text(),t)
+		test.Eq(correctVal, w.Text(), t)
 	}
 	err = os.Remove(src)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 func TestToFile(t *testing.T) {
 	toFileIterHelperWithNewline(0, "emptyFileTest.txt", t)

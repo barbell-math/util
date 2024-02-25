@@ -19,7 +19,7 @@ func TestStop(t *testing.T) {
 			return Continue, val, nil
 		}).Stop()
 	test.Eq(1, cntr, t)
-	test.Eq(newErr, err,t)
+	test.Eq(newErr, err, t)
 }
 
 func forEachIterHelper[T any](
@@ -66,7 +66,7 @@ func TestForEachEarlyStopBool(t *testing.T) {
 			return Continue, nil
 		})
 	test.Eq(4, cntr, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 
 func TestForEachEarlyStopErr(t *testing.T) {

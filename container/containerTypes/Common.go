@@ -111,6 +111,7 @@ type WriteUniqueOps[K any, V any] interface {
 // valued, operations.
 type WriteUniqueKeyedOps[K any, V any] interface {
     EmplaceUnique(idx K, v V) error
+    // SetUnique(idx K, v V) error
 }
 
 // TODO
@@ -119,7 +120,7 @@ type WriteUniqueKeyedOps[K any, V any] interface {
 // make map
 // reimpl circular buffer
 // make static container tests
-// add window producer it iterface file
+// add window producer it iterface file - move all necessary circular import tests
 
 // An interface that enforces implementation of write-only, value-only, operations.
 type WriteOps[V any] interface {
@@ -128,8 +129,13 @@ type WriteOps[V any] interface {
 // An interface that enforces implementation of write-only, key/value, operations.
 type WriteKeyedOps[K any, V any] interface {
     Set(kvPairs ...basic.Pair[K,V]) error;
+}
+// An interface that enforces implementation of write-only, key/value, 
+// sequential operations.
+type WriteKeyedSequentialOps[K any, V any] interface {
     SetSequential(k K, v ...V) error;
 }
+
 // An interface that enforces implementation of write-only, key/value, 
 // dynamic key, operations. A dynamic key operation is an operation that allows
 // changing the value of a key but also allows changing of the keys as a
@@ -139,11 +145,17 @@ type WriteDynKeyedOps[K any, V any] interface {
     InsertSequential(idx K, v ...V) error
 }
 // An interface that enforces implementation of write-only, key/value, 
+// static key, sequential, operations. A static key operation is an operation 
+// that allows changing the value of a key but does not allow changing of the 
+// keys as a result of that operation.
+type WriteStaticKeyedOps[K any, V any] interface {
+    Emplace(kvPairs ...basic.Pair[K,V]) error;
+}
+// An interface that enforces implementation of write-only, key/value, 
 // static key, operations. A static key operation is an operation that allows
 // changing the value of a key but does not allow changing of the keys as a
 // result of that operation.
-type WriteStaticKeyedOps[K any, V any] interface {
-    Emplace(kvPairs ...basic.Pair[K,V]) error;
+type WriteStaticKeyedSequentialOps[K any, V any] interface {
     EmplaceSequential(idk K, v ...V) error;
 }
 

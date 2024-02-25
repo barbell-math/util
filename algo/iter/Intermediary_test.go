@@ -29,23 +29,23 @@ func TestNext(t *testing.T) {
 		})
 	next, err, cont := n(Iterate)
 	test.Eq(1, next, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	test.True(cont, t)
 	next, err, cont = n(Iterate)
 	test.Eq(3, next, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	test.True(cont, t)
 	next, err, cont = n(Iterate)
 	test.Eq(5, next, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	test.True(cont, t)
 	next, err, cont = n(Iterate)
 	test.Eq(5, next, t)
-	test.NotNil(err,t)
+	test.NotNil(err, t)
 	test.False(cont, t)
 	next, err, cont = n(Break)
 	test.Eq(0, next, t)
-	test.Nil(err,t)
+	test.Nil(err, t)
 	test.False(cont, t)
 }
 
@@ -65,9 +65,9 @@ func TestNextReachesBreak(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.True(breakReached,t)
-	test.True(breakReached2,t)
-	test.Nil(err,t)
+	test.True(breakReached, t)
+	test.True(breakReached2, t)
+	test.Nil(err, t)
 }
 
 func TestNextReachesBreakParentErr(t *testing.T) {
@@ -90,9 +90,9 @@ func TestNextReachesBreakParentErr(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.True(breakReached,t)
-	test.True(breakReached2,t)
-	test.Eq(expectedErr, err,t)
+	test.True(breakReached, t)
+	test.True(breakReached2, t)
+	test.Eq(expectedErr, err, t)
 }
 
 func TestNextReachesBreakParentCleanUpErr(t *testing.T) {
@@ -113,9 +113,9 @@ func TestNextReachesBreakParentCleanUpErr(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.True(breakReached,t)
-	test.True(breakReached2,t)
-	test.Eq(expectedErr, err,t)
+	test.True(breakReached, t)
+	test.True(breakReached2, t)
+	test.Eq(expectedErr, err, t)
 }
 
 func TestNextReachesBreakParentErrAndCleanUpErr(t *testing.T) {
@@ -139,9 +139,9 @@ func TestNextReachesBreakParentErrAndCleanUpErr(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.True(breakReached,t)
-	test.True(breakReached2,t)
-	test.ContainsError(expectedErr,err,t)
+	test.True(breakReached, t)
+	test.True(breakReached2, t)
+	test.ContainsError(expectedErr, err, t)
 }
 
 func TestSetupTeardownNoElems(t *testing.T) {
@@ -150,10 +150,10 @@ func TestSetupTeardownNoElems(t *testing.T) {
 	setup := func() error { setupRan = true; return nil }
 	teardown := func() error { teardownRan = true; return nil }
 	cnt, err := NoElem[int]().SetupTeardown(setup, teardown).Count()
-	test.True(setupRan,t)
-	test.True(teardownRan,t)
-	test.Eq(0, cnt,t)
-	test.Nil(err,t)
+	test.True(setupRan, t)
+	test.True(teardownRan, t)
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
 }
 
 func TestSetupTeardownWithElems(t *testing.T) {
@@ -162,35 +162,35 @@ func TestSetupTeardownWithElems(t *testing.T) {
 	setup := func() error { setupRan = true; return nil }
 	teardown := func() error { teardownRan = true; return nil }
 	cnt, err := SliceElems[int]([]int{0, 1, 2, 3}).SetupTeardown(setup, teardown).Count()
-	test.True(setupRan,t)
-	test.True(teardownRan,t)
-	test.Eq(4, cnt,t)
-	test.Nil(err,t)
+	test.True(setupRan, t)
+	test.True(teardownRan, t)
+	test.Eq(4, cnt, t)
+	test.Nil(err, t)
 }
 
 func TestSetupTeardownWithSetupError(t *testing.T) {
 	setupRan := false
 	teardownRan := false
-	expectedError:=errors.New("ERROR")
+	expectedError := errors.New("ERROR")
 	setup := func() error { setupRan = true; return expectedError }
 	teardown := func() error { teardownRan = true; return nil }
 	cnt, err := SliceElems[int]([]int{0, 1, 2, 3}).SetupTeardown(setup, teardown).Count()
-	test.True(setupRan,t)
-	test.True(teardownRan,t)
-	test.Eq(0, cnt,t)
-	test.ContainsError(expectedError,err,t)
+	test.True(setupRan, t)
+	test.True(teardownRan, t)
+	test.Eq(0, cnt, t)
+	test.ContainsError(expectedError, err, t)
 }
 
 func TestSetupTeardownWithTeardownError(t *testing.T) {
 	setupRan := false
 	teardownRan := false
-	expectedError:=errors.New("ERROR")
+	expectedError := errors.New("ERROR")
 	setup := func() error { setupRan = true; return nil }
 	teardown := func() error { teardownRan = true; return expectedError }
 	err := SliceElems[int]([]int{0, 1, 2, 3}).SetupTeardown(setup, teardown).Consume()
-	test.True(setupRan,t)
-	test.True(teardownRan,t)
-	test.ContainsError(expectedError,err,t)
+	test.True(setupRan, t)
+	test.True(teardownRan, t)
+	test.ContainsError(expectedError, err, t)
 }
 
 func injectIterHelper[T any](
@@ -201,10 +201,10 @@ func injectIterHelper[T any](
 ) {
 	result, err := SliceElems(initialVals).Inject(op).Collect()
 	test.Nil(err, t)
-	test.Eq(len(desiredSeq), len(result),t)
+	test.Eq(len(desiredSeq), len(result), t)
 	for i, v := range desiredSeq {
 		if i < len(result) {
-			test.Eq(v, result[i],t)
+			test.Eq(v, result[i], t)
 		}
 	}
 }
