@@ -2,10 +2,8 @@ package iter
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
-	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )
 
@@ -30,37 +28,25 @@ func TestNext(t *testing.T) {
 			return Continue, val, nil
 		})
 	next, err, cont := n(Iterate)
-	test.BasicTest(1, next, "Next did not return the correct value.", t)
-	test.BasicTest(nil, err,
-		"Next returned an error when it was not supposed to.", t,
-	)
-	test.BasicTest(true, cont, "Next did not reutrn correct cont status.", t)
+	test.Eq(1, next, t)
+	test.Nil(err,t)
+	test.True(cont, t)
 	next, err, cont = n(Iterate)
-	test.BasicTest(3, next, "Next did not return the correct value.", t)
-	test.BasicTest(nil, err,
-		"Next returned an error when it was not supposed to.", t,
-	)
-	test.BasicTest(true, cont, "Next did not reutrn correct cont status.", t)
+	test.Eq(3, next, t)
+	test.Nil(err,t)
+	test.True(cont, t)
 	next, err, cont = n(Iterate)
-	test.BasicTest(5, next, "Next did not return the correct value.", t)
-	test.BasicTest(nil, err,
-		"Next returned an error when it was not supposed to.", t,
-	)
-	test.BasicTest(true, cont, "Next did not reutrn correct cont status.", t)
+	test.Eq(5, next, t)
+	test.Nil(err,t)
+	test.True(cont, t)
 	next, err, cont = n(Iterate)
-	test.BasicTest(5, next, "Next did not return the correct value.", t)
-	if err == nil {
-		test.FormatError("!nil", err,
-			"Next did not return an error when it was supposed to.", t,
-		)
-	}
-	test.BasicTest(false, cont, "Next did not reutrn correct cont status.", t)
+	test.Eq(5, next, t)
+	test.NotNil(err,t)
+	test.False(cont, t)
 	next, err, cont = n(Break)
-	test.BasicTest(0, next, "Next did not return the correct value.", t)
-	test.BasicTest(nil, err,
-		"Next returned an error when it was not supposed to.", t,
-	)
-	test.BasicTest(false, cont, "Next did not reutrn correct cont status.", t)
+	test.Eq(0, next, t)
+	test.Nil(err,t)
+	test.False(cont, t)
 }
 
 func TestNextReachesBreak(t *testing.T) {
@@ -79,15 +65,9 @@ func TestNextReachesBreak(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.BasicTest(true, breakReached,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	test.BasicTest(true, breakReached2,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	test.BasicTest(nil, err,
-		"Next returned an error when it shouldn't have.", t,
-	)
+	test.True(breakReached,t)
+	test.True(breakReached2,t)
+	test.Nil(err,t)
 }
 
 func TestNextReachesBreakParentErr(t *testing.T) {
@@ -110,15 +90,9 @@ func TestNextReachesBreakParentErr(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.BasicTest(true, breakReached,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	test.BasicTest(true, breakReached2,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	test.BasicTest(expectedErr, err,
-		"Next returned an error when it shouldn't have.", t,
-	)
+	test.True(breakReached,t)
+	test.True(breakReached2,t)
+	test.Eq(expectedErr, err,t)
 }
 
 func TestNextReachesBreakParentCleanUpErr(t *testing.T) {
@@ -139,15 +113,9 @@ func TestNextReachesBreakParentCleanUpErr(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.BasicTest(true, breakReached,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	test.BasicTest(true, breakReached2,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	test.BasicTest(expectedErr, err,
-		"Next returned an error when it shouldn't have.", t,
-	)
+	test.True(breakReached,t)
+	test.True(breakReached2,t)
+	test.Eq(expectedErr, err,t)
 }
 
 func TestNextReachesBreakParentErrAndCleanUpErr(t *testing.T) {
@@ -171,18 +139,9 @@ func TestNextReachesBreakParentErrAndCleanUpErr(t *testing.T) {
 		return Continue, val, nil
 	})
 	err := n.Consume()
-	test.BasicTest(true, breakReached,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	test.BasicTest(true, breakReached2,
-		"Next did not properly call parrent iterators with break flag.", t,
-	)
-	tmp := fmt.Sprintf("%s", customerr.AppendError(expectedErr, expectedErr))
-	if fmt.Sprintf("%s", expectedErr) == tmp {
-		test.FormatError(tmp, err,
-			"Next returned an error when it shouldn't have.", t,
-		)
-	}
+	test.True(breakReached,t)
+	test.True(breakReached2,t)
+	test.ContainsError(expectedErr,err,t)
 }
 
 func TestSetupTeardownNoElems(t *testing.T) {
@@ -191,18 +150,10 @@ func TestSetupTeardownNoElems(t *testing.T) {
 	setup := func() error { setupRan = true; return nil }
 	teardown := func() error { teardownRan = true; return nil }
 	cnt, err := NoElem[int]().SetupTeardown(setup, teardown).Count()
-	test.BasicTest(true, setupRan,
-		"Setup was not run when it was supposed to be.", t,
-	)
-	test.BasicTest(true, teardownRan,
-		"Teardown was not run when it was supposed to be.", t,
-	)
-	test.BasicTest(0, cnt,
-		"SetupTeardown iterated the wrong number of times.", t,
-	)
-	test.BasicTest(nil, err,
-		"SetupTeardown returned an error when it should not have.", t,
-	)
+	test.True(setupRan,t)
+	test.True(teardownRan,t)
+	test.Eq(0, cnt,t)
+	test.Nil(err,t)
 }
 
 func TestSetupTeardownWithElems(t *testing.T) {
@@ -211,59 +162,35 @@ func TestSetupTeardownWithElems(t *testing.T) {
 	setup := func() error { setupRan = true; return nil }
 	teardown := func() error { teardownRan = true; return nil }
 	cnt, err := SliceElems[int]([]int{0, 1, 2, 3}).SetupTeardown(setup, teardown).Count()
-	test.BasicTest(true, setupRan,
-		"Setup was not run when it was supposed to be.", t,
-	)
-	test.BasicTest(true, teardownRan,
-		"Teardown was not run when it was supposed to be.", t,
-	)
-	test.BasicTest(4, cnt,
-		"SetupTeardown iterated the wrong number of times.", t,
-	)
-	test.BasicTest(nil, err,
-		"SetupTeardown returned an error when it should not have.", t,
-	)
+	test.True(setupRan,t)
+	test.True(teardownRan,t)
+	test.Eq(4, cnt,t)
+	test.Nil(err,t)
 }
 
 func TestSetupTeardownWithSetupError(t *testing.T) {
 	setupRan := false
 	teardownRan := false
-	setup := func() error { setupRan = true; return errors.New("ERROR") }
+	expectedError:=errors.New("ERROR")
+	setup := func() error { setupRan = true; return expectedError }
 	teardown := func() error { teardownRan = true; return nil }
 	cnt, err := SliceElems[int]([]int{0, 1, 2, 3}).SetupTeardown(setup, teardown).Count()
-	test.BasicTest(true, setupRan,
-		"Setup was not run when it was supposed to be.", t,
-	)
-	test.BasicTest(true, teardownRan,
-		"Teardown was not run when it was supposed to be.", t,
-	)
-	test.BasicTest(0, cnt,
-		"SetupTeardown iterated the wrong number of times.", t,
-	)
-	if err.Error() != "ERROR" {
-		test.FormatError(errors.New("ERROR"), err,
-			"Setupteardown did not return the correct error.", t,
-		)
-	}
+	test.True(setupRan,t)
+	test.True(teardownRan,t)
+	test.Eq(0, cnt,t)
+	test.ContainsError(expectedError,err,t)
 }
 
 func TestSetupTeardownWithTeardownError(t *testing.T) {
 	setupRan := false
 	teardownRan := false
+	expectedError:=errors.New("ERROR")
 	setup := func() error { setupRan = true; return nil }
-	teardown := func() error { teardownRan = true; return errors.New("ERROR") }
+	teardown := func() error { teardownRan = true; return expectedError }
 	err := SliceElems[int]([]int{0, 1, 2, 3}).SetupTeardown(setup, teardown).Consume()
-	test.BasicTest(true, setupRan,
-		"Setup was not run when it was supposed to be.", t,
-	)
-	test.BasicTest(true, teardownRan,
-		"Teardown was not run when it was supposed to be.", t,
-	)
-	if err.Error() != "ERROR" {
-		test.FormatError(errors.New("ERROR"), err,
-			"Setupteardown did not return the correct error.", t,
-		)
-	}
+	test.True(setupRan,t)
+	test.True(teardownRan,t)
+	test.ContainsError(expectedError,err,t)
 }
 
 func injectIterHelper[T any](
@@ -273,15 +200,11 @@ func injectIterHelper[T any](
 	t *testing.T,
 ) {
 	result, err := SliceElems(initialVals).Inject(op).Collect()
-	test.BasicTest(nil, err, "Inject created an error when it should not have.", t)
-	test.BasicTest(len(desiredSeq), len(result),
-		"Using inject did not return the correct number of elements.", t,
-	)
+	test.Nil(err, t)
+	test.Eq(len(desiredSeq), len(result),t)
 	for i, v := range desiredSeq {
 		if i < len(result) {
-			test.BasicTest(v, result[i],
-				"Inject incorrectly modified values.", t,
-			)
+			test.Eq(v, result[i],t)
 		}
 	}
 }

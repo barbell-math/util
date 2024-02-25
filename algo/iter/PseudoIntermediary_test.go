@@ -8,81 +8,79 @@ import (
 
 func TestTake(t *testing.T) {
 	cnt, err := SliceElems([]int{1, 2, 3, 4}).Take(0).Count()
-	test.BasicTest(0, cnt, "Take took the wrong number of items.", t)
-	test.BasicTest(nil, err, "Take took the wrong number of items.", t)
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4}).Take(1).Count()
-	test.BasicTest(1, cnt, "Take took the wrong number of items.", t)
-	test.BasicTest(nil, err, "Take took the wrong number of items.", t)
+	test.Eq(1, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4}).Take(2).Count()
-	test.BasicTest(2, cnt, "Take took the wrong number of items.", t)
-	test.BasicTest(nil, err, "Take took the wrong number of items.", t)
+	test.Eq(2, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4}).Take(4).Count()
-	test.BasicTest(4, cnt, "Take took the wrong number of items.", t)
-	test.BasicTest(nil, err, "Take took the wrong number of items.", t)
+	test.Eq(4, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4}).Take(5).Count()
-	test.BasicTest(4, cnt, "Take took the wrong number of items.", t)
-	test.BasicTest(nil, err, "Take took the wrong number of items.", t)
+	test.Eq(4, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{}).Take(1).Count()
-	test.BasicTest(0, cnt, "Take took the wrong number of items.", t)
-	test.BasicTest(nil, err, "Take took the wrong number of items.", t)
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{}).Take(0).Count()
-	test.BasicTest(0, cnt, "Take took the wrong number of items.", t)
-	test.BasicTest(nil, err, "Take took the wrong number of items.", t)
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
 }
 
 func TestTakeWhile(t *testing.T) {
 	cnt, err := SliceElems([]int{1, 2, 3, 4}).TakeWhile(func(val int) bool {
 		return val < 3
 	}).Count()
-	test.BasicTest(2, cnt, "TakeWhile did not take correct number of elements.", t)
-	test.BasicTest(nil, err, "TakeWhile did not take correct number of elements.", t)
+	test.Eq(2, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4}).TakeWhile(func(val int) bool {
 		return val < 1
 	}).Count()
-	test.BasicTest(0, cnt, "TakeWhile did not take correct number of elements.", t)
-	test.BasicTest(nil, err, "TakeWhile did not take correct number of elements.", t)
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4}).TakeWhile(func(val int) bool {
 		return val < 2
 	}).Count()
-	test.BasicTest(1, cnt, "TakeWhile did not take correct number of elements.", t)
-	test.BasicTest(nil, err, "TakeWhile did not take correct number of elements.", t)
+	test.Eq(1, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4}).TakeWhile(func(val int) bool {
 		return val < 5
 	}).Count()
-	test.BasicTest(4, cnt, "TakeWhile did not take correct number of elements.", t)
-	test.BasicTest(nil, err, "TakeWhile did not take correct number of elements.", t)
+	test.Eq(4, cnt, t)
+	test.Nil(err, t)
 }
 
 func TestSkip(t *testing.T) {
 	cnt, err := SliceElems([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}).Skip(0).Count()
-	test.BasicTest(9, cnt, "Skip skipped a value it should not have.", t)
-	test.BasicTest(nil, err, "Skip returned an error when it should not have.", t)
+	test.Eq(9, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}).Skip(1).Count()
-	test.BasicTest(8, cnt, "Skip skipped a value it should not have.", t)
-	test.BasicTest(nil, err, "Skip returned an error when it should not have.", t)
+	test.Eq(8, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}).Skip(2).Count()
-	test.BasicTest(7, cnt, "Skip skipped a value it should not have.", t)
-	test.BasicTest(nil, err, "Skip returned an error when it should not have.", t)
+	test.Eq(7, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}).Skip(8).Count()
-	test.BasicTest(1, cnt, "Skip skipped a value it should not have.", t)
-	test.BasicTest(nil, err, "Skip returned an error when it should not have.", t)
+	test.Eq(1, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}).Skip(9).Count()
-	test.BasicTest(0, cnt, "Skip skipped a value it should not have.", t)
-	test.BasicTest(nil, err, "Skip returned an error when it should not have.", t)
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
 	cnt, err = SliceElems([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}).Skip(10).Count()
-	test.BasicTest(0, cnt, "Skip skipped a value it should not have.", t)
-	test.BasicTest(nil, err, "Skip returned an error when it should not have.", t)
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
 }
 
 func mapIterHelper[T any](elems []T, t *testing.T) {
 	mapped, err := Map(SliceElems(elems), func(index int, val T) (string, error) {
 		return fmt.Sprintf("%v", val), nil
 	}).Collect()
-	test.BasicTest(nil, err, "Map returned an error when it should not have", t)
+	test.Nil(err, t)
 	for i, v := range elems {
-		test.BasicTest(fmt.Sprintf("%v", v), mapped[i],
-			"Mapping did not mutate elements as expected.", t,
-		)
+		test.Eq(fmt.Sprintf("%v", v), mapped[i],t)
 	}
 }
 func TestMap(t *testing.T) {
@@ -95,21 +93,21 @@ func TestFilter(t *testing.T) {
 	cntr, err := SliceElems([]int{1, 2, 3, 4}).Filter(func(index int, val int) bool {
 		return val < 3
 	}).Count()
-	test.BasicTest(2, cntr, "Filter did not work appropriately.", t)
-	test.BasicTest(nil, err, "Filter returned an error when it should not have", t)
+	test.Eq(2, cntr, t)
+	test.Nil(err, t)
 	cntr, err = SliceElems([]int{1, 2, 3, 4}).Filter(func(index int, val int) bool {
 		return val < 5
 	}).Count()
-	test.BasicTest(4, cntr, "Filter did not work appropriately.", t)
-	test.BasicTest(nil, err, "Filter returned an error when it should not have", t)
+	test.Eq(4, cntr, t)
+	test.Nil(err, t)
 	cntr, err = SliceElems([]int{1, 2, 3, 4}).Filter(func(index int, val int) bool {
 		return val < 2
 	}).Count()
-	test.BasicTest(1, cntr, "Filter did not work appropriately.", t)
-	test.BasicTest(nil, err, "Filter returned an error when it should not have", t)
+	test.Eq(1, cntr, t)
+	test.Nil(err, t)
 	cntr, err = SliceElems([]int{1, 2, 3, 4}).Filter(func(index int, val int) bool {
 		return val < 1
 	}).Count()
-	test.BasicTest(0, cntr, "Filter did not work appropriately.", t)
-	test.BasicTest(nil, err, "Filter returned an error when it should not have", t)
+	test.Eq(0, cntr, t)
+	test.Nil(err, t)
 }
