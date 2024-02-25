@@ -1,175 +1,166 @@
 package tests
 
-// import (
-// 	"testing"
-// 
-// 	"github.com/barbell-math/util/algo/iter"
-// 	"github.com/barbell-math/util/container/containerTypes"
-// 	"github.com/barbell-math/util/container/dynamicContainers"
-// 	"github.com/barbell-math/util/customerr"
-// 	"github.com/barbell-math/util/test"
-// )
+import (
+	"testing"
+	//
+	// 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/container/basic"
+	"github.com/barbell-math/util/container/containerTypes"
+	"github.com/barbell-math/util/container/dynamicContainers"
+	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/test"
+)
 
-// func mapReadInterface[T any, U any](c dynamicContainers.ReadMap[T,U])   {}
-// func mapWriteInterface[T any, U any](c dynamicContainers.WriteMap[T,U]) {}
-// func mapInterface[T any, U any](c dynamicContainers.Map[T,U])           {}
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.RWSyncable] interface.
-// func MapInterfaceSyncableInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.RWSyncable = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.Length] interface.
-// func MapInterfaceLengthInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.Length = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.Clear] interface.
-// func MapInterfaceClearInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.Clear = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.KeyedWriteOps] interface.
-// func MapInterfaceWriteKeyedOpsInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.WriteKeyedOps[K, V] = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.ReadOps] interface.
-// func MapInterfaceReadOpsInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.ReadOps[V] = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.KeyedReadOps] interface.
-// func MapInterfaceReadKeyedOpsInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.ReadKeyedOps[K, V] = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.DeleteOps] interface.
-// func MapInterfaceDeleteOpsInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.DeleteOps[K, V] = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [containerTypes.KeyedDeleteOps] interface.
-// func MapInterfaceDeleteKeyedOpsInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	var container containerTypes.DeleteKeyedOps[K, V] = factory()
-// 	_ = container
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [dynamicContainers.MapRead] interface.
-// func ReadMapInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	mapReadInterface[K,V](factory())
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [dynamicContainers.WriteMap] interface.
-// func WriteMapInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	mapWriteInterface[K,V](factory())
-// }
-// 
-// // Tests that the value supplied by the factory implements the
-// // [dynamicContainers.Map] interface.
-// func MapInterfaceInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	mapInterface[K,V](factory())
-// }
-// 
-// // Tests that the value supplied by the factory does not implement the
-// // [staticContainers.Map] interface.
-// func MapInterfaceStaticCapacityInterface[K any, V any](
-// 	factory func() dynamicContainers.Map[K,V],
-// 	t *testing.T,
-// ) {
-// 	test.Panics(
-// 		func() {
-// 			var c any
-// 			c = factory()
-// 			c2 := c.(containerTypes.StaticCapacity)
-// 			_ = c2
-// 		},
-// 		"Code did not panic when casting a dynamic map to a static vector.", t,
-// 	)
-// }
-// 
-// // Tests the Get method functionality of a dynamic map.
-// func MapInterfaceGet(
-// 	factory func() dynamicContainers.Map[int,int],
-// 	t *testing.T,
-// ) {
-// 	container := factory()
-// 	_, err := container.Get(0)
-// 	test.ContainsError(customerr.ValOutsideRange, err,
-// 		"Get did not return the correct error with invalid index.", t,
-// 	)
-// 	for i := 0; i < 5; i++ {
-// 		container.Emplace(i,i)
-// 	}
-// 	for i := 0; i < 5; i++ {
-// 		_v, err := container.Get(i)
-// 		test.BasicTest(i, _v,
-// 			"Get did not return the correct value.", t,
-// 		)
-// 		test.BasicTest(nil, err,
-// 			"Get returned an error when it shouldn't have.", t,
-// 		)
-// 	}
-// 	_, err = container.Get(-1)
-// 	test.ContainsError(customerr.ValOutsideRange, err,
-// 		"Get did not return the correct error with invalid index.", t,
-// 	)
-// 	_, err = container.Get(6)
-// 	test.ContainsError(customerr.ValOutsideRange, err,
-// 		"Get did not return the correct error with invalid index.", t,
-// 	)
-// }
-// 
+func mapReadInterface[T any, U any](c dynamicContainers.ReadMap[T,U])   {}
+func mapWriteInterface[T any, U any](c dynamicContainers.WriteMap[T,U]) {}
+func mapInterface[T any, U any](c dynamicContainers.Map[T,U])           {}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func MapInterfaceSyncableInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.RWSyncable = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.Length] interface.
+func MapInterfaceLengthInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.Length = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.Clear] interface.
+func MapInterfaceClearInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.Clear = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.KeyedWriteOps] interface.
+func MapInterfaceWriteKeyedOpsInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.WriteKeyedOps[K, V] = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.ReadOps] interface.
+func MapInterfaceReadOpsInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.ReadOps[V] = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.KeyedReadOps] interface.
+func MapInterfaceReadKeyedOpsInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.ReadKeyedOps[K, V] = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.DeleteOps] interface.
+func MapInterfaceDeleteOpsInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.DeleteOps[K, V] = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.KeyedDeleteOps] interface.
+func MapInterfaceDeleteKeyedOpsInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	var container containerTypes.DeleteKeyedOps[K, V] = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [dynamicContainers.MapRead] interface.
+func ReadMapInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	mapReadInterface[K,V](factory())
+}
+
+// Tests that the value supplied by the factory implements the
+// [dynamicContainers.WriteMap] interface.
+func WriteMapInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	mapWriteInterface[K,V](factory())
+}
+
+// Tests that the value supplied by the factory implements the
+// [dynamicContainers.Map] interface.
+func MapInterfaceInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	mapInterface[K,V](factory())
+}
+
+// Tests that the value supplied by the factory does not implement the
+// [staticContainers.Map] interface.
+func MapInterfaceStaticCapacityInterface[K any, V any](
+	factory func() dynamicContainers.Map[K,V],
+	t *testing.T,
+) {
+	test.Panics(
+		func() {
+			var c any
+			c = factory()
+			c2 := c.(containerTypes.StaticCapacity)
+			_ = c2
+		},
+		t,
+	)
+}
+
+// Tests the Get method functionality of a dynamic map.
+func MapInterfaceGet(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	container := factory()
+	_, err := container.Get(0)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
+	for i := 0; i < 5; i++ {
+		container.Emplace(basic.Pair[int, int]{i,i})
+	}
+	for i := 0; i < 5; i++ {
+		_v, err := container.Get(i)
+		test.Eq(i, _v,t)
+		test.Nil(err,t)
+	}
+	_, err = container.Get(-1)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
+	_, err = container.Get(6)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
+}
+
 // // Tests the GetPntr method functionality of a dynamic map.
 // func MapInterfaceGetPntr(
 // 	factory func() dynamicContainers.Map[int,int],

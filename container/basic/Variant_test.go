@@ -15,24 +15,20 @@ func TestVariantA(t *testing.T){
     var tmp int=5;
     v:=Variant[int,testStruct]{};
     newV:=v.SetValA(tmp);
-    test.BasicTest(true,newV.HasA(),"Variant did not claim to have correct value.",t);
-    test.BasicTest(false,newV.HasB(),"Variant did not claim to have correct value.",t);
-    test.BasicTest(5,newV.ValA(),"Variant did not return correct value.",t);
-    test.BasicTest(5,newV.ValAOr(1),"Variant did not return correct value.",t);
-    test.BasicTest(testStruct{},newV.ValBOr(testStruct{}),
-        "Variant did not return correct value.",t,
-    );
+    test.True(newV.HasA(),t);
+    test.False(newV.HasB(),t);
+    test.Eq(5,newV.ValA(),t);
+    test.Eq(5,newV.ValAOr(1),t);
+    test.Eq(testStruct{},newV.ValBOr(testStruct{}),t)
 }
 
 func TestVariantB(t *testing.T){
     var tmp testStruct=testStruct{a: 1, b: 2};
     v:=Variant[int,testStruct]{};
     newV:=v.SetValB(tmp);
-    test.BasicTest(false,newV.HasA(),"Variant did not claim to have correct value.",t);
-    test.BasicTest(true,newV.HasB(),"Variant did not claim to have correct value.",t);
-    test.BasicTest(tmp,newV.ValB(),"Variant did not return correct value.",t);
-    test.BasicTest(1,newV.ValAOr(1),"Variant did not return correct value.",t);
-    test.BasicTest(tmp,newV.ValBOr(testStruct{}),
-        "Variant did not return correct value.",t,
-    );
+    test.False(newV.HasA(),t);
+    test.True(newV.HasB(),t);
+    test.Eq(tmp,newV.ValB(),t);
+    test.Eq(1,newV.ValAOr(1),t);
+    test.Eq(tmp,newV.ValBOr(testStruct{}),t)
 }

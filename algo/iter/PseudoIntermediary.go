@@ -116,37 +116,3 @@ func (i Iter[T]) Setup(setup func() error) Iter[T] {
 func (i Iter[T]) Teardown(teardown func() error) Iter[T] {
 	return i.SetupTeardown(func() error { return nil }, teardown)
 }
-
-// TODO - reimplement after circular queue is finished
-// TODO - delete after implementing in containers
-// // This function is an intermediary.
-// //
-// //Window cannot be tested here because it would cause a circular import with the
-// //dataStruct module. Testing would require importing a specific implementation
-// //of a queue. Using the types interface definition is the only thing preventing
-// //a circular import now.
-//
-// // Window will take the parent iterator and return a window of it'c cached values
-// // of length equal to the allowed capacity of the supplied queue (q). Note that
-// // a static queue is expected to be passed instead of a dynamic one. If
-// // allowPartials is true then windows that are not full will be returned. Setting
-// // allowPartials to false will enforce all returned windows to have length equal
-// // to the allowed capacity of the supplied queue. An error will stop iteration.
-// func Window[T any](i Iter[T],
-//     q interface{ staticContainers.Queue[T]; staticContainers.Vector[T] },
-//     allowPartials bool,
-// ) Iter[staticContainers.Vector[T]] {
-//     return Next(i,
-//     func(
-//         index int, val T, status IteratorFeedback,
-//     ) (IteratorFeedback, staticContainers.Vector[T], error) {
-//         if status==Break {
-//             return Break,q,nil;
-//         }
-//         q.ForcePushBack(val);
-//         if !allowPartials && q.Length()!=q.Capacity() {
-//             return Iterate,q,nil;
-//         }
-//         return Continue,q,nil;
-//     });
-// }
