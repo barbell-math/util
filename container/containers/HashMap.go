@@ -1,7 +1,6 @@
 package containers
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/barbell-math/util/algo/hash"
@@ -223,12 +222,9 @@ func (m *SyncedHashMap[K, V, KI, VI])Get(k K) (V,error) {
 func (h *HashMap[K, V, KI, VI])getHashPosition(k *K) (hash.Hash,bool) {
     w:=widgets.NewWidget[K,KI]()
     for i:=w.Hash(k); ; i++ {
-        fmt.Println("Considering hash: ",i)
         if iterV,found:=h.internalHashMapImpl[i]; found && w.Eq(k,&iterV.A) {
-            fmt.Println("Found acceptable value.")
             return i,true 
         } else if !found {
-            fmt.Println("No value found.")
             return hash.Hash(0),false
         }
     }
@@ -303,6 +299,7 @@ func (m *SyncedHashMap[K, V, KI, VI])Set(kvPairs ...basic.Pair[K,V]) error {
 func (m *HashMap[K, V, KI, VI])setImpl(kvPairs []basic.Pair[K,V]) error {
     for i:=0; i<len(kvPairs); i++ {
         if h,found:=m.getHashPosition(&kvPairs[i].A); found {
+            m.zeroKVPair(h)
             m.internalHashMapImpl[h]=kvPairs[i]
         } else {
             return getKeyError[K](&kvPairs[i].A)
@@ -341,12 +338,15 @@ func (m *SyncedHashMap[K, V, KI, VI])Emplace(vals ...basic.Pair[K,V]) error {
 }
 
 func (m *HashMap[K, V, KI, VI])emplaceImpl(v *basic.Pair[K,V]) {
-    w:=widgets.NewWidget[K,KI]()
-    for i:=w.Hash(&v.A); ; i++ {
+    kw:=widgets.NewWidget[K,KI]()
+    for i:=kw.Hash(&v.A); ; i++ {
         if iterV,found:=m.internalHashMapImpl[i]; !found {
+            // Reached end of collision chain, insert
             m.internalHashMapImpl[i]=*v
             break
-        } else if w.Eq(&v.A,&iterV.A) {
+        } else if kw.Eq(&v.A,&iterV.A) {
+            // Found value in collision chain, set value
+            m.zeroKVPair(i)
             m.internalHashMapImpl[i]=*v
             break
         }
@@ -381,20 +381,20 @@ func (m *HashMap[K, V, KI, VI])popImpl(v *V) int {
     vw:=widgets.NewWidget[V,VI]()
     for iterH,iterV:=range(m.internalHashMapImpl) {
         if vw.Eq(&iterV.B,v) {
-            m.removeValue(iterH,v)
+            m.removeMultipleValues(iterH,v)
             rv++
         }
     }
     return rv
 }
 
-func (m *HashMap[K, V, KI, VI])removeValue(h hash.Hash, v *V) {
+func (m *HashMap[K, V, KI, VI])removeMultipleValues(h hash.Hash, v *V) {
     kw:=widgets.NewWidget[K,KI]()
     vw:=widgets.NewWidget[V,VI]()
+    m.zeroKVPair(h)
     delete(m.internalHashMapImpl,h)
     curPos:=h
     for j:=h+1; ; j++ {
-        fmt.Println("Looking at hash: ",j)
         if iterV,found:=m.internalHashMapImpl[j]; found {
             // If the hash of iterV is > the curPos then do not move it, it 
             // is already in the correct position, but continue on this 
@@ -417,6 +417,7 @@ func (m *HashMap[K, V, KI, VI])removeValue(h hash.Hash, v *V) {
                 continue
             }
             m.internalHashMapImpl[curPos]=m.internalHashMapImpl[j]
+            m.zeroKVPair(h)
             delete(m.internalHashMapImpl,j)
             curPos=j 
         } else {
@@ -425,18 +426,88 @@ func (m *HashMap[K, V, KI, VI])removeValue(h hash.Hash, v *V) {
     }
 }
 
+func (m *HashMap[K, V, KI, VI])zeroKVPair(h hash.Hash) {
+    kw:=widgets.NewWidget[K,KI]()
+    vw:=widgets.NewWidget[V,VI]()
+    if v,ok:=m.internalHashMapImpl[h]; ok {
+        kw.Zero(&v.A)
+        vw.Zero(&v.B)
+    }
+}
+
+// Description: Deletes the key value pair that has the specified key. Returns 
+// an error if the key is not found in the hash map.
+//
+// Time Complexity: O(1)
 func (m *HashMap[K, V, KI, VI])Delete(k K) error {
-    return nil
+    return m.deleteImpl(&k)
 }
+// Description: Places a write lock on the underlying hash map and then calls 
+// the underlying hash maps [HashMap.Delete] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(1)
 func (m *SyncedHashMap[K, V, KI, VI])Delete(k K) error {
-    return nil
+    m.Lock()
+    defer m.Unlock()
+    return m.HashMap.deleteImpl(&k)
 }
 
+func (m *HashMap[K, V, KI, VI])deleteImpl(k *K) error {
+    if h,found:=m.getHashPosition(k); found {
+        m.removeSingleValue(h)
+        return nil
+    }
+    return getKeyError[K](k)
+}
+
+func (m *HashMap[K, V, KI, VI])removeSingleValue(h hash.Hash) {
+    kw:=widgets.NewWidget[K,KI]()
+    m.zeroKVPair(h)
+    delete(m.internalHashMapImpl,h)
+    curPos:=h
+    for j:=h+1; ; j++ {
+        if iterV,found:=m.internalHashMapImpl[j]; found {
+            // If the hash of iterV is > the curPos then do not move it, it 
+            // is already in the correct position, but continue on this 
+            // collision chain to check for other values that could move.
+            if kw.Hash(&iterV.A)>curPos {
+                continue
+            }
+            m.internalHashMapImpl[curPos]=m.internalHashMapImpl[j]
+            m.zeroKVPair(h)
+            delete(m.internalHashMapImpl,j)
+            curPos=j 
+        } else {
+            break
+        }
+    }
+}
+
+// Description: Clears all values from the map. Equivalent to making a new hash 
+// map and setting it equal to the current one.
+//
+// Time Complexity: O(1)
 func (m *HashMap[K, V, KI, VI])Clear() {
-
+    kw:=widgets.NewWidget[K,KI]()
+    vw:=widgets.NewWidget[V,VI]()
+    for _,v:=range(m.internalHashMapImpl) {
+        kw.Zero(&v.A)
+        vw.Zero(&v.B)
+    }
+    m.internalHashMapImpl=internalHashMapImpl[K,V]{}
 }
+// Description: Places a write lock on the underlying hash map and then calls 
+// the underlying hash maps [HashMap.Clear] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(1)
 func (m *SyncedHashMap[K, V, KI, VI])Clear() {
-
+    m.Lock()
+    defer m.Unlock()
+    m.HashMap.Clear()
 }
 
 func (m *HashMap[K, V, KI, VI])Keys() iter.Iter[K] {

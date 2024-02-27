@@ -346,6 +346,41 @@ func MapInterfacePop(
 	}
 }
 
+// Tests the Delete method functionality of a dynamic map.
+func MapInterfaceDelete(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	container := factory()
+	for i := 0; i < 6; i++ {
+		container.Emplace(basic.Pair[int, int]{i,i})
+	}
+	for i := container.Length() - 1; i >= 0; i-- {
+		container.Delete(i)
+		test.Eq(i, container.Length(), t)
+		for j := 0; j < i; j++ {
+			iterV, err := container.Get(j)
+			test.Eq(j, iterV, t)
+			test.Nil(err,t)
+		}
+	}
+	err := container.Delete(0)
+	test.ContainsError(containerTypes.KeyError, err,t)
+}
+
+// Tests the Clear method functionality of a dynamic map.
+func MapInterfaceClear(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	container := factory()
+	for i := 0; i < 6; i++ {
+		container.Emplace(basic.Pair[int,int]{i,i})
+	}
+	container.Clear()
+	test.Eq(0, container.Length(), t)
+}
+
 // func mapContainsHelper(
 // 	v dynamicContainers.Map[int,int],
 // 	l int,
