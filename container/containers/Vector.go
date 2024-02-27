@@ -309,8 +309,9 @@ func (v *Vector[T, U])keyOfImpl(val *T) (int,bool) {
     return rv,found
 }
 
-// Description: Sets the value at the specified index. Returns an error if the 
-// index is >= the length of the vector.
+// Description: Sets the values at the specified indexes. Returns an error if 
+// the index is >= the length of the vector. Stops setting values as soon as an
+// error is encountered.
 //
 // Time Complexity: O(m), where m=len(vals)
 func (v *Vector[T,U])Set(vals ...basic.Pair[int,T]) error {
@@ -319,7 +320,7 @@ func (v *Vector[T,U])Set(vals ...basic.Pair[int,T]) error {
 // Description: Places a write lock on the underlying vector and then calls the 
 // underlying vectors [Vector.Set] implementaiton method. The [Vector.Set]
 // method is not called directly to avoid copying the vals varargs twice, which
-// could be expensize with a large type for the T generic or a large number of
+// could be expensive with a large type for the T generic or a large number of
 // values.
 //
 // Lock Type: Write
@@ -523,37 +524,59 @@ func (v *Vector[T, U])insertSequentialImpl(idx int, vals []T) error {
     return getIndexOutOfBoundsError(idx,0,len(*v))
 }
 
-// Description: Pop will remove the first num occurrences of val in the vector. 
-// All equality comparisons are performed by the generic U widget type that the 
-// vector was initialized with. If num is <=0 then no values will be poped and 
-// the vector will not change.
+// Description: Pop will remove all occurrences of val in the vector. All 
+// equality comparisons are performed by the generic U widget type that the 
+// vector was initialized with.
 //
 // Time Complexity: O(n^2)
-func (v *Vector[T, U])Pop(val T, num int) int {
-    if num<=0 {
-        return 0
-    }
-    return v.popImpl(&val,num)
+func (v *Vector[T, U])Pop(val T) int {
+    return v.popSequentialImpl(&val,containerTypes.PopAll)
 }
 // Description: Places a write lock on the underlying vector and then calls the 
 // underlying vectors [Vector.Pop] implementation method. The [Vector.Pop] 
-// method is not called directly to avoid copying the vals varargs twice, which 
-// could be expensive with a large type for the T generic or a large number of 
-// values.
+// method is not called directly to avoid copying the value twice, which could 
+// be expensive with a large type for the T generic or a large number of values.
 //
 // Lock Type: Write
 //
 // Time Complexity: O(n^2)
-func (v *SyncedVector[T, U])Pop(val T, num int) int {
+func (v *SyncedVector[T, U])Pop(val T) int {
+    v.Lock()
+    defer v.Unlock()
+    return v.Vector.popSequentialImpl(&val,containerTypes.PopAll)
+}
+
+// Description: PopSequential will remove the first num occurrences of val in 
+// the vector. All equality comparisons are performed by the generic U widget 
+// type that the vector was initialized with. If num is <=0 then no values will 
+// be poped and the vector will not change.
+//
+// Time Complexity: O(n^2)
+func (v *Vector[T, U])PopSequential(val T, num int) int {
+    if num<=0 {
+        return 0
+    }
+    return v.popSequentialImpl(&val,num)
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.PopSequential] implementation method. The 
+// [Vector.PopSequential] method is not called directly to avoid copying the 
+// value twice, which could be expensive with a large type for the T generic or 
+// a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n^2)
+func (v *SyncedVector[T, U])PopSequential(val T, num int) int {
     if num<=0 {
         return 0
     }
     v.Lock()
     defer v.Unlock()
-    return v.Vector.popImpl(&val,num)
+    return v.Vector.popSequentialImpl(&val,num)
 }
 
-func (v *Vector[T, U])popImpl(val *T, num int) int {
+func (v *Vector[T, U])popSequentialImpl(val *T, num int) int {
     cntr:=0
     prevIndex:=-1
     w:=widgets.NewWidget[T,U]()
@@ -602,6 +625,11 @@ func (v *SyncedVector[T, U])Delete(idx int) error {
     v.Lock()
     defer v.Unlock()
     return v.Vector.Delete(idx)
+}
+
+// TODO - impl and test
+func (v *Vector[T, U])DeleteSequential(start int, end int) error {
+    return nil
 }
 
 // Description: Clears all values from the vector. Equivalent to making a new 

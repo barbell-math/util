@@ -257,11 +257,8 @@ func (h *HashSet[T, U])appendOp(v *T) {
 // the hash set will not change.
 //
 // Time Complexity: O(m), where m=num
-func (h *HashSet[T, U])Pop(v T, num int) int {
-    if num<=0 {
-        return 0
-    }
-    return h.popImpl(&v,num)
+func (h *HashSet[T, U])Pop(v T) int {
+    return h.popImpl(&v)
 }
 // Description: Places a write lock on the underlying hash set and then calls 
 // the underlying hash sets [hash set.Pop] implementation method. The 
@@ -272,13 +269,13 @@ func (h *HashSet[T, U])Pop(v T, num int) int {
 // Lock Type: Write
 //
 // Time Complexity: O(m), where m=num
-func (h *SyncedHashSet[T, U])Pop(v T, num int) int {
+func (h *SyncedHashSet[T, U])Pop(v T) int {
     h.Lock()
     defer h.Unlock()
-    return h.HashSet.popImpl(&v,num)
+    return h.HashSet.popImpl(&v)
 }
 
-func (h *HashSet[T, U])popImpl(v *T, num int) int {
+func (h *HashSet[T, U])popImpl(v *T) int {
     w:=widgets.NewWidget[T,U]()
     if i,cont:=h.getHashPosition(v); cont {
         delete(h.internalHashSetImpl,i)

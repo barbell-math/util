@@ -25,6 +25,8 @@ type WriteVector[V any] interface {
 	containerTypes.WriteDynKeyedOps[int,V]
 	containerTypes.DeleteOps[int,V]
 	containerTypes.DeleteKeyedOps[int,V]
+	containerTypes.DeleteSequentialOps[int,V]
+	containerTypes.DeleteKeyedSequentialOps[int,V]
 }
 // An interface that represents a vector with no restrictions on reading or
 // writing.

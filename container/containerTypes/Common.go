@@ -161,12 +161,20 @@ type WriteStaticKeyedSequentialOps[K any, V any] interface {
 
 // An interface that enforces implementation of delete-only, value-only, operations.
 type DeleteOps[K any, V any] interface {
-    Pop(v V, num int) int
+    Pop(v V) int
+}
+// An interface that enforces implementation of delete-only, value-only, 
+// sequential operations.
+type DeleteSequentialOps[K any, V any] interface {
+    PopSequential(v V, num int) int
 }
 // An interface that enforces implementation of delete-only, key/value, operations.
 type DeleteKeyedOps[K any, V any] interface {
-    DeleteOps[K,V]
     Delete(idx K) error
+}
+// An interface that enforces implementation of delete-only, key/value, operations.
+type DeleteKeyedSequentialOps[K any, V any] interface {
+    DeleteSequential(idx K, num int) error
 }
 
 // An interface that enforces the implementation of read-only first element access.

@@ -136,6 +136,26 @@ func VectorInterfaceDeleteKeyedOpsInterface[V any](
 }
 
 // Tests that the value supplied by the factory implements the
+// [containerTypes.KeyedDeleteOps] interface.
+func VectorInterfaceDeleteSequentialOpsInterface[V any](
+	factory func() dynamicContainers.Vector[V],
+	t *testing.T,
+) {
+	var container containerTypes.DeleteSequentialOps[int, V] = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.KeyedDeleteOps] interface.
+func VectorInterfaceDeleteKeyedSequentialOpsInterface[V any](
+	factory func() dynamicContainers.Vector[V],
+	t *testing.T,
+) {
+	var container containerTypes.DeleteKeyedSequentialOps[int, V] = factory()
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
 // [dynamicContainers.VectorRead] interface.
 func ReadVectorInterface[V any](
 	factory func() dynamicContainers.Vector[V],
@@ -513,7 +533,7 @@ func VectorInterfaceInsertSequential(
 	}
 }
 
-func vectorPopHelper(
+func vectorPopSequentialHelper(
 	factory func() dynamicContainers.Vector[int],
 	l int,
 	num int,
@@ -529,7 +549,7 @@ func vectorPopHelper(
 		}
 	}
 	// fmt.Println("Init:   ",v)
-	n := container.Pop(-1, num)
+	n := container.PopSequential(-1, num)
 	exp := factory()
 	cntr := 0
 	for i := 0; i < l; i++ {
@@ -549,8 +569,60 @@ func vectorPopHelper(
 	// fmt.Println("EXP:    ",exp)
 	// fmt.Println("Final:  ",v)
 	for i := 0; i < container.Length(); i++ {
-		iterV, _ := container.Get(i)
-		expIterV, _ := exp.Get(i)
+		iterV, found := container.Get(i)
+		expIterV, foundExp := exp.Get(i)
+		test.Nil(found,t)
+		test.Nil(foundExp,t)
+		test.Eq(expIterV, iterV,t)
+	}
+}
+
+// Tests the PopSequential method functionality of a dynamic vector.
+func VectorInterfacePopSequential(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	for i := 0; i < 13; i++ {
+		for j := 0; j < 13; j++ {
+			vectorPopSequentialHelper(factory, i, j, t)
+		}
+	}
+}
+
+func vectorPopHelper(
+	factory func() dynamicContainers.Vector[int],
+	l int,
+	t *testing.T,
+) {
+	// fmt.Println("Permutation: l: ",l," num: ",num)
+	container := factory()
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	// fmt.Println("Init:   ",v)
+	n := container.Pop(-1)
+	exp := factory()
+	cntr := 0
+	for i := 0; i < l; i++ {
+		if i%4 != 0 {
+			exp.Append(i)
+		} else {
+			cntr++
+		}
+	}
+	test.Eq(exp.Length(), container.Length(),t)
+	test.Eq(cntr, n,t)
+	// fmt.Println("EXP:    ",exp)
+	// fmt.Println("Final:  ",v)
+	for i := 0; i < container.Length(); i++ {
+		iterV, found := container.Get(i)
+		expIterV, foundExp := exp.Get(i)
+		test.Nil(found,t)
+		test.Nil(foundExp,t)
 		test.Eq(expIterV, iterV,t)
 	}
 }
@@ -561,9 +633,7 @@ func VectorInterfacePop(
 	t *testing.T,
 ) {
 	for i := 0; i < 13; i++ {
-		for j := 0; j < 13; j++ {
-			vectorPopHelper(factory, i, j, t)
-		}
+		vectorPopHelper(factory, i, t)
 	}
 }
 
@@ -708,7 +778,7 @@ func VectorInterfaceKeyedEq(
 	v2.Append(1, 2, 3)
 	test.True(v.KeyedEq(v2),t)
 	test.True(v2.KeyedEq(v),t)
-	v.Pop(3,1)
+	v.Pop(3)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
 	v.Append(3)
@@ -716,7 +786,7 @@ func VectorInterfaceKeyedEq(
 	v2.Append(3, 1, 2)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
-	v.Pop(3,1)
+	v.Pop(3)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
 	v = factory()
@@ -725,7 +795,7 @@ func VectorInterfaceKeyedEq(
 	v2.Append(0)
 	test.True(v.KeyedEq(v2), t)
 	test.True(v2.KeyedEq(v), t)
-	v.Pop(0,1)
+	v.Pop(0)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
 	v = factory()

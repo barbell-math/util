@@ -1,12 +1,15 @@
 package tests
 
 import (
+	// "fmt"
+	"fmt"
 	"testing"
 	//
 	// 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
+
 	// "github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )
@@ -190,6 +193,156 @@ func MapInterfaceGetPntr(
 			},
 			t,
 		)
+	}
+}
+
+// Tests the Set method functionality of a dynamic map.
+func MapInterfaceSet(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	container := factory()
+	err := container.Set(basic.Pair[int, int]{0,6})
+	test.ContainsError(containerTypes.KeyError, err,t)
+	for i := 0; i < 5; i++ {
+		container.Emplace(basic.Pair[int, int]{i,i})
+	}
+	for i := 0; i < 5; i++ {
+		err := container.Set(basic.Pair[int,int]{i, i+1})
+		test.Nil(err,t)
+	}
+	for i := 0; i < 5; i++ {
+		iterV, _ := container.Get(i)
+		test.Eq(i+1, iterV,t)
+	}
+	err = container.Set(basic.Pair[int,int]{-1, 6})
+	test.ContainsError(containerTypes.KeyError, err,t)
+	err = container.Set(basic.Pair[int,int]{6, 6})
+	test.ContainsError(containerTypes.KeyError, err,t)
+}
+
+func mapContainsHelper(
+	v dynamicContainers.Map[int,int],
+	l int,
+	t *testing.T,
+) {
+	for i := 0; i < l; i++ {
+		v.Emplace(basic.Pair[int, int]{i,i})
+	}
+	for i := 0; i < l; i++ {
+		test.True(v.Contains(i),t)
+	}
+	test.False(v.Contains(-1),t)
+	test.False(v.Contains(l),t)
+}
+// Tests the Contains method functionality of a dynamic map.
+func MapInterfaceContains(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	mapContainsHelper(factory(), 0, t)
+	mapContainsHelper(factory(), 1, t)
+	mapContainsHelper(factory(), 2, t)
+	mapContainsHelper(factory(), 5, t)
+}
+
+func mapContainsPntrHelper(
+	v dynamicContainers.Map[int,int],
+	l int,
+	t *testing.T,
+) {
+	for i := 0; i < l; i++ {
+		v.Emplace(basic.Pair[int, int]{i,i})
+	}
+	for i := 0; i < l; i++ {
+		test.True(v.ContainsPntr(&i),t)
+	}
+	tmp:=-1
+	test.False(v.ContainsPntr(&tmp),t)
+	test.False(v.ContainsPntr(&l),t)
+}
+// Tests the ContainsPntr method functionality of a dynamic map.
+func MapInterfaceContainsPntr(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	mapContainsHelper(factory(), 0, t)
+	mapContainsHelper(factory(), 1, t)
+	mapContainsHelper(factory(), 2, t)
+	mapContainsHelper(factory(), 5, t)
+}
+
+func mapKeyOfHelper(
+	v dynamicContainers.Map[int,int],
+	l int,
+	t *testing.T,
+) {
+	for i := 0; i < l; i++ {
+		v.Emplace(basic.Pair[int, int]{i,i})
+	}
+	for i := 0; i < l; i++ {
+		k, found := v.KeyOf(i)
+		test.Eq(i, k,t)
+		test.True(found,t)
+	}
+	_, found := v.KeyOf(-1)
+	test.False(found,t)
+	_, found = v.KeyOf(-1)
+	test.False(v.Contains(l),t)
+}
+// Tests the KeyOf method functionality of a dynamic map.
+func MapInterfaceKeyOf(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	mapKeyOfHelper(factory(), 0, t)
+	mapKeyOfHelper(factory(), 1, t)
+	mapKeyOfHelper(factory(), 2, t)
+	mapKeyOfHelper(factory(), 5, t)
+}
+
+func mapPopHelper(
+	factory func() dynamicContainers.Map[int,int],
+	l int,
+	t *testing.T,
+) {
+	// fmt.Println("Permutation: l: ",l," num: ",num)
+	container := factory()
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Emplace(basic.Pair[int, int]{i,-1})
+		} else {
+			container.Emplace(basic.Pair[int, int]{i,i})
+		}
+	}
+	fmt.Println("Init:   ",container)
+	n := container.Pop(-1)
+	fmt.Println("After pop: ",container)
+	// exp := factory()
+	cntr := 0
+	expLength:=0
+	for i := 0; i < l; i++ {
+		if i%4 != 0 {
+			// exp.Emplace(basic.Pair[int, int]{i,i})
+			expLength++
+			fmt.Println("Getting ",i)
+			iterV, found:=container.Get(i)
+			test.Nil(found,t)
+			test.Eq(i,iterV,t)
+		} else {
+			cntr++
+		}
+	}
+	test.Eq(cntr,n,t)
+	test.Eq(expLength, container.Length(),t)
+}
+// Tests the Pop method functionality of a dynamic map.
+func MapInterfacePop(
+	factory func() dynamicContainers.Map[int,int],
+	t *testing.T,
+) {
+	for i := 0; i < 13; i++ {
+		mapPopHelper(factory, i, t)
 	}
 }
 

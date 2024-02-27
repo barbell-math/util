@@ -34,6 +34,14 @@ func getSizeError(size int) error {
     )
 }
 
+func getKeyError[K any](k *K) error {
+    return customerr.Wrap(
+        containerTypes.KeyError,
+        "The supplied key (%v) was not found in the container.",
+        *k,
+    )
+}
+
 func getIndexOutOfBoundsError(idx int, upper int, lower int) error {
     return customerr.AppendError(
         customerr.Wrap(

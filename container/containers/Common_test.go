@@ -7,8 +7,8 @@ import (
 
 type (
     // badBuiltinInt is a type that forces hash collisions to occur with integer
-    // types. It does this by providing a horrible hash function. 
-    // !!! This type sould be used for testing only. !!!
+    // types. It does this by providing a *horrible* hash function. 
+    // !!! This type should be used for testing only. !!!
     badBuiltinInt struct {
 	widgets.BuiltinInt
     }
@@ -17,4 +17,3 @@ type (
 func (b badBuiltinInt)Hash(v *int) hash.Hash {
     return hash.Hash(*v%2)
 }
-

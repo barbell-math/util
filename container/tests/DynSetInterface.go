@@ -164,7 +164,7 @@ func SetInterfaceContainsPntr(
 	test.False(container.ContainsPntr(&v),t)
 	v=-1
 	test.False(container.ContainsPntr(&v),t)
-	container.Pop(0,1)
+	container.Pop(0)
 	v=0
 	test.False(container.ContainsPntr(&v),t)
 	for i:=1; i<5; i++ {
@@ -186,7 +186,7 @@ func SetInterfaceContains(
 	}
 	test.False(container.Contains(5),t)
 	test.False(container.Contains(-1),t)
-	container.Pop(0,1)
+	container.Pop(0)
 	test.False(container.Contains(0),t)
 	for i:=1; i<5; i++ {
 		test.True(container.Contains(i),t)
@@ -248,8 +248,9 @@ func SetInterfacePop(
 	}
 	for i:=0; i<5; i++ {
 		test.True(container.Contains(i),t)
-		container.Pop(i,1)
+		container.Pop(i)
 		test.False(container.Contains(i),t)
+		test.Eq(4-i, container.Length(),t)
 	}
 }
 
@@ -264,7 +265,7 @@ func SetInterfaceUnorderedEq(
 	v2.AppendUnique(1, 2, 3)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
-	v.Pop(3,1)
+	v.Pop(3)
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
 	v.AppendUnique(3)
@@ -272,7 +273,7 @@ func SetInterfaceUnorderedEq(
 	v2.AppendUnique(3, 1, 2)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
-	v.Pop(3,1)
+	v.Pop(3)
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
 	v.AppendUnique(3)
@@ -280,7 +281,7 @@ func SetInterfaceUnorderedEq(
 	v2.AppendUnique(2, 3, 1)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
-	v.Pop(3,1)
+	v.Pop(3)
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
 	v = factory()
@@ -289,7 +290,7 @@ func SetInterfaceUnorderedEq(
 	v2.AppendUnique(0)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
-	v.Pop(0,1)
+	v.Pop(0)
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
 	v = factory()
