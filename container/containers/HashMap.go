@@ -616,3 +616,79 @@ func (m *SyncedHashMap[K, V, KI, VI])KeyedEq(
     defer other.RUnlock()
     return m.HashMap.KeyedEq(other)
 }
+
+// An equality function that implements the [algo.widget.WidgetInterface] 
+// interface. Internally this is equivalent to [HashMap.KeyedEq]. Returns true
+// if l==r, false otherwise.
+func (m *HashMap[K, V, KI, VI])Eq(
+    l *HashMap[K,V,KI,VI],
+    r *HashMap[K,V,KI,VI],
+) bool {
+    return l.KeyedEq(r)
+}
+// An equality function that implements the [algo.widget.WidgetInterface] 
+// interface. Internally this is equivalent to [SyncedHashMap.KeyedEq]. Returns
+// true if l==r, false otherwise.
+func (m *SyncedHashMap[K, V, KI, VI])Eq(
+    l *SyncedHashMap[K,V,KI,VI], 
+    r *SyncedHashMap[K,V,KI,VI],
+) bool {
+    return l.KeyedEq(r)
+}
+
+// Panics, hash maps cannot be compared for order.
+func (m *HashMap[K, V, KI, VI])Lt(
+    l *HashMap[K,V,KI,VI], 
+    r *HashMap[K,V,KI,VI],
+) bool {
+    panic("Hash maps cannot be compared relative to each other.")
+}
+// Panics, hash maps cannot be compared for order.
+func (m *SyncedHashMap[K, V, KI, VI])Lt(
+    l *SyncedHashMap[K,V,KI,VI], 
+    r *SyncedHashMap[K,V,KI,VI],
+) bool {
+    panic("Hash maps cannot be compared relative to each other.")
+}
+
+// A function that returns a hash of a hash map. To do this all of the 
+// individual hashes that are produced from the elements of the hash map are 
+// combined in a way that maintains identity, making it so the hash will 
+// represent the same equality operation that [HashMap.KeyedEq] and 
+// [HashMap.Eq] provide.
+func (m *HashMap[K, V, KI, VI])Hash(other *HashMap[K,V,KI,VI]) hash.Hash {
+    cntr:=0
+    var rv hash.Hash
+    kw:=widgets.NewWidget[K,KI]()
+    vw:=widgets.NewWidget[V,VI]()
+    for _,iterV:=range(m.internalHashMapImpl) {
+        iterH:=kw.Hash(&iterV.A).Combine(vw.Hash(&iterV.B))
+        if cntr==0 {
+            rv=iterH
+            cntr++
+        } else {
+            rv=rv.CombineUnordered(kw.Hash(&iterV.A).Combine(vw.Hash(&iterV.B)))
+        }
+    }
+    return rv
+}
+// Places a read lock on the underlying hash map of other and then calls others
+// underlying hash maps [HashMap.IsSubset] method.
+func (m *SyncedHashMap[K, V, KI, VI])Hash(
+    other *SyncedHashMap[K,V,KI,VI],
+) hash.Hash {
+    other.RLock()
+    defer other.RUnlock()
+    return m.HashMap.Hash(&other.HashMap)
+}
+
+// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// Internally this is equivalent to [HashMap.Clear].
+func (m *HashMap[K, V, KI, VI])Zero(other *HashMap[K,V,KI,VI]) {
+    other.Clear()
+}
+// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// Internally this is equivalent to [SyncedHashMap.Clear].
+func (m *SyncedHashMap[K, V, KI, VI])Zero(other *SyncedHashMap[K,V,KI,VI]) {
+    other.Clear()
+}

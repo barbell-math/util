@@ -50,10 +50,7 @@ func TestHashSetHash(t *testing.T) {
     s2.AppendUnique(0,1,2,3,4)
     test.Eq(s1.Hash(&s1),s2.Hash(&s2),t)
     s2.AppendUnique(5)
-    test.False(s1.Hash(&s1)==s2.Hash(&s2),t)
-    for i:=5; i<100; i++ {
-        s2.AppendUnique(i*100)
-    }
+    test.Neq(s1.Hash(&s1),s2.Hash(&s2),t)
     h:=s1.Hash(&s1)
     for i:=0; i<100; i++ {
 	test.Eq(h,s1.Hash(&s1),t)

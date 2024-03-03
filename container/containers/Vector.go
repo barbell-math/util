@@ -1367,7 +1367,7 @@ func (v *SyncedVector[T, U])Lt(l *SyncedVector[T,U], r *SyncedVector[T,U]) bool 
 // way that maintains identity, making it so the hash will represent the same
 // equality operation that [Vector.KeyedEq] and [Vector.Eq] provide.
 func (c *Vector[T, U])Hash(other *Vector[T,U]) hash.Hash {
-    var rv hash.Hash=0
+    var rv hash.Hash
     w:=widgets.NewWidget[T,U]()
     if len(*other)>0 {
         rv=w.Hash(&(*other)[0])    
@@ -1393,5 +1393,5 @@ func (v *Vector[T, U])Zero(other *Vector[T,U]) {
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [SyncedVector.Clear].
 func (v *SyncedVector[T, U])Zero(other *SyncedVector[T,U]) {
-    other.Vector.Clear()
+    other.Clear()
 }

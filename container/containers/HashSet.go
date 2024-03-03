@@ -640,17 +640,29 @@ func (h *SyncedHashSet[T, U])Eq(
 func (h *HashSet[T, U])Lt(l *HashSet[T,U], r *HashSet[T,U]) bool {
     panic("Sets cannot be compared relative to each other.")
 }
+// Panics, sets cannot be compared for order.
+func (h *SyncedHashSet[T, U])Lt(
+    l *SyncedHashSet[T,U],
+    r *SyncedHashSet[T,U],
+) bool {
+    panic("Sets cannot be compared relative to each other.")
+}
 
 // A function that returns a hash of a hash set. To do this all of the individual
 // hashes that are produced from the elements of the hash set are combined in a
 // way that maintains identity, making it so the hash will represent the same
 // equality operation that [HashSet.KeyedEq] and [HashSet.Eq] provide.
 func (h *HashSet[T, U])Hash(other *HashSet[T,U]) hash.Hash {
-    var rv hash.Hash=0
+    cntr:=0
+    var rv hash.Hash
     w:=widgets.NewWidget[T,U]()
-    rv=hash.Hash(0)
     for _,v:=range(other.internalHashSetImpl) {
-        rv=rv.CombineUnordered(w.Hash(&v))
+        if cntr==0 {
+            rv=w.Hash(&v)
+            cntr++
+        } else {
+            rv=rv.CombineUnordered(w.Hash(&v))
+        }
     }
     return rv
 }
@@ -670,5 +682,5 @@ func (h *HashSet[T, U])Zero(other *HashSet[T,U]) {
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [SyncedHashSet.Clear].
 func (v *SyncedHashSet[T, U])Zero(other *SyncedHashSet[T,U]) {
-    other.HashSet.Clear()
+    other.Clear()
 }
