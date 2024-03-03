@@ -141,10 +141,7 @@ func SetInterfaceValPntrs(
     	testSetPntrValsHelper(factory,1,t);
     	testSetPntrValsHelper(factory,2,t);
 	} else {
-		test.Panics(
-			func() { container.ValPntrs() },
-			t,
-		)
+		test.Panics( func() { container.ValPntrs() }, t)
 	}
 }
 

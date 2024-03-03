@@ -10,6 +10,19 @@ import (
 )
 
 
+func addressableSafeGet[K any, V any](
+    other containerTypes.KeyedComparisonsOtherConstraint[K,V],
+    k K,
+) (*V,error) {
+    if other.IsAddressable() {
+        return other.GetPntr(k)
+    } else {
+        tmp,err:=other.Get(k)
+        otherV:=&tmp
+        return otherV,err
+    }
+}
+
 func addressableSafeValIter[T any](
     other containerTypes.ComparisonsOtherConstraint[T],
     iterOp func(index int, val *T) (iter.IteratorFeedback,error),

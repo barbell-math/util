@@ -145,7 +145,7 @@ func (m *SyncedHashMap[K, V, KI, VI])Length() int {
 
 // Description: Contains will return true if the supplied value is in the 
 // map, false otherwise. All equality comparisons are performed by the 
-// generic VI widget type that the vector was initialized with. 
+// generic VI widget type that the hash map was initialized with. 
 //
 // Time Complexity: O(n) (linear search)
 func (m *HashMap[K, V, KI, VI])Contains(v V) bool {
@@ -247,10 +247,10 @@ func (m *HashMap[K, V, KI, VI])KeyOf(v V) (K,bool) {
     var tmp K
     return tmp,m.keyOfImpl(&tmp,&v)
 }
-// Description: Places a read lock on the underlying vector and then calls the 
-// underlying vectors [Map.KeyOf] implemenation method. The [Map.KeyOf] method 
-// is not called directly to avoid copying the val variable twice, which could 
-// be expensive with a large type for the V generic.
+// Description: Places a read lock on the underlying hash map and then calls the 
+// underlying hash map [HashMap.KeyOf] implemenation method. The [HashMap.KeyOf]
+// method is not called directly to avoid copying the val variable twice, which 
+// could be expensive with a large type for the V generic.
 //
 // Lock Type: Read
 //
@@ -282,10 +282,10 @@ func (m *HashMap[K, V, KI, VI])Set(kvPairs ...basic.Pair[K,V]) error {
     return m.setImpl(kvPairs)
 }
 // Description: Places a write lock on the underlying map and then calls the 
-// underlying vectors [Map.Set] implementaiton method. The [Map.Set] method is 
-// not called directly to avoid copying the vals varargs twice, which could be 
-// expensive with a large types for the K or V generics or a large number of 
-// values.
+// underlying hash map [HashMap.Set] implementaiton method. The [HashMap.Set] 
+// method is not called directly to avoid copying the vals varargs twice, which 
+// could be expensive with a large types for the K or V generics or a large 
+// number of values.
 //
 // Lock Type: Write
 //
@@ -510,106 +510,109 @@ func (m *SyncedHashMap[K, V, KI, VI])Clear() {
     m.HashMap.Clear()
 }
 
+// Description: Returns an iterator that iterates over the keys of the hash map.
+// The hash map will have a read lock the entire time the iteration is being 
+// performed. The lock will not be applied until the iterator starts to be 
+// consumed.
+//
+// Time Complexity: O(n)
 func (m *HashMap[K, V, KI, VI])Keys() iter.Iter[K] {
-    return iter.NoElem[K]()
+    return iter.Map[basic.Pair[K,V],K](
+        iter.MapVals[hash.Hash,basic.Pair[K,V]](m.internalHashMapImpl),
+        func(index int, val basic.Pair[K, V]) (K, error) { return val.A,nil },
+    )
 }
+// Description: Modifies the iterator chain returned by the unerlying 
+// [HashMap.Keys] method such that a read lock will be placed on the underlying 
+// hash map when the iterator is consumed. The hash map will have a read lock the 
+// entire time the iteration is being performed. The lock will not be applied 
+// until the iterator starts to be consumed.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n)
 func (m *SyncedHashMap[K, V, KI, VI])Keys() iter.Iter[K] {
-    return iter.NoElem[K]()
+    return m.HashMap.Keys().SetupTeardown(
+        func() error { m.RLock(); return nil },
+        func() error { m.RUnlock(); return nil },
+    )
 }
 
+// Description: Returns an iterator that iterates over the values in the hash 
+// map.
+//
+// Time Complexity: O(n)
 func (m *HashMap[K, V, KI, VI])Vals() iter.Iter[V] {
-    return iter.NoElem[V]()
+    return iter.Map[basic.Pair[K,V],V](
+        iter.MapVals[hash.Hash,basic.Pair[K,V]](m.internalHashMapImpl),
+        func(index int, val basic.Pair[K, V]) (V, error) { return val.B,nil },
+    )
 }
+// Description: Modifies the iterator chain returned by the unerlying 
+// [HashMap.Vals] method such that a read lock will be placed on the underlying 
+// hash map when the iterator is consumed. The hash map will have a read lock 
+// the entire time the iteration is being performed. The lock will not be 
+// applied until the iterator starts to be consumed.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n)
 func (m *SyncedHashMap[K, V, KI, VI])Vals() iter.Iter[V] {
-    return iter.NoElem[V]()
+    return m.HashMap.Vals().SetupTeardown(
+        func() error { m.RLock(); return nil },
+        func() error { m.RUnlock(); return nil },
+    )
 }
 
+// Panics, a hash set is not addressable.
 func (m *HashMap[K, V, KI, VI])ValPntrs() iter.Iter[*V] {
-    return iter.NoElem[*V]()
-}
-func (m *SyncedHashMap[K, V, KI, VI])ValPntrs() iter.Iter[*V] {
-    return iter.NoElem[*V]()
+    panic(getNonAddressablePanicText("hash map"))
 }
 
+// Description: Returns true if all the key value pairs in v are all contained 
+// in other and the key value pairs in other are all contained in v. Returns 
+// false otherwise. 
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the Get/GetPntr method on other. In big-O it might look something like this, 
+// O(n*O(other.GetPntr))), where n is the number of elements in v and 
+// O(other.ContainsPntr) represents the time complexity of the containsPntr 
+// method on other.
 func (m *HashMap[K, V, KI, VI])KeyedEq(
     other containerTypes.KeyedComparisonsOtherConstraint[K,V],
 ) bool {
-    return false
+    vw:=widgets.NewWidget[V,VI]()
+    if len(m.internalHashMapImpl)!=other.Length() {
+        return false
+    }
+    for _,v:=range(m.internalHashMapImpl) {
+	if otherV,err:=addressableSafeGet[K,V](other,v.A); err==nil {
+            if !vw.Eq(&v.B,otherV) {
+                return false
+            }
+	} else {
+	    return false
+	}
+    }
+    return true
 }
+// Description: Places a read lock on the underlying hash map and then calls the 
+// underlying hash map [HashMap.KeyedEq] method. Attempts to place a read lock 
+// on other but whether or not that happens is implementation dependent.
+//
+// Lock Type: Read on this hash map, read on other
+//
+// Time Complexity: Dependent on the time complexity of the implementation of 
+// the GetPntr method on other. In big-O it might look something like this, 
+// O(n*O(other.GetPntr))), where n is the number of elements in v and 
+// O(other.ContainsPntr) represents the time complexity of the containsPntr 
+// method on other.
 func (m *SyncedHashMap[K, V, KI, VI])KeyedEq(
     other containerTypes.KeyedComparisonsOtherConstraint[K,V],
 ) bool {
-    return false
-}
-
-func (m *HashMap[K, V, KI, VI])UnorderedEq(
-    other containerTypes.ComparisonsOtherConstraint[V],
-) bool {
-    return false
-}
-func (m *SyncedHashMap[K, V, KI, VI])UnorderedEq(
-    other containerTypes.ComparisonsOtherConstraint[V],
-) bool {
-    return false
-}
-
-func (m *HashMap[K, V, KI, VI])Union(
-    l containerTypes.ComparisonsOtherConstraint[V], 
-    r containerTypes.ComparisonsOtherConstraint[V],
-) {
-
-}
-func (m *SyncedHashMap[K, V, KI, VI])Union(
-    l containerTypes.ComparisonsOtherConstraint[V], 
-    r containerTypes.ComparisonsOtherConstraint[V],
-) {
-
-}
-
-func (m *HashMap[K, V, KI, VI])Intersection(
-    l containerTypes.ComparisonsOtherConstraint[V], 
-    r containerTypes.ComparisonsOtherConstraint[V],
-) {
-
-}
-func (m *SyncedHashMap[K, V, KI, VI])Intersection(
-    l containerTypes.ComparisonsOtherConstraint[V], 
-    r containerTypes.ComparisonsOtherConstraint[V],
-) {
-
-}
-
-func (m *HashMap[K, V, KI, VI])Difference(
-    l containerTypes.ComparisonsOtherConstraint[V], 
-    r containerTypes.ComparisonsOtherConstraint[V],
-) {
-
-}
-func (m *SyncedHashMap[K, V, KI, VI])Differnce(
-    l containerTypes.ComparisonsOtherConstraint[V], 
-    r containerTypes.ComparisonsOtherConstraint[V],
-) {
-
-}
-
-func (m *HashMap[K, V, KI, VI])IsSuperset(
-    other containerTypes.ComparisonsOtherConstraint[V],
-) bool {
-    return false
-}
-func (m *SyncedHashMap[K, V, KI, VI])IsSuperset(
-    other containerTypes.ComparisonsOtherConstraint[V],
-) bool {
-    return false
-}
-
-func (m *HashMap[K, V, KI, VI])IsSubset(
-    other containerTypes.ComparisonsOtherConstraint[V],
-) bool {
-    return false
-}
-func (m *SyncedHashMap[K, V, KI, VI])IsSubset(
-    other containerTypes.ComparisonsOtherConstraint[V],
-) bool {
-    return false
+    m.RLock()
+    other.RLock()
+    defer m.RUnlock()
+    defer other.RUnlock()
+    return m.HashMap.KeyedEq(other)
 }

@@ -733,10 +733,7 @@ func VectorInterfaceValPntrs(
     	testVectorPntrValsHelper(factory,1,t);
     	testVectorPntrValsHelper(factory,2,t);
 	} else {
-		test.Panics(
-			func() { container.ValPntrs() },
-			t,
-		)
+		test.Panics( func() { container.ValPntrs() }, t)
 	}
 }
 
@@ -757,6 +754,7 @@ func testVectorKeysHelper(
     });
     test.Eq(l,cnt,t)
 }
+// Tests the Keys method functionality of a dynamic vector.
 func VectorInterfaceKeys(
 	factory func() dynamicContainers.Vector[int],
 	t *testing.T,

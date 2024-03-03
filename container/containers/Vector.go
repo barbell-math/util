@@ -932,9 +932,9 @@ func (v *Vector[T,U])Vals() iter.Iter[T] {
 }
 // Description: Modifies the iterator chain returned by the unerlying 
 // [Vector.Vals] method such that a read lock will be placed on the underlying 
-// vector when iterator is consumer. The vector will have a read lock the entire 
-// time the iteration is being performed. The lock will not be applied until the 
-// iterator starts to be consumed.
+// vector when the iterator is consumed. The vector will have a read lock the 
+// entire time the iteration is being performed. The lock will not be applied 
+// until the iterator starts to be consumed.
 //
 // Lock Type: Read
 //
@@ -960,8 +960,8 @@ func (v *Vector[T,U])ValPntrs() iter.Iter[*T] {
 }
 // Description: Modifies the iterator chain returned by the unerlying 
 // [Vector.ValPntrs] method such that a read lock will be placed on the 
-// underlying vector when iterator is consumed. The vector will have a read lock 
-// the entire time the iteration is being performed. The lock will not be 
+// underlying vector when the iterator is consumed. The vector will have a read 
+// lock the entire time the iteration is being performed. The lock will not be 
 // applied until the iterator starts to be consumed.
 //
 // Lock Type: Read
@@ -976,7 +976,8 @@ func (v *SyncedVector[T, U])ValPntrs() iter.Iter[*T] {
 
 // Description: Returns an iterator that iterates over the keys (indexes) of the 
 // vector. The vector will have a read lock the entire time the iteration is 
-// being performed. The lock will not be applied until the iterator is consumed.
+// being performed. The lock will not be applied until the iterator starts to be
+// consumed.
 //
 // Time Complexity: O(n)
 func (v *Vector[T,U])Keys() iter.Iter[int] {
@@ -1040,7 +1041,7 @@ func (v *SyncedVector[T, U])UnorderedEq(
 // false otherwise. 
 //
 // Time Complexity: Dependent on the time complexity of the implementation of 
-// the GetPntr method on other. In big-O it might look something like this, 
+// the Get/GetPntr method on other. In big-O it might look something like this, 
 // O(n*O(other.GetPntr))), where n is the number of elements in v and 
 // O(other.ContainsPntr) represents the time complexity of the containsPntr 
 // method on other.
@@ -1050,11 +1051,11 @@ func (v *Vector[T,U])KeyedEq(
     w:=widgets.NewWidget[T,U]()
     rv:=(len(*v)==other.Length())
     for i:=0; i<len(*v) && rv; i++ {
-        if otherV,err:=other.GetPntr(i); err!=nil {
-            rv=false
-        } else {
-            rv=w.Eq(&(*v)[i],otherV)
-        }
+	if otherV,err:=addressableSafeGet[int,T](other,i); err==nil {
+	    rv=w.Eq(otherV,&(*v)[i])
+	} else {
+	    rv=false
+	}
     }
     return rv
 }
@@ -1102,7 +1103,7 @@ func (v *Vector[T,U])Intersection(
     newV:=make(Vector[T, U], 0, (l.Length()+r.Length())/2)
     addressableSafeValIter[T](
         l,
-        func( index int, val *T) (iter.IteratorFeedback, error) {
+        func(index int, val *T) (iter.IteratorFeedback, error) {
             if r.ContainsPntr(val) {
                 newV=append(newV, *val) 
             }

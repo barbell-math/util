@@ -114,14 +114,6 @@ type WriteUniqueKeyedOps[K any, V any] interface {
     // SetUnique(idx K, v V) error
 }
 
-// TODO
-// Add arith to widgets - map will need it for sequential ops, separate widget type?? Probably should be
-// Map interface tests
-// make map
-// reimpl circular buffer
-// make static container tests
-// add window producer it iterface file - move all necessary circular import tests
-
 // An interface that enforces implementation of write-only, value-only, operations.
 type WriteOps[V any] interface {
     Append(vals ...V) error
