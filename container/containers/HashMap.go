@@ -667,7 +667,7 @@ func (m *HashMap[K, V, KI, VI])Hash(other *HashMap[K,V,KI,VI]) hash.Hash {
             rv=iterH
             cntr++
         } else {
-            rv=rv.CombineUnordered(kw.Hash(&iterV.A).Combine(vw.Hash(&iterV.B)))
+            rv=rv.CombineUnordered(iterH)
         }
     }
     return rv

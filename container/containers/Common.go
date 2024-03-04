@@ -77,3 +77,11 @@ func getDuplicateValueError[T any](v T) error {
         v,
     )
 }
+
+func getStartEndIndexError(start int, end int) error {
+    return customerr.Wrap(
+        customerr.InvalidValue,
+        "The end index (%d) must be >= the start index (%d).",
+        end,start,
+    )
+}

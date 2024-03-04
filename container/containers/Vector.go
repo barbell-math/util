@@ -627,9 +627,34 @@ func (v *SyncedVector[T, U])Delete(idx int) error {
     return v.Vector.Delete(idx)
 }
 
-// TODO - impl and test
+// Description: Deletes the values between the specified indexes. Returns an 
+// error if the start index is < 0, the end index is >= the length of the 
+// vector, or the end index is < the start index.
+//
+// Time Complexity: O(n)
 func (v *Vector[T, U])DeleteSequential(start int, end int) error {
+    if start<0 {
+	return getIndexOutOfBoundsError(start,0,len(*v))
+    }
+    if end>=len(*v) {
+	return getIndexOutOfBoundsError(end,0,len(*v))
+    }
+    if end<start {
+	return getStartEndIndexError(start,end)
+    }
+    *v=append((*v)[0:start],(*v)[end:]...)
     return nil
+}
+// Description: Places a write lock on the underlying vector and then calls the 
+// underlying vectors [Vector.DeleteSequential] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])DeleteSequential(start int, end int) error {
+    v.Lock()
+    defer v.Unlock()
+    return v.Vector.DeleteSequential(start,end)
 }
 
 // Description: Clears all values from the vector. Equivalent to making a new 

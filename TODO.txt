@@ -1,5 +1,3 @@
-// implement map (vector cannot implement) How to represent in memory (dual sets seems bad...)
-// Map interface tests
 // Fix CSV
 // Make static interface tests - vector, queue, stack, deque, set
 // reimpl circular buffer

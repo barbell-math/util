@@ -658,6 +658,58 @@ func VectorInterfaceDelete(
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
 
+func testVectorDeleteSequentialHelper(
+	factory func() dynamicContainers.Vector[int],
+	start int,
+	end int,
+	l int,
+	t *testing.T,
+){
+	container:=factory()
+	for i:=0; i<l; i++ {
+		container.Append(i)
+	}
+	container.DeleteSequential(start,end)
+	test.Eq(l-(end-start),container.Length(),t)
+	for i:=0; i<l; i++ {
+		if i<start {
+			v,err:=container.Get(i)
+			test.Nil(err,nil)
+			test.Eq(i,v,t)
+		} else if i>=end {
+			v,err:=container.Get(i-(end-start))
+			test.Nil(err,nil)
+			test.Eq(i,v,t)
+		} else {
+			test.False(container.Contains(i),t)
+		}
+	}
+}
+// Tests the DeleteSequential method functionality of a dynamic vector.
+func VectorInterfaceDeleteSequential(
+	factory func() dynamicContainers.Vector[int],
+	t *testing.T,
+){
+	container:=factory()
+	container.Append(0,1,2,3)
+	err:=container.DeleteSequential(-1,3)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	test.Eq(4,container.Length(),t)
+	err=container.DeleteSequential(0,4)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	test.Eq(4,container.Length(),t)
+	err=container.DeleteSequential(2,1)
+	test.ContainsError(customerr.InvalidValue,err,t)
+	test.Eq(4,container.Length(),t)
+	for i:=0; i<20; i++ {
+		for j:=0; j<i; j++ {
+			for k:=j; k<i; k++ {
+				testVectorDeleteSequentialHelper(factory,j,k,i,t)
+			}
+		}
+	}
+}
+
 // Tests the Clear method functionality of a dynamic vector.
 func VectorInterfaceClear(
 	factory func() dynamicContainers.Vector[int],
