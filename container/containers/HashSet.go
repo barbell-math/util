@@ -209,16 +209,17 @@ func (h *HashSet[T, U])getHashPosition(v *T) (hash.Hash,bool) {
 }
 
 // Description: AppendUnique will append the supplied values to the hash set if 
-// they are not already present in the hash set (unique). Non-unique values will 
-// not be appended. This function will never return an error. 
+// they are not already present in the hash set (unique). If a non-unique value
+// is found an error will be returned and no further values will be appended.
 //
 // Time Complexity: Best case O(m) (no reallocation), worst case O(n+m) 
 // (reallocation), where m=len(vals).
 func (h *HashSet[T, U])AppendUnique(vals ...T) error {
-    for i:=0; i<len(vals); i++ {
-        h.appendOp(&vals[i])
+    var rv error
+    for i:=0; i<len(vals) && rv==nil; i++ {
+        rv=h.appendOp(&vals[i])
     }
-    return nil
+    return rv
 }
 // Description: Places a write lock on the underlying hash set and then calls 
 // the underlying hash sets [HashSet.AppendUnique] implementaion method. The 
@@ -233,20 +234,21 @@ func (h *HashSet[T, U])AppendUnique(vals ...T) error {
 func (h *SyncedHashSet[T, U])AppendUnique(vals ...T) error {
     h.Lock()
     defer h.Unlock()
-    for i:=0; i<len(vals); i++ {
-        h.appendOp(&vals[i])
+    var rv error
+    for i:=0; i<len(vals) && rv==nil; i++ {
+        rv=h.appendOp(&vals[i])
     }
-    return nil
+    return rv
 }
 
-func (h *HashSet[T, U])appendOp(v *T) {
+func (h *HashSet[T, U])appendOp(v *T) error {
     w:=widgets.NewWidget[T,U]()
     for i:=w.Hash(v); ; i++ {
         if iterV,found:=h.internalHashSetImpl[i]; !found {
             h.internalHashSetImpl[i]=*v
             break
         } else if w.Eq(v,&iterV) {
-            break
+            return getDuplicateValueError[T](*v)
         }
     }
 }

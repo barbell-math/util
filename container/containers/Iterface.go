@@ -33,3 +33,25 @@ package containers
 //             return iter.Continue,q,nil;
 //         });
 // }
+
+// // This function is a consumer.
+// //
+// // Unique will consume all values from it's parent iterator and will collect all
+// // unique values into a set. The errOnDuplicate argument determines whether or
+// // not an error will be returned if a duplicate value is found. Iteration will
+// // stop if errOnDuplicate is set to true and a duplicate value is found.
+// func Unique[T any](
+//     i iter.Iter[T],
+//     s dynamicContainers.Set[T],
+//     errOnDuplicate bool,
+// ) {
+//     i.ForEach(func(index int, val T) (iter.IteratorFeedback, error) {
+//         if errOnDuplicate && s.ContainsPntr(&val) {
+//             return iter.Break,getDuplicateValueError[T](val)
+//         }
+//         s.AppendUnique(val)
+//         return iter.Continue,nil
+//     })
+// }
+
+// func ToContainer?? - prob not due to append/emplace inconsistencies

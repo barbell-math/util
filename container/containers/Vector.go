@@ -627,7 +627,7 @@ func (v *SyncedVector[T, U])Delete(idx int) error {
     return v.Vector.Delete(idx)
 }
 
-// Description: Deletes the values between the specified indexes. Returns an 
+// Description: Deletes the values in the index range [start,end). Returns an 
 // error if the start index is < 0, the end index is >= the length of the 
 // vector, or the end index is < the start index.
 //
@@ -641,6 +641,10 @@ func (v *Vector[T, U])DeleteSequential(start int, end int) error {
     }
     if end<start {
 	return getStartEndIndexError(start,end)
+    }
+    w:=widgets.NewWidget[T,U]()
+    for i:=start; i<end; i++ {
+	w.Zero(&(*v)[i])
     }
     *v=append((*v)[0:start],(*v)[end:]...)
     return nil

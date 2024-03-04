@@ -220,7 +220,8 @@ func SetInterfaceAppendUnique(
 		test.True(container.Contains(i),t)
 	}
 	for i:=0; i<5; i++ {
-		container.AppendUnique(i)
+		err:=container.AppendUnique(i)
+		test.Nil(err,t)
 		test.Eq(5,container.Length(),t)
 	}
 	container=factory()

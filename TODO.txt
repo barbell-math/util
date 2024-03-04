@@ -1,9 +1,15 @@
-// Fix CSV
-// Make static interface tests - vector, queue, stack, deque, set
 // reimpl circular buffer
 // Re-instate circular buffer tests
-// Static Vector (Array?) - no way to dynamically represent, probably no?
-// Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New
+// Make static interface tests - vector, queue, stack, deque, set
+// Remove all circular import tests
+
+// Pull in reflect - update
+// Fix CSV
+
+// Static Vector (Array?) - no way to dynamically represent, probably no? - unless unsafe somehow???
+// Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New, track f/b ratio with moving average (https://stackoverflow.com/questions/12636613/how-to-calculate-moving-average-without-keeping-the-count-and-data-total)
+// OrderedMap - rb tree?
+// OrderedSet - rb tree?
 // add window producer it iterface file - move all necessary circular import tests
 // Tree, graph...
 // Precompiled nfa/dfa - use go:generate comments!
