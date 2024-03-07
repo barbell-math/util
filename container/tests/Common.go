@@ -13,4 +13,9 @@
 //
 // Due to this package only testing interface values many tests will rely on
 // multiple functions from the interface working correctly.
+//
+// There are several conventions that must be observed when writing these tests:
+//  1. All values placed in the tested containers must be of type int. This 
+//     facilitates populating values in the containers as it can simply be done
+//     with standard for loops.
 package tests

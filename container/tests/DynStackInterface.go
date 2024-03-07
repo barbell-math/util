@@ -15,101 +15,101 @@ func stackInterface[U any](c dynamicContainers.Stack[U])           {}
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Length] interface.
-func StackInterfaceLengthInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceLengthInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Length = factory()
+	var container containerTypes.Length = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Capacity] interface.
-func StackInterfaceCapacityInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceCapacityInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Capacity = factory()
+	var container containerTypes.Capacity = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Clear] interface.
-func StackInterfaceClearInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceClearInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Clear = factory()
+	var container containerTypes.Clear = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemRead] interface.
-func StackInterfaceLastElemReadInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceLastElemReadInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	var container containerTypes.LastElemRead[V] = factory()
+	var container containerTypes.LastElemRead[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemWrite] interface.
-func StackInterfaceLastElemWriteInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceLastElemWriteInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	var container containerTypes.LastElemWrite[V] = factory()
+	var container containerTypes.LastElemWrite[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemDelete] interface.
-func StackInterfaceLastElemDeleteInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceLastElemDeleteInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	var container containerTypes.LastElemDelete[V] = factory()
+	var container containerTypes.LastElemDelete[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.StackRead] interface.
-func ReadStackInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func ReadDynStackInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	stackReadInterface[V](factory())
+	stackReadInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.WriteStack] interface.
-func WriteStackInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func WriteDynStackInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	stackWriteInterface[V](factory())
+	stackWriteInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.Stack] interface.
-func StackInterfaceInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
-	stackInterface[V](factory())
+	stackInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory does not implement the 
 // [staticContainers.Stack] interface.
-func StackInterfaceStaticCapacityInterface[V any](
-	factory func() dynamicContainers.Stack[V],
+func DynStackInterfaceStaticCapacityInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
 	t *testing.T,
 ) {
 	test.Panics(
 		func() {
 			var c any
-			c = factory()
+			c = factory(0)
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
@@ -118,11 +118,11 @@ func StackInterfaceStaticCapacityInterface[V any](
 }
 
 // Tests the Clear method functionality of a dynamic Stack.
-func StackInterfaceClear(
-	factory func() dynamicContainers.Stack[int],
+func DynStackInterfaceClear(
+	factory func(capacity int) dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 6; i++ {
 		container.PushBack(i)
 	}
@@ -132,11 +132,11 @@ func StackInterfaceClear(
 }
 
 // Tests the PeekPntrBack method functionality of a dynamic Stack.
-func StackInterfacePeekPntrBack(
-	factory func() dynamicContainers.Stack[int],
+func DynStackInterfacePeekPntrBack(
+	factory func(capacity int) dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_v, err := container.PeekPntrBack()
 	test.NilPntr[int](_v,t)
 	test.ContainsError(customerr.ValOutsideRange, err,t)
@@ -151,11 +151,11 @@ func StackInterfacePeekPntrBack(
 }
 
 // Tests the PeekBack method functionality of a dynamic Stack.
-func StackInterfacePeekBack(
-	factory func() dynamicContainers.Stack[int],
+func DynStackInterfacePeekBack(
+	factory func(capacity int) dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_, err := container.PeekBack()
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 	container.PushBack(1)
@@ -169,11 +169,11 @@ func StackInterfacePeekBack(
 }
 
 // Tests the PopBack method functionality of a dynamic Stack.
-func StackInterfacePopBack(
-	factory func() dynamicContainers.Stack[int],
+func DynStackInterfacePopBack(
+	factory func(capacity int) dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.PushBack(i)
 	}
@@ -187,18 +187,18 @@ func StackInterfacePopBack(
 }
 
 // Tests the PushBack method functionality of a dynamic Stack.
-func StackInterfacePushBack(
-	factory func() dynamicContainers.Stack[int],
+func DynStackInterfacePushBack(
+	factory func(capacity int) dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.PushBack(i)
 		test.Eq(i+1, container.Length(),t)
 		iterV, _ := container.PeekBack()
 		test.Eq(i, iterV,t)
 	}
-	container=factory()
+	container=factory(0)
 	for i := 0; i < 6; i+=2 {
 		container.PushBack(i,i+1)
 		test.Eq(i+2, container.Length(),t)
@@ -208,18 +208,18 @@ func StackInterfacePushBack(
 }
 
 // Tests the ForcePushBack method functionality of a dynamic Stack.
-func StackInterfaceForcePushBack(
-	factory func() dynamicContainers.Stack[int],
+func DynStackInterfaceForcePushBack(
+	factory func(capacity int) dynamicContainers.Stack[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.ForcePushBack(i)
 		test.Eq(i+1, container.Length(),t)
 		iterV, _ := container.PeekBack()
 		test.Eq(i, iterV,t)
 	}
-	container=factory()
+	container=factory(0)
 	for i := 0; i < 6; i+=2 {
 		container.ForcePushBack(i,i+1)
 		test.Eq(i+2, container.Length(),t)

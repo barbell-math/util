@@ -245,6 +245,8 @@ func (v *Vector[T, U])Contains(val T) bool {
 //
 // Time Complexity: O(n) (linear search)
 func (v *SyncedVector[T, U])Contains(val T) bool {
+    v.RLock()
+    defer v.RUnlock()
     return v.Vector.ContainsPntr(&val)
 }
 

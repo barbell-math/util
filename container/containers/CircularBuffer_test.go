@@ -1,20 +1,21 @@
 package containers
 
-// import (
-// 	"testing"
-// 
-// 	"github.com/barbell-math/util/algo/iter"
-// 	// "github.com/barbell-math/util/container/staticContainers"
-// 	"github.com/barbell-math/util/algo/widgets"
-// 	"github.com/barbell-math/util/test"
-// )
+import (
+	"github.com/barbell-math/util/algo/widgets"
+)
 
-// //go:generate go run interfaceTest.go -type=CircularBuffer -category=static -interface=Vector -factory=generateCircularBuffer -info
+//go:generate go run interfaceTest.go -type=CircularBuffer -category=static -interface=Vector -genericDecl=[int] -factory=generateCircularBuffer
+//go:generate go run interfaceTest.go -type=SyncedCircularBuffer -category=static -interface=Vector -genericDecl=[int] -factory=generateSyncedCircularBuffer
 
-// func generateCircularBuffer() staticContainers.Vector[int,int] {
-//     c,_:=NewCircularBuffer[int,widgets.BuiltinInt](6)
-//     return c
-// }
+func generateCircularBuffer(capacity int) CircularBuffer[int,widgets.BuiltinInt] {
+    c,_:=NewCircularBuffer[int,widgets.BuiltinInt](capacity)
+    return c
+}
+
+func generateSyncedCircularBuffer(capacity int) SyncedCircularBuffer[int,widgets.BuiltinInt] {
+    c,_:=NewSyncedCircularBuffer[int,widgets.BuiltinInt](capacity)
+    return c
+}
 
 // // func TestCircularBufferSyncableInterface(t *testing.T){
 // //     v,_:=NewCircularBuffer[string,widgets.BuiltinString](0)

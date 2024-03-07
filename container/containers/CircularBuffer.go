@@ -38,7 +38,8 @@ func NewCircularBuffer[T any, U widgets.WidgetInterface[T]](
     size int,
 ) (CircularBuffer[T,U],error) {
     if size<=0 {
-        return CircularBuffer[T,U]{},customerr.Wrap(customerr.ValOutsideRange,
+        return CircularBuffer[T,U]{},customerr.Wrap(
+            customerr.ValOutsideRange,
             "Size of buffer must be >0 | Have: %d",size,
         )
     }
@@ -67,59 +68,73 @@ func NewSyncedCircularBuffer[T any, U widgets.WidgetInterface[T]](
     }, err
 }
 
-// A empty pass through function that performs no action. CircularBuffer will 
-// call all the appropriate locking methods despite not being synced, just 
-// nothing will happen. This is done so that SyncedCircularBuffer can simply 
-// embed a CircularBuffer and override the appropriate locking methods to 
-// implement the correct behavior without needing to make any additional changes 
-// such as wrapping every single method from CircularBuffer.
-func (c *CircularBuffer[T,U])Lock() { }
+// Converts the supplied map to a syncronized map. Beware: The original 
+// non-synced circular buffer will remain useable.
+func (c *CircularBuffer[T, U])ToSynced() SyncedCircularBuffer[T,U] {
+    return SyncedCircularBuffer[T, U]{
+        RWMutex: &sync.RWMutex{},
+        CircularBuffer: *c,
+    }
+}
 
-// A empty pass through function that performs no action. CircularBuffer will 
-// call all the appropriate locking methods despite not being synced, just 
-// nothing will happen. This is done so that SyncedCircularBuffer can simply 
-// embed a CircularBuffer and override the appropriate locking methods to 
-// implement the correct behavior without needing to make any additional changes 
-// such as wrapping every single method from CircularBuffer.
-func (c *CircularBuffer[T,U])Unlock() { }
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
+func (c *CircularBuffer[T, U])Lock() { }
 
-// A empty pass through function that performs no action. CircularBuffer will 
-// call all the appropriate locking methods despite not being synced, just 
-// nothing will happen. This is done so that SyncedCircularBuffer can simply 
-// embed a CircularBuffer and override the appropriate locking methods to 
-// implement the correct behavior without needing to make any additional changes 
-// such as wrapping every single method from CircularBuffer.
-func (c *CircularBuffer[T,U])RLock() { }
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
+func (c *CircularBuffer[T, U])Unlock() { }
 
-// A empty pass through function that performs no action. CircularBuffer will 
-// call all the appropriate locking methods despite not being synced, just 
-// nothing will happen. This is done so that SyncedCircularBuffer can simply 
-// embed a CircularBuffer and override the appropriate locking methods to 
-// implement the correct behavior without needing to make any additional changes 
-// such as wrapping every single method from CircularBuffer.
-func (c *CircularBuffer[T,U])RUnlock() { }
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
+func (c *CircularBuffer[T, U])RLock() { }
 
-// The SyncedCircularBuffer method to override the CircularBuffer pass through 
-// function and actually apply the mutex operation.
+// A empty pass through function that performs no action. Needed for the
+// [containerTypes.Comparisons] interface.
+func (c *CircularBuffer[T, U])RUnlock() { }
+
+// The SyncedCircularBuffer method to override the HashMap pass through function 
+// and actually apply the mutex operation.
 func (c *SyncedCircularBuffer[T,U])Lock() { c.RWMutex.Lock() }
 
-// The SyncedCircularBuffer method to override the CircularBuffer pass through 
-// function and actually apply the mutex operation.
+// The SyncedCircularBuffer method to override the HashMap pass through function 
+// and actually apply the mutex operation.
 func (c *SyncedCircularBuffer[T,U])Unlock() { c.RWMutex.Unlock() }
 
-// The SyncedCircularBuffer method to override the CircularBuffer pass through 
-// function and actually apply the mutex operation.
-func (c *SyncedCircularBuffer[T,U])RLock() { c.RWMutex.RLock() }
+// The SyncedCircularBuffer method to override the HashMap pass through function 
+// and actually apply the mutex operation.
+func (c *SyncedCircularBuffer[T, U])RLock() { c.RWMutex.RLock() }
 
-// The SyncedCircularBuffer method to override the CircularBuffer pass through 
-// function and actually apply the mutex operation.
-func (c *SyncedCircularBuffer[T,U])RUnlock() { c.RWMutex.RUnlock() }
+// The SyncedCircularBuffer method to override the HashMap pass through function 
+// and actually apply the mutex operation.
+func (c *SyncedCircularBuffer[T, U])RUnlock() { c.RWMutex.RUnlock() }
 
-// Returns true if the circular buffer has reached its capacity.
+// Returns true, a circular biffer is addressable.
+func (c *CircularBuffer[T, U])IsAddressable() bool { return true }
+
+// Returns false, a circular buffer is not synced.
+func (c *CircularBuffer[T, U])IsSynced() bool { return false }
+
+// Returns true, a synced circular buffer is synced.
+func (c *SyncedCircularBuffer[T,U])IsSynced() bool { return true }
+
+// Description: Returns true if the circular buffer has reached its capacity,
+// false otherwise.
+//
+// Time Complexity: O(1)
 func (c *CircularBuffer[T,U])Full() bool {
+    return c.numElems==len(c.vals)
+}
+// Description: Places a read lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.Length] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (c *SyncedCircularBuffer[T, U])Full() bool {
     c.RLock()
     defer c.RUnlock()
-    return c.numElems==len(c.vals)
+    return c.CircularBuffer.Full()
 }
 
 // Returns the length of the circular buffer.
@@ -243,84 +258,276 @@ func (c *CircularBuffer[T, U])PeekPntrBack() (*T,error) {
     return nil,getIndexOutOfBoundsError(0,0,c.numElems)
 }
 
-// Gets the value at the specified index. Returns an error if the index is 
-// >= the length of the circular buffer.
-func (c *CircularBuffer[T,U])Get(idx int) (T,error){
-    v,err:=c.GetPntr(idx);
-    if v!=nil {
-        return *v,err;
-    }
-    var tmp T;
-    return tmp,err;
-}
-
-// Gets a pointer to the value at the specified index. Returns an error if the 
+// Description: Gets the value at the specified index. Returns an error if the 
 // index is >= the length of the circular buffer.
-func (c *CircularBuffer[T,U])GetPntr(idx int) (*T,error) {
+//
+// Time Complexity: O(1)
+func (c *CircularBuffer[T,U])Get(idx int) (T,error){
+    if idx>=0 && idx<c.numElems && c.numElems>0 {
+        properIndex:=c.getProperIndex(idx)
+        return c.vals[properIndex],nil;
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(idx,0,c.numElems)
+}
+// Description: Places a read lock on the underlying circular buffer and then 
+// gets the value at the specified index. Exhibits the same behavior as the 
+// [CircularBuffer.Get] method. The underlying [CircularBuffer.Get] method is 
+// not called to avoid copying the return value twice, which could be 
+// inefficient with a large value for the T generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (c *SyncedCircularBuffer[T, U])Get(idx int) (T,error) {
     c.RLock()
     defer c.RUnlock()
+    if idx>=0 && idx<c.numElems && c.numElems>0 {
+        properIndex:=c.getProperIndex(idx)
+        return c.vals[properIndex],nil;
+    }
+    var tmp T
+    return tmp,getIndexOutOfBoundsError(idx,0,c.numElems)
+}
+
+// Description: Gets a pointer to the value at the specified index. Returns an 
+// error if the index is >= the length of the circular buffer.
+//
+// Time Complexity: O(1)
+func (c *CircularBuffer[T,U])GetPntr(idx int) (*T,error) {
     if idx>=0 && idx<c.numElems && c.numElems>0 {
         properIndex:=c.getProperIndex(idx)
         return &c.vals[properIndex],nil;
     }
     return nil,getIndexOutOfBoundsError(idx,0,c.numElems)
 }
-
-// Contains will return true if the supplied value is in the vector, false
-// otherwise. All equality comparisons are performed by the generic U widget
-// type that the vector was initialized with.
-func (c *CircularBuffer[T, U])Contains(val T) bool {
+// Description: Places a read lock on the underlying circular buffer and then 
+// calls the underlying circular buffer [CircularBuffer.GetPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (c *SyncedCircularBuffer[T, U])GetPntr(idx int) (*T,error) {
     c.RLock()
     defer c.RUnlock()
+    return c.CircularBuffer.GetPntr(idx)
+}
+
+// Description: Contains will return true if the supplied value is in the 
+// circular buffer, false otherwise. All equality comparisons are performed by 
+// the generic U widget type that the circular buffer was initialized with. 
+//
+// Time Complexity: O(n) (linear search)
+func (c *CircularBuffer[T, U])Contains(val T) bool {
+    return c.ContainsPntr(&val)
+}
+// Description: Places a read lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.ContainsPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (c *SyncedCircularBuffer[T, U])Contains(val T) bool {
+    c.RLock()
+    defer c.RUnlock()
+    return c.CircularBuffer.ContainsPntr(&val)
+}
+
+// Description: ContainsPntr will return true if the supplied value is in the 
+// circular buffer, false otherwise. All equality comparisons are performed by 
+// the generic U widget type that the circular buffer was initialized with.
+//
+// Time Complexity: O(n) (linear search)
+func (c *CircularBuffer[T, U])ContainsPntr(val *T) bool {
     found:=false
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<c.numElems && !found; i++ {
         properIndex:=c.getProperIndex(i)
-        found=w.Eq(&val,&c.vals[properIndex])
+        found=w.Eq(val,&c.vals[properIndex])
     }
     return found
 }
+// Description: Places a read lock on the underlying circular buffer and then 
+// calls the underlying circular buffer [CircularBuffer.ContainsPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (c *SyncedCircularBuffer[T, U])ContainsPntr(val *T) bool {
+    c.RLock()
+    defer c.RUnlock()
+    return c.CircularBuffer.ContainsPntr(val)
+}
 
-// TODO - implement
+// Description: KeyOf will return the index of the first occurrence of the 
+// supplied value in the circular buffer. If the value is not found then the 
+// returned index will be -1 and the boolean flag will be set to false. If the 
+// value is found then the boolean flag will be set to true. All equality 
+// comparisons are performed by the generic U widget type that the circular buffer was 
+// initialized with.
+//
+// Time Complexity: O(n) (linear search)
 func (c *CircularBuffer[T, U])KeyOf(val T) (int,bool) {
+    return c.keyOfImpl(&val)
+}
+// Description: Places a read lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.KeyOf] implemenation 
+// method. The [CircularBuffer.KeyOf] method is not called directly to avoid 
+// copying the val variable twice, which could be expensive with a large type 
+// for the T generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (c *SyncedCircularBuffer[T, U])KeyOf(val T) (int,bool) {
+    c.RLock()
+    defer c.RUnlock()
+    return c.CircularBuffer.keyOfImpl(&val)
+}
+
+func (c *CircularBuffer[T,U])keyOfImpl(val *T) (int,bool) {
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<c.numElems; i++ {
+        properIndex:=c.getProperIndex(i)
+        if w.Eq(val,&c.vals[properIndex]) {
+            return i,true
+        }
+    }
     return -1,false
 }
 
-// Emplaces (sets) the value at the specified index. Returns an error if the 
-// index is >= the length of the circular buffer.
-func (c *CircularBuffer[T,U])Emplace(idx int, v T) error {
+// Description: Sets the values at the specified indexes. Returns an error if 
+// the index is >= the length of the circular buffer. Stops setting values as 
+// soon as an error is encountered.
+//
+// Time Complexity: O(m), where m=len(vals)
+func (c *CircularBuffer[T,U])Set(vals ...basic.Pair[int,T]) error {
+    return c.setImpl(vals)
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.Set] implementaiton 
+// method. The [CircularBuffer.Set] method is not called directly to avoid 
+// copying the vals varargs twice, which could be expensive with a large type 
+// for the T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(m), where m=len(vals)
+func (c *SyncedCircularBuffer[T, U])Set(vals ...basic.Pair[int,T]) error {
     c.Lock()
     defer c.Unlock()
-    if idx>=0 && idx<c.numElems && c.numElems>0 {
-        properIndex:=c.getProperIndex(idx)
-        c.vals[properIndex]=v
-        return nil
-    }
-    return getIndexOutOfBoundsError(idx,0,c.numElems)
+    return c.CircularBuffer.setImpl(vals)
 }
+
+func (c *CircularBuffer[T, U])setImpl(vals []basic.Pair[int,T]) error {
+    for _,iterV:=range(vals) {
+        if iterV.A>=0 && iterV.A<c.numElems && len(c.vals)>0 {
+            c.vals[c.getProperIndex(iterV.A)]=iterV.B
+        } else {
+            return getIndexOutOfBoundsError(iterV.A,0,c.numElems)
+        }
+    }
+    return nil
+}
+
+// Description: Sets the supplied values sequentially starting at the supplied 
+// index and continuing sequentailly after that. Returns and error if any index 
+// that is attempted to be set is >= the length of the circular buffer. If an 
+// error occurs, all values will be set up until the value that caused the error.
+//
+// Time Complexity: O(m), where m=len(vals)
+func (c *CircularBuffer[T, U])SetSequential(idx int, vals ...T) error {
+    return c.setSequentialImpl(idx,vals)
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.SetSequential] 
+// implementation method. The [circular buffer.SetSequential] method is not 
+// called directly to avoid copying the vals varargs twice, which could be 
+// expensive with a large type for the T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(m), where m=len(vals)
+func (c *SyncedCircularBuffer[T, U])SetSequential(idx int, vals ...T) error {
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.setSequentialImpl(idx,vals)
+}
+
+func (c *CircularBuffer[T, U])setSequentialImpl(idx int, vals []T) error {
+    if idx>=len(c.vals) {
+        return getIndexOutOfBoundsError(idx,0,len(c.vals))
+    }
+    numCopyableVals:=min(len(c.vals)-idx,len(vals))
+    copy((c.vals)[idx:idx+numCopyableVals],vals[0:numCopyableVals])
+    if idx+len(vals)>len(c.vals) {
+        return getIndexOutOfBoundsError(len(c.vals),0,len(c.vals)) 
+    }
+    return nil
+}
+
+// Description: Append the supplied values to the circular buffer. This function
+// will never return an error.
+//
+// Time Complexity: Best case O(m), where m=len(vals).
+func (c *CircularBuffer[T,U])Append(vals ...T) error {
+    return c.appendImpl(vals)
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.Append] implementation 
+// method. The [CircularBuffer.Append] method is not called directly to avoid 
+// copying the vals varargs twice, which could be expensive with a large type 
+// for the T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: Best case O(m), where m=len(vals).
+func (c *SyncedCircularBuffer[T, U])Append(vals ...T) error {
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.appendImpl(vals)
+}
+
+func (c *CircularBuffer[T,U])appendImpl(vals []T) error {
+    for i:=0; i<len(vals); i++ {
+        if c.numElems<len(c.vals) {
+            c.numElems++;
+            c.startEnd.B=c.incIndex(c.startEnd.B,1);
+            c.vals[c.startEnd.B]=vals[i];
+        } else {
+            return c.getFullError()
+        }
+    }
+    return nil
+}
+
 
 // Pushes (inserts) the supplied values at the given index. Returns an error if 
 // the index is >= the length of the circular buffer.
-func (c *CircularBuffer[T,U])Push(idx int, v ...T) error {
-    c.Lock()
-    defer c.Unlock()
-    if idx<0 || idx>c.numElems {
-        return getIndexOutOfBoundsError(idx,0,c.numElems)
-    } else if c.numElems==len(c.vals) {
-        return c.getFullError()
-    }
-    maxVals:=len(v)
-    if c.numElems+maxVals>len(c.vals) {
-        maxVals=len(c.vals)-c.numElems
-    }
-    if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
-        c.insertMoveFront(v,idx,maxVals)
-    } else {
-        c.insertMoveBack(v,idx,maxVals)
-    }
-    if maxVals<len(v) {
-        return c.getFullError()
-    }
+func (c *CircularBuffer[T,U])Insert(vals ...basic.Pair[int,T]) error {
+    // c.Lock()
+    // defer c.Unlock()
+    // if idx<0 || idx>c.numElems {
+    //     return getIndexOutOfBoundsError(idx,0,c.numElems)
+    // } else if c.numElems==len(c.vals) {
+    //     return c.getFullError()
+    // }
+    // maxVals:=len(v)
+    // if c.numElems+maxVals>len(c.vals) {
+    //     maxVals=len(c.vals)-c.numElems
+    // }
+    // if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
+    //     c.insertMoveFront(v,idx,maxVals)
+    // } else {
+    //     c.insertMoveBack(v,idx,maxVals)
+    // }
+    // if maxVals<len(v) {
+    //     return c.getFullError()
+    // }
+    return nil
+}
+
+func (c *CircularBuffer[T, U])InsertSequential(idx int, vals ...int) error {
     return nil
 }
 
@@ -346,23 +553,6 @@ func (c *CircularBuffer[T,U])insertMoveBack(v []T, idx int, maxVals int) {
     for i:=idx; i<idx+maxVals; i++ {
         c.vals[c.getProperIndex(i)]=v[i-idx]
     }
-}
-
-// Appends the supplied values to the circular buffer. A [containerTypes.Full] error will be
-// returned if the circular buffer reaches it's capacity.
-func (c *CircularBuffer[T,U])Append(v ...T) error {
-    c.Lock()
-    defer c.Unlock()
-    for i:=0; i<len(v); i++ {
-        if c.numElems<len(c.vals) {
-            c.numElems++;
-            c.startEnd.B=c.incIndex(c.startEnd.B,1);
-            c.vals[c.startEnd.B]=v[i];
-        } else {
-            return c.getFullError()
-        }
-    }
-    return nil
 }
 
 // Returns and removes the element at the front of the circular buffer. Returns 
@@ -415,8 +605,17 @@ func (c *CircularBuffer[T,U])Delete(idx int) error {
     return nil
 }
 
+// TODO - impl and test
+func (c *CircularBuffer[T, U])DeleteSequential(idx int, num int) error {
+    return nil
+}
+
 // TODO - implement
-func (c *CircularBuffer[T, U])Pop(val T, num int) int {
+func (c *CircularBuffer[T, U])Pop(val T) int {
+    return -1
+}
+
+func (c *CircularBuffer[T, U])PopSequential(val T, num int) int {
     return -1
 }
 
@@ -489,15 +688,6 @@ func (c *CircularBuffer[T,U])PntrElems() iter.Iter[*T] {
 //     }
 //     return rv
 // }
-// 
-// // Returns true if the circular buffers are not equal. The supplied comparison 
-// // function will be used when comparing values in the circular buffer.
-// func (c *CircularBuffer[T,U])Neq(
-//     other *CircularBuffer[T,U], 
-//     comp func(l *T, r *T) bool,
-// ) bool {
-//     return !c.Eq(other,comp)
-// }
 
 // This function only works for an index that is <2n when n is the capacity of 
 // the underlying array
@@ -537,3 +727,24 @@ func (c *CircularBuffer[T,U])distanceFromBack(idx int) int{
 func (c *CircularBuffer[T,U])getFullError() error {
     return customerr.Wrap(containerTypes.Full,"Circular buffer size: %d",len(c.vals))
 }
+
+func (c *CircularBuffer[T, U])Keys() iter.Iter[int] {
+    return iter.NoElem[int]()
+}
+
+func (c *CircularBuffer[T, U])Vals() iter.Iter[T] {
+    return iter.NoElem[T]()
+}
+
+func (c *CircularBuffer[T, U])ValPntrs() iter.Iter[*T] {
+    return iter.NoElem[*T]()
+}
+
+// TODO - impl and test
+func (c *CircularBuffer[T,U])KeyedEq(other containerTypes.KeyedComparisonsOtherConstraint[int,T]) bool { return false }
+func (c *CircularBuffer[T,U])UnorderedEq(other containerTypes.ComparisonsOtherConstraint[T]) bool { return false }
+func (c *CircularBuffer[T,U])Intersection(l containerTypes.ComparisonsOtherConstraint[T], r containerTypes.ComparisonsOtherConstraint[T]) {}
+func (c *CircularBuffer[T,U])Union(l containerTypes.ComparisonsOtherConstraint[T], r containerTypes.ComparisonsOtherConstraint[T]) {}
+func (c *CircularBuffer[T,U])Difference(l containerTypes.ComparisonsOtherConstraint[T], r containerTypes.ComparisonsOtherConstraint[T]) {}
+func (c *CircularBuffer[T,U])IsSuperset(other containerTypes.ComparisonsOtherConstraint[T]) bool { return false }
+func (c *CircularBuffer[T,U])IsSubset(other containerTypes.ComparisonsOtherConstraint[T]) bool { return false }

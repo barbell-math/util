@@ -10,13 +10,13 @@ import (
 //go:generate go run interfaceTest.go -type=HashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateHashSet
 //go:generate go run interfaceTest.go -type=SyncedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedHashSet
 
-func generateHashSet() HashSet[int,badBuiltinInt] {
-    v,_:=NewHashSet[int,badBuiltinInt](0)
+func generateHashSet(capacity int) HashSet[int,badBuiltinInt] {
+    v,_:=NewHashSet[int,badBuiltinInt](capacity)
     return v
 }
 
-func generateSyncedHashSet() SyncedHashSet[int,badBuiltinInt] {
-    v,_:=NewSyncedHashSet[int,badBuiltinInt](0)
+func generateSyncedHashSet(capacity int) SyncedHashSet[int,badBuiltinInt] {
+    v,_:=NewSyncedHashSet[int,badBuiltinInt](capacity)
     return v
 }
 

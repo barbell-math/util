@@ -18,13 +18,13 @@ import (
 //go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateVector
 //go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedVector
 
-func generateVector() Vector[int,widgets.BuiltinInt] {
-    v,_:=NewVector[int,widgets.BuiltinInt](0)
+func generateVector(capacity int) Vector[int,widgets.BuiltinInt] {
+    v,_:=NewVector[int,widgets.BuiltinInt](capacity)
     return v
 }
 
-func generateSyncedVector() SyncedVector[int,widgets.BuiltinInt] {
-    v,_:=NewSyncedVector[int,widgets.BuiltinInt](0)
+func generateSyncedVector(capacity int) SyncedVector[int,widgets.BuiltinInt] {
+    v,_:=NewSyncedVector[int,widgets.BuiltinInt](capacity)
     return v
 }
 

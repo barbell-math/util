@@ -53,7 +53,13 @@ type Values struct {
 }
 
 var VALS Values
-var REQUIRED_ARGS []string=[]string{"type","category","interface","factory","genericDecl"}
+var REQUIRED_ARGS []string=[]string{
+	"type",
+	"category",
+	"interface",
+	"factory",
+	"genericDecl",
+}
 
 func main() {
 	setupFlags()
@@ -71,6 +77,10 @@ func main() {
 	}
 
 	testFuncs:=viableFuncs()
+	fmt.Printf(
+		"Type: %-20s | Interface type: %-10s %-10s | Num Funcs: %3d\n",
+		VALS.Type,VALS.Cat.String(),VALS.Interface,len(testFuncs),
+	)
 
 	fName:=fileName()
 	f,err:=os.Create(fName)
@@ -84,13 +94,16 @@ func main() {
 	f.WriteString("import (\n")
 	f.WriteString("    \"testing\"\n")
 	f.WriteString("    \"github.com/barbell-math/util/container/tests\"\n")
-	f.WriteString("    \"github.com/barbell-math/util/container/dynamicContainers\"\n")
+	f.WriteString(fmt.Sprintf(
+		"    \"github.com/barbell-math/util/container/%sContainers\"\n",
+		VALS.Cat.String(),
+	))
 	f.WriteString(")\n\n")
 	f.WriteString(fmt.Sprintf(
-		"func %sTo%sInterfaceFactory() %sContainers.%s%s {\n",
+		"func %sTo%sInterfaceFactory(capacity int) %sContainers.%s%s {\n",
 		VALS.Type,VALS.Interface,VALS.Cat.String(),VALS.Interface,VALS.GenericDecl,
 	))
-	f.WriteString(fmt.Sprintf("    v:= %s()\n", VALS.Factory))
+	f.WriteString(fmt.Sprintf("    v:= %s(capacity)\n", VALS.Factory))
 	f.WriteString(fmt.Sprintf(
 		"    var rv %sContainers.%s%s=&v\n",
 		VALS.Cat.String(),VALS.Interface,VALS.GenericDecl,
@@ -234,8 +247,19 @@ func viableFirstParam(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet) (
 }
 
 func isViableFactory(f *ast.FuncType, srcFile *os.File, fSet *token.FileSet) (bool,string) {
-	if f.TypeParams!=nil {
-		return false, "Expected a function that accepted not arguments."
+	if f.Params==nil || f.Params.NumFields()!=1 {
+		return false, "Expected a function that accepted one argument."
+	}
+	if _,err:=srcFile.Seek(int64(fSet.Position(f.Params.List[0].Type.Pos()).Offset),0); err!=nil {
+		return false,fmt.Sprintf("An error occurred seeking to the required location in the src file.\n%s",err.Error())
+	}
+	src:=make([]byte,f.Params.List[0].Type.End()-f.Params.List[0].Type.Pos())
+	if _,err:=srcFile.Read(src); err==nil {
+		if string(src)!="int" {
+			return false,fmt.Sprintf("Factory argument was not correct .\nExpected: 'int'\nGot: '%s'\n",string(src))
+		}
+	} else {
+		return false,fmt.Sprintf("An error ocurred reading it's arguments from the src file.\n%s",err.Error())
 	}
 	if f.Results.NumFields()!=1 {
 		return false,"Expected a function that returned a single value."
@@ -243,7 +267,7 @@ func isViableFactory(f *ast.FuncType, srcFile *os.File, fSet *token.FileSet) (bo
 	if _,err:=srcFile.Seek(int64(fSet.Position(f.Results.Pos()).Offset),0); err!=nil {
 		return false,fmt.Sprintf("An error occurred seeking to the required location in the src file.\n%s",err.Error())
 	}
-	src:=make([]byte,f.Results.End()-f.Results.Pos())
+	src=make([]byte,f.Results.End()-f.Results.Pos())
 	if _,err:=srcFile.Read(src); err==nil {
 		expSrcType:=fmt.Sprintf("%sContainers.%s*",VALS.Cat.String(),VALS.Interface)
 		if match,_:=regexp.Match(expSrcType,src); !match {

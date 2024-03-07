@@ -15,64 +15,64 @@ func setInterface[U any](c dynamicContainers.Set[U])           {}
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Length] interface.
-func SetInterfaceLengthInterface[V any](
-	factory func() dynamicContainers.Set[V],
+func DynSetInterfaceLengthInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Length = factory()
+	var container containerTypes.Length = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Clear] interface.
-func SetInterfaceClearInterface[V any](
-	factory func() dynamicContainers.Set[V],
+func DynSetInterfaceClearInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Clear = factory()
+	var container containerTypes.Clear = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.WriteUniqueOps] interface.
-func SetInterfaceWriteUniqueOpsInterface[V any](
-	factory func() dynamicContainers.Set[V],
+func DynSetInterfaceWriteUniqueOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteUniqueOps[uint64, V] = factory()
+	var container containerTypes.WriteUniqueOps[uint64, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.ReadOps] interface.
-func SetInterfaceReadOpsInterface[V any](
-	factory func() dynamicContainers.Set[V],
+func DynSetInterfaceReadOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
 	t *testing.T,
 ) {
-	var container containerTypes.ReadOps[V] = factory()
+	var container containerTypes.ReadOps[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.DeleteOps] interface.
-func SetInterfaceDeleteOpsInterface[V any](
-	factory func() dynamicContainers.Set[V],
+func DynSetInterfaceDeleteOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
 	t *testing.T,
 ) {
-	var container containerTypes.DeleteOps[uint64, V] = factory()
+	var container containerTypes.DeleteOps[uint64, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory does not implement the 
 // [containerTypes.StaticCapacity] interface.
-func SetInterfaceStaticCapacityInterface[V any](
-	factory func() dynamicContainers.Set[V],
+func DynSetInterfaceStaticCapacityInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
 	t *testing.T,
 ) {
 	test.Panics(
 		func() {
 			var c any
-			c = factory()
+			c = factory(0)
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
@@ -81,11 +81,11 @@ func SetInterfaceStaticCapacityInterface[V any](
 }
 
 func setValsHelper(
-    factory func() dynamicContainers.Set[int],
+    factory func(capacity int) dynamicContainers.Set[int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.AppendUnique(i);
     }
@@ -98,8 +98,8 @@ func setValsHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the Vals method functionality of a dynamic set.
-func SetInterfaceVals(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceVals(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
     setValsHelper(factory,0,t);
@@ -109,11 +109,11 @@ func SetInterfaceVals(
 }
 
 func testSetPntrValsHelper(
-	factory func() dynamicContainers.Set[int],
+	factory func(capacity int) dynamicContainers.Set[int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.AppendUnique(i);
     }
@@ -131,11 +131,11 @@ func testSetPntrValsHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the ValPntrs method functionality of a dynamic set.
-func SetInterfaceValPntrs(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceValPntrs(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	if container.IsAddressable() {
 		testSetPntrValsHelper(factory,0,t);
     	testSetPntrValsHelper(factory,1,t);
@@ -146,11 +146,11 @@ func SetInterfaceValPntrs(
 }
 
 // Tests the ContainsPntr method functionality of a dynamic set.
-func SetInterfaceContainsPntr(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceContainsPntr(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	for i:=0; i<5; i++ {
 		container.AppendUnique(i)
 	}
@@ -170,11 +170,11 @@ func SetInterfaceContainsPntr(
 }
 
 // Tests the Contains method functionality of a dynamic set.
-func SetInterfaceContains(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceContains(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	for i:=0; i<5; i++ {
 		container.AppendUnique(i)
 	}
@@ -191,11 +191,11 @@ func SetInterfaceContains(
 }
 
 // Tests the Clear method functionality of a dynamic set.
-func SetInterfaceClear(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceClear(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	test.Eq(0,container.Length(),t)
 	for i:=0; i<5; i++ {
 		container.AppendUnique(i)
@@ -206,11 +206,11 @@ func SetInterfaceClear(
 }
 
 // Tests the AppendUnique method functionality of a dynamic set.
-func SetInterfaceAppendUnique(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceAppendUnique(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	test.Eq(0,container.Length(),t)
 	for i:=0; i<5; i++ {
 		err:=container.AppendUnique(i)
@@ -224,7 +224,7 @@ func SetInterfaceAppendUnique(
 		test.Nil(err,t)
 		test.Eq(5,container.Length(),t)
 	}
-	container=factory()
+	container=factory(0)
 	test.Eq(0,container.Length(),t)
 	for i:=0; i<6; i+=2 {
 		container.AppendUnique(i,i+1)
@@ -235,11 +235,11 @@ func SetInterfaceAppendUnique(
 }
 
 // Tests the Pop method functionality of a dynamic set.
-func SetInterfacePop(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfacePop(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	test.Eq(0,container.Length(),t)
 	for i:=0; i<5; i++ {
 		container.AppendUnique(i)
@@ -253,13 +253,13 @@ func SetInterfacePop(
 }
 
 // Tests the UnorderedEq method functionality of a dynamic set.
-func SetInterfaceUnorderedEq(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceUnorderedEq(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ) {
-	v := factory()
+	v := factory(0)
 	v.AppendUnique(1, 2, 3)
-	v2 := factory()
+	v2 := factory(0)
 	v2.AppendUnique(1, 2, 3)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
@@ -267,7 +267,7 @@ func SetInterfaceUnorderedEq(
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
 	v.AppendUnique(3)
-	v2 = factory()
+	v2 = factory(0)
 	v2.AppendUnique(3, 1, 2)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
@@ -275,24 +275,24 @@ func SetInterfaceUnorderedEq(
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
 	v.AppendUnique(3)
-	v2 = factory()
+	v2 = factory(0)
 	v2.AppendUnique(2, 3, 1)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
 	v.Pop(3)
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
-	v = factory()
+	v = factory(0)
 	v.AppendUnique(0)
-	v2 = factory()
+	v2 = factory(0)
 	v2.AppendUnique(0)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
 	v.Pop(0)
 	test.False(v.UnorderedEq(v2),t)
 	test.False(v2.UnorderedEq(v),t)
-	v = factory()
-	v2 = factory()
+	v = factory(0)
+	v2 = factory(0)
 	test.True(v.UnorderedEq(v2),t)
 	test.True(v2.UnorderedEq(v),t)
 }
@@ -302,7 +302,7 @@ func setIntersectionHelper(
 	l dynamicContainers.Set[int],
 	r dynamicContainers.Set[int],
 	exp []int,
-	factory func() dynamicContainers.Set[int],
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
 	tester:=func(c dynamicContainers.Set[int]) {
@@ -318,29 +318,29 @@ func setIntersectionHelper(
 }
 
 // Tests the Intersection method functionality of a dynamic set.
-func SetInterfaceIntersection(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceIntersection(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ) {
-	v:=factory()
-	v2:=factory()
-	setIntersectionHelper(factory(),v,v2,[]int{},factory,t)
+	v:=factory(0)
+	v2:=factory(0)
+	setIntersectionHelper(factory(0),v,v2,[]int{},factory,t)
 	v.AppendUnique(1)
-	setIntersectionHelper(factory(),v,v2,[]int{},factory,t)
+	setIntersectionHelper(factory(0),v,v2,[]int{},factory,t)
 	v2.AppendUnique(1)
-	setIntersectionHelper(factory(),v,v2,[]int{1},factory,t)
+	setIntersectionHelper(factory(0),v,v2,[]int{1},factory,t)
 	v2.AppendUnique(2)
-	setIntersectionHelper(factory(),v,v2,[]int{1},factory,t)
+	setIntersectionHelper(factory(0),v,v2,[]int{1},factory,t)
 	v.AppendUnique(2)
-	setIntersectionHelper(factory(),v,v2,[]int{1,2},factory,t)
+	setIntersectionHelper(factory(0),v,v2,[]int{1,2},factory,t)
 	v.AppendUnique(3)
-	setIntersectionHelper(factory(),v,v2,[]int{1,2},factory,t)
+	setIntersectionHelper(factory(0),v,v2,[]int{1,2},factory,t)
 	v2.AppendUnique(3)
-	setIntersectionHelper(factory(),v,v2,[]int{1,2,3},factory,t)
+	setIntersectionHelper(factory(0),v,v2,[]int{1,2,3},factory,t)
 
 	if !v.IsSynced() {
-		v=factory()
-		v2=factory()
+		v=factory(0)
+		v2=factory(0)
 		v.AppendUnique(1,2,3,4)
 		v2.AppendUnique(2,4)
 		setIntersectionHelper(v,v,v2,[]int{2,4},factory,t)
@@ -352,7 +352,7 @@ func setUnionHelper(
 	l dynamicContainers.Set[int],
 	r dynamicContainers.Set[int],
 	exp []int,
-	factory func() dynamicContainers.Set[int],
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
 	tester:=func(c dynamicContainers.Set[int]) {
@@ -368,29 +368,29 @@ func setUnionHelper(
 }
 
 // Tests the Union method functionality of a dynamic set.
-func SetInterfaceUnion(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceUnion(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ) {
-	v:=factory()
-	v2:=factory()
-	setUnionHelper(factory(),v,v2,[]int{},factory,t)
+	v:=factory(0)
+	v2:=factory(0)
+	setUnionHelper(factory(0),v,v2,[]int{},factory,t)
 	v.AppendUnique(1)
-	setUnionHelper(factory(),v,v2,[]int{1},factory,t)
+	setUnionHelper(factory(0),v,v2,[]int{1},factory,t)
 	v2.AppendUnique(1)
-	setUnionHelper(factory(),v,v2,[]int{1},factory,t)
+	setUnionHelper(factory(0),v,v2,[]int{1},factory,t)
 	v2.AppendUnique(2)
-	setUnionHelper(factory(),v,v2,[]int{1,2},factory,t)
+	setUnionHelper(factory(0),v,v2,[]int{1,2},factory,t)
 	v.AppendUnique(2)
-	setUnionHelper(factory(),v,v2,[]int{1,2},factory,t)
+	setUnionHelper(factory(0),v,v2,[]int{1,2},factory,t)
 	v.AppendUnique(3)
-	setUnionHelper(factory(),v,v2,[]int{1,2,3},factory,t)
+	setUnionHelper(factory(0),v,v2,[]int{1,2,3},factory,t)
 	v2.AppendUnique(3)
-	setUnionHelper(factory(),v,v2,[]int{1,2,3},factory,t)
+	setUnionHelper(factory(0),v,v2,[]int{1,2,3},factory,t)
 
 	if !v.IsSynced() {
-		v=factory()
-		v2=factory()
+		v=factory(0)
+		v2=factory(0)
 		v.AppendUnique(1,2,3,4)
 		v2.AppendUnique(2,4,5,6)
 		setUnionHelper(v,v,v2,[]int{1,2,3,4,5,6},factory,t)
@@ -402,7 +402,7 @@ func setDifferenceHelper(
 	l dynamicContainers.Set[int],
 	r dynamicContainers.Set[int],
 	exp []int,
-	factory func() dynamicContainers.Set[int],
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
 	res.Difference(l,r)
@@ -413,51 +413,51 @@ func setDifferenceHelper(
 }
 
 // Tests the Difference method functionality of a dynamic set.
-func SetInterfaceDifference(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceDifference(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ) {
-	v:=factory()
-	v2:=factory()
-	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+	v:=factory(0)
+	v2:=factory(0)
+	setDifferenceHelper(factory(0),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{},factory,t)
 	v.AppendUnique(1)
-	setDifferenceHelper(factory(),v,v2,[]int{1},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v,v2,[]int{1},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{},factory,t)
 	v2.AppendUnique(1)
-	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{},factory,t)
 	v2.AppendUnique(2)
-	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{2},factory,t)
+	setDifferenceHelper(factory(0),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{2},factory,t)
 	v.AppendUnique(2)
-	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{},factory,t)
 	v.AppendUnique(3)
-	setDifferenceHelper(factory(),v,v2,[]int{3},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v,v2,[]int{3},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{},factory,t)
 	v2.AppendUnique(3)
-	setDifferenceHelper(factory(),v,v2,[]int{},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v,v2,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{},factory,t)
 	v.AppendUnique(4,5,6)
-	setDifferenceHelper(factory(),v,v2,[]int{4,5,6},factory,t)
-	setDifferenceHelper(factory(),v2,v,[]int{},factory,t)
+	setDifferenceHelper(factory(0),v,v2,[]int{4,5,6},factory,t)
+	setDifferenceHelper(factory(0),v2,v,[]int{},factory,t)
 
 	if !v.IsSynced() {
-		v=factory()
-		v2=factory()
+		v=factory(0)
+		v2=factory(0)
 		v.AppendUnique(1,2,3,4)
 		v2.AppendUnique(2,4)
 		setDifferenceHelper(v,v,v2,[]int{1,3},factory,t)
 	}
 }
 
-func SetInterfaceIsSuperset(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceIsSuperset(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	v:=factory()
-	v2:=factory()
+	v:=factory(0)
+	v2:=factory(0)
 	test.True(v.IsSuperset(v2),t)
 	v.AppendUnique(1)
 	test.True(v.IsSuperset(v2),t)
@@ -479,12 +479,12 @@ func SetInterfaceIsSuperset(
 	test.False(v2.IsSuperset(v),t)
 }
 
-func SetInterfaceIsSubset(
-	factory func() dynamicContainers.Set[int],
+func DynSetInterfaceIsSubset(
+	factory func(capacity int) dynamicContainers.Set[int],
 	t *testing.T,
 ){
-	v:=factory()
-	v2:=factory()
+	v:=factory(0)
+	v2:=factory(0)
 	test.True(v.IsSubset(v2),t)
 	v.AppendUnique(1)
 	test.False(v.IsSubset(v2),t)

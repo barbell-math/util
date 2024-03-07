@@ -17,181 +17,181 @@ func vectorInterface[U any](c dynamicContainers.Vector[U])           {}
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Addressable] interface.
-func VectorInterfaceAddressableInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceAddressableInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Addressable = factory()
+	var container containerTypes.Addressable = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Length] interface.
-func VectorInterfaceLengthInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceLengthInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Length = factory()
+	var container containerTypes.Length = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Capacity] interface.
-func VectorInterfaceCapacityInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceCapacityInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Capacity = factory()
+	var container containerTypes.Capacity = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Clear] interface.
-func VectorInterfaceClearInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceClearInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Clear = factory()
+	var container containerTypes.Clear = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.WriteOps] interface.
-func VectorInterfaceWriteOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceWriteOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteOps[V] = factory()
+	var container containerTypes.WriteOps[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.WriteKeyedOps] interface.
-func VectorInterfaceWriteKeyedOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceWriteKeyedOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteKeyedOps[int, V] = factory()
+	var container containerTypes.WriteKeyedOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.WriteKeyedSequentialOps] interface.
-func VectorInterfaceWriteKeyedSequentialOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceWriteKeyedSequentialOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteKeyedSequentialOps[int, V] = factory()
+	var container containerTypes.WriteKeyedSequentialOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedWriteOps] interface.
-func VectorInterfaceWriteDynKeyedOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceWriteDynKeyedOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteDynKeyedOps[int, V] = factory()
+	var container containerTypes.WriteDynKeyedOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.ReadOps] interface.
-func VectorInterfaceReadOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceReadOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.ReadOps[V] = factory()
+	var container containerTypes.ReadOps[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedReadOps] interface.
-func VectorInterfaceReadKeyedOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceReadKeyedOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.ReadKeyedOps[int, V] = factory()
+	var container containerTypes.ReadKeyedOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.DeleteOps] interface.
-func VectorInterfaceDeleteOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceDeleteOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.DeleteOps[int, V] = factory()
+	var container containerTypes.DeleteOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedDeleteOps] interface.
-func VectorInterfaceDeleteKeyedOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceDeleteKeyedOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.DeleteKeyedOps[int, V] = factory()
+	var container containerTypes.DeleteKeyedOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedDeleteOps] interface.
-func VectorInterfaceDeleteSequentialOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceDeleteSequentialOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.DeleteSequentialOps[int, V] = factory()
+	var container containerTypes.DeleteSequentialOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedDeleteOps] interface.
-func VectorInterfaceDeleteKeyedSequentialOpsInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceDeleteKeyedSequentialOpsInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	var container containerTypes.DeleteKeyedSequentialOps[int, V] = factory()
+	var container containerTypes.DeleteKeyedSequentialOps[int, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [dynamicContainers.VectorRead] interface.
-func ReadVectorInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func ReadDynVectorInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	vectorReadInterface[V](factory())
+	vectorReadInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
 // [dynamicContainers.WriteVector] interface.
-func WriteVectorInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func WriteDynVectorInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	vectorWriteInterface[V](factory())
+	vectorWriteInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
 // [dynamicContainers.Vector] interface.
-func VectorInterfaceInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
-	vectorInterface[V](factory())
+	vectorInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory does not implement the
 // [staticContainers.Vector] interface.
-func VectorInterfaceStaticCapacityInterface[V any](
-	factory func() dynamicContainers.Vector[V],
+func DynVectorInterfaceStaticCapacityInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
 	t *testing.T,
 ) {
 	test.Panics(
 		func() {
 			var c any
-			c = factory()
+			c = factory(0)
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
@@ -200,11 +200,11 @@ func VectorInterfaceStaticCapacityInterface[V any](
 }
 
 // Tests the Get method functionality of a dynamic vector.
-func VectorInterfaceGet(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceGet(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_, err := container.Get(0)
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 	for i := 0; i < 5; i++ {
@@ -212,8 +212,8 @@ func VectorInterfaceGet(
 	}
 	for i := 0; i < 5; i++ {
 		_v, err := container.Get(i)
-		test.Eq(i, _v,t)
 		test.Eq(nil, err,t)
+		test.Eq(i, _v,t)
 	}
 	_, err = container.Get(-1)
 	test.ContainsError(customerr.ValOutsideRange, err,t)
@@ -222,14 +222,15 @@ func VectorInterfaceGet(
 }
 
 // Tests the GetPntr method functionality of a dynamic vector.
-func VectorInterfaceGetPntr(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceGetPntr(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	if container.IsAddressable() {
-		_, err := container.GetPntr(0)
+		v, err := container.GetPntr(0)
 		test.ContainsError(customerr.ValOutsideRange, err,t)
+		test.NilPntr[int](v,t)
 		for i := 0; i < 5; i++ {
 			container.Append(i)
 		}
@@ -238,14 +239,16 @@ func VectorInterfaceGetPntr(
 			test.Eq(i, *_v,t)
 			test.Eq(nil, err,t)
 		}
-		_, err = container.GetPntr(-1)
+		v, err = container.GetPntr(-1)
 		test.ContainsError(customerr.ValOutsideRange, err,t)
-		_, err = container.GetPntr(6)
+		test.NilPntr[int](v,t)
+		v, err = container.GetPntr(6)
 		test.ContainsError(customerr.ValOutsideRange, err,t)
+		test.NilPntr[int](v,t)
 	} else {
 		test.Panics(
 			func() {
-				container:=factory()
+				container:=factory(0)
 				container.GetPntr(1)
 			},
 			t,
@@ -253,7 +256,7 @@ func VectorInterfaceGetPntr(
 	}
 }
 
-func vectorContainsHelper(
+func dynVectorContainsHelper(
 	v dynamicContainers.Vector[int],
 	l int,
 	t *testing.T,
@@ -269,17 +272,17 @@ func vectorContainsHelper(
 }
 
 // Tests the Contains method functionality of a dynamic vector.
-func VectorInterfaceContains(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceContains(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	vectorContainsHelper(factory(), 0, t)
-	vectorContainsHelper(factory(), 1, t)
-	vectorContainsHelper(factory(), 2, t)
-	vectorContainsHelper(factory(), 5, t)
+	dynVectorContainsHelper(factory(0), 0, t)
+	dynVectorContainsHelper(factory(0), 1, t)
+	dynVectorContainsHelper(factory(0), 2, t)
+	dynVectorContainsHelper(factory(0), 5, t)
 }
 
-func vectorContainsPntrHelper(
+func dynVectorContainsPntrHelper(
 	v dynamicContainers.Vector[int],
 	l int,
 	t *testing.T,
@@ -296,17 +299,17 @@ func vectorContainsPntrHelper(
 }
 
 // Tests the ContainsPntr method functionality of a dynamic vector.
-func VectorInterfaceContainsPntr(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceContainsPntr(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	vectorContainsHelper(factory(), 0, t)
-	vectorContainsHelper(factory(), 1, t)
-	vectorContainsHelper(factory(), 2, t)
-	vectorContainsHelper(factory(), 5, t)
+	dynVectorContainsPntrHelper(factory(0), 0, t)
+	dynVectorContainsPntrHelper(factory(0), 1, t)
+	dynVectorContainsPntrHelper(factory(0), 2, t)
+	dynVectorContainsPntrHelper(factory(0), 5, t)
 }
 
-func vectorKeyOfHelper(
+func dynVectorKeyOfHelper(
 	v dynamicContainers.Vector[int],
 	l int,
 	t *testing.T,
@@ -326,22 +329,22 @@ func vectorKeyOfHelper(
 }
 
 // Tests the KeyOf method functionality of a dynamic vector.
-func VectorInterfaceKeyOf(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceKeyOf(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	vectorKeyOfHelper(factory(), 0, t)
-	vectorKeyOfHelper(factory(), 1, t)
-	vectorKeyOfHelper(factory(), 2, t)
-	vectorKeyOfHelper(factory(), 5, t)
+	dynVectorKeyOfHelper(factory(0), 0, t)
+	dynVectorKeyOfHelper(factory(0), 1, t)
+	dynVectorKeyOfHelper(factory(0), 2, t)
+	dynVectorKeyOfHelper(factory(0), 5, t)
 }
 
 // Tests the Set method functionality of a dynamic vector.
-func VectorInterfaceSet(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceSet(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	err := container.Set(basic.Pair[int, int]{0,6})
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 	for i := 0; i < 5; i++ {
@@ -352,7 +355,8 @@ func VectorInterfaceSet(
 		test.Nil(err,t)
 	}
 	for i := 0; i < 5; i++ {
-		iterV, _ := container.Get(i)
+		iterV, err := container.Get(i)
+		test.Nil(err,t)
 		test.Eq(i+1, iterV,t)
 	}
 	err = container.Set(basic.Pair[int,int]{-1, 6})
@@ -361,14 +365,14 @@ func VectorInterfaceSet(
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
 
-func vectorSetSequentialHelper(
-	factory func() dynamicContainers.Vector[int],
+func dynVectorSetSequentialHelper(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	idx int,
 	vals []int,
 	l int,
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	for i:=0; i<l; i++ {
 		container.Append(i)
 	}
@@ -384,8 +388,8 @@ func vectorSetSequentialHelper(
 	}
 }
 // Tests the SetSequential method functionality of a dynamic vector.
-func VectorInterfaceSetSequential(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceSetSequential(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ){
 	for i:=0; i<20; i++ {
@@ -393,18 +397,18 @@ func VectorInterfaceSetSequential(
 			vals:=[]int{}
 			for k:=0; k<i-j; k++ {
 				vals = append(vals, k)
-				vectorSetSequentialHelper(factory,j,vals,i,t)
+				dynVectorSetSequentialHelper(factory,j,vals,i,t)
 			}
 		}
 	}
 }
 
 // Tests the Append method functionality of a dynamic vector.
-func VectorInterfaceAppend(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceAppend(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 5; i++ {
 		container.Append(i)
 	}
@@ -420,7 +424,7 @@ func VectorInterfaceAppend(
 }
 
 func vectorInsertHelper(
-	factory func() dynamicContainers.Vector[int],
+	factory func(capacity int) dynamicContainers.Vector[int],
 	vals []basic.Pair[int,int],
 	l int,
 	t *testing.T,
@@ -433,7 +437,7 @@ func vectorInsertHelper(
 		}
 		return basic.Pair[int,int]{},false
 	}
-	container:=factory()
+	container:=factory(0)
 	for i:=0; i<l; i++ {
 		container.Append(i)
 	}
@@ -452,11 +456,11 @@ func vectorInsertHelper(
 	}
 }
 // Tests the Insert method functionality of a dynamic vector.
-func VectorInterfaceInsert(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceInsert(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	err:=container.Insert(basic.Pair[int, int]{1,0})
 	test.ContainsError(containerTypes.KeyError,err,t)
 	for i:=0; i<20; i++ {
@@ -478,12 +482,12 @@ func VectorInterfaceInsert(
 }
 
 func vectorInsertSequentialHelper(
-	v func() dynamicContainers.Vector[int],
+	factory func(capacity int) dynamicContainers.Vector[int],
 	idx int,
 	l int,
 	t *testing.T,
 ) {
-	container := v()
+	container := factory(0)
 	for i := 0; i < l-1; i++ {
 		container.Append(i)
 	}
@@ -505,11 +509,11 @@ func vectorInsertSequentialHelper(
 }
 
 // Tests the InsertSequential method functionality of a dynamic vector.
-func VectorInterfaceInsertSequential(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceInsertSequential(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 2; i >= 0; i-- {
 		container.InsertSequential(0,i)
 	}
@@ -520,7 +524,7 @@ func VectorInterfaceInsertSequential(
 		iterV, _ := container.Get(i)
 		test.Eq(i, iterV,t)
 	}
-	container = factory()
+	container = factory(0)
 	container.InsertSequential(0,0,1,2)
 	container.InsertSequential(3,4,5)
 	container.InsertSequential(3,3)
@@ -534,13 +538,13 @@ func VectorInterfaceInsertSequential(
 }
 
 func vectorPopSequentialHelper(
-	factory func() dynamicContainers.Vector[int],
+	factory func(capacity int) dynamicContainers.Vector[int],
 	l int,
 	num int,
 	t *testing.T,
 ) {
 	// fmt.Println("Permutation: l: ",l," num: ",num)
-	container := factory()
+	container := factory(0)
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
 			container.Append(-1)
@@ -550,7 +554,7 @@ func vectorPopSequentialHelper(
 	}
 	// fmt.Println("Init:   ",v)
 	n := container.PopSequential(-1, num)
-	exp := factory()
+	exp := factory(0)
 	cntr := 0
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
@@ -578,8 +582,8 @@ func vectorPopSequentialHelper(
 }
 
 // Tests the PopSequential method functionality of a dynamic vector.
-func VectorInterfacePopSequential(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfacePopSequential(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
 	for i := 0; i < 13; i++ {
@@ -590,12 +594,12 @@ func VectorInterfacePopSequential(
 }
 
 func vectorPopHelper(
-	factory func() dynamicContainers.Vector[int],
+	factory func(capacity int) dynamicContainers.Vector[int],
 	l int,
 	t *testing.T,
 ) {
 	// fmt.Println("Permutation: l: ",l," num: ",num)
-	container := factory()
+	container := factory(0)
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
 			container.Append(-1)
@@ -605,7 +609,7 @@ func vectorPopHelper(
 	}
 	// fmt.Println("Init:   ",v)
 	n := container.Pop(-1)
-	exp := factory()
+	exp := factory(0)
 	cntr := 0
 	for i := 0; i < l; i++ {
 		if i%4 != 0 {
@@ -628,8 +632,8 @@ func vectorPopHelper(
 }
 
 // Tests the Pop method functionality of a dynamic vector.
-func VectorInterfacePop(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfacePop(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
 	for i := 0; i < 13; i++ {
@@ -638,11 +642,11 @@ func VectorInterfacePop(
 }
 
 // Tests the Delete method functionality of a dynamic vector.
-func VectorInterfaceDelete(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceDelete(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 6; i++ {
 		container.Append(i)
 	}
@@ -659,13 +663,13 @@ func VectorInterfaceDelete(
 }
 
 func testVectorDeleteSequentialHelper(
-	factory func() dynamicContainers.Vector[int],
+	factory func(capacity int) dynamicContainers.Vector[int],
 	start int,
 	end int,
 	l int,
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	for i:=0; i<l; i++ {
 		container.Append(i)
 	}
@@ -686,11 +690,11 @@ func testVectorDeleteSequentialHelper(
 	}
 }
 // Tests the DeleteSequential method functionality of a dynamic vector.
-func VectorInterfaceDeleteSequential(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceDeleteSequential(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	container.Append(0,1,2,3)
 	err:=container.DeleteSequential(-1,3)
 	test.ContainsError(customerr.ValOutsideRange,err,t)
@@ -711,11 +715,11 @@ func VectorInterfaceDeleteSequential(
 }
 
 // Tests the Clear method functionality of a dynamic vector.
-func VectorInterfaceClear(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceClear(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 6; i++ {
 		container.Append(i)
 	}
@@ -725,11 +729,11 @@ func VectorInterfaceClear(
 }
 
 func testVectorValsHelper(
-    factory func() dynamicContainers.Vector[int],
+    factory func(capacity int) dynamicContainers.Vector[int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.Append(i);
     }
@@ -742,8 +746,8 @@ func testVectorValsHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the Vals method functionality of a dynamic vector.
-func VectorInterfaceVals(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceVals(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ){
     testVectorValsHelper(factory,0,t);
@@ -753,11 +757,11 @@ func VectorInterfaceVals(
 }
 
 func testVectorPntrValsHelper(
-	factory func() dynamicContainers.Vector[int],
+	factory func(capacity int) dynamicContainers.Vector[int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.Append(i);
     }
@@ -775,11 +779,11 @@ func testVectorPntrValsHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the ValPntrs method functionality of a dynamic vector.
-func VectorInterfaceValPntrs(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceValPntrs(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	if container.IsAddressable() {
 		testVectorPntrValsHelper(factory,0,t);
     	testVectorPntrValsHelper(factory,1,t);
@@ -790,11 +794,11 @@ func VectorInterfaceValPntrs(
 }
 
 func testVectorKeysHelper(
-    factory func() dynamicContainers.Vector[int],
+    factory func(capacity int) dynamicContainers.Vector[int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.Append(i);
     }
@@ -807,8 +811,8 @@ func testVectorKeysHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the Keys method functionality of a dynamic vector.
-func VectorInterfaceKeys(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceKeys(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ){
     testVectorKeysHelper(factory,0,t);
@@ -818,13 +822,13 @@ func VectorInterfaceKeys(
 }
 
 // Tests the KeyedEq method functionality of a dynamic vector.
-func VectorInterfaceKeyedEq(
-	factory func() dynamicContainers.Vector[int],
+func DynVectorInterfaceKeyedEq(
+	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
-	v := factory()
+	v := factory(0)
 	v.Append(1, 2, 3)
-	v2 := factory()
+	v2 := factory(0)
 	v2.Append(1, 2, 3)
 	test.True(v.KeyedEq(v2),t)
 	test.True(v2.KeyedEq(v),t)
@@ -832,24 +836,24 @@ func VectorInterfaceKeyedEq(
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
 	v.Append(3)
-	v2 = factory()
+	v2 = factory(0)
 	v2.Append(3, 1, 2)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
 	v.Pop(3)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
-	v = factory()
+	v = factory(0)
 	v.Append(0)
-	v2 = factory()
+	v2 = factory(0)
 	v2.Append(0)
 	test.True(v.KeyedEq(v2), t)
 	test.True(v2.KeyedEq(v), t)
 	v.Pop(0)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
-	v = factory()
-	v2 = factory()
+	v = factory(0)
+	v2 = factory(0)
 	test.True(v.KeyedEq(v2), t)
 	test.True(v2.KeyedEq(v), t)
 }

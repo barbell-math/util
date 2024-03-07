@@ -15,131 +15,131 @@ func dequeInterface[U any](c dynamicContainers.Deque[U])           {}
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Length] interface.
-func DequeInterfaceLengthInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceLengthInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Length = factory()
+	var container containerTypes.Length = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Capacity] interface.
-func DequeInterfaceCapacityInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceCapacityInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Capacity = factory()
+	var container containerTypes.Capacity = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.Clear] interface.
-func DequeInterfaceClearInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceClearInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.Clear = factory()
+	var container containerTypes.Clear = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.FirstElemRead] interface.
-func DequeInterfaceFirstElemReadInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceFirstElemReadInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.FirstElemRead[V] = factory()
+	var container containerTypes.FirstElemRead[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.FirstElemWrite] interface.
-func DequeInterfaceFirstElemWriteInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceFirstElemWriteInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.FirstElemWrite[V] = factory()
+	var container containerTypes.FirstElemWrite[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.FirstElemDelete] interface.
-func DequeInterfaceFirstElemDeleteInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceFirstElemDeleteInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.FirstElemDelete[V] = factory()
+	var container containerTypes.FirstElemDelete[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemRead] interface.
-func DequeInterfaceLastElemReadInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceLastElemReadInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.LastElemRead[V] = factory()
+	var container containerTypes.LastElemRead[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemWrite] interface.
-func DequeInterfaceLastElemWriteInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceLastElemWriteInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.LastElemWrite[V] = factory()
+	var container containerTypes.LastElemWrite[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [containerTypes.LastElemDelete] interface.
-func DequeInterfaceLastElemDeleteInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceLastElemDeleteInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	var container containerTypes.LastElemDelete[V] = factory()
+	var container containerTypes.LastElemDelete[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.DequeRead] interface.
-func ReadDequeInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func ReadDynDequeInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	dequeReadInterface[V](factory())
+	dequeReadInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.WriteDeque] interface.
-func WriteDequeInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func WriteDynDequeInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	dequeWriteInterface[V](factory())
+	dequeWriteInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the 
 // [dynamicContainers.Deque] interface.
-func DequeInterfaceInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
-	dequeInterface[V](factory())
+	dequeInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory does not implement the 
 // [staticContainers.Deque] interface.
-func DequeInterfaceStaticCapacityInterface[V any](
-	factory func() dynamicContainers.Deque[V],
+func DynDequeInterfaceStaticCapacityInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
 	t *testing.T,
 ) {
 	test.Panics(
 		func() {
 			var c any
-			c = factory()
+			c = factory(0)
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
@@ -148,11 +148,11 @@ func DequeInterfaceStaticCapacityInterface[V any](
 }
 
 // Tests the Clear method functionality of a dynamic Deque.
-func DequeInterfaceClear(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfaceClear(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 6; i++ {
 		container.PushBack(i)
 	}
@@ -162,11 +162,11 @@ func DequeInterfaceClear(
 }
 
 // Tests the PeekPntrFront method functionality of a dynamic Deque.
-func DequeInterfacePeekPntrFront(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePeekPntrFront(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_v, err := container.PeekPntrFront()
 	test.NilPntr[int](_v,t)
 	test.ContainsError(customerr.ValOutsideRange, err,t)
@@ -181,11 +181,11 @@ func DequeInterfacePeekPntrFront(
 }
 
 // Tests the PeekFront method functionality of a dynamic Deque.
-func DequeInterfacePeekFront(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePeekFront(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_, err := container.PeekFront()
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 	container.PushBack(1)
@@ -199,11 +199,11 @@ func DequeInterfacePeekFront(
 }
 
 // Tests the PeekPntrBack method functionality of a dynamic Deque.
-func DequeInterfacePeekPntrBack(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePeekPntrBack(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_v, err := container.PeekPntrBack()
 	test.NilPntr[int](_v,t)
 	test.ContainsError(customerr.ValOutsideRange, err,t)
@@ -218,11 +218,11 @@ func DequeInterfacePeekPntrBack(
 }
 
 // Tests the PeekBack method functionality of a dynamic Deque.
-func DequeInterfacePeekBack(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePeekBack(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_, err := container.PeekBack()
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 	container.PushBack(1)
@@ -236,11 +236,11 @@ func DequeInterfacePeekBack(
 }
 
 // Tests the PopFront method functionality of a dynamic Deque.
-func DequeInterfacePopFront(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePopFront(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.PushBack(i)
 	}
@@ -254,11 +254,11 @@ func DequeInterfacePopFront(
 }
 
 // Tests the PopBack method functionality of a dynamic Deque.
-func DequeInterfacePopBack(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePopBack(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.PushBack(i)
 	}
@@ -272,11 +272,11 @@ func DequeInterfacePopBack(
 }
 
 // Tests the PopFront method functionality of a dynamic Deque.
-func DequeInterfacePushFront(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePushFront(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.PushFront(i)
 		test.Eq(i+1, container.Length(),t)
@@ -285,7 +285,7 @@ func DequeInterfacePushFront(
 		iterV, _ = container.PeekBack()
 		test.Eq(0, iterV,t)
 	}
-	container=factory()
+	container=factory(0)
 	for i := 0; i < 6; i+=2 {
 		container.PushFront(i,i+1)
 		test.Eq(i+2, container.Length(),t)
@@ -297,11 +297,11 @@ func DequeInterfacePushFront(
 }
 
 // Tests the ForcePopFront method functionality of a dynamic Deque.
-func DequeInterfaceForcePushFront(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfaceForcePushFront(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.ForcePushFront(i)
 		test.Eq(i+1, container.Length(),t)
@@ -310,7 +310,7 @@ func DequeInterfaceForcePushFront(
 		iterV, _ = container.PeekBack()
 		test.Eq(0, iterV,t)
 	}
-	container=factory()
+	container=factory(0)
 	for i := 0; i < 6; i+=2 {
 		container.PushFront(i,i+1)
 		test.Eq(i+2, container.Length(),t)
@@ -322,11 +322,11 @@ func DequeInterfaceForcePushFront(
 }
 
 // Tests the PushBack method functionality of a dynamic Deque.
-func DequeInterfacePushBack(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfacePushBack(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.PushBack(i)
 		test.Eq(i+1, container.Length(),t)
@@ -335,7 +335,7 @@ func DequeInterfacePushBack(
 		iterV, _ = container.PeekFront()
 		test.Eq(0, iterV,t)
 	}
-	container=factory()
+	container=factory(0)
 	for i := 0; i < 6; i+=2 {
 		container.PushBack(i,i+1)
 		test.Eq(i+2, container.Length(),t)
@@ -347,11 +347,11 @@ func DequeInterfacePushBack(
 }
 
 // Tests the ForcePushBack method functionality of a dynamic Deque.
-func DequeInterfaceForcePushBack(
-	factory func() dynamicContainers.Deque[int],
+func DynDequeInterfaceForcePushBack(
+	factory func(capacity int) dynamicContainers.Deque[int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 4; i++ {
 		container.ForcePushBack(i)
 		test.Eq(i+1, container.Length(),t)
@@ -360,7 +360,7 @@ func DequeInterfaceForcePushBack(
 		iterV, _ = container.PeekFront()
 		test.Eq(0, iterV,t)
 	}
-	container=factory()
+	container=factory(0)
 	for i := 0; i < 6; i+=2 {
 		container.ForcePushBack(i,i+1)
 		test.Eq(i+2, container.Length(),t)

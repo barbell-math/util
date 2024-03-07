@@ -3,34 +3,35 @@ package staticContainers
 import "github.com/barbell-math/util/container/containerTypes"
 
 // An interface that only allows read operations on a vector.
-type ReadVector[K ~int, V any] interface {
+type ReadVector[V any] interface {
 	containerTypes.RWSyncable
+	containerTypes.Addressable
 	containerTypes.Length
 	containerTypes.Capacity
-    containerTypes.StaticCapacity
 	containerTypes.ReadOps[V]
-	containerTypes.ReadKeyedOps[K,V]
-	containerTypes.LastElemRead[V]
-	containerTypes.FirstElemRead[V]
+	containerTypes.ReadKeyedOps[int,V]
+	containerTypes.Comparisons[int,V]
+	containerTypes.KeyedComparisons[int,V]
+	containerTypes.StaticCapacity
 }
 // An interface that only allows write operations on a vector.
-type WriteVector[K ~int, V any] interface {
+type WriteVector[V any] interface {
 	containerTypes.RWSyncable
+	containerTypes.Clear
 	containerTypes.Length
 	containerTypes.Capacity
-    containerTypes.StaticCapacity
-	containerTypes.WriteOps[K,V]
-	containerTypes.WriteKeyedOps[K,V]
-	containerTypes.LastElemWrite[V]
-	containerTypes.FirstElemWrite[V]
-	containerTypes.DeleteOps[K,V]
-	containerTypes.DeleteKeyedOps[K,V]
-	containerTypes.LastElemDelete[V]
-	containerTypes.FirstElemDelete[V]
+	containerTypes.WriteOps[V]
+	containerTypes.WriteKeyedOps[int,V]
+	containerTypes.WriteKeyedSequentialOps[int,V]
+	containerTypes.WriteDynKeyedOps[int,V]
+	containerTypes.DeleteOps[int,V]
+	containerTypes.DeleteKeyedOps[int,V]
+	containerTypes.DeleteSequentialOps[int,V]
+	containerTypes.DeleteKeyedSequentialOps[int,V]
 }
 // An interface that represents a vector with no restrictions on reading or
 // writing.
-type Vector[K ~int, V any] interface {
-	ReadVector[K,V]
-	WriteVector[K,V]
+type Vector[V any] interface {
+	ReadVector[V]
+	WriteVector[V]
 }

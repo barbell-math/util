@@ -81,7 +81,6 @@ type KeyedComparisonsOtherConstraint[K any, V any] interface {
     RWSyncable
     Addressable
     Length
-    ReadOps[V] // TODO - needed??
     ReadKeyedOps[K,V]
 }
 

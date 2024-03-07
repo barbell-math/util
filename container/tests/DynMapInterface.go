@@ -17,121 +17,121 @@ func mapInterface[T any, U any](c dynamicContainers.Map[T,U])           {}
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.RWSyncable] interface.
-func MapInterfaceSyncableInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceSyncableInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.RWSyncable = factory()
+	var container containerTypes.RWSyncable = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Length] interface.
-func MapInterfaceLengthInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceLengthInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.Length = factory()
+	var container containerTypes.Length = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Clear] interface.
-func MapInterfaceClearInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceClearInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.Clear = factory()
+	var container containerTypes.Clear = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedWriteOps] interface.
-func MapInterfaceWriteKeyedOpsInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceWriteKeyedOpsInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.WriteKeyedOps[K, V] = factory()
+	var container containerTypes.WriteKeyedOps[K, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.ReadOps] interface.
-func MapInterfaceReadOpsInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceReadOpsInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.ReadOps[V] = factory()
+	var container containerTypes.ReadOps[V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedReadOps] interface.
-func MapInterfaceReadKeyedOpsInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceReadKeyedOpsInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.ReadKeyedOps[K, V] = factory()
+	var container containerTypes.ReadKeyedOps[K, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.DeleteOps] interface.
-func MapInterfaceDeleteOpsInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceDeleteOpsInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.DeleteOps[K, V] = factory()
+	var container containerTypes.DeleteOps[K, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.KeyedDeleteOps] interface.
-func MapInterfaceDeleteKeyedOpsInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceDeleteKeyedOpsInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	var container containerTypes.DeleteKeyedOps[K, V] = factory()
+	var container containerTypes.DeleteKeyedOps[K, V] = factory(0)
 	_ = container
 }
 
 // Tests that the value supplied by the factory implements the
 // [dynamicContainers.MapRead] interface.
-func ReadMapInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func ReadDynMapInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	mapReadInterface[K,V](factory())
+	mapReadInterface[K,V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
 // [dynamicContainers.WriteMap] interface.
-func WriteMapInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func WriteDynMapInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	mapWriteInterface[K,V](factory())
+	mapWriteInterface[K,V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
 // [dynamicContainers.Map] interface.
-func MapInterfaceInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
-	mapInterface[K,V](factory())
+	mapInterface[K,V](factory(0))
 }
 
 // Tests that the value supplied by the factory does not implement the
 // [staticContainers.Map] interface.
-func MapInterfaceStaticCapacityInterface[K any, V any](
-	factory func() dynamicContainers.Map[K,V],
+func DynMapInterfaceStaticCapacityInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K,V],
 	t *testing.T,
 ) {
 	test.Panics(
 		func() {
 			var c any
-			c = factory()
+			c = factory(0)
 			c2 := c.(containerTypes.StaticCapacity)
 			_ = c2
 		},
@@ -140,11 +140,11 @@ func MapInterfaceStaticCapacityInterface[K any, V any](
 }
 
 // Tests the Get method functionality of a dynamic map.
-func MapInterfaceGet(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceGet(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	_, err := container.Get(0)
 	test.ContainsError(containerTypes.KeyError, err,t)
 	for i := 0; i < 5; i++ {
@@ -162,11 +162,11 @@ func MapInterfaceGet(
 }
 
 // Tests the GetPntr method functionality of a dynamic map.
-func MapInterfaceGetPntr(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceGetPntr(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	if container.IsAddressable() {
 		_, err := container.GetPntr(0)
 		test.ContainsError(containerTypes.KeyError, err,t)
@@ -185,7 +185,7 @@ func MapInterfaceGetPntr(
 	} else {
 		test.Panics(
 			func() {
-				container:=factory()
+				container:=factory(0)
 				container.GetPntr(1)
 			},
 			t,
@@ -194,11 +194,11 @@ func MapInterfaceGetPntr(
 }
 
 // Tests the Set method functionality of a dynamic map.
-func MapInterfaceSet(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceSet(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	err := container.Set(basic.Pair[int, int]{0,6})
 	test.ContainsError(containerTypes.KeyError, err,t)
 	for i := 0; i < 5; i++ {
@@ -233,14 +233,14 @@ func mapContainsHelper(
 	test.False(v.Contains(l),t)
 }
 // Tests the Contains method functionality of a dynamic map.
-func MapInterfaceContains(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceContains(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	mapContainsHelper(factory(), 0, t)
-	mapContainsHelper(factory(), 1, t)
-	mapContainsHelper(factory(), 2, t)
-	mapContainsHelper(factory(), 5, t)
+	mapContainsHelper(factory(0), 0, t)
+	mapContainsHelper(factory(0), 1, t)
+	mapContainsHelper(factory(0), 2, t)
+	mapContainsHelper(factory(0), 5, t)
 }
 
 func mapContainsPntrHelper(
@@ -259,14 +259,14 @@ func mapContainsPntrHelper(
 	test.False(v.ContainsPntr(&l),t)
 }
 // Tests the ContainsPntr method functionality of a dynamic map.
-func MapInterfaceContainsPntr(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceContainsPntr(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	mapContainsHelper(factory(), 0, t)
-	mapContainsHelper(factory(), 1, t)
-	mapContainsHelper(factory(), 2, t)
-	mapContainsHelper(factory(), 5, t)
+	mapContainsHelper(factory(0), 0, t)
+	mapContainsHelper(factory(0), 1, t)
+	mapContainsHelper(factory(0), 2, t)
+	mapContainsHelper(factory(0), 5, t)
 }
 
 func mapKeyOfHelper(
@@ -288,23 +288,23 @@ func mapKeyOfHelper(
 	test.False(v.Contains(l),t)
 }
 // Tests the KeyOf method functionality of a dynamic map.
-func MapInterfaceKeyOf(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceKeyOf(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	mapKeyOfHelper(factory(), 0, t)
-	mapKeyOfHelper(factory(), 1, t)
-	mapKeyOfHelper(factory(), 2, t)
-	mapKeyOfHelper(factory(), 5, t)
+	mapKeyOfHelper(factory(0), 0, t)
+	mapKeyOfHelper(factory(0), 1, t)
+	mapKeyOfHelper(factory(0), 2, t)
+	mapKeyOfHelper(factory(0), 5, t)
 }
 
 func mapPopHelper(
-	factory func() dynamicContainers.Map[int,int],
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	l int,
 	t *testing.T,
 ) {
 	// fmt.Println("Permutation: l: ",l," num: ",num)
-	container := factory()
+	container := factory(0)
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
 			container.Emplace(basic.Pair[int, int]{i,-1})
@@ -332,8 +332,8 @@ func mapPopHelper(
 	test.Eq(expLength, container.Length(),t)
 }
 // Tests the Pop method functionality of a dynamic map.
-func MapInterfacePop(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfacePop(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
 	for i := 0; i < 13; i++ {
@@ -342,11 +342,11 @@ func MapInterfacePop(
 }
 
 // Tests the Delete method functionality of a dynamic map.
-func MapInterfaceDelete(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceDelete(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 6; i++ {
 		container.Emplace(basic.Pair[int, int]{i,i})
 	}
@@ -364,11 +364,11 @@ func MapInterfaceDelete(
 }
 
 // Tests the Clear method functionality of a dynamic map.
-func MapInterfaceClear(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceClear(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	container := factory()
+	container := factory(0)
 	for i := 0; i < 6; i++ {
 		container.Emplace(basic.Pair[int,int]{i,i})
 	}
@@ -377,11 +377,11 @@ func MapInterfaceClear(
 }
 
 func testHashMapKeysHelper(
-    factory func() dynamicContainers.Map[int,int],
+    factory func(capacity int) dynamicContainers.Map[int,int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.Emplace(basic.Pair[int, int]{i,i});
     }
@@ -396,8 +396,8 @@ func testHashMapKeysHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the Keys method functionality of a dynamic map.
-func MapInterfaceKeys(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceKeys(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ){
     testHashMapKeysHelper(factory,0,t);
@@ -407,11 +407,11 @@ func MapInterfaceKeys(
 }
 
 func testHashMapValsHelper(
-    factory func() dynamicContainers.Map[int,int],
+    factory func(capacity int) dynamicContainers.Map[int,int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.Emplace(basic.Pair[int, int]{i,i});
     }
@@ -424,8 +424,8 @@ func testHashMapValsHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the Vals method functionality of a dynamic map.
-func MapInterfaceVals(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceVals(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ){
     testHashMapValsHelper(factory,0,t);
@@ -435,11 +435,11 @@ func MapInterfaceVals(
 }
 
 func testHashMapValPntrsHelper(
-    factory func() dynamicContainers.Map[int,int],
+    factory func(capacity int) dynamicContainers.Map[int,int],
     l int, 
     t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
     for i:=0; i<l; i++ {
         container.Emplace(basic.Pair[int, int]{i,i});
     }
@@ -452,11 +452,11 @@ func testHashMapValPntrsHelper(
     test.Eq(l,cnt,t)
 }
 // Tests the Vals method functionality of a dynamic map.
-func MapInterfaceValPntrs(
-	factory func() dynamicContainers.Map[int,int],
+func DynMapInterfaceValPntrs(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ){
-	container:=factory()
+	container:=factory(0)
 	if container.IsAddressable() {
 		testHashMapValPntrsHelper(factory,0,t);
     	testHashMapValPntrsHelper(factory,1,t);
@@ -468,17 +468,17 @@ func MapInterfaceValPntrs(
 }
 
 // Tests the KeyedEq method functionality of a dynamic hash map.
-func HashMapInterfaceKeyedEq(
-	factory func() dynamicContainers.Map[int,int],
+func HashDynMapInterfaceKeyedEq(
+	factory func(capacity int) dynamicContainers.Map[int,int],
 	t *testing.T,
 ) {
-	v := factory()
+	v := factory(0)
 	v.Emplace(
 		basic.Pair[int, int]{1,1},
 		basic.Pair[int, int]{2,2},
 		basic.Pair[int, int]{3,3},
 	)
-	v2 := factory()
+	v2 := factory(0)
 	v2.Emplace(
 		basic.Pair[int, int]{1,1},
 		basic.Pair[int, int]{2,2},
@@ -490,7 +490,7 @@ func HashMapInterfaceKeyedEq(
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
 	v.Emplace(basic.Pair[int, int]{3,3})
-	v2 = factory()
+	v2 = factory(0)
 	v2.Emplace(
 		basic.Pair[int, int]{3,3},
 		basic.Pair[int, int]{1,1},
@@ -501,11 +501,11 @@ func HashMapInterfaceKeyedEq(
 	v.Pop(3)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
-	v = factory()
+	v = factory(0)
 	v.Emplace(
 		basic.Pair[int, int]{0,0},
 	)
-	v2 = factory()
+	v2 = factory(0)
 	v2.Emplace(
 		basic.Pair[int, int]{0,0},
 	)
@@ -514,8 +514,8 @@ func HashMapInterfaceKeyedEq(
 	v.Pop(0)
 	test.False(v.KeyedEq(v2), t)
 	test.False(v2.KeyedEq(v), t)
-	v = factory()
-	v2 = factory()
+	v = factory(0)
+	v2 = factory(0)
 	test.True(v.KeyedEq(v2), t)
 	test.True(v2.KeyedEq(v), t)
 }
