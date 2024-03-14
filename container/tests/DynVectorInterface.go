@@ -423,7 +423,7 @@ func DynVectorInterfaceAppend(
 	}
 }
 
-func vectorInsertHelper(
+func dynVectorInsertHelper(
 	factory func(capacity int) dynamicContainers.Vector[int],
 	vals []basic.Pair[int,int],
 	l int,
@@ -439,14 +439,16 @@ func vectorInsertHelper(
 	}
 	container:=factory(0)
 	for i:=0; i<l; i++ {
-		container.Append(i)
+		err:=container.Append(i)
+		test.Nil(err,t)
 	}
 	err:=container.Insert(vals...)
 	test.Nil(err,t)
 	test.Eq(l+len(vals),container.Length(),t)
 	offset:=0
 	for i:=0; i<container.Length(); i++ {
-		iterV,_:=container.Get(i)
+		iterV,err:=container.Get(i)
+		test.Nil(err,t)
 		if v,ok:=indexContained(i); ok {
 			test.Eq(v.B,iterV,t)
 			offset++
@@ -465,23 +467,23 @@ func DynVectorInterfaceInsert(
 	test.ContainsError(containerTypes.KeyError,err,t)
 	for i:=0; i<20; i++ {
 		vals:=[]basic.Pair[int,int]{}
-		vectorInsertHelper(factory,vals,i,t)
+		dynVectorInsertHelper(factory,vals,i,t)
 		for j:=0; j<20; j++ {
 			vals = append(vals, basic.Pair[int, int]{j,j})
-			vectorInsertHelper(factory,vals,i,t)
+			dynVectorInsertHelper(factory,vals,i,t)
 		}
 	}
 	for i:=0; i<20; i++ {
 		vals:=[]basic.Pair[int,int]{}
-		vectorInsertHelper(factory,vals,i,t)
+		dynVectorInsertHelper(factory,vals,i,t)
 		for j:=0; j<i; j+=2 {
 			vals = append(vals, basic.Pair[int, int]{j,j})
-			vectorInsertHelper(factory,vals,i,t)
+			dynVectorInsertHelper(factory,vals,i,t)
 		}
 	}
 }
 
-func vectorInsertSequentialHelper(
+func dynVectorInsertSequentialHelper(
 	factory func(capacity int) dynamicContainers.Vector[int],
 	idx int,
 	l int,
@@ -506,6 +508,12 @@ func vectorInsertSequentialHelper(
 		}
 		test.Eq(exp, v,t)
 	}
+	err=container.InsertSequential(l+1,-1)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	test.Eq(l,container.Length(),t)
+	err=container.InsertSequential(-1,-1)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	test.Eq(l,container.Length(),t)
 }
 
 // Tests the InsertSequential method functionality of a dynamic vector.
@@ -515,13 +523,16 @@ func DynVectorInterfaceInsertSequential(
 ) {
 	container := factory(0)
 	for i := 2; i >= 0; i-- {
-		container.InsertSequential(0,i)
+		err:=container.InsertSequential(0,i)
+		test.Nil(err,t)
 	}
 	for i := 3; i < 5; i++ {
-		container.InsertSequential(container.Length(), i)
+		err:=container.InsertSequential(container.Length(), i)
+		test.Nil(err,t)
 	}
 	for i := 0; i < 5; i++ {
-		iterV, _ := container.Get(i)
+		iterV, err := container.Get(i)
+		test.Nil(err,t)
 		test.Eq(i, iterV,t)
 	}
 	container = factory(0)
@@ -529,15 +540,16 @@ func DynVectorInterfaceInsertSequential(
 	container.InsertSequential(3,4,5)
 	container.InsertSequential(3,3)
 	for i := 0; i < 6; i++ {
-		iterV, _ := container.Get(i)
+		iterV, err := container.Get(i)
+		test.Nil(err,t)
 		test.Eq(i, iterV,t)
 	}
 	for i := 0; i < 5; i++ {
-		vectorInsertSequentialHelper(factory, i, 5, t)
+		dynVectorInsertSequentialHelper(factory, i, 5, t)
 	}
 }
 
-func vectorPopSequentialHelper(
+func dynVectorPopSequentialHelper(
 	factory func(capacity int) dynamicContainers.Vector[int],
 	l int,
 	num int,
@@ -580,7 +592,6 @@ func vectorPopSequentialHelper(
 		test.Eq(expIterV, iterV,t)
 	}
 }
-
 // Tests the PopSequential method functionality of a dynamic vector.
 func DynVectorInterfacePopSequential(
 	factory func(capacity int) dynamicContainers.Vector[int],
@@ -588,12 +599,12 @@ func DynVectorInterfacePopSequential(
 ) {
 	for i := 0; i < 13; i++ {
 		for j := 0; j < 13; j++ {
-			vectorPopSequentialHelper(factory, i, j, t)
+			dynVectorPopSequentialHelper(factory, i, j, t)
 		}
 	}
 }
 
-func vectorPopHelper(
+func dynVectorPopHelper(
 	factory func(capacity int) dynamicContainers.Vector[int],
 	l int,
 	t *testing.T,
@@ -630,14 +641,13 @@ func vectorPopHelper(
 		test.Eq(expIterV, iterV,t)
 	}
 }
-
 // Tests the Pop method functionality of a dynamic vector.
 func DynVectorInterfacePop(
 	factory func(capacity int) dynamicContainers.Vector[int],
 	t *testing.T,
 ) {
 	for i := 0; i < 13; i++ {
-		vectorPopHelper(factory, i, t)
+		dynVectorPopHelper(factory, i, t)
 	}
 }
 
@@ -647,22 +657,29 @@ func DynVectorInterfaceDelete(
 	t *testing.T,
 ) {
 	container := factory(0)
+	err:=container.Delete(0)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
 	for i := 0; i < 6; i++ {
 		container.Append(i)
 	}
+	err=container.Delete(-1)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	err=container.Delete(7)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
 	for i := container.Length() - 1; i >= 0; i-- {
 		container.Delete(i)
 		test.Eq(i, container.Length(), t)
 		for j := 0; j < i; j++ {
-			iterV, _ := container.Get(j)
+			iterV, err := container.Get(j)
+			test.Nil(err,t)
 			test.Eq(j, iterV, t)
 		}
 	}
-	err := container.Delete(0)
+	err = container.Delete(0)
 	test.ContainsError(customerr.ValOutsideRange, err,t)
 }
 
-func testVectorDeleteSequentialHelper(
+func dynVectorDeleteSequentialHelper(
 	factory func(capacity int) dynamicContainers.Vector[int],
 	start int,
 	end int,
@@ -708,7 +725,7 @@ func DynVectorInterfaceDeleteSequential(
 	for i:=0; i<20; i++ {
 		for j:=0; j<i; j++ {
 			for k:=j; k<i; k++ {
-				testVectorDeleteSequentialHelper(factory,j,k,i,t)
+				dynVectorDeleteSequentialHelper(factory,j,k,i,t)
 			}
 		}
 	}

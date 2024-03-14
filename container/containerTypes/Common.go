@@ -165,7 +165,7 @@ type DeleteKeyedOps[K any, V any] interface {
 }
 // An interface that enforces implementation of delete-only, key/value, operations.
 type DeleteKeyedSequentialOps[K any, V any] interface {
-    DeleteSequential(idx K, num int) error
+    DeleteSequential(start int, end int) error
 }
 
 // An interface that enforces the implementation of read-only first element access.

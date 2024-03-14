@@ -494,8 +494,8 @@ func (v *Vector[T, U])insertImpl(vals []basic.Pair[int,T]) error {
 // Description: Inserts the supplied values at the given index. Returns an error 
 // if the index is >= the length of the vector.
 //
-// Time Complexity: O(n^2). For time complexity see the InsertVector section of
-// https://go.dev/wiki/SliceTricks
+// Time Complexity: O(n+m), where m=len(vals). For time complexity see the 
+// InsertVector section of https://go.dev/wiki/SliceTricks
 func (v *Vector[T,U])InsertSequential(idx int, vals ...T) error {
     return v.insertSequentialImpl(idx,vals)
 }
@@ -507,8 +507,8 @@ func (v *Vector[T,U])InsertSequential(idx int, vals ...T) error {
 //
 // Lock Type: Write
 //
-// Time Complexity: O(n^2). For time complexity see the InsertVector section of
-// https://go.dev/wiki/SliceTricks
+// Time Complexity: O(n+m), where m=len(vals). For time complexity see the 
+// InsertVector section of https://go.dev/wiki/SliceTricks
 func (v *SyncedVector[T,U])InsertSequential(idx int, vals ...T) error {
     v.Lock()
     defer v.Unlock()
@@ -530,7 +530,7 @@ func (v *Vector[T, U])insertSequentialImpl(idx int, vals []T) error {
 // equality comparisons are performed by the generic U widget type that the 
 // vector was initialized with.
 //
-// Time Complexity: O(n^2)
+// Time Complexity: O(n)
 func (v *Vector[T, U])Pop(val T) int {
     return v.popSequentialImpl(&val,containerTypes.PopAll)
 }
@@ -541,7 +541,7 @@ func (v *Vector[T, U])Pop(val T) int {
 //
 // Lock Type: Write
 //
-// Time Complexity: O(n^2)
+// Time Complexity: O(n)
 func (v *SyncedVector[T, U])Pop(val T) int {
     v.Lock()
     defer v.Unlock()
@@ -553,7 +553,7 @@ func (v *SyncedVector[T, U])Pop(val T) int {
 // type that the vector was initialized with. If num is <=0 then no values will 
 // be poped and the vector will not change.
 //
-// Time Complexity: O(n^2)
+// Time Complexity: O(n)
 func (v *Vector[T, U])PopSequential(val T, num int) int {
     if num<=0 {
         return 0
@@ -568,7 +568,7 @@ func (v *Vector[T, U])PopSequential(val T, num int) int {
 //
 // Lock Type: Write
 //
-// Time Complexity: O(n^2)
+// Time Complexity: O(n)
 func (v *SyncedVector[T, U])PopSequential(val T, num int) int {
     if num<=0 {
         return 0

@@ -11,6 +11,8 @@ import (
 )
 
 type (
+    wrapingIndex int
+
     // A container that holds a fixed number of values in such a way that makes
     // stack and queue operations extremely efficient. Because the length of the
     // container is fixed (it will not dynamically expand to add more elements
@@ -19,8 +21,8 @@ type (
     // performed beyond the initial creation of the underlying array.
     CircularBuffer[T any, U widgets.WidgetInterface[T]] struct {
         vals []T;
-        numElems int;
-        startEnd basic.Pair[int,int];
+        numElems int
+        start wrapingIndex
     };
     
     // A synchronized version of CircularBuffer. All operations will be wrapped 
@@ -31,6 +33,26 @@ type (
         CircularBuffer[T, U]
     }
 )
+
+func (w wrapingIndex)normalize(wrapThreshold int) wrapingIndex {
+    rv:=int(w)%wrapThreshold            // Takes care of positive bounds
+    for ; rv<0; rv+=wrapThreshold {}    // Takes care of negative bounds
+    return wrapingIndex(rv)
+}
+
+func (w wrapingIndex)Add(amnt int, wrapThreshold int) wrapingIndex {
+    rv:=w+wrapingIndex(amnt)
+    return rv.normalize(wrapThreshold)
+}
+
+func (w wrapingIndex)Sub(amnt int, wrapThreshold int) wrapingIndex {
+    rv:=w-wrapingIndex(amnt)
+    return rv.normalize(wrapThreshold)
+}
+
+func (start wrapingIndex)GetProperIndex(idx int, wrapThreshold int) wrapingIndex {
+    return start.Add(idx,wrapThreshold)%wrapingIndex(wrapThreshold)
+}
 
 // Creates a new CircularBuffer initialized with size zero valued elements. Size 
 // must be greater than 0, an error will be returned if it is not.
@@ -51,7 +73,7 @@ func NewCircularBuffer[T any, U widgets.WidgetInterface[T]](
     // the buffer wraps around. You have been warned.
     return CircularBuffer[T,U]{
         vals: make([]T,size),
-        startEnd: basic.Pair[int, int]{A: 0, B: size-1},
+        start: 0,
     },nil;
 }
 
@@ -137,18 +159,40 @@ func (c *SyncedCircularBuffer[T, U])Full() bool {
     return c.CircularBuffer.Full()
 }
 
-// Returns the length of the circular buffer.
+// Description: Returns the length of the circular buffer.
+//
+// Time Complexity: O(1)
 func (c *CircularBuffer[T,U])Length() int {
-    c.RLock()
-    defer c.RUnlock()
-    return c.numElems;
+    return c.numElems
 }
 
-// Returns the capacity of the circular buffer.
-func (c *CircularBuffer[T,U])Capacity() int {
+// Description: Returns the length of the underlying circular buffer.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (c *SyncedCircularBuffer[T, U])Length() int {
     c.RLock()
     defer c.RUnlock()
+    return c.CircularBuffer.numElems
+}
+
+// Description: Returns the capacity of the circular buffer.
+//
+// Time Complexity: O(1)
+func (c *CircularBuffer[T,U])Capacity() int {
     return len(c.vals);
+}
+
+// Description: Returns the capacity of the underlying circular buffer.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (c *SyncedCircularBuffer[T, U])Capacity() int {
+    c.RLock()
+    defer c.RUnlock()
+    return len(c.vals)
 }
 
 // Pushes an element to the front of the circular buffer. Equivalent to inserting 
@@ -157,16 +201,15 @@ func (c *CircularBuffer[T,U])Capacity() int {
 func (c *CircularBuffer[T,U])PushFront(v T) error {
     c.Lock()
     defer c.Unlock()
-    if c.numElems<len(c.vals) {
-        c.numElems++;
-        c.startEnd.A=c.decIndex(c.startEnd.A,1);
-        c.vals[c.startEnd.A]=v;
+    if c.Length()<len(c.vals) {
+        c.start=c.start.Sub(1,len(c.vals))
+        c.vals[c.start]=v;
         return nil;
     }
     return c.getFullError()
 }
 
-// Pushes an element to the back of the circular buffer. Equivalent to appending 
+// Pushes an element to the back of the circular buffer. Equivalent to appinclusiveEnding 
 // a single value to the circular buffer. Returns an error if the circular buffer 
 // is full.
 func (c *CircularBuffer[T,U])PushBack(v T) error {
@@ -174,8 +217,7 @@ func (c *CircularBuffer[T,U])PushBack(v T) error {
     defer c.Unlock()
     if c.numElems<len(c.vals) {
         c.numElems++;
-        c.startEnd.B=c.incIndex(c.startEnd.B,1);
-        c.vals[c.startEnd.B]=v;
+        c.vals[c.inclusiveEnd()]=v
         return nil;
     }
     return c.getFullError()
@@ -190,12 +232,11 @@ func (c *CircularBuffer[T,U])ForcePushBack(v T) {
     c.Lock()
     defer c.Unlock()
     if c.numElems==len(c.vals) {
-        c.startEnd.A=c.incIndex(c.startEnd.A,1);
+        c.start=c.start.Add(1,len(c.vals))
         c.numElems--;
     }
     c.numElems++;
-    c.startEnd.B=c.incIndex(c.startEnd.B,1);
-    c.vals[c.startEnd.B]=v;
+    c.vals[c.inclusiveEnd()]=v
 }
 
 // Pushes an element to the back of the circular buffer, poping an element from
@@ -206,12 +247,11 @@ func (c *CircularBuffer[T,U])ForcePushFront(v T) {
     c.Lock()
     defer c.Unlock()
     if c.numElems==len(c.vals) {
-        c.startEnd.B=c.decIndex(c.startEnd.B,1);
         c.numElems--;
     }
     c.numElems++;
-    c.startEnd.A=c.decIndex(c.startEnd.A,1);
-    c.vals[c.startEnd.A]=v;
+    c.start=c.start.Sub(1,len(c.vals))
+    c.vals[c.start]=v;
 }
 
 // Returns the value at index 0 if one is present. If the circular buffer has no 
@@ -231,7 +271,7 @@ func (c *CircularBuffer[T,U])PeekPntrFront() (*T,error) {
     c.RLock()
     defer c.RUnlock()
     if c.numElems>0 {
-        return &c.vals[c.startEnd.A],nil
+        return &c.vals[c.start],nil
     }
     return nil,getIndexOutOfBoundsError(0,0,c.numElems)
 }
@@ -253,7 +293,7 @@ func (c *CircularBuffer[T, U])PeekPntrBack() (*T,error) {
     c.RLock()
     defer c.RUnlock()
     if c.numElems>0 {
-        return &c.vals[c.startEnd.B],nil
+        return &c.vals[c.inclusiveEnd()],nil
     }
     return nil,getIndexOutOfBoundsError(0,0,c.numElems)
 }
@@ -262,10 +302,9 @@ func (c *CircularBuffer[T, U])PeekPntrBack() (*T,error) {
 // index is >= the length of the circular buffer.
 //
 // Time Complexity: O(1)
-func (c *CircularBuffer[T,U])Get(idx int) (T,error){
+func (c *CircularBuffer[T,U])Get(idx int) (T,error) {
     if idx>=0 && idx<c.numElems && c.numElems>0 {
-        properIndex:=c.getProperIndex(idx)
-        return c.vals[properIndex],nil;
+        return c.vals[c.start.GetProperIndex(idx,len(c.vals))],nil
     }
     var tmp T
     return tmp,getIndexOutOfBoundsError(idx,0,c.numElems)
@@ -283,8 +322,7 @@ func (c *SyncedCircularBuffer[T, U])Get(idx int) (T,error) {
     c.RLock()
     defer c.RUnlock()
     if idx>=0 && idx<c.numElems && c.numElems>0 {
-        properIndex:=c.getProperIndex(idx)
-        return c.vals[properIndex],nil;
+        return c.vals[c.start.GetProperIndex(idx,len(c.vals))],nil
     }
     var tmp T
     return tmp,getIndexOutOfBoundsError(idx,0,c.numElems)
@@ -296,8 +334,7 @@ func (c *SyncedCircularBuffer[T, U])Get(idx int) (T,error) {
 // Time Complexity: O(1)
 func (c *CircularBuffer[T,U])GetPntr(idx int) (*T,error) {
     if idx>=0 && idx<c.numElems && c.numElems>0 {
-        properIndex:=c.getProperIndex(idx)
-        return &c.vals[properIndex],nil;
+        return &c.vals[c.start.GetProperIndex(idx,len(c.vals))],nil
     }
     return nil,getIndexOutOfBoundsError(idx,0,c.numElems)
 }
@@ -342,8 +379,7 @@ func (c *CircularBuffer[T, U])ContainsPntr(val *T) bool {
     found:=false
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<c.numElems && !found; i++ {
-        properIndex:=c.getProperIndex(i)
-        found=w.Eq(val,&c.vals[properIndex])
+        found=w.Eq(val,&c.vals[c.start.GetProperIndex(i,len(c.vals))])
     }
     return found
 }
@@ -388,8 +424,7 @@ func (c *SyncedCircularBuffer[T, U])KeyOf(val T) (int,bool) {
 func (c *CircularBuffer[T,U])keyOfImpl(val *T) (int,bool) {
     w:=widgets.NewWidget[T,U]()
     for i:=0; i<c.numElems; i++ {
-        properIndex:=c.getProperIndex(i)
-        if w.Eq(val,&c.vals[properIndex]) {
+        if w.Eq(val,&c.vals[c.start.GetProperIndex(i,len(c.vals))]) {
             return i,true
         }
     }
@@ -422,7 +457,7 @@ func (c *SyncedCircularBuffer[T, U])Set(vals ...basic.Pair[int,T]) error {
 func (c *CircularBuffer[T, U])setImpl(vals []basic.Pair[int,T]) error {
     for _,iterV:=range(vals) {
         if iterV.A>=0 && iterV.A<c.numElems && len(c.vals)>0 {
-            c.vals[c.getProperIndex(iterV.A)]=iterV.B
+            c.vals[c.start.GetProperIndex(iterV.A,len(c.vals))]=iterV.B
         } else {
             return getIndexOutOfBoundsError(iterV.A,0,c.numElems)
         }
@@ -466,7 +501,7 @@ func (c *CircularBuffer[T, U])setSequentialImpl(idx int, vals []T) error {
     return nil
 }
 
-// Description: Append the supplied values to the circular buffer. This function
+// Description: Appends the supplied values to the circular buffer. This function
 // will never return an error.
 //
 // Time Complexity: Best case O(m), where m=len(vals).
@@ -492,8 +527,7 @@ func (c *CircularBuffer[T,U])appendImpl(vals []T) error {
     for i:=0; i<len(vals); i++ {
         if c.numElems<len(c.vals) {
             c.numElems++;
-            c.startEnd.B=c.incIndex(c.startEnd.B,1);
-            c.vals[c.startEnd.B]=vals[i];
+            c.vals[c.inclusiveEnd()]=vals[i];
         } else {
             return c.getFullError()
         }
@@ -501,71 +535,144 @@ func (c *CircularBuffer[T,U])appendImpl(vals []T) error {
     return nil
 }
 
-
-// Pushes (inserts) the supplied values at the given index. Returns an error if 
-// the index is >= the length of the circular buffer.
+// Description: Insert will insert the supplied values into the circular buffer.
+// The values will be inserted in the order that they are given. 
+//
+// Time Complexity: O(n*m), where m=len(vals)
 func (c *CircularBuffer[T,U])Insert(vals ...basic.Pair[int,T]) error {
-    // c.Lock()
-    // defer c.Unlock()
-    // if idx<0 || idx>c.numElems {
-    //     return getIndexOutOfBoundsError(idx,0,c.numElems)
-    // } else if c.numElems==len(c.vals) {
-    //     return c.getFullError()
-    // }
-    // maxVals:=len(v)
-    // if c.numElems+maxVals>len(c.vals) {
-    //     maxVals=len(c.vals)-c.numElems
-    // }
-    // if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
-    //     c.insertMoveFront(v,idx,maxVals)
-    // } else {
-    //     c.insertMoveBack(v,idx,maxVals)
-    // }
-    // if maxVals<len(v) {
-    //     return c.getFullError()
-    // }
+    return c.insertImpl(vals)
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffer [CircularBuffer.Insert] implementation 
+// method. The [CircularBuffer.Insert] method is not called directly to avoid 
+// copying the vals varargs twice, which could be expensive with a large type 
+// for the T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n*m), where m=len(vals)
+func (c *SyncedCircularBuffer[T, U])Insert(vals ...basic.Pair[int,T]) error {
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.insertImpl(vals)
+}
+
+func (c *CircularBuffer[T, U])insertImpl(vals []basic.Pair[int,T]) error {
+    for _,iterV:=range(vals) {
+        if iterV.A<0 || iterV.A>c.numElems {
+            return getIndexOutOfBoundsError(iterV.A,0,c.numElems)
+        } else if c.numElems==len(c.vals) {
+            return c.getFullError()
+        }
+        if c.distanceFromBack(iterV.A)>c.distanceFromFront(iterV.A) {
+            c.insertMoveFront(&iterV)
+        } else {
+            c.insertMoveBack(&iterV)
+        }
+    }
     return nil
 }
 
-func (c *CircularBuffer[T, U])InsertSequential(idx int, vals ...int) error {
+func (c *CircularBuffer[T,U])insertMoveFront(val *basic.Pair[int,T]) {
+    c.numElems+=1;
+    c.start=c.start.Sub(1,len(c.vals))
+    for j,i:=0,1; i<val.A+1; i++ {
+        c.vals[c.start.GetProperIndex(j,len(c.vals))]=c.vals[c.start.GetProperIndex(i,len(c.vals))]
+        j++
+    }
+    c.vals[c.start.GetProperIndex(val.A,len(c.vals))]=val.B
+}
+
+func (c *CircularBuffer[T,U])insertMoveBack(val *basic.Pair[int,T]) {
+    c.numElems+=1
+    for j,i:=c.numElems-1,c.numElems-2; i>=val.A; i-- {
+        c.vals[c.start.GetProperIndex(j,len(c.vals))]=c.vals[c.start.GetProperIndex(i,len(c.vals))]
+        j--
+    }
+    c.vals[c.start.GetProperIndex(val.A,len(c.vals))]=val.B
+}
+
+// Description: Inserts the supplied values at the given index. Returns an error 
+// if the index is >= the length of the circular buffer.
+//
+// Time Complexity: O(n+m), where m=len(vals)
+func (c *CircularBuffer[T, U])InsertSequential(idx int, vals ...T) error {
+    return c.insertSequentailImpl(idx,vals)
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffer [CircularBuffer.InsertSequential] 
+// implementation method. The [CircularBuffer.InsertSequential] method is not 
+// called directly to avoid copying the vals varargs twice, which could be 
+// expensive with a large type for the T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n+m), where m=len(vals)
+func (c *SyncedCircularBuffer[T, U])InsertSequential(idx int, vals ...T) error {
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.insertSequentailImpl(idx,vals)
+}
+
+func (c *CircularBuffer[T, U])insertSequentailImpl(idx int, vals []T) error {
+    if idx<0 || idx>c.numElems {
+        return getIndexOutOfBoundsError(idx,0,c.numElems)
+    } else if c.numElems==len(c.vals) {
+        return c.getFullError()
+    }
+    maxVals:=len(vals)
+    if c.numElems+maxVals>len(c.vals) {
+        maxVals=len(c.vals)-c.numElems
+    }
+    if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
+        c.insertSequentialMoveFront(idx,vals,maxVals)
+    } else {
+        c.insertSequentialMoveBack(idx,vals,maxVals)
+    }
+    if maxVals<len(vals) {
+        return c.getFullError()
+    }
     return nil
 }
 
-func (c *CircularBuffer[T,U])insertMoveFront(v []T, idx int, maxVals int) {
+func (c *CircularBuffer[T,U])insertSequentialMoveFront(idx int, v []T, maxVals int) {
     c.numElems+=maxVals;
-    c.startEnd.A=c.decIndex(c.startEnd.A,maxVals);
+    c.start=c.start.Sub(maxVals,len(c.vals))
     for j,i:=0,maxVals-1; i<idx+maxVals; i++ {
-        c.vals[c.getProperIndex(j)]=c.vals[c.getProperIndex(i)]
+        c.vals[c.start.GetProperIndex(j,len(c.vals))]=c.vals[
+            c.start.GetProperIndex(i,len(c.vals)),
+        ]
         j++
     }
     for i:=idx; i<idx+maxVals; i++ {
-        c.vals[c.getProperIndex(i)]=v[i-idx]
+        c.vals[c.start.GetProperIndex(i,len(c.vals))]=v[i-idx]
     }
 }
 
-func (c *CircularBuffer[T,U])insertMoveBack(v []T, idx int, maxVals int) {
+func (c *CircularBuffer[T,U])insertSequentialMoveBack(idx int, v []T, maxVals int) {
     c.numElems+=maxVals
-    c.startEnd.B=c.incIndex(c.startEnd.B,maxVals)
     for j,i:=c.numElems-1,c.numElems-maxVals-1; i>=idx; i-- {
-        c.vals[c.getProperIndex(j)]=c.vals[c.getProperIndex(i)]
+        c.vals[c.start.GetProperIndex(j,len(c.vals))]=c.vals[
+            c.start.GetProperIndex(i,len(c.vals)),
+        ]
         j--
     }
     for i:=idx; i<idx+maxVals; i++ {
-        c.vals[c.getProperIndex(i)]=v[i-idx]
+        c.vals[c.start.GetProperIndex(i,len(c.vals))]=v[i-idx]
     }
 }
 
 // Returns and removes the element at the front of the circular buffer. Returns 
 // an error if the circular buffer has no elements.
 func (c *CircularBuffer[T,U])PopFront() (T,error) {
-    c.Lock()
-    defer c.Unlock()
-    if c.numElems>0 {
-        rv:=c.vals[c.startEnd.A];
-        c.startEnd.A=c.incIndex(c.startEnd.A,1);
-        c.numElems--;
-        return rv,nil;
-    }
+    // c.Lock()
+    // defer c.Unlock()
+    // if c.numElems>0 {
+    //     rv:=c.vals[c.startinclusiveEnd.A];
+    //     c.startinclusiveEnd.A=c.incIndex(c.startexclusiveEnd.A,1);
+    //     c.numElems--;
+    //     return rv,nil;
+    // }
     var tmp T;
     return tmp,containerTypes.Empty
 }
@@ -573,30 +680,30 @@ func (c *CircularBuffer[T,U])PopFront() (T,error) {
 // Returns and removes the element at the back of the circular buffer. Returns 
 // an error if the circular buffer has no elements.
 func (c *CircularBuffer[T, U])PopBack() (T,error) {
-    c.Lock()
-    defer c.Unlock()
-    if c.numElems>0 {
-        rv:=c.vals[c.startEnd.B];
-        c.startEnd.B=c.decIndex(c.startEnd.B,1);
-        c.numElems--;
-        return rv,nil;
-    }
+    // c.Lock()
+    // defer c.Unlock()
+    // if c.numElems>0 {
+    //     rv:=c.vals[c.startinclusiveEnd.B];
+    //     c.startinclusiveEnd.B=c.decIndex(c.startexclusiveEnd.B,1);
+    //     c.numElems--;
+    //     return rv,nil;
+    // }
     var tmp T;
     return tmp,containerTypes.Empty
 }
 
-// Deletes the value at the specified index. If the index is >= the length of the
-// circular buffer then no action is taken and no error is returned. The function 
-// will never return an error.
+// Description: Deletes the value at the specified index. Returns an error if 
+// the index is >= the length of the circular buffer.
+//
+// Time Complexity: O(n)
 func (c *CircularBuffer[T,U])Delete(idx int) error {
-    c.Lock()
-    defer c.Unlock()
     if idx<0 || idx>=c.numElems {
         return getIndexOutOfBoundsError(idx,0,c.numElems)
     }
+    w:=widgets.NewWidget[T,U]()
+    w.Zero(&c.vals[c.start.GetProperIndex(idx,len(c.vals))])
     if c.numElems==1 && idx==0 {
         c.numElems--;
-        c.startEnd.B=c.decIndex(c.startEnd.B,1);
     } else if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
         c.deleteMoveFront(idx)
     } else {
@@ -604,35 +711,165 @@ func (c *CircularBuffer[T,U])Delete(idx int) error {
     }
     return nil
 }
-
-// TODO - impl and test
-func (c *CircularBuffer[T, U])DeleteSequential(idx int, num int) error {
-    return nil
-}
-
-// TODO - implement
-func (c *CircularBuffer[T, U])Pop(val T) int {
-    return -1
-}
-
-func (c *CircularBuffer[T, U])PopSequential(val T, num int) int {
-    return -1
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.Delete] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (c *SyncedCircularBuffer[T, U])Delete(idx int) error {
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.Delete(idx)
 }
 
 func (c *CircularBuffer[T,U])deleteMoveFront(idx int) {
     for i:=idx-1; i>=0; i-- {
-        c.vals[c.getProperIndex(i+1)]=c.vals[c.getProperIndex(i)]
+        c.vals[c.start.GetProperIndex(i+1,len(c.vals))]=c.vals[
+            c.start.GetProperIndex(i,len(c.vals)),
+        ]
     }
     c.numElems--;
-    c.startEnd.A=c.incIndex(c.startEnd.A,1);
+    c.start=c.start.Add(1,len(c.vals))
 }
 
 func (c *CircularBuffer[T,U])deleteMoveBack(idx int) {
     for i:=idx; i<c.numElems; i++ {
-        c.vals[c.getProperIndex(i)]=c.vals[c.getProperIndex(i+1)]
+        c.vals[c.start.GetProperIndex(i,len(c.vals))]=c.vals[c.start.GetProperIndex(i+1,len(c.vals))]
     }
     c.numElems--;
-    c.startEnd.B=c.decIndex(c.startEnd.B,1);
+}
+
+// Description: Deletes the values in the index range [start,end). Returns an 
+// error if the start index is < 0, the end index is >= the length of the 
+// circular buffer, or the end index is < the start index.
+//
+// Time Complexity: O(n)
+func (c *CircularBuffer[T, U])DeleteSequential(start int, end int) error {
+    if start<0 {
+	return getIndexOutOfBoundsError(start,0,c.numElems)
+    }
+    if end>=c.numElems {
+	return getIndexOutOfBoundsError(end,0,c.numElems)
+    }
+    if end<start {
+	return getStartEndIndexError(start,end)
+    }
+    w:=widgets.NewWidget[T,U]()
+    w.Zero(&c.vals[c.start.GetProperIndex(idx,c.numElems)])
+    if c.numElems==1 && idx==0 {
+        c.numElems--;
+    } else if c.distanceFromBack(idx)>c.distanceFromFront(idx) {
+        c.deleteMoveFront(idx)
+    } else {
+        c.deleteMoveBack(idx)
+    }
+    return nil
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffer [CircularBuffer.DeleteSequential] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (c *SyncedCircularBuffer[T, U])DeleteSequential(start int, end int) error {
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.DeleteSequential(start,end)
+}
+
+func (c *CircularBuffer[T,U])deleteSequentialMoveFront(idx int) {
+    for i:=idx-1; i>=0; i-- {
+        c.vals[c.start.GetProperIndex(i+1,len(c.vals))]=c.vals[
+            c.start.GetProperIndex(i,len(c.vals)),
+        ]
+    }
+    c.numElems--;
+    c.start=c.start.Add(1,len(c.vals))
+}
+
+func (c *CircularBuffer[T,U])deleteSequentialMoveBack(idx int) {
+    for i:=idx; i<c.numElems; i++ {
+        c.vals[c.start.GetProperIndex(i,len(c.vals))]=c.vals[c.start.GetProperIndex(i+1,len(c.vals))]
+    }
+    c.numElems--;
+}
+
+
+// Description: Pop will remove all occurrences of val in the circular buffer. 
+// All equality comparisons are performed by the generic U widget type that the 
+// circular buffer was initialized with.
+//
+// Time Complexity: O(n)
+func (c *CircularBuffer[T, U])Pop(val T) int {
+    return c.popSequentialImpl(&val,containerTypes.PopAll)
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying circular buffers [CircularBuffer.Pop] implementation 
+// method. The [CircularBuffer.Pop] method is not called directly to avoid 
+// copying the value twice, which could be expensive with a large type for the 
+// T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (c *SyncedCircularBuffer[T, U])Pop(val T) int {
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.popSequentialImpl(&val,containerTypes.PopAll)
+}
+
+// Description: PopSequential will remove the first num occurrences of val in 
+// the circular buffer. All equality comparisons are performed by the generic U 
+// widget type that the vector was initialized with. If num is <=0 then no 
+// values will be poped and the vector will not change.
+//
+// Time Complexity: O(n)
+func (c *CircularBuffer[T, U])PopSequential(val T, num int) int {
+    if num<=0 {
+        return 0
+    }
+    return c.popSequentialImpl(&val,num)
+}
+// Description: Places a write lock on the underlying circular buffer and then 
+// calls the underlying vectors [CircularBuffer.PopSequential] implementation 
+// method. The [CircularBuffer.PopSequential] method is not called directly to 
+// avoid copying the value twice, which could be expensive with a large type for 
+// the T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (c *SyncedCircularBuffer[T, U])PopSequential(val T, num int) int {
+    if num<=0 {
+        return 0
+    }
+    c.Lock()
+    defer c.Unlock()
+    return c.CircularBuffer.popSequentialImpl(&val,num)
+}
+
+func (c *CircularBuffer[T, U])popSequentialImpl(val *T, num int) int {
+    rv:=0
+    curIdx:=-1
+    w:=widgets.NewWidget[T,U]()
+    for i:=0; i<c.numElems; i++ {
+        if w.Eq(&c.vals[c.start.GetProperIndex(i,len(c.vals))],val) && rv<num {
+            if rv==0 {
+                curIdx=0
+            }
+            w.Zero(&c.vals[c.start.GetProperIndex(i,len(c.vals))])
+            rv++
+        } else if curIdx!=-1 {
+            c.vals[c.start.GetProperIndex(curIdx,len(c.vals))]=c.vals[
+                c.start.GetProperIndex(i,len(c.vals)),
+            ]
+            curIdx++
+        }
+    }
+    c.numElems-=rv
+    return rv
+    return 0
 }
 
 // Clears all values from the circular buffer. Equivalent to making a new 
@@ -642,7 +879,7 @@ func (c *CircularBuffer[T,U])Clear() {
     defer c.Unlock()
     c.vals=make([]T,len(c.vals))
     c.numElems=0
-    c.startEnd=basic.Pair[int, int]{A: 0, B: len(c.vals)-1}
+    c.start=0
 }
 
 // Returns an iterator that iterates over the values in the circular buffer. The 
@@ -689,32 +926,8 @@ func (c *CircularBuffer[T,U])PntrElems() iter.Iter[*T] {
 //     return rv
 // }
 
-// This function only works for an index that is <2n when n is the capacity of 
-// the underlying array
-func (c *CircularBuffer[T,U])incIndex(idx int, amnt int) int {
-    rv:=idx+amnt
-    if rv>=len(c.vals) {
-        rv-=len(c.vals)
-    }
-    return rv
-}
-
-// This function only works for an index that is <2n when n is the capacity of 
-// the underlying array
-func (c *CircularBuffer[T,U])decIndex(idx int, amnt int) int {
-    rv:=idx-amnt
-    if rv<0 {
-        rv+=len(c.vals)
-    }
-    return rv
-}
-
-func (c *CircularBuffer[T,U])getProperIndex(idx int) int {
-    properIndex:=idx+c.startEnd.A;
-    if properIndex>=len(c.vals) {
-        properIndex-=len(c.vals);
-    }
-    return properIndex
+func (c *CircularBuffer[T, U])inclusiveEnd() wrapingIndex {
+    return c.start.Add(c.numElems-1,len(c.vals))
 }
 
 func (c *CircularBuffer[T,U])distanceFromFront(idx int) int {

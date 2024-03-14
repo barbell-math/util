@@ -314,7 +314,8 @@ func staticVectorKeyOfHelper(
 	}
 	_, found := v.KeyOf(-1)
 	test.False(found,t)
-	_, found = v.KeyOf(-1)
+	_, found = v.KeyOf(l)
+	test.False(found,t)
 	test.False(v.Contains(l),t)
 }
 
@@ -397,24 +398,389 @@ func StaticVectorInterfaceSetSequential(
 	}
 }
 
-// TODO - change test to test static nature of container!!!!
 // Tests the Append method functionality of a static vector.
 func StaticVectorInterfaceAppend(
 	factory func(capacity int) staticContainers.Vector[int],
 	t *testing.T,
 ) {
 	container := factory(0)
+	err:=container.Append(0)
+	test.ContainsError(containerTypes.Full,err,t)
+	container=factory(5)
 	for i := 0; i < 5; i++ {
-		container.Append(i)
+		err:=container.Append(i)
+		test.Nil(err,t)
 	}
 	for i := 0; i < 5; i++ {
-		iterV, _ := container.Get(i)
+		iterV, err := container.Get(i)
+		test.Nil(err,t)
 		test.Eq(i, iterV,t)
 	}
-	container.Append(5, 6, 7)
-	for i := 0; i < 8; i++ {
-		iterV, _ := container.Get(i)
+	err=container.Append(5, 6, 7)
+	test.ContainsError(containerTypes.Full,err,t)
+	test.Eq(5,container.Length(),t)
+	for i := 0; i < 5; i++ {
+		iterV, err := container.Get(i)
+		test.Nil(err,t)
 		test.Eq(i, iterV,t)
 	}
 }
 
+func staticVectorInsertHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	vals []basic.Pair[int,int],
+	l int,
+	t *testing.T,
+){
+	indexContained:=func(idx int) (basic.Pair[int,int],bool) {
+		for _,v:=range(vals) {
+			if idx==v.A {
+				return v,true
+			}
+		}
+		return basic.Pair[int,int]{},false
+	}
+	container:=factory(l)
+	for i:=0; i<l; i++ {
+		err:=container.Append(i)
+		test.Nil(err,t)
+	}
+	err:=container.Insert(vals...)
+	if len(vals)>0 {
+		test.ContainsError(containerTypes.Full,err,t)
+	} else {
+		test.Nil(err,t)
+	}
+	container=factory(l+len(vals))
+	for i:=0; i<l; i++ {
+		container.Append(i)
+	}
+	err=container.Insert(vals...)
+	test.Nil(err,t)
+	test.Eq(l+len(vals),container.Length(),t)
+	offset:=0
+	for i:=0; i<container.Length(); i++ {
+		iterV,err:=container.Get(i)
+		test.Nil(err,t)
+		if v,ok:=indexContained(i); ok {
+			test.Eq(v.B,iterV,t)
+			offset++
+		} else {
+			test.Eq(i-offset,iterV,t)
+		}
+	}
+	err=container.Insert(basic.Pair[int, int]{l+len(vals)+1,-1})
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	err=container.Insert(basic.Pair[int, int]{-1,-1})
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+}
+// Tests the Insert method functionality of a static vector.
+func StaticVectorInterfaceInsert(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+){
+	container:=factory(0)
+	err:=container.Insert(basic.Pair[int, int]{0,0})
+	test.ContainsError(containerTypes.Full,err,t)
+	err=container.Insert(basic.Pair[int, int]{1,0})
+	test.ContainsError(containerTypes.KeyError,err,t)
+	for i:=0; i<20; i++ {
+		vals:=[]basic.Pair[int,int]{}
+		staticVectorInsertHelper(factory,vals,i,t)
+		for j:=0; j<20; j++ {
+			vals = append(vals, basic.Pair[int, int]{j,j})
+			staticVectorInsertHelper(factory,vals,i,t)
+		}
+	}
+	for i:=0; i<20; i++ {
+		vals:=[]basic.Pair[int,int]{}
+		staticVectorInsertHelper(factory,vals,i,t)
+		for j:=0; j<i; j+=2 {
+			vals = append(vals, basic.Pair[int, int]{j,j})
+			staticVectorInsertHelper(factory,vals,i,t)
+		}
+	}
+}
+
+func staticVectorInsertSequentialHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	idx int,
+	l int,
+	t *testing.T,
+) {
+	container := factory(l)
+	for i := 0; i < l-1; i++ {
+		container.Append(i)
+	}
+	err := container.InsertSequential(idx, l-1)
+	test.Nil(err,t)
+	test.Eq(l, container.Length(),t)
+	for i := 0; i < container.Length(); i++ {
+		var exp int
+		v, _ := container.Get(i)
+		if i < idx {
+			exp = i
+		} else if i == idx {
+			exp = l - 1
+		} else {
+			exp = i - 1
+		}
+		test.Eq(exp, v,t)
+	}
+	err=container.InsertSequential(l+1,-1)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	test.Eq(l,container.Length(),t)
+	err=container.InsertSequential(-1,-1)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	test.Eq(l,container.Length(),t)
+	err=container.InsertSequential(l,-1)
+	test.ContainsError(containerTypes.Full,err,t)
+	test.Eq(l,container.Length(),t)
+}
+// Tests the InsertSequential method functionality of a static vector.
+func StaticVectorInterfaceInsertSequential(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	container := factory(5)
+	for i := 2; i >= 0; i-- {
+		err:=container.InsertSequential(0,i)
+		test.Nil(err,t)
+	}
+	for i := 3; i < 5; i++ {
+		err:=container.InsertSequential(container.Length(), i)
+		test.Nil(err,t)
+	}
+	for i := 0; i < 5; i++ {
+		iterV, err := container.Get(i)
+		test.Nil(err,t)
+		test.Eq(i, iterV,t)
+	}
+	container = factory(6)
+	container.InsertSequential(0,0,1,2)
+	container.InsertSequential(3,4,5)
+	container.InsertSequential(3,3)
+	for i := 0; i < 6; i++ {
+		iterV, err := container.Get(i)
+		test.Nil(err,t)
+		test.Eq(i, iterV,t)
+	}
+	for i := 0; i < 5; i++ {
+		staticVectorInsertSequentialHelper(factory, i, 5, t)
+	}
+}
+
+func staticVectorPopSequentialHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	num int,
+	t *testing.T,
+) {
+	permutation:=func(container staticContainers.Vector[int]) {
+		// fmt.Println("Init:   ",container)
+		n := container.PopSequential(-1, num)
+		cntr := 0
+		expLen:=0
+		for i := 0; i < l; i++ {
+			if i%4 == 0 {
+				if cntr < num {
+					cntr++
+					continue
+				} else {
+					v,err:=container.Get(i-cntr)
+					test.Nil(err,t)
+					test.Eq(-1,v,t)
+					expLen++
+				}
+			} else {
+				v,err:=container.Get(i-cntr)
+				test.Nil(err,t)
+				test.Eq(i,v,t)
+				expLen++
+			}
+		}
+		test.Eq(expLen, container.Length(),t)
+		test.Eq(cntr, n,t)
+	}
+	// fmt.Println("Permutation: l: ",l," num: ",num)
+	container := factory(l)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(container)
+	container = factory(l+1)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(container)
+	container = factory(l+10)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(container)
+}
+// Tests the PopSequential method functionality of a static vector.
+func StaticVectorInterfacePopSequential(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	for i := 0; i < 13; i++ {
+		for j := 0; j < 13; j++ {
+			staticVectorPopSequentialHelper(factory, i, j, t)
+		}
+	}
+}
+
+func staticVectorPopHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	t *testing.T,
+) {
+	permutation:=func(container staticContainers.Vector[int]){
+		// fmt.Println("Init:   ",v)
+		n := container.Pop(-1)
+		cntr := 0
+		expLength:=0
+		for i := 0; i < l; i++ {
+			if i%4 != 0 {
+				v,err:=container.Get(i-cntr)
+				test.Nil(err,t)
+				test.Eq(i,v,t)
+				expLength++
+			} else {
+				cntr++
+			}
+		}
+		test.Eq(expLength, container.Length(),t)
+		test.Eq(cntr, n,t)
+	}
+	// fmt.Println("Permutation: l: ",l," num: ",num)
+	container := factory(l)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(container)
+	container = factory(l+1)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(container)
+	container = factory(l+10)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(container)
+}
+// Tests the Pop method functionality of a static vector.
+func StaticVectorInterfacePop(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	for i := 0; i < 13; i++ {
+		staticVectorPopHelper(factory, i, t)
+	}
+}
+
+// Tests the Delete method functionality of a static vector.
+func StaticVectorInterfaceDelete(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	container := factory(6)
+	err:=container.Delete(0)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	for i := 0; i < 6; i++ {
+		container.Append(i)
+	}
+	err=container.Delete(-1)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	err=container.Delete(7)
+	test.ContainsError(customerr.ValOutsideRange,err,t)
+	for i := container.Length() - 1; i >= 0; i-- {
+		container.Delete(i)
+		test.Eq(i, container.Length(), t)
+		for j := 0; j < i; j++ {
+			iterV, err := container.Get(j)
+			test.Nil(err,t)
+			test.Eq(j, iterV, t)
+		}
+	}
+	err = container.Delete(0)
+	test.ContainsError(customerr.ValOutsideRange, err,t)
+}
+
+// func staticVectorDeleteSequentialHelper(
+// 	factory func(capacity int) staticContainers.Vector[int],
+// 	start int,
+// 	end int,
+// 	l int,
+// 	t *testing.T,
+// ){
+// 	container:=factory(0)
+// 	for i:=0; i<l; i++ {
+// 		container.Append(i)
+// 	}
+// 	container.DeleteSequential(start,end)
+// 	test.Eq(l-(end-start),container.Length(),t)
+// 	for i:=0; i<l; i++ {
+// 		if i<start {
+// 			v,err:=container.Get(i)
+// 			test.Nil(err,nil)
+// 			test.Eq(i,v,t)
+// 		} else if i>=end {
+// 			v,err:=container.Get(i-(end-start))
+// 			test.Nil(err,nil)
+// 			test.Eq(i,v,t)
+// 		} else {
+// 			test.False(container.Contains(i),t)
+// 		}
+// 	}
+// }
+// // Tests the DeleteSequential method functionality of a static vector.
+// func StaticVectorInterfaceDeleteSequential(
+// 	factory func(capacity int) staticContainers.Vector[int],
+// 	t *testing.T,
+// ){
+// 	container:=factory(0)
+// 	container.Append(0,1,2,3)
+// 	err:=container.DeleteSequential(-1,3)
+// 	test.ContainsError(customerr.ValOutsideRange,err,t)
+// 	test.Eq(4,container.Length(),t)
+// 	err=container.DeleteSequential(0,4)
+// 	test.ContainsError(customerr.ValOutsideRange,err,t)
+// 	test.Eq(4,container.Length(),t)
+// 	err=container.DeleteSequential(2,1)
+// 	test.ContainsError(customerr.InvalidValue,err,t)
+// 	test.Eq(4,container.Length(),t)
+// 	for i:=0; i<20; i++ {
+// 		for j:=0; j<i; j++ {
+// 			for k:=j; k<i; k++ {
+// 				staticVectorDeleteSequentialHelper(factory,j,k,i,t)
+// 			}
+// 		}
+// 	}
+// }
