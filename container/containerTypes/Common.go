@@ -110,7 +110,6 @@ type WriteUniqueOps[K any, V any] interface {
 // valued, operations.
 type WriteUniqueKeyedOps[K any, V any] interface {
     EmplaceUnique(idx K, v V) error
-    // SetUnique(idx K, v V) error
 }
 
 // An interface that enforces implementation of write-only, value-only, operations.

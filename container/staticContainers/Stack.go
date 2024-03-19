@@ -1,4 +1,4 @@
-package dynamicContainers
+package staticContainers
 
 import "github.com/barbell-math/util/container/containerTypes"
 
@@ -8,6 +8,7 @@ type ReadStack[V any] interface {
 	containerTypes.Length
 	containerTypes.Capacity
 	containerTypes.LastElemRead[V]
+	containerTypes.StaticCapacity
 }
 
 // An interface that only allows write operations on a stack.

@@ -3,6 +3,7 @@ package tests
 import (
 	"testing"
 
+	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/staticContainers"
@@ -13,6 +14,16 @@ import (
 func staticVectorReadInterface[U any](c staticContainers.ReadVector[U])   {}
 func staticVectorWriteInterface[U any](c staticContainers.WriteVector[U]) {}
 func staticVectorInterface[U any](c staticContainers.Vector[U])           {}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.StaticCapacity] interface.
+func StaticVectorInterfaceStaticCapacity[V any](
+	factory func(capacity int) staticContainers.Vector[V],
+	t *testing.T,
+) {
+	var container containerTypes.StaticCapacity = factory(0)
+	_ = container
+}
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Addressable] interface.
@@ -181,26 +192,66 @@ func StaticVectorInterfaceInterface[V any](
 	staticVectorInterface[V](factory(1))
 }
 
+func staticVectorGetHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	c int,
+	t *testing.T,
+) {
+	container := factory(c)
+	_, err := container.Get(0)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	for i := 0; i < 5; i++ {
+		container.Append(i)
+	}
+	test.Eq(l, container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	for i := 0; i < 5; i++ {
+		_v, err := container.Get(i)
+		test.Eq(i, _v, t)
+		test.Nil(err, t)
+	}
+	_, err = container.Get(-1)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	_, err = container.Get(6)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+}
+
 // Tests the Get method functionality of a static vector.
 func StaticVectorInterfaceGet(
 	factory func(capacity int) staticContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory(5)
-	_, err := container.Get(0)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
+	staticVectorGetHelper(factory, 5, 5, t)
+	staticVectorGetHelper(factory, 5, 10, t)
+}
+
+func staticVectorGetPntrHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	c int,
+	t *testing.T,
+) {
+	container := factory(c)
+	v, err := container.GetPntr(0)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	test.NilPntr[int](v, t)
 	for i := 0; i < 5; i++ {
 		container.Append(i)
 	}
+	test.Eq(l, container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
 	for i := 0; i < 5; i++ {
-		_v, err := container.Get(i)
-		test.Eq(i, _v,t)
-		test.Eq(nil, err,t)
+		_v, err := container.GetPntr(i)
+		test.Eq(nil, err, t)
+		test.Eq(i, *_v, t)
 	}
-	_, err = container.Get(-1)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
-	_, err = container.Get(6)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
+	v, err = container.GetPntr(-1)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	test.NilPntr[int](v, t)
+	v, err = container.GetPntr(6)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	test.NilPntr[int](v, t)
 }
 
 // Tests the GetPntr method functionality of a static vector.
@@ -208,29 +259,14 @@ func StaticVectorInterfaceGetPntr(
 	factory func(capacity int) staticContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory(5)
+	container := factory(0)
 	if container.IsAddressable() {
-		v, err := container.GetPntr(0)
-		test.ContainsError(customerr.ValOutsideRange, err,t)
-		test.NilPntr[int](v,t)
-		for i := 0; i < 5; i++ {
-			container.Append(i)
-		}
-		for i := 0; i < 5; i++ {
-			_v, err := container.GetPntr(i)
-			test.Eq(nil, err,t)
-			test.Eq(i, *_v,t)
-		}
-		v, err = container.GetPntr(-1)
-		test.ContainsError(customerr.ValOutsideRange, err,t)
-		test.NilPntr[int](v,t)
-		v, err = container.GetPntr(6)
-		test.ContainsError(customerr.ValOutsideRange, err,t)
-		test.NilPntr[int](v,t)
+		staticVectorGetPntrHelper(factory, 5, 5, t)
+		staticVectorGetPntrHelper(factory, 5, 10, t)
 	} else {
 		test.Panics(
 			func() {
-				container:=factory(0)
+				container := factory(0)
 				container.GetPntr(1)
 			},
 			t,
@@ -247,10 +283,10 @@ func staticVectorContainsHelper(
 		v.Append(i)
 	}
 	for i := 0; i < l; i++ {
-		test.True(v.Contains(i),t)
+		test.True(v.Contains(i), t)
 	}
-	test.False(v.Contains(-1),t)
-	test.False(v.Contains(l),t)
+	test.False(v.Contains(-1), t)
+	test.False(v.Contains(l), t)
 }
 
 // Tests the Contains method functionality of a static vector.
@@ -277,11 +313,11 @@ func staticVectorContainsPntrHelper(
 		v.Append(i)
 	}
 	for i := 0; i < l; i++ {
-		test.True(v.ContainsPntr(&i),t)
+		test.True(v.ContainsPntr(&i), t)
 	}
-	tmp:=-1
-	test.False(v.ContainsPntr(&tmp),t)
-	test.False(v.ContainsPntr(&l),t)
+	tmp := -1
+	test.False(v.ContainsPntr(&tmp), t)
+	test.False(v.ContainsPntr(&l), t)
 }
 
 // Tests the ContainsPntr method functionality of a static vector.
@@ -309,14 +345,14 @@ func staticVectorKeyOfHelper(
 	}
 	for i := 0; i < l; i++ {
 		k, found := v.KeyOf(i)
-		test.Eq(i, k,t)
-		test.True(found,t)
+		test.Eq(i, k, t)
+		test.True(found, t)
 	}
 	_, found := v.KeyOf(-1)
-	test.False(found,t)
+	test.False(found, t)
 	_, found = v.KeyOf(l)
-	test.False(found,t)
-	test.False(v.Contains(l),t)
+	test.False(found, t)
+	test.False(v.Contains(l), t)
 }
 
 // Tests the KeyOf method functionality of a static vector.
@@ -334,30 +370,42 @@ func StaticVectorInterfaceKeyOf(
 	staticVectorKeyOfHelper(factory(10), 5, t)
 }
 
+func staticVectorSetHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	c int,
+	t *testing.T,
+) {
+	container := factory(c)
+	err := container.Set(basic.Pair[int, int]{0, 6})
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	for i := 0; i < l; i++ {
+		container.Append(i)
+	}
+	test.Eq(l, container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	for i := 0; i < l; i++ {
+		err := container.Set(basic.Pair[int, int]{i, i + 1})
+		test.Nil(err, t)
+	}
+	for i := 0; i < l; i++ {
+		iterV, err := container.Get(i)
+		test.Nil(err, t)
+		test.Eq(i+1, iterV, t)
+	}
+	err = container.Set(basic.Pair[int, int]{-1, -1})
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	err = container.Set(basic.Pair[int, int]{l, l})
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+}
+
 // Tests the Set method functionality of a static vector.
 func StaticVectorInterfaceSet(
 	factory func(capacity int) staticContainers.Vector[int],
 	t *testing.T,
 ) {
-	container := factory(5)
-	err := container.Set(basic.Pair[int, int]{0,6})
-	test.ContainsError(customerr.ValOutsideRange, err,t)
-	for i := 0; i < 5; i++ {
-		container.Append(i)
-	}
-	for i := 0; i < 5; i++ {
-		err := container.Set(basic.Pair[int,int]{i, i+1})
-		test.Nil(err,t)
-	}
-	for i := 0; i < 5; i++ {
-		iterV, err := container.Get(i)
-		test.Nil(err,t)
-		test.Eq(i+1, iterV,t)
-	}
-	err = container.Set(basic.Pair[int,int]{-1, 6})
-	test.ContainsError(customerr.ValOutsideRange, err,t)
-	err = container.Set(basic.Pair[int,int]{6, 6})
-	test.ContainsError(customerr.ValOutsideRange, err,t)
+	staticVectorSetHelper(factory, 5, 5, t)
+	staticVectorSetHelper(factory, 5, 10, t)
 }
 
 func staticVectorSetSequentialHelper(
@@ -366,33 +414,49 @@ func staticVectorSetSequentialHelper(
 	vals []int,
 	l int,
 	t *testing.T,
-){
-	container:=factory(l)
-	for i:=0; i<l; i++ {
+) {
+	container := factory(l)
+	for i := 0; i < l; i++ {
 		container.Append(i)
 	}
-	err:=container.SetSequential(idx,vals...)
-	test.Nil(err,t)
-	for i:=0; i<container.Length(); i++ {
-		iterV,_:=container.Get(i)
-		if i>=idx && i<idx+len(vals) {
-			test.Eq(vals[i-idx],iterV,t)
+	err := container.SetSequential(idx, vals...)
+	test.Nil(err, t)
+	for i := 0; i < container.Length(); i++ {
+		iterV, _ := container.Get(i)
+		if i >= idx && i < idx+len(vals) {
+			test.Eq(vals[i-idx], iterV, t)
 		} else {
-			test.Eq(i,iterV,t)
+			test.Eq(i, iterV, t)
+		}
+	}
+
+	container = factory(l + 10)
+	for i := 0; i < l; i++ {
+		container.Append(i)
+	}
+	err = container.SetSequential(idx, vals...)
+	test.Nil(err, t)
+	for i := 0; i < container.Length(); i++ {
+		iterV, _ := container.Get(i)
+		if i >= idx && i < idx+len(vals) {
+			test.Eq(vals[i-idx], iterV, t)
+		} else {
+			test.Eq(i, iterV, t)
 		}
 	}
 }
+
 // Tests the SetSequential method functionality of a static vector.
 func StaticVectorInterfaceSetSequential(
 	factory func(capacity int) staticContainers.Vector[int],
 	t *testing.T,
-){
-	for i:=0; i<20; i++ {
-		for j:=0; j<i; j++ {
-			vals:=[]int{}
-			for k:=0; k<i-j; k++ {
+) {
+	for i := 0; i < 20; i++ {
+		for j := 0; j < i; j++ {
+			vals := []int{}
+			for k := 0; k < i-j; k++ {
 				vals = append(vals, k)
-				staticVectorSetSequentialHelper(factory,j,vals,i,t)
+				staticVectorSetSequentialHelper(factory, j, vals, i, t)
 			}
 		}
 	}
@@ -404,100 +468,116 @@ func StaticVectorInterfaceAppend(
 	t *testing.T,
 ) {
 	container := factory(0)
-	err:=container.Append(0)
-	test.ContainsError(containerTypes.Full,err,t)
-	container=factory(5)
+	err := container.Append(0)
+	test.ContainsError(containerTypes.Full, err, t)
+	container = factory(5)
 	for i := 0; i < 5; i++ {
-		err:=container.Append(i)
-		test.Nil(err,t)
+		err := container.Append(i)
+		test.Nil(err, t)
 	}
 	for i := 0; i < 5; i++ {
 		iterV, err := container.Get(i)
-		test.Nil(err,t)
-		test.Eq(i, iterV,t)
+		test.Nil(err, t)
+		test.Eq(i, iterV, t)
 	}
-	err=container.Append(5, 6, 7)
-	test.ContainsError(containerTypes.Full,err,t)
-	test.Eq(5,container.Length(),t)
+	err = container.Append(5, 6, 7)
+	test.ContainsError(containerTypes.Full, err, t)
+	test.Eq(5, container.Length(), t)
 	for i := 0; i < 5; i++ {
 		iterV, err := container.Get(i)
-		test.Nil(err,t)
-		test.Eq(i, iterV,t)
+		test.Nil(err, t)
+		test.Eq(i, iterV, t)
 	}
 }
 
 func staticVectorInsertHelper(
 	factory func(capacity int) staticContainers.Vector[int],
-	vals []basic.Pair[int,int],
+	vals []basic.Pair[int, int],
 	l int,
 	t *testing.T,
-){
-	indexContained:=func(idx int) (basic.Pair[int,int],bool) {
-		for _,v:=range(vals) {
-			if idx==v.A {
-				return v,true
+) {
+	indexContained := func(idx int) (basic.Pair[int, int], bool) {
+		for _, v := range vals {
+			if idx == v.A {
+				return v, true
 			}
 		}
-		return basic.Pair[int,int]{},false
+		return basic.Pair[int, int]{}, false
 	}
-	container:=factory(l)
-	for i:=0; i<l; i++ {
-		err:=container.Append(i)
-		test.Nil(err,t)
+	container := factory(l)
+	for i := 0; i < l; i++ {
+		err := container.Append(i)
+		test.Nil(err, t)
 	}
-	err:=container.Insert(vals...)
-	if len(vals)>0 {
-		test.ContainsError(containerTypes.Full,err,t)
+	test.Eq(l, container.Length(), t)
+	test.Eq(l, container.Capacity(), t)
+	err := container.Insert(vals...)
+	test.Eq(l, container.Capacity(), t)
+	test.Eq(l, container.Capacity(), t)
+	if len(vals) > 0 {
+		test.ContainsError(containerTypes.Full, err, t)
 	} else {
-		test.Nil(err,t)
+		test.Nil(err, t)
 	}
-	container=factory(l+len(vals))
-	for i:=0; i<l; i++ {
+	container = factory(l + len(vals))
+	for i := 0; i < l; i++ {
 		container.Append(i)
 	}
-	err=container.Insert(vals...)
-	test.Nil(err,t)
-	test.Eq(l+len(vals),container.Length(),t)
-	offset:=0
-	for i:=0; i<container.Length(); i++ {
-		iterV,err:=container.Get(i)
-		test.Nil(err,t)
-		if v,ok:=indexContained(i); ok {
-			test.Eq(v.B,iterV,t)
+	test.Eq(l, container.Length(), t)
+	test.Eq(l+len(vals), container.Capacity(), t)
+	err = container.Insert(vals...)
+	test.Nil(err, t)
+	test.Eq(l+len(vals), container.Length(), t)
+	test.Eq(l+len(vals), container.Capacity(), t)
+	offset := 0
+	for i := 0; i < container.Length(); i++ {
+		iterV, err := container.Get(i)
+		test.Nil(err, t)
+		if v, ok := indexContained(i); ok {
+			test.Eq(v.B, iterV, t)
 			offset++
 		} else {
-			test.Eq(i-offset,iterV,t)
+			test.Eq(i-offset, iterV, t)
 		}
 	}
-	err=container.Insert(basic.Pair[int, int]{l+len(vals)+1,-1})
-	test.ContainsError(customerr.ValOutsideRange,err,t)
-	err=container.Insert(basic.Pair[int, int]{-1,-1})
-	test.ContainsError(customerr.ValOutsideRange,err,t)
+	err = container.Insert(basic.Pair[int, int]{l + len(vals) + 1, -1})
+	test.Eq(l+len(vals), container.Length(), t)
+	test.Eq(l+len(vals), container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	err = container.Insert(basic.Pair[int, int]{-1, -1})
+	test.Eq(l+len(vals), container.Length(), t)
+	test.Eq(l+len(vals), container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
 }
+
 // Tests the Insert method functionality of a static vector.
 func StaticVectorInterfaceInsert(
 	factory func(capacity int) staticContainers.Vector[int],
 	t *testing.T,
-){
-	container:=factory(0)
-	err:=container.Insert(basic.Pair[int, int]{0,0})
-	test.ContainsError(containerTypes.Full,err,t)
-	err=container.Insert(basic.Pair[int, int]{1,0})
-	test.ContainsError(containerTypes.KeyError,err,t)
-	for i:=0; i<20; i++ {
-		vals:=[]basic.Pair[int,int]{}
-		staticVectorInsertHelper(factory,vals,i,t)
-		for j:=0; j<20; j++ {
-			vals = append(vals, basic.Pair[int, int]{j,j})
-			staticVectorInsertHelper(factory,vals,i,t)
+) {
+	container := factory(0)
+	err := container.Insert(basic.Pair[int, int]{0, 0})
+	test.ContainsError(containerTypes.Full, err, t)
+	test.Eq(0, container.Length(), t)
+	test.Eq(0, container.Capacity(), t)
+	err = container.Insert(basic.Pair[int, int]{1, 0})
+	test.ContainsError(containerTypes.KeyError, err, t)
+	test.Eq(0, container.Length(), t)
+	test.Eq(0, container.Capacity(), t)
+	for i := 0; i < 20; i++ {
+		vals := []basic.Pair[int, int]{}
+		staticVectorInsertHelper(factory, vals, i, t)
+		for j := 0; j < 20; j++ {
+			vals = append(vals, basic.Pair[int, int]{j, j})
+			staticVectorInsertHelper(factory, vals, i, t)
 		}
 	}
-	for i:=0; i<20; i++ {
-		vals:=[]basic.Pair[int,int]{}
-		staticVectorInsertHelper(factory,vals,i,t)
-		for j:=0; j<i; j+=2 {
-			vals = append(vals, basic.Pair[int, int]{j,j})
-			staticVectorInsertHelper(factory,vals,i,t)
+	for i := 0; i < 20; i++ {
+		vals := []basic.Pair[int, int]{}
+		staticVectorInsertHelper(factory, vals, i, t)
+		for j := 0; j < i; j += 2 {
+			vals = append(vals, basic.Pair[int, int]{j, j})
+			staticVectorInsertHelper(factory, vals, i, t)
 		}
 	}
 }
@@ -512,9 +592,13 @@ func staticVectorInsertSequentialHelper(
 	for i := 0; i < l-1; i++ {
 		container.Append(i)
 	}
+	test.Eq(l-1, container.Length(), t)
+	test.Eq(l, container.Capacity(), t)
 	err := container.InsertSequential(idx, l-1)
-	test.Nil(err,t)
-	test.Eq(l, container.Length(),t)
+	test.Eq(l, container.Length(), t)
+	test.Eq(l, container.Capacity(), t)
+	test.Nil(err, t)
+	test.Eq(l, container.Length(), t)
 	for i := 0; i < container.Length(); i++ {
 		var exp int
 		v, _ := container.Get(i)
@@ -525,18 +609,24 @@ func staticVectorInsertSequentialHelper(
 		} else {
 			exp = i - 1
 		}
-		test.Eq(exp, v,t)
+		test.Eq(exp, v, t)
 	}
-	err=container.InsertSequential(l+1,-1)
-	test.ContainsError(customerr.ValOutsideRange,err,t)
-	test.Eq(l,container.Length(),t)
-	err=container.InsertSequential(-1,-1)
-	test.ContainsError(customerr.ValOutsideRange,err,t)
-	test.Eq(l,container.Length(),t)
-	err=container.InsertSequential(l,-1)
-	test.ContainsError(containerTypes.Full,err,t)
-	test.Eq(l,container.Length(),t)
+	err = container.InsertSequential(l+1, -1)
+	test.Eq(l, container.Length(), t)
+	test.Eq(l, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+
+	err = container.InsertSequential(-1, -1)
+	test.Eq(l, container.Length(), t)
+	test.Eq(l, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+
+	err = container.InsertSequential(l, -1)
+	test.Eq(l, container.Length(), t)
+	test.Eq(l, container.Capacity(), t)
+	test.ContainsError(containerTypes.Full, err, t)
 }
+
 // Tests the InsertSequential method functionality of a static vector.
 func StaticVectorInterfaceInsertSequential(
 	factory func(capacity int) staticContainers.Vector[int],
@@ -544,26 +634,37 @@ func StaticVectorInterfaceInsertSequential(
 ) {
 	container := factory(5)
 	for i := 2; i >= 0; i-- {
-		err:=container.InsertSequential(0,i)
-		test.Nil(err,t)
+		err := container.InsertSequential(0, i)
+		test.Nil(err, t)
 	}
 	for i := 3; i < 5; i++ {
-		err:=container.InsertSequential(container.Length(), i)
-		test.Nil(err,t)
+		err := container.InsertSequential(container.Length(), i)
+		test.Nil(err, t)
 	}
+	test.Eq(5, container.Length(), t)
+	test.Eq(5, container.Capacity(), t)
 	for i := 0; i < 5; i++ {
 		iterV, err := container.Get(i)
-		test.Nil(err,t)
-		test.Eq(i, iterV,t)
+		test.Nil(err, t)
+		test.Eq(i, iterV, t)
 	}
 	container = factory(6)
-	container.InsertSequential(0,0,1,2)
-	container.InsertSequential(3,4,5)
-	container.InsertSequential(3,3)
+	container.InsertSequential(0, 0, 1, 2)
+	test.Eq(3, container.Length(), t)
+	test.Eq(6, container.Capacity(), t)
+
+	container.InsertSequential(3, 4, 5)
+	test.Eq(5, container.Length(), t)
+	test.Eq(6, container.Capacity(), t)
+
+	container.InsertSequential(3, 3)
+	test.Eq(6, container.Length(), t)
+	test.Eq(6, container.Capacity(), t)
+
 	for i := 0; i < 6; i++ {
 		iterV, err := container.Get(i)
-		test.Nil(err,t)
-		test.Eq(i, iterV,t)
+		test.Nil(err, t)
+		test.Eq(i, iterV, t)
 	}
 	for i := 0; i < 5; i++ {
 		staticVectorInsertSequentialHelper(factory, i, 5, t)
@@ -576,31 +677,32 @@ func staticVectorPopSequentialHelper(
 	num int,
 	t *testing.T,
 ) {
-	permutation:=func(container staticContainers.Vector[int]) {
+	permutation := func(expCap int, container staticContainers.Vector[int]) {
 		// fmt.Println("Init:   ",container)
 		n := container.PopSequential(-1, num)
 		cntr := 0
-		expLen:=0
+		expLen := 0
 		for i := 0; i < l; i++ {
 			if i%4 == 0 {
 				if cntr < num {
 					cntr++
 					continue
 				} else {
-					v,err:=container.Get(i-cntr)
-					test.Nil(err,t)
-					test.Eq(-1,v,t)
+					v, err := container.Get(i - cntr)
+					test.Nil(err, t)
+					test.Eq(-1, v, t)
 					expLen++
 				}
 			} else {
-				v,err:=container.Get(i-cntr)
-				test.Nil(err,t)
-				test.Eq(i,v,t)
+				v, err := container.Get(i - cntr)
+				test.Nil(err, t)
+				test.Eq(i, v, t)
 				expLen++
 			}
 		}
-		test.Eq(expLen, container.Length(),t)
-		test.Eq(cntr, n,t)
+		test.Eq(expLen, container.Length(), t)
+		test.Eq(expCap, container.Capacity(), t)
+		test.Eq(cntr, n, t)
 	}
 	// fmt.Println("Permutation: l: ",l," num: ",num)
 	container := factory(l)
@@ -611,8 +713,8 @@ func staticVectorPopSequentialHelper(
 			container.Append(i)
 		}
 	}
-	permutation(container)
-	container = factory(l+1)
+	permutation(l, container)
+	container = factory(l + 1)
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
 			container.Append(-1)
@@ -620,8 +722,8 @@ func staticVectorPopSequentialHelper(
 			container.Append(i)
 		}
 	}
-	permutation(container)
-	container = factory(l+10)
+	permutation(l+1, container)
+	container = factory(l + 10)
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
 			container.Append(-1)
@@ -629,8 +731,9 @@ func staticVectorPopSequentialHelper(
 			container.Append(i)
 		}
 	}
-	permutation(container)
+	permutation(l+10, container)
 }
+
 // Tests the PopSequential method functionality of a static vector.
 func StaticVectorInterfacePopSequential(
 	factory func(capacity int) staticContainers.Vector[int],
@@ -648,23 +751,24 @@ func staticVectorPopHelper(
 	l int,
 	t *testing.T,
 ) {
-	permutation:=func(container staticContainers.Vector[int]){
+	permutation := func(expCap int, container staticContainers.Vector[int]) {
 		// fmt.Println("Init:   ",v)
 		n := container.Pop(-1)
 		cntr := 0
-		expLength:=0
+		expLength := 0
 		for i := 0; i < l; i++ {
 			if i%4 != 0 {
-				v,err:=container.Get(i-cntr)
-				test.Nil(err,t)
-				test.Eq(i,v,t)
+				v, err := container.Get(i - cntr)
+				test.Nil(err, t)
+				test.Eq(i, v, t)
 				expLength++
 			} else {
 				cntr++
 			}
 		}
-		test.Eq(expLength, container.Length(),t)
-		test.Eq(cntr, n,t)
+		test.Eq(expCap, container.Capacity(), t)
+		test.Eq(expLength, container.Length(), t)
+		test.Eq(cntr, n, t)
 	}
 	// fmt.Println("Permutation: l: ",l," num: ",num)
 	container := factory(l)
@@ -675,8 +779,8 @@ func staticVectorPopHelper(
 			container.Append(i)
 		}
 	}
-	permutation(container)
-	container = factory(l+1)
+	permutation(l, container)
+	container = factory(l + 1)
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
 			container.Append(-1)
@@ -684,8 +788,8 @@ func staticVectorPopHelper(
 			container.Append(i)
 		}
 	}
-	permutation(container)
-	container = factory(l+10)
+	permutation(l+1, container)
+	container = factory(l + 10)
 	for i := 0; i < l; i++ {
 		if i%4 == 0 {
 			container.Append(-1)
@@ -693,8 +797,9 @@ func staticVectorPopHelper(
 			container.Append(i)
 		}
 	}
-	permutation(container)
+	permutation(l+10, container)
 }
+
 // Tests the Pop method functionality of a static vector.
 func StaticVectorInterfacePop(
 	factory func(capacity int) staticContainers.Vector[int],
@@ -711,76 +816,282 @@ func StaticVectorInterfaceDelete(
 	t *testing.T,
 ) {
 	container := factory(6)
-	err:=container.Delete(0)
-	test.ContainsError(customerr.ValOutsideRange,err,t)
+	err := container.Delete(0)
+	test.Eq(6, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
 	for i := 0; i < 6; i++ {
-		container.Append(i)
+		test.Nil(container.Append(i), t)
 	}
-	err=container.Delete(-1)
-	test.ContainsError(customerr.ValOutsideRange,err,t)
-	err=container.Delete(7)
-	test.ContainsError(customerr.ValOutsideRange,err,t)
+	err = container.Delete(-1)
+	test.Eq(6, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	err = container.Delete(7)
+	test.Eq(6, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
 	for i := container.Length() - 1; i >= 0; i-- {
 		container.Delete(i)
 		test.Eq(i, container.Length(), t)
+		test.Eq(6, container.Capacity(), t)
 		for j := 0; j < i; j++ {
 			iterV, err := container.Get(j)
-			test.Nil(err,t)
+			test.Nil(err, t)
 			test.Eq(j, iterV, t)
 		}
 	}
 	err = container.Delete(0)
-	test.ContainsError(customerr.ValOutsideRange, err,t)
+	test.Eq(6, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
 }
 
-// func staticVectorDeleteSequentialHelper(
-// 	factory func(capacity int) staticContainers.Vector[int],
-// 	start int,
-// 	end int,
-// 	l int,
-// 	t *testing.T,
-// ){
-// 	container:=factory(0)
-// 	for i:=0; i<l; i++ {
-// 		container.Append(i)
-// 	}
-// 	container.DeleteSequential(start,end)
-// 	test.Eq(l-(end-start),container.Length(),t)
-// 	for i:=0; i<l; i++ {
-// 		if i<start {
-// 			v,err:=container.Get(i)
-// 			test.Nil(err,nil)
-// 			test.Eq(i,v,t)
-// 		} else if i>=end {
-// 			v,err:=container.Get(i-(end-start))
-// 			test.Nil(err,nil)
-// 			test.Eq(i,v,t)
-// 		} else {
-// 			test.False(container.Contains(i),t)
-// 		}
-// 	}
-// }
-// // Tests the DeleteSequential method functionality of a static vector.
-// func StaticVectorInterfaceDeleteSequential(
-// 	factory func(capacity int) staticContainers.Vector[int],
-// 	t *testing.T,
-// ){
-// 	container:=factory(0)
-// 	container.Append(0,1,2,3)
-// 	err:=container.DeleteSequential(-1,3)
-// 	test.ContainsError(customerr.ValOutsideRange,err,t)
-// 	test.Eq(4,container.Length(),t)
-// 	err=container.DeleteSequential(0,4)
-// 	test.ContainsError(customerr.ValOutsideRange,err,t)
-// 	test.Eq(4,container.Length(),t)
-// 	err=container.DeleteSequential(2,1)
-// 	test.ContainsError(customerr.InvalidValue,err,t)
-// 	test.Eq(4,container.Length(),t)
-// 	for i:=0; i<20; i++ {
-// 		for j:=0; j<i; j++ {
-// 			for k:=j; k<i; k++ {
-// 				staticVectorDeleteSequentialHelper(factory,j,k,i,t)
-// 			}
-// 		}
-// 	}
-// }
+func staticVectorDeleteSequentialHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	start int,
+	end int,
+	l int,
+	t *testing.T,
+) {
+	container := factory(l)
+	for i := 0; i < l; i++ {
+		test.Nil(container.Append(i), t)
+	}
+	container.DeleteSequential(start, end)
+	test.Eq(l-(end-start), container.Length(), t)
+	test.Eq(l, container.Capacity(), t)
+	for i := 0; i < l; i++ {
+		if i < start {
+			v, err := container.Get(i)
+			test.Nil(err, nil)
+			test.Eq(i, v, t)
+		} else if i >= end {
+			v, err := container.Get(i - (end - start))
+			test.Nil(err, nil)
+			test.Eq(i, v, t)
+		} else {
+			test.False(container.Contains(i), t)
+		}
+	}
+}
+
+// Tests the DeleteSequential method functionality of a static vector.
+func StaticVectorInterfaceDeleteSequential(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	container := factory(4)
+	test.Nil(container.Append(0, 1, 2, 3), t)
+	err := container.DeleteSequential(-1, 3)
+	test.Eq(4, container.Length(), t)
+	test.Eq(4, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	err = container.DeleteSequential(0, 4)
+	test.Eq(4, container.Length(), t)
+	test.Eq(4, container.Capacity(), t)
+	test.ContainsError(customerr.ValOutsideRange, err, t)
+	err = container.DeleteSequential(2, 1)
+	test.Eq(4, container.Length(), t)
+	test.Eq(4, container.Capacity(), t)
+	test.ContainsError(customerr.InvalidValue, err, t)
+	for i := 0; i < 20; i++ {
+		for j := 0; j < i; j++ {
+			for k := j; k < i; k++ {
+				staticVectorDeleteSequentialHelper(factory, j, k, i, t)
+			}
+		}
+	}
+}
+
+// Tests the Clear method functionality of a static vector.
+func StaticVectorInterfaceClear(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	container := factory(6)
+	for i := 0; i < 6; i++ {
+		container.Append(i)
+	}
+	container.Clear()
+	test.Eq(0, container.Length(), t)
+	test.Eq(6, container.Capacity(), t)
+}
+
+func staticTestVectorValsHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	c int,
+	t *testing.T,
+) {
+	container := factory(c)
+	for i := 0; i < l; i++ {
+		container.Append(i)
+	}
+	test.Eq(max(0, l), container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	cnt := 0
+	container.Vals().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+		cnt++
+		test.Eq(index, val, t)
+		return iter.Continue, nil
+	})
+	test.Eq(max(0, l), container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	test.Eq(max(0, l), cnt, t)
+}
+
+// Tests the Vals method functionality of a dynamic vector.
+func StaticVectorInterfaceVals(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	staticTestVectorValsHelper(factory, -1, 0, t)
+	staticTestVectorValsHelper(factory, 0, 0, t)
+	staticTestVectorValsHelper(factory, 0, 10, t)
+	staticTestVectorValsHelper(factory, 1, 1, t)
+	staticTestVectorValsHelper(factory, 1, 10, t)
+	staticTestVectorValsHelper(factory, 2, 2, t)
+	staticTestVectorValsHelper(factory, 2, 10, t)
+	staticTestVectorValsHelper(factory, 5, 5, t)
+	staticTestVectorValsHelper(factory, 5, 10, t)
+}
+
+func staticVectorPntrValsHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	c int,
+	t *testing.T,
+) {
+	container := factory(c)
+	for i := 0; i < l; i++ {
+		container.Append(i)
+	}
+	test.Eq(max(0, l), container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	cnt := 0
+	container.ValPntrs().ForEach(func(index int, val *int) (iter.IteratorFeedback, error) {
+		cnt++
+		test.Eq(index, *val, t)
+		*val = 100
+		return iter.Continue, nil
+	})
+	container.Vals().ForEach(func(index int, val int) (iter.IteratorFeedback, error) {
+		test.Eq(100, val, t)
+		return iter.Continue, nil
+	})
+	test.Eq(max(0, l), container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	test.Eq(max(0, l), cnt, t)
+}
+
+// Tests the ValPntrs method functionality of a dynamic vector.
+func StaticVectorInterfaceValPntrs(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	container := factory(0)
+	if container.IsAddressable() {
+		staticVectorPntrValsHelper(factory, -1, 0, t)
+		staticVectorPntrValsHelper(factory, 0, 0, t)
+		staticVectorPntrValsHelper(factory, 0, 10, t)
+		staticVectorPntrValsHelper(factory, 1, 1, t)
+		staticVectorPntrValsHelper(factory, 1, 10, t)
+		staticVectorPntrValsHelper(factory, 2, 2, t)
+		staticVectorPntrValsHelper(factory, 2, 10, t)
+		staticVectorPntrValsHelper(factory, 5, 5, t)
+		staticVectorPntrValsHelper(factory, 5, 10, t)
+	} else {
+		test.Panics(func() { container.ValPntrs() }, t)
+	}
+}
+
+func staticVectorKeysHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	c int,
+	t *testing.T,
+) {
+	container := factory(c)
+	for i := 0; i < l; i++ {
+		container.Append(i)
+	}
+	test.Eq(max(0, l), container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	cnt := 0
+	container.Keys().ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+		cnt++
+		test.Eq(index, val, t)
+		return iter.Continue, nil
+	})
+	test.Eq(max(0, l), container.Length(), t)
+	test.Eq(c, container.Capacity(), t)
+	test.Eq(l, cnt, t)
+}
+
+// Tests the Keys method functionality of a static vector.
+func StaticVectorInterfaceKeys(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	staticVectorKeysHelper(factory, 0, 0, t)
+	staticVectorKeysHelper(factory, 0, 10, t)
+	staticVectorKeysHelper(factory, 1, 1, t)
+	staticVectorKeysHelper(factory, 1, 10, t)
+	staticVectorKeysHelper(factory, 2, 2, t)
+	staticVectorKeysHelper(factory, 2, 10, t)
+	staticVectorKeysHelper(factory, 5, 5, t)
+	staticVectorKeysHelper(factory, 5, 10, t)
+}
+
+// Tests the KeyedEq method functionality of a static vector.
+func StaticVectorInterfaceKeyedEq(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	innerFactory := func(_cap int, vals ...int) staticContainers.Vector[int] {
+		rv := factory(_cap)
+		rv.Append(vals...)
+		return rv
+	}
+	v := innerFactory(6, 1, 2, 3)
+	v2 := innerFactory(6, 1, 2, 3)
+	test.True(v.KeyedEq(v2), t)
+	test.True(v2.KeyedEq(v), t)
+
+	v = innerFactory(3, 1, 2, 3)
+	v2 = innerFactory(3, 1, 2, 3)
+	test.True(v.KeyedEq(v2), t)
+	test.True(v2.KeyedEq(v), t)
+
+	v = innerFactory(3, 1, 2)
+	v2 = innerFactory(3, 1, 2, 3)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
+
+	v = innerFactory(3, 1, 2, 3)
+	v2 = innerFactory(3, 3, 1, 2)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
+
+	v = innerFactory(3, 1, 2)
+	v2 = innerFactory(3, 3, 1, 2)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
+
+	v = innerFactory(3, 0)
+	v2 = innerFactory(3, 0)
+	test.True(v.KeyedEq(v2), t)
+	test.True(v2.KeyedEq(v), t)
+
+	v = innerFactory(1, 0)
+	v2 = innerFactory(1, 0)
+	test.True(v.KeyedEq(v2), t)
+	test.True(v2.KeyedEq(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1, 0)
+	test.False(v.KeyedEq(v2), t)
+	test.False(v2.KeyedEq(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1)
+	test.True(v.KeyedEq(v2), t)
+	test.True(v2.KeyedEq(v), t)
+}

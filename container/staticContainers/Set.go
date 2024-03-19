@@ -1,4 +1,4 @@
-package dynamicContainers
+package staticContainers
 
 import "github.com/barbell-math/util/container/containerTypes"
 
@@ -9,6 +9,7 @@ type ReadSet[V any] interface {
 	containerTypes.Length
 	containerTypes.ReadOps[V]
 	containerTypes.Comparisons[uint64, V]
+	containerTypes.StaticCapacity
 }
 
 // An interface that only allows write operations on a set.

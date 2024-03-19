@@ -1,4 +1,4 @@
-package dynamicContainers
+package staticContainers
 
 import "github.com/barbell-math/util/container/containerTypes"
 
@@ -8,6 +8,7 @@ type ReadQueue[V any] interface {
 	containerTypes.Length
 	containerTypes.Capacity
 	containerTypes.FirstElemRead[V]
+	containerTypes.StaticCapacity
 }
 
 // An interface that only allows write operations on a queue.

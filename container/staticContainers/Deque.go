@@ -1,4 +1,4 @@
-package dynamicContainers
+package staticContainers
 
 import "github.com/barbell-math/util/container/containerTypes"
 
@@ -9,6 +9,7 @@ type ReadDeque[V any] interface {
 	containerTypes.Capacity
 	containerTypes.LastElemRead[V]
 	containerTypes.FirstElemRead[V]
+	containerTypes.StaticCapacity
 }
 
 // An interface that only allows write operations on a deque.
