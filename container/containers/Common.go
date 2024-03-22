@@ -71,7 +71,7 @@ func getIndexOutOfBoundsError(idx int, upper int, lower int) error {
 		),
 		customerr.Wrap(
 			customerr.ValOutsideRange,
-			"Index must be >=%d and < %d. Idx: %d",
+			"Index must be >=%d and < %d. Supplied idx: %d",
 			lower, upper, idx,
 		),
 	)
@@ -80,7 +80,7 @@ func getIndexOutOfBoundsError(idx int, upper int, lower int) error {
 func getDuplicateValueError[T any](v T) error {
 	return customerr.Wrap(
 		containerTypes.Duplicate,
-		"The supplied value is already in the container: %v",
+		"The supplied value (%v) is already in the container.",
 		v,
 	)
 }

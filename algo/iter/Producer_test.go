@@ -95,6 +95,27 @@ func TestSliceElems(t *testing.T) {
 	sliceElemsIterHelper([]int{}, t)
 }
 
+func sliceElemPntrsIterHelper[T any](vals []T, t *testing.T) {
+	sIter := SliceElemPntrs(vals)
+	for i := 0; i < len(vals); i++ {
+		sV, sErr, sBool := sIter(Continue)
+		test.Eq(&vals[i], sV, t)
+		test.Eq(vals[i], *sV, t)
+		test.Nil(sErr, t)
+		test.True(sBool, t)
+	}
+	sV, sErr, sBool := sIter(Continue)
+	test.NilPntr[T](sV, t)
+	test.Nil(sErr, t)
+	test.False(sBool, t)
+}
+func TestSliceElemPntrs(t *testing.T) {
+	sliceElemPntrsIterHelper([]string{"one", "two", "three"}, t)
+	sliceElemPntrsIterHelper([]int{1, 2, 3}, t)
+	sliceElemPntrsIterHelper([]int{1}, t)
+	sliceElemPntrsIterHelper([]int{}, t)
+}
+
 func stringElemsIterHelper(vals string, t *testing.T) {
 	sIter := StrElems(vals)
 	for i := 0; i < len(vals); i++ {

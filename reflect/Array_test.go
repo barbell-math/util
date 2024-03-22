@@ -116,7 +116,7 @@ func TestArrayElemPntrsReflectVal(t *testing.T){
     v2:=reflect.ValueOf(v)
     vals,err:=ArrayElemPntrs[reflect.Value](v2).Collect()
     test.Eq(0,len(vals),t)
-    test.ContainsError(customerr.IncorrectType,err,t)
+    test.ContainsError(InAddressableField,err,t)
 }
 
 func TestArrayElemPntrsReflectValPntr(t *testing.T){
@@ -267,7 +267,7 @@ func TestArrayElemInfoReflectVal(t *testing.T){
         test.Eq(reflect.Int,info[i].Kind,t)
         pntr,err:=info[i].Pntr()
         test.Nil(pntr,t)
-        test.ContainsError(customerr.IncorrectType,err,t)
+        test.ContainsError(InAddressableField,err,t)
     }
 }
 
@@ -342,7 +342,7 @@ func TestRecursiveArrayElemInfoReflectVal(t *testing.T){
     v2:=reflect.ValueOf(v)
     vals,err:=RecursiveArrayElemInfo[[3][3]int](v2,true).Collect()
     test.Eq(1,len(vals),t)
-    test.ContainsError(customerr.IncorrectType,err,t)
+    test.ContainsError(InAddressableField,err,t)
     for i,iterV:=range(vals) {
         v,ok:=iterV.Val()
         test.Eq([3]int{4*i+1,4*i+2,4*i+3},v.([3]int),t)
@@ -351,7 +351,7 @@ func TestRecursiveArrayElemInfoReflectVal(t *testing.T){
         test.Eq(reflect.Array,iterV.Kind,t)
         p,err:=iterV.Pntr()
         test.Nil(p,t)
-        test.ContainsError(customerr.IncorrectType,err,t)
+        test.ContainsError(InAddressableField,err,t)
     }
 }
 

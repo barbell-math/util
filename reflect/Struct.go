@@ -8,7 +8,7 @@ import (
 )
 
 func getInaddressableFieldError(name string) error {
-    return customerr.Wrap(InAddressableField,"Field Name: %s",name)
+    return customerr.Wrap(InAddressableField,"Field name in struct: %s",name)
 }
 
 // This struct has fields that contain all the possible relevant information 
@@ -207,7 +207,7 @@ func StructFieldInfo[T any, S reflect.Value | *T](
                         if f.CanAddr() {
                             return f.Addr().Interface(),nil
                         }
-                        return reflect.Value{},getInaddressableFieldError(n)
+                        return nil,getInaddressableFieldError(n)
                     },
                 },
             }, nil

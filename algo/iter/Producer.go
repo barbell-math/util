@@ -9,7 +9,7 @@ import (
 	"github.com/barbell-math/util/customerr"
 )
 
-// This function is a Producer.
+// This function is a producer.
 //
 // NoElem provides an iterator that returns no elements. NoElem returns an empty
 // iterator.
@@ -20,7 +20,7 @@ func NoElem[T any]() Iter[T] {
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // ValElem returns an iterator that produces the supplied value and error the
 // supplied number of times. The same value and error will be returned so any
@@ -30,16 +30,16 @@ func NoElem[T any]() Iter[T] {
 func ValElem[T any](val T, err error, repeat int) Iter[T] {
 	cntr := 0
 	return func(f IteratorFeedback) (T, error, bool) {
-		var rv T
 		if cntr < repeat && f != Break {
 			cntr++
 			return val, err, true
 		}
+		var rv T
 		return rv, nil, false
 	}
 }
 
-// This funciton is a Producer.
+// This funciton is a producer.
 //
 // Range returns an iterator that produces a sequence of values according to the
 // values that are given as parameters. The sequence of values that will be
@@ -59,28 +59,47 @@ func Range[
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // SliceElems returns an iterator that iterates over the supplied slices
 // elements. No error will ever be returned by this producer. This producer is
 // not thread safe. If the underlying slice is modified while it is being
-// iterated over the behavior will be undefined and there are no order
-// guarantees if this function is passed to multiple threads. For a thread safe
-// implementation of SliceElems use the Vector.Elems method from the datastruct
-// package.
+// iterated over the behavior will be undefined. For a thread safe
+// implementation of SliceElems use the SyncedVector.Elems method from the 
+// collections package.
 func SliceElems[T any](s []T) Iter[T] {
 	i := -1
 	return func(f IteratorFeedback) (T, error, bool) {
-		var rv T
 		i++
 		if i < len(s) && f != Break {
 			return s[i], nil, true
 		}
+		var rv T
 		return rv, nil, false
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
+//
+// SliceElemPntrs returns an iterator that iterates over the supplied slices
+// elements, providing points to the elements in the slice rather than the
+// elements themselves. No error will ever be returned by this producer. This
+// producer is not thread safe. If the underlying slice is modified while it is
+// being iterated over the behavior will be undefined. For a thread safe
+// implementation of SliceElemPntrs use the SyncedVector.Elems method from the
+// collections package.
+func SliceElemPntrs[T any](s []T) Iter[*T] {
+	i := -1
+	return func(f IteratorFeedback) (*T, error, bool) {
+		i++
+		if i < len(s) && f != Break {
+			return &s[i], nil, true
+		}
+		return nil, nil, false
+	}
+}
+
+// This function is a producer.
 //
 // StrElems returns an iterator that iterates over the supplied strings
 // characters. No error will ever be returned by this producer.
@@ -95,7 +114,7 @@ func StrElems(s string) Iter[byte] {
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // SequentialElems returns an iterator that iterates over a general container
 // using the get function in combination with the length function. Note that
@@ -133,7 +152,7 @@ func mapOp[K comparable, V any](
 	return c
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // MapElems returns an iterator that iterates over a maps key,value pairs. Do
 // not confuse this with the Map intermediary function. This producer will never
@@ -163,7 +182,7 @@ func MapElems[K comparable, V any](
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // MapElems returns an iterator that iterates over a maps key values. Do not
 // confuse this with the Map intermediary function. This producer will never
@@ -188,7 +207,7 @@ func MapKeys[K comparable, V any](m map[K]V) Iter[K] {
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // MapElems returns an iterator that iterates over a maps values. Do not confuse
 // this with the Map intermediary function. This producer will never return an
@@ -214,7 +233,7 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // ChanElems returns an iterator that iterates over the elements in an unbuffered
 // channel. Calling this function will block until the channel receives a value.
@@ -233,7 +252,7 @@ func ChanElems[T any](c <-chan T) Iter[T] {
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // FileLines returns an iterator that iterates over the lines in a file. If an
 // error occurs opening the file then no lines will be iterated over and the
@@ -254,7 +273,7 @@ func FileLines(path string) Iter[string] {
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // Zip will take two iterators and return an iterator that iterates over pairs
 // of values where each pair contains a value from each supplied iterator. The
@@ -286,7 +305,7 @@ func Zip[T any, U any](
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // Join takes two iterators and a decider function and returns an iterator that
 // consumes both supplied iterators, returning a single value at a time based on
@@ -338,7 +357,7 @@ func Join[T any, U any](
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // JoinSame takes two iterators and a decider function and returns an iterator
 // that consumes both supplied iterators, returning a single value at a time
@@ -367,7 +386,7 @@ func JoinSame[T any](
 	}
 }
 
-// This function is a Producer.
+// This function is a producer.
 //
 // Recurse will return an iterator that recursively returns values from the
 // supplied iterator. This iterator will enforce root-left-right traversal. This

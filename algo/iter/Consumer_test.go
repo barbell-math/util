@@ -17,9 +17,81 @@ func TestStop(t *testing.T) {
 				return Break, 0, newErr
 			}
 			return Continue, val, nil
-		}).Stop()
+		},
+	).Stop()
 	test.Eq(1, cntr, t)
 	test.Eq(newErr, err, t)
+}
+
+func TestPullOne(t *testing.T) {
+	_iter:=SliceElems[int]([]int{1,2,3,4})
+	for i:=0; i<4; i++ {
+		v,err,ok:=_iter.PullOne()
+		test.Eq(i+1,v,t)
+		test.Nil(err,t)
+		test.True(ok,t)
+	}
+	v,err,ok:=_iter.PullOne()
+	test.Eq(0,v,t)
+	test.Nil(err,t)
+	test.False(ok,t)
+}
+
+func TestPull(t *testing.T) {
+	_iter:=SliceElems[int]([]int{1,2,3,4})
+	for i:=0; i<4; i++ {
+		v,err,ok:=_iter.Pull(1)
+		test.Eq(i+1,v[0],t)
+		test.Nil(err,t)
+		test.True(ok,t)
+	}
+	v,err,ok:=_iter.Pull(1)
+	test.Eq(0,v[0],t)
+	test.Nil(err,t)
+	test.False(ok,t)
+
+	_iter=SliceElems[int]([]int{1,2,3,4})
+	for i:=0; i<4; i+=2 {
+		v,err,ok:=_iter.Pull(2)
+		test.Eq(i+1,v[0],t)
+		test.Eq(i+2,v[1],t)
+		test.Nil(err,t)
+		test.True(ok,t)
+	}
+	v,err,ok=_iter.Pull(2)
+	test.Eq(0,v[0],t)
+	test.Eq(0,v[1],t)
+	test.Nil(err,t)
+	test.False(ok,t)
+
+	_iter=SliceElems[int]([]int{1,2,3,4})
+	v,err,ok=_iter.Pull(4)
+	for i:=0; i<4; i++ {
+		test.Eq(i+1,v[i],t)
+	}
+	test.Nil(err,t)
+	test.True(ok,t)
+	v,err,ok=_iter.Pull(4)
+	for i:=0; i<4; i++ {
+		test.Eq(0,v[i],t)
+	}
+	test.Nil(err,t)
+	test.False(ok,t)
+
+	_iter=SliceElems[int]([]int{1,2,3,4})
+	v,err,ok=_iter.Pull(5)
+	for i:=0; i<4; i++ {
+		test.Eq(i+1,v[i],t)
+	}
+	test.Eq(0,v[4],t)
+	test.Nil(err,t)
+	test.False(ok,t)
+	v,err,ok=_iter.Pull(5)
+	for i:=0; i<5; i++ {
+		test.Eq(0,v[i],t)
+	}
+	test.Nil(err,t)
+	test.False(ok,t)
 }
 
 func forEachIterHelper[T any](

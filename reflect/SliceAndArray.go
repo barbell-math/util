@@ -10,7 +10,7 @@ import (
 func getInaddressableIndexError(idx int) error {
     return customerr.Wrap(
         InAddressableField,
-        "Index: %d",idx,
+        "Slice/array value at index: %d",idx,
     )
 }
 

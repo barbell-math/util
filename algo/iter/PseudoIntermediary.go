@@ -93,7 +93,8 @@ func (i Iter[T]) Filter(op func(index int, val T) bool) Iter[T] {
 				return Continue, val, nil
 			}
 			return Iterate, val, nil
-		})
+		},
+	)
 }
 
 // This function is an intermediary.

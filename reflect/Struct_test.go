@@ -237,21 +237,21 @@ func TestStructFieldPntrsFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldTypes(t *testing.T){
     v:=0
     err:=StructFieldTypes[int](&v).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldTypesFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldTypes[reflect.Value](v2).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldTypesFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldTypes[reflect.Value](v2).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestStructFieldTypes(t *testing.T){
@@ -289,21 +289,21 @@ func TestStructFieldTypesFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldKinds(t *testing.T){
     v:=0
     err:=StructFieldKinds[int](&v).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldKindsFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldKinds[reflect.Value](v2).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldKindsFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldKinds[reflect.Value](v2).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestStructFieldKinds(t *testing.T){
@@ -341,21 +341,21 @@ func TestStructFieldKindsFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldTags(t *testing.T){
     v:=0
     err:=StructFieldTags[int](&v).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldTagsFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldTags[reflect.Value](v2).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldTagsFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldTags[reflect.Value](v2).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestStructFieldTags(t *testing.T){
@@ -393,21 +393,21 @@ func TestStructFieldTagsFromReflectValPntr(t *testing.T){
 func TestNonStructStructFieldInfo(t *testing.T){
     v:=0
     err:=StructFieldInfo[int](&v,true).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldInfoFromReflectVal(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(v)
     err:=StructFieldInfo[reflect.Value](v2,true).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestNonStructStructFieldInfoFromReflectValPntr(t *testing.T){
     v:=0
     v2:=reflect.ValueOf(&v)
     err:=StructFieldInfo[reflect.Value](v2,true).Consume()
-    test.ContainsError(InAddressableField,err,t)
+    test.ContainsError(customerr.IncorrectType,err,t)
 }
 
 func TestStructFieldInfo(t *testing.T){

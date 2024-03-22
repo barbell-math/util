@@ -37,7 +37,7 @@ func Assert(op func() error){
 //
 // This allows for consistent error formatting.
 func Wrap(origErr error, fmtStr string, vals ...any) error {
-    fmtStrWithErr:=fmt.Sprintf("%%w\n  |- %s\n",fmtStr)
+    fmtStrWithErr:=fmt.Sprintf("%%w\n  |- %s",fmtStr)
     args:=[]interface{}{origErr}
     return fmt.Errorf(fmtStrWithErr,append(args,vals...)...)
 }
@@ -58,11 +58,9 @@ func ArrayDimsArgree[N any, P any](l []N, r []P) error {
 // Given a list of errors it will append them with a predetermined format, as 
 // shown below.
 //
-//  Multiple errors have occured.
 //  <original first error>
 //    |- <wrapped information>
 //  ...
-//  The error above also caused the below error:
 //  <original nth error>
 //    |- <wrapped information>
 //
@@ -78,16 +76,10 @@ func AppendError(errs ...error) error {
             if cntr==0 {
                 rv=e
             } else {
-                rv=fmt.Errorf(
-                    "%w\n\nThe error above also caused the below error:\n%w\n",
-                    rv,e,
-                )
+                rv=fmt.Errorf("%w\n%w",rv,e)
             }
             cntr++
         }
-    }
-    if cntr>1 {
-        rv=fmt.Errorf("%w\n%w",MultipleErrorsOccurred,rv)
     }
     return rv
 }
