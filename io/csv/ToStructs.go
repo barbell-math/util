@@ -10,12 +10,12 @@ import (
 	"github.com/barbell-math/util/reflect"
 )
 
-// Takes in iterator stream of string slices, treats each slice as a row of a
+// Takes an iterator stream of string slices, treats each slice as a row of a
 // csv file, and maps that stream of slices to a stream of structs with the
 // type specified by the generic R type. The options argument controls the
-// behavior of the mapping process, see the [NewOptions] for more information.
-// If an error is encountered while processing the stream of slices then
-// iteration will stop and that error will be returned. 
+// behavior of the mapping process, see [NewOptions] for more information. If an 
+// error is encountered while processing the stream of slices then iteration 
+// will stop and that error will be returned. 
 //
 // Data is placed in struct fields based on either the CSV headers or the 
 // ordering of the fields in the struct, depending on the options passed to the
@@ -139,7 +139,7 @@ func setStructValue[R any](
             case int64: err=setInt[int64](f,val);
             case float32: err=setFloat[float32](f,val);
             case float64: err=setFloat[float32](f,val);
-            case string: err=setString(f,val);
+            case string: f.SetString(val)
             default: err=customerr.Wrap(
                 customerr.UnsupportedType,
                 "'%s'",f.Kind().String(),
@@ -175,15 +175,4 @@ func setFloat[N ~float32 | ~float64](f stdReflect.Value, v string) error {
     tmp,err:=strconv.ParseFloat(v,64);
     f.SetFloat(tmp);
     return err;
-}
-func setString(f stdReflect.Value, v string) error {
-    s,e:=0, len(v);
-    if len(v)>0 && v[0]=='"' {
-        s++;
-    }
-    if len(v)>0 && v[len(v)-1]=='"' {
-        e--;
-    }
-    f.SetString(v[s:e]);
-    return nil;
 }

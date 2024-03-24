@@ -9,7 +9,7 @@ import (
 
 func FormatError(expected any, got any, base string, file string, line int, t *testing.T){
     t.Fatal(fmt.Sprintf(
-        "Error | File %s: Line %d: %s\nExpected: '%v'\nGot: '%v'",
+        "Error | File %s: Line %d: %s\nExpected: '%v'\nGot     : '%v'",
         file,line,base,expected,got,
     ));
 }

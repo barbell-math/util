@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/customerr"
@@ -35,7 +36,7 @@ func getColCountError(idx int, expLen int, gotLen int, opts *options) error {
     )
 }
 
-
+// TODO - still needed??
 // func CSVGenerator(sep string, callback func(iter int) (string,bool)) string {
 //     var sb strings.Builder;
 //     var temp string;
@@ -49,27 +50,38 @@ func getColCountError(idx int, expLen int, gotLen int, opts *options) error {
 //     }
 //     return sb.String();
 // }
-// 
-// func Flatten(elems iter.Iter[[]string], sep string) iter.Iter[string] {
-//     return iter.Next(elems,
-//     func(index int,
-//         val []string,
-//         status iter.IteratorFeedback,
-//     ) (iter.IteratorFeedback, string, error) {
-//         if status==iter.Break {
-//             return iter.Break,"",nil;
-//         }
-//         var sb strings.Builder;
-//         for i,v:=range(val) {
-//             sb.WriteString(v);
-//             if i!=len(val)-1 {
-//                 sb.WriteString(sep);
-//             }
-//         }
-//         return iter.Continue,sb.String(),nil;
-//     });
-// }
 
+// Maps a stream of string slices to a stream of strings using a csv format,
+// which can then be written directly to a file. The options argument controls
+// the behavior of the mapping process, see [NewOptions] for more information.
+// If an error is encountered while mapping the stream of strings slices then
+// iteration will stop and that error will be returned.
+func Flatten(elems iter.Iter[[]string], opts *options) iter.Iter[string] {
+    return iter.Next(elems,
+    func(index int,
+        val []string,
+        status iter.IteratorFeedback,
+    ) (iter.IteratorFeedback, string, error) {
+        if status==iter.Break {
+            return iter.Break,"",nil;
+        }
+        var sb strings.Builder;
+        for i,v:=range(val) {
+            sb.WriteString(v);
+            if i!=len(val)-1 {
+                sb.WriteString(string(opts.delimiter))
+            }
+        }
+        return iter.Continue,sb.String(),nil;
+    });
+}
+
+// Parses the supplied csv file to produce a stream of string slices, which can
+// then be passed to the [ToStructs] function to unmarshall the data into
+// structs. The options argument controls the behavior of the parsing process,
+// see [NewOptions] for more information. If an error is encountered while 
+// processing the stream of structs then iteration will stop and that error will
+// be returned.
 func Parse(src string, opts *options) iter.Iter[[]string] {
     var reader *csv.Reader=nil;
     file,err:=os.Open(src);

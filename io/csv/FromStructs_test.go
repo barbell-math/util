@@ -1,7 +1,6 @@
 package csv
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/barbell-math/util/algo/iter"
@@ -34,127 +33,117 @@ func TestFromStructsInvalidStruct(t *testing.T) {
     test.Eq(0,cnt,t)
 }
 
+func fromStructsEqualityHelper(exp [][]string, got [][]string, t *testing.T){
+    test.Eq(len(exp),len(got),t)
+    for i:=0; i<len(got); i++ {
+        test.Eq(len(exp[i]),len(got[i]),t)
+        for j:=0; j<len(got[i]); j++ {
+            test.Eq(exp[i][j],got[i][j],t)
+        }
+    }
+}
+
 func TestFromStructsValidStruct(t *testing.T){
     res,err:=FromStructs[csvTest](
         iter.SliceElems[csvTest](VALID_STRUCT),
         NewOptions().DateTimeFormat("01/02/2006"),
     ).Collect()
-    fmt.Println(res)
     test.Nil(err,t)
-    test.Eq(len(VALID),len(res),t)
+    fromStructsEqualityHelper(VALID_FROM_STRUCT,res,t)
+}
+
+func TestFromStructsValidStructDontWriteHeaders(t *testing.T){
+    res,err:=FromStructs[csvTest](
+        iter.SliceElems[csvTest](VALID_STRUCT),
+        NewOptions().DateTimeFormat("01/02/2006").WriteHeaders(false),
+    ).Collect()
+    test.Nil(err,t)
+    test.Eq(len(VALID_FROM_STRUCT)-1,len(res),t)
     for i:=0; i<len(res); i++ {
-        test.Eq(len(VALID[i]),len(res[i]),t)
+        test.Eq(len(VALID_FROM_STRUCT[i+1]),len(res[i]),t)
         for j:=0; j<len(res); j++ {
-            test.Eq(VALID[i][j],res[i][j],t)
+            test.Eq(VALID_FROM_STRUCT[i+1][j],res[i][j],t)
         }
     }
 }
 
-// func TestValidStructToCSV(t *testing.T) {
-//     type testType struct {
-//         V int;
-//         priv int;
-//     };
-//     structs:=make([]testType,5);
-//     for i,_:=range(structs) {
-//         structs[i].V=i;
-//         structs[i].priv=i+1;
-//     }
-//     res,err:=StructToCSV(iter.SliceElems(structs),true,"01/02/2006").Collect();
-//     test.BasicTest(nil,err,
-//         "StructToCSV returned an error when it should not have.",t,
-//     );
-//     test.BasicTest(len(structs)+1,len(res),
-//         "StructToCSV did not produce the correct number of values.",t,
-//     );
-//     newStructs,err:=CSVToStruct[testType](
-//         iter.SliceElems(res),"01/02/2006",
-//     ).Collect();
-//     test.BasicTest(len(structs),len(newStructs),
-//         "StructToCSV -> CSVToStruct did not produce the correct number of values.",t,
-//     );
-//     for i,v:=range(structs) {
-//         if i<len(newStructs) {
-//             test.BasicTest(v.V,newStructs[i].V,
-//                 "New structs public variable was not correctly set.",t,
-//             );
-//             test.BasicTest(0,newStructs[i].priv,
-//                 "New structs private variable was modified when it should not have been.",t,
-//             );
-//         }
-//     }
-// }
-// 
-// func TestInvalidStructToCSV(t *testing.T) {
-//     type testType struct {
-//         V []int;
-//         priv int;
-//     };
-//     structs:=make([]testType,5);
-//     for i,_:=range(structs) {
-//         structs[i].V=make([]int, 5);
-//         structs[i].priv=i+1;
-//     }
-//     _,err:=StructToCSV(iter.SliceElems(structs),true,"01/02/2006").Collect();
-//     if !IsUnsupportedType(err) {
-//         test.FormatError(UnsupportedType(""),err,
-//             "StructToCSV did not return the correct error.",t,
-//         );
-//     }
-// }
-// 
-// func TestNonStructToCSV(t *testing.T) {
-//     _,err:=StructToCSV(iter.SliceElems([]int{1,2,3,4}),true,"01/02/2006").Collect();
-//     if !IsNonStructValue(err) {
-//         test.FormatError(UnsupportedType(""),err,
-//             "StructToCSV did not return the correct error.",t,
-//         );
-//     }
-// }
-// 
-// func TestValidStructToCSVWithTime(t *testing.T) {
-//     structs:=make([]csvTest,5);
-//     for i,_:=range(structs) {
-//         structs[i].B=true;
-//         structs[i].T=time.Now();
-//         structs[i].S="test string";
-//         structs[i].Ui=uint(i);
-//     }
-//     res,err:=StructToCSV(iter.SliceElems(structs),true,"01/02/2006").Collect();
-//     test.BasicTest(nil,err,
-//         "StructToCSV returned an error when it should not have.",t,
-//     );
-//     test.BasicTest(len(structs)+1,len(res),
-//         "StructToCSV did not produce the correct number of values.",t,
-//     );
-//     newStructs,err:=CSVToStruct[csvTest](
-//         iter.SliceElems(res),"01/02/2006",
-//     ).Collect();
-//     test.BasicTest(len(structs),len(newStructs),
-//         "StructToCSV -> CSVToStruct did not produce the correct number of values.",t,
-//     );
-//     for i,v:=range(structs) {
-//         if i<len(newStructs) {
-//             test.BasicTest(v.B,newStructs[i].B,
-//                 "New structs public boolean variable was not correctly set.",t,
-//             );
-//             test.BasicTest(v.S,newStructs[i].S,
-//                 "New structs public string variable was not correctly set.",t,
-//             );
-//             test.BasicTest(v.Ui,newStructs[i].Ui,
-//                 "New structs public unsigned int variable was not correctly set.",t,
-//             );
-//             day,month,year:=v.T.Date();
-//             day1,month1,year1:=newStructs[i].T.Date();
-//             test.BasicTest(day,day1,
-//                 "The day of the structs public time variable was not correctly set.",t,
-//             );
-//             test.BasicTest(month,month1,
-//                 "The month of the structs public time variable was not correctly set.",t,
-//             );
-//             test.BasicTest(year,year1,
-//                 "The year of the structs public time variable was not correctly set.",t,
-//             );
-//         }
-//     }
-// }
+func TestFromStructsMissingColumnsWithHeadersSpecified(t *testing.T){
+    res,err:=FromStructs[csvTest](
+        iter.SliceElems[csvTest](MISSING_COLUMNS_STRUCT),
+        NewOptions().DateTimeFormat("01/02/2006").Headers([]string{
+            "I8","Ui","Ui8","F32","S","B","T",
+        }),
+    ).Collect()
+    test.Nil(err,t)
+    fromStructsEqualityHelper(MISSING_COLUMNS_FROM_STRUCT,res,t)
+}
+
+func TestFromStructMissingValues(t *testing.T) {
+    res,err:=FromStructs[csvTest](
+        iter.SliceElems[csvTest](MISSING_VALUES_STRUCT),
+        NewOptions().DateTimeFormat("01/02/2006"),
+    ).Collect()
+    test.Nil(err,t)
+    fromStructsEqualityHelper(MISSING_VALUES_FROM_STRUCT,res,t)
+}
+
+func TestFromStructsMissingHeaders(t *testing.T){
+    res,err:=FromStructs[csvTest](
+        iter.SliceElems[csvTest](MISSING_HEADERS_STRUCT),
+        NewOptions().DateTimeFormat("01/02/2006").WriteHeaders(false),
+    ).Collect()
+    test.Nil(err,t)
+    fromStructsEqualityHelper(MISSING_HEADERS_FROM_STRUCT,res,t)
+}
+
+func TestFromStructsStrings(t *testing.T){
+    res,err:=FromStructs[csvTest](
+        iter.SliceElems[csvTest](STRINGS_STRUCT),
+        NewOptions().DateTimeFormat("01/02/2006").Headers([]string{"S","S1"}),
+    ).Collect()
+    test.Nil(err,t)
+    fromStructsEqualityHelper(STRINGS_FROM_STRUCT,res,t)
+}
+
+func TestFromStructsNewlineString(t *testing.T){
+    type Row struct {
+        Str string
+    }
+    res,err:=FromStructs[Row](
+        iter.SliceElems[Row]([]Row{{"hello\nworld"}}),
+        NewOptions(),
+    ).Collect()
+    test.Nil(err,t)
+    test.Eq(2,len(res),t)
+    test.SlicesMatch[string]([]string{"Str"},res[0],t)
+    test.SlicesMatch[string]([]string{"\"hello\nworld\""},res[1],t)
+}
+
+func TestFromStructsQuotedString(t *testing.T){
+    type Row struct {
+        Str string
+    }
+    res,err:=FromStructs[Row](
+        iter.SliceElems[Row]([]Row{{"\"hello\n\"world\"\""}}),
+        NewOptions(),
+    ).Collect()
+    test.Nil(err,t)
+    test.Eq(2,len(res),t)
+    test.SlicesMatch[string]([]string{"Str"},res[0],t)
+    test.SlicesMatch[string]([]string{"\"\"\"hello\n\"\"world\"\"\"\"\""},res[1],t)
+}
+
+func TestFromStructsWithTags(t *testing.T) {
+    type Row struct {
+        I int `csv:"int"`
+        S string `csv:"string"`
+    }
+    res,err:=FromStructs[Row](
+        iter.SliceElems[Row]([]Row{{1,"One"}}),
+        NewOptions(),
+    ).Collect()
+    test.Nil(err,t)
+    test.Eq(2,len(res),t)
+    test.SlicesMatch[string]([]string{"int","string"},res[0],t)
+    test.SlicesMatch[string]([]string{"1","One"},res[1],t)
+}
