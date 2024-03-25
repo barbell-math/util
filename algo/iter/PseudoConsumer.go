@@ -92,40 +92,6 @@ func (i Iter[T]) AppendTo(orig *[]T) (int, error) {
 	return j, err
 }
 
-// TODO -reimplement
-// // This function is a Consumer.
-// //
-// // CollectInto will collect all of it's parent iterators values into the
-// // supplied container. The action that is used to place the value in the container
-// // is specified by the collectOp parameter, which will be passed the container
-// // and each iteration value to add to the container. The container is locked
-// // for the entire duration of iteration, meaning reads will not be possible
-// // until iteration is done. Note that there are no constraints on what the
-// // container contains before iteration starts, meaning CollectInto can also be
-// // used to append values to an existing collection. Iteration will stop if an
-// // error occurs. If an error occurs then the slice will contain all the values
-// // that were recieved up until that point.
-// func (i Iter[T])CollectInto(
-//     container interface { types.Write[int,T]; types.Syncable },
-//     collectOp func(
-//         container interface { types.Write[int,T]; types.Syncable },
-//         val T,
-//     ) error,
-// ) (int,error) {
-//     j:=0
-//     err:=i.SetupTeardown(
-//         func() error { container.Lock(); return nil },
-//         func() error { container.Unlock(); return nil },
-//     ).ForEach(func(index int, val T) (IteratorFeedback, error) {
-//         j++
-//         if err:=collectOp(container,val); err!=nil {
-//             return Break,err
-//         }
-//         return Continue,nil
-//     })
-//     return j,err
-// }
-
 // This function is a Consumer.
 //
 // All will apply the supplied operation function (op) to each value from it's
