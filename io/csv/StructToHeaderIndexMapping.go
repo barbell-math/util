@@ -25,7 +25,7 @@ func newStructToHeaderIndexMapping[R any](
 		return rv, getBadRowTypeError(r)
 	}
 
-	if !opts.headersSupplied {
+	if !opts.getFlag(headersSupplied) {
 		// Get all public data from the struct
 		return rv, rv.getHeadersUntil(math.MaxInt, r)
 	}

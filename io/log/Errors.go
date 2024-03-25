@@ -1,13 +1,10 @@
-package log;
+package log
 
-import (
-    customerr "github.com/barbell-math/util/err"
-)
+import "errors"
 
-var LogFileNotSpecified,IsLogFileNotSpecified=customerr.ErrorFactory(
-    "The log file was not specified.",
-);
-
-var LogLineMalformed,IsLogLineMalformed=customerr.ErrorFactory(
-    "Log line malformed.",
-);
+var LogFileNotSpecified = errors.New("The log file was not specified.")
+var LogFileMalformed = errors.New("Log line malformed.")
+var NoLogStatus = errors.New("No log status present.")
+var NoLogTime = errors.New("No log time present.")
+var NoLogObj = errors.New("No object present.")
+var InvalidLogStatus = errors.New("Invalid log status.")

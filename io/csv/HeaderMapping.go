@@ -32,7 +32,7 @@ func newStructHeaderMapping[R any](r *R, opts *options) (headerMapping[R], error
 			return iter.Continue, nil
 		}
 		desiredVal := val.GetA()
-		if opts.useStructTags {
+		if opts.getFlag(useStructTags) {
 			if v, ok := val.GetB().Lookup(opts.structTagName); ok {
 				desiredVal = v
 			}
