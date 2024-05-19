@@ -1,3 +1,13 @@
+// This package implements a csv parser that extends the one supplied by the std
+// lib to include marshalling and un-marshaling to struct values. Many options
+// are provided beyond what the std lib csv package presents. This package
+// relies on the iterator package to create streams of structs and string slices
+// which are used to represent un-marshalling and marshalling respectively.
+//
+// Within a csv file, string literals can be specified that follow the same
+// rules as the std lib csv parser. (A quote literal can escape newlines and
+// commas, a double double quote "" escapes a quote within a quote literal,
+// etc...)
 package csv
 
 import (

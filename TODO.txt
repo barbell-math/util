@@ -1,5 +1,3 @@
-// fix logging
-
 // Static Vector (Array?) - no way to dynamically represent, probably no? - unless unsafe somehow???
 // Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New, track f/b ratio with moving average (https://stackoverflow.com/questions/12636613/how-to-calculate-moving-average-without-keeping-the-count-and-data-total)
 // OrderedMap - rb tree?

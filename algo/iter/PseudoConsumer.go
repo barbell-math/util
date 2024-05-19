@@ -34,7 +34,7 @@ func (i Iter[T]) ToChan(c chan T) {
 // ToFile will take all the values from it's parent iterator and will write them
 // to the specified writer. All values are written to the writer using the standard
 // fmt.Sprintf %v formatting directive. If you want a format other than that then
-// map the values to a the formatted string before passing values to this iterator.
+// map the values to the formatted string before passing values to this iterator.
 //
 // If addNewLine is true then newlines will be appended to every value after it
 // is formatted.
@@ -51,7 +51,7 @@ func (i Iter[T]) ToWriter(src io.Writer, addNewLine bool) error {
 // This function is a Consumer.
 //
 // Count will consumer it's parent iterator, counting the number of values that
-// it recieves. The values from the parent iterator are not saved or used in
+// it receives. The values from the parent iterator are not saved or used in
 // any way. Iteration will stop if an error occurs.
 func (i Iter[T]) Count() (int, error) {
 	rv := 0
@@ -81,7 +81,7 @@ func (i Iter[T]) Collect() ([]T, error) {
 // AppendTo will append all of it's parent iterators values into a slice.
 // Iteration will stop if an error occurs. If an error occurs then
 // the slice will contain all the values that were already present in it plus the
-// values that were recieved up until the error occured.
+// values that were received up until the error occurred.
 func (i Iter[T]) AppendTo(orig *[]T) (int, error) {
 	j := 0
 	err := i.ForEach(func(index int, val T) (IteratorFeedback, error) {
@@ -99,7 +99,7 @@ func (i Iter[T]) AppendTo(orig *[]T) (int, error) {
 // true for every value, otherwise it will return false. If an error occurs
 // iteration will stop. If an error occurs, the state of the boolean value that
 // All returns will reflect the result of applying the operation function to
-// every value from the parent iterator before the error occured, excluding the
+// every value from the parent iterator before the error occurred, excluding the
 // value returned with the error.
 func (i Iter[T]) All(op func(val T) (bool, error)) (bool, error) {
 	rv := true
@@ -121,7 +121,7 @@ func (i Iter[T]) All(op func(val T) (bool, error)) (bool, error) {
 // true for any value, otherwise it will return false. If an error occurs
 // iteration will stop. If an error occurs, the state of the boolean value that
 // Any returns will reflect the result of applying the operation function to
-// every value from the parent iterator before the error occured, excluding the
+// every value from the parent iterator before the error occurred, excluding the
 // value returned with the error.
 func (i Iter[T]) Any(op func(val T) (bool, error)) (bool, error) {
 	rv := false
@@ -210,7 +210,7 @@ func (i Iter[T]) Nth(idx int) (T, error, bool) {
 
 // This function is a Consumer.
 //
-// Reduce will take all of the values from it's parent iteratior and will
+// Reduce will take all of the values from it's parent iterator and will
 // combine them using the logic from the operation function (op), returning
 // the combined value. The start value is specified as an argument. If an error
 // occurs then iteration will stop and the current accumulated value will be

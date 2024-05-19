@@ -12,6 +12,7 @@ type (
 	// is supplied. The size of the struct will be equal to the largest type
 	// plus one byte which is used to specify which value is in the variant.
 	Variant[A any, B any] struct {
+		aOrB variantFlag
 		data []byte
 	}
 
@@ -29,7 +30,7 @@ func NewVariant[A any, B any]() Variant[A, B] {
 
 func (v *Variant[A, B]) initData() {
 	if len(v.data) == 0 {
-		v.data = make([]byte, v.dataSize()+1)
+		v.data = make([]byte, v.dataSize())
 	}
 }
 
@@ -42,20 +43,15 @@ func (v Variant[A, B]) dataSize() uintptr {
 }
 
 func (v Variant[A, B]) dataStart() unsafe.Pointer {
-	return unsafe.Pointer(&v.data[1])
+	return unsafe.Pointer(&v.data[0])
 }
-
-// The return type for these two functions has to be types.Variant because that
-// is what the interface expects. The interface cannot use a specific return
-// value because that would require the interface to import this package,
-// creating circular imports.
 
 // Sets the variant to hold value type A, initilized with the value passed to
 // the function. After calling this method the variant will panic if value
 // type B is attempted to be accessed.
 func (v Variant[A, B]) SetValA(newVal A) Variant[A, B] {
 	v.initData()
-	v.data[0] = byte(aVal)
+	v.aOrB=aVal
 	*(*A)(v.dataStart()) = newVal
 	return v
 }
@@ -65,16 +61,16 @@ func (v Variant[A, B]) SetValA(newVal A) Variant[A, B] {
 // type A is attempted to be accessed.
 func (v Variant[A, B]) SetValB(newVal B) Variant[A, B] {
 	v.initData()
-	v.data[0] = byte(bVal)
+	v.aOrB=bVal
 	*(*B)(v.dataStart()) = newVal
 	return v
 }
 
 // Returns true if the variant holds value A.
-func (v Variant[A, B]) HasA() bool { return v.data[0] == byte(aVal) }
+func (v Variant[A, B]) HasA() bool { return v.aOrB == aVal }
 
 // Returns true if the variant holds value B.
-func (v Variant[A, B]) HasB() bool { return v.data[0] == byte(bVal) }
+func (v Variant[A, B]) HasB() bool { return v.aOrB == bVal }
 
 // Attempts to return value A from the variant. Panics if the variant does not
 // hold type A.

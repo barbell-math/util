@@ -215,7 +215,8 @@ func BenchmarkJoinLog(b *testing.B) {
 		).ForEach(
 			func(index int, val LogEntry[int]) (iter.IteratorFeedback, error) {
 				return iter.Continue, nil
-			})
+			},
+		)
 	}
 	l1.Close()
 	l2.Close()

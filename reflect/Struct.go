@@ -150,7 +150,6 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
     )
 }
 
-// TODO -test
 // Returns an iterator that provides the struct field tags if a struct is
 // is supplied as an argument, returns an error otherwise. As a special case, 
 // if a reflect.Value is passed to this function it will return the field 
