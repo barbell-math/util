@@ -30,7 +30,7 @@ func testCustomWidgetHelper(
     v2 customWidget,
     t *testing.T,
 ) {
-    w:=NewWidget[customWidget,*customWidget]()
+    w:=Widget[customWidget,*customWidget]{}
     test.True(w.Eq(&v,&v),t)
     test.False(w.Eq(&v,&v2),t)
     test.False(w.Lt(&v,&v),t)
@@ -48,7 +48,7 @@ func TestCustomWidget(t *testing.T){
 
 func TestCustomWidgetPntr(t *testing.T) {
     vImpl:=&customWidget{a: 10, b: 20}
-    v:=NewWidget[*customWidget,Pntr[customWidget,*customWidget]]()
+    v:=Widget[*customWidget,Pntr[customWidget,*customWidget]]{}
     v2Impl:=&customWidget{a: 9, b: 20}
     test.True(v.Eq(&vImpl,&vImpl),t)
     test.False(v.Eq(&vImpl,&v2Impl),t)

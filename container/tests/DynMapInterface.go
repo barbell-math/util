@@ -3,12 +3,11 @@ package tests
 import (
 	"testing"
 
+	"github.com/barbell-math/util/test"
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
-
-	"github.com/barbell-math/util/test"
 )
 
 func mapReadInterface[T any, U any](c dynamicContainers.ReadMap[T, U])   {}
@@ -22,6 +21,16 @@ func DynMapInterfaceSyncableInterface[K any, V any](
 	t *testing.T,
 ) {
 	var container containerTypes.RWSyncable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynMapInterfaceAddressableInterface[K any, V any](
+	factory func(capacity int) dynamicContainers.Map[K, V],
+	t *testing.T,
+) {
+	var container containerTypes.Addressable = factory(0)
 	_ = container
 }
 
@@ -265,10 +274,10 @@ func DynMapInterfaceContainsPntr(
 	factory func(capacity int) dynamicContainers.Map[int, int],
 	t *testing.T,
 ) {
-	mapContainsHelper(factory(0), 0, t)
-	mapContainsHelper(factory(0), 1, t)
-	mapContainsHelper(factory(0), 2, t)
-	mapContainsHelper(factory(0), 5, t)
+	mapContainsPntrHelper(factory(0), 0, t)
+	mapContainsPntrHelper(factory(0), 1, t)
+	mapContainsPntrHelper(factory(0), 2, t)
+	mapContainsPntrHelper(factory(0), 5, t)
 }
 
 func mapKeyOfHelper(

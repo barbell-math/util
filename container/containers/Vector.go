@@ -159,7 +159,7 @@ func (v *SyncedVector[T, U]) Capacity() int {
 //
 // Time Complexity: O(n) because a copy operation is performed.
 func (v *Vector[T, U]) SetCapacity(c int) error {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := c + 1; i < len(*v); i++ {
 		w.Zero(&(*v)[i])
 	}
@@ -263,7 +263,7 @@ func (v *SyncedVector[T, U]) Contains(val T) bool {
 // Time Complexity: O(n) (linear search)
 func (v *Vector[T, U]) ContainsPntr(val *T) bool {
 	found := false
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < len(*v) && !found; i++ {
 		found = w.Eq(val, &(*v)[i])
 	}
@@ -294,7 +294,7 @@ func (v *Vector[T, U]) KeyOf(val T) (int, bool) {
 }
 
 // Description: Places a read lock on the underlying vector and then calls the
-// underlying vectors [Vector.KeyOf] implemenation method. The [Vector.KeyOf]
+// underlying vectors [Vector.KeyOf] implementation method. The [Vector.KeyOf]
 // method is not called directly to avoid copying the val variable twice, which
 // could be expensive with a large type for the T generic.
 //
@@ -310,7 +310,7 @@ func (v *SyncedVector[T, U]) KeyOf(val T) (int, bool) {
 func (v *Vector[T, U]) keyOfImpl(val *T) (int, bool) {
 	rv := -1
 	found := false
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < len(*v) && !found; i++ {
 		if found = w.Eq(val, &(*v)[i]); found {
 			rv = i
@@ -325,25 +325,6 @@ func (v *Vector[T, U]) keyOfImpl(val *T) (int, bool) {
 //
 // Time Complexity: O(m), where m=len(vals)
 func (v *Vector[T, U]) Set(vals ...basic.Pair[int, T]) error {
-	return v.setImpl(vals)
-}
-
-// Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.Set] implementaiton method. The [Vector.Set]
-// method is not called directly to avoid copying the vals varargs twice, which
-// could be expensive with a large type for the T generic or a large number of
-// values.
-//
-// Lock Type: Write
-//
-// Time Complexity: O(m), where m=len(vals)
-func (v *SyncedVector[T, U]) Set(vals ...basic.Pair[int, T]) error {
-	v.Lock()
-	defer v.Unlock()
-	return v.Vector.setImpl(vals)
-}
-
-func (v *Vector[T, U]) setImpl(vals []basic.Pair[int, T]) error {
 	for _, iterV := range vals {
 		if iterV.A >= 0 && iterV.A < len(*v) && len(*v) > 0 {
 			(*v)[iterV.A] = iterV.B
@@ -354,6 +335,18 @@ func (v *Vector[T, U]) setImpl(vals []basic.Pair[int, T]) error {
 	return nil
 }
 
+// Description: Places a write lock on the underlying vector and then calls the
+// underlying vectors [Vector.Set] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(m), where m=len(vals)
+func (v *SyncedVector[T, U]) Set(vals ...basic.Pair[int, T]) error {
+	v.Lock()
+	defer v.Unlock()
+	return v.Vector.Set(vals...)
+}
+
 // Description: Sets the supplied values sequentially starting at the supplied
 // index and continuing sequentailly after that. Returns and error if any index
 // that is attempted to be set is >= the length of the vector. If an error
@@ -361,25 +354,6 @@ func (v *Vector[T, U]) setImpl(vals []basic.Pair[int, T]) error {
 //
 // Time Complexity: O(m), where m=len(vals)
 func (v *Vector[T, U]) SetSequential(idx int, vals ...T) error {
-	return v.setSequentialImpl(idx, vals)
-}
-
-// Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.SetSequential] implementation method. The
-// [Vector.SetSequential] method is not called directly to avoid copying the
-// vals varargs twice, which could be expensive with a large type for the T
-// generic or a large number of values.
-//
-// Lock Type: Write
-//
-// Time Complexity: O(m), where m=len(vals)
-func (v *SyncedVector[T, U]) SetSequential(idx int, vals ...T) error {
-	v.Lock()
-	defer v.Unlock()
-	return v.Vector.setSequentialImpl(idx, vals)
-}
-
-func (v *Vector[T, U]) setSequentialImpl(idx int, vals []T) error {
 	if idx >= len(*v) {
 		return getIndexOutOfBoundsError(idx, 0, len(*v))
 	}
@@ -391,20 +365,30 @@ func (v *Vector[T, U]) setSequentialImpl(idx int, vals []T) error {
 	return nil
 }
 
+// Description: Places a write lock on the underlying vector and then calls the
+// underlying vectors [Vector.SetSequential] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(m), where m=len(vals)
+func (v *SyncedVector[T, U]) SetSequential(idx int, vals ...T) error {
+	v.Lock()
+	defer v.Unlock()
+	return v.Vector.SetSequential(idx, vals...)
+}
+
 // Description: Append the supplied values to the vector. This function will
 // never return an error.
 //
 // Time Complexity: Best case O(m), worst case O(n+m) (reallocation), where
 // m=len(vals).
 func (v *Vector[T, U]) Append(vals ...T) error {
-	return v.appendImpl(vals)
+	*v = append(*v, vals...)
+	return nil
 }
 
 // Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.Append] implementation method. The [Vector.Append]
-// method is not called directly to avoid copying the vals varargs twice, which
-// could be expensive with a large type for the T generic or a large number of
-// values.
+// underlying vectors [Vector.Append] method.
 //
 // Lock Type: Write
 //
@@ -413,12 +397,7 @@ func (v *Vector[T, U]) Append(vals ...T) error {
 func (v *SyncedVector[T, U]) Append(vals ...T) error {
 	v.Lock()
 	defer v.Unlock()
-	return v.appendImpl(vals)
-}
-
-func (v *Vector[T, U]) appendImpl(vals []T) error {
-	*v = append(*v, vals...)
-	return nil
+	return v.Vector.Append(vals...)
 }
 
 // Description: AppendUnique will append the supplied values to the vector if
@@ -428,8 +407,15 @@ func (v *Vector[T, U]) appendImpl(vals []T) error {
 // Time Complexity: Best case O(m) (no reallocation), worst case O(n+m)
 // (reallocation), where m=len(vals).
 func (v *Vector[T, U]) AppendUnique(vals ...T) error {
+	found := false
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < len(vals); i++ {
-		v.appendUniqueImpl(&vals[i])
+		for j := 0; j < len(*v) && !found; j++ {
+			found = w.Eq(&vals[i], &(*v)[j])
+		}
+		if !found {
+			*v = append(*v, vals[i])
+		}
 	}
 	return nil
 }
@@ -447,22 +433,7 @@ func (v *Vector[T, U]) AppendUnique(vals ...T) error {
 func (v *SyncedVector[T, U]) AppendUnique(vals ...T) error {
 	v.Lock()
 	defer v.Unlock()
-	for i := 0; i < len(vals); i++ {
-		v.Vector.appendUniqueImpl(&vals[i])
-	}
-	return nil
-}
-
-func (v *Vector[T, U]) appendUniqueImpl(val *T) error {
-	found := false
-	w := widgets.NewWidget[T, U]()
-	for j := 0; j < len(*v) && !found; j++ {
-		found = w.Eq(val, &(*v)[j])
-	}
-	if !found {
-		*v = append(*v, *val)
-	}
-	return nil
+	return v.Vector.AppendUnique(vals...)
 }
 
 // Description: Insert will insert the supplied values into the vector. The
@@ -470,25 +441,6 @@ func (v *Vector[T, U]) appendUniqueImpl(val *T) error {
 //
 // Time Complexity: O(n*m), where m=len(vals)
 func (v *Vector[T, U]) Insert(vals ...basic.Pair[int, T]) error {
-	return v.insertImpl(vals)
-}
-
-// Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.Insert] implementation method. The [Vector.Insert]
-// method is not called directly to avoid copying the vals varargs twice, which
-// could be expensive with a large type for the T generic or a large number of
-// values.
-//
-// Lock Type: Write
-//
-// Time Complexity: O(n*m), where m=len(vals)
-func (v *SyncedVector[T, U]) Insert(vals ...basic.Pair[int, T]) error {
-	v.Lock()
-	defer v.Unlock()
-	return v.Vector.insertImpl(vals)
-}
-
-func (v *Vector[T, U]) insertImpl(vals []basic.Pair[int, T]) error {
 	for i := 0; i < len(vals); i++ {
 		if vals[i].A >= 0 && vals[i].A < len(*v) && len(*v) > 0 {
 			var tmp T
@@ -504,32 +456,24 @@ func (v *Vector[T, U]) insertImpl(vals []basic.Pair[int, T]) error {
 	return nil
 }
 
+// Description: Places a write lock on the underlying vector and then calls the
+// underlying vectors [Vector.Insert] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n*m), where m=len(vals)
+func (v *SyncedVector[T, U]) Insert(vals ...basic.Pair[int, T]) error {
+	v.Lock()
+	defer v.Unlock()
+	return v.Vector.Insert(vals...)
+}
+
 // Description: Inserts the supplied values at the given index. Returns an error
 // if the index is >= the length of the vector.
 //
 // Time Complexity: O(n+m), where m=len(vals). For time complexity see the
 // InsertVector section of https://go.dev/wiki/SliceTricks
 func (v *Vector[T, U]) InsertSequential(idx int, vals ...T) error {
-	return v.insertSequentialImpl(idx, vals)
-}
-
-// Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.InsertSequential] implementation method. The
-// [Vector.InsertSequential] method is not called directly to avoid copying the
-// vals varargs twice, which could be expensive with a large type for the T
-// generic or a large number of values.
-//
-// Lock Type: Write
-//
-// Time Complexity: O(n+m), where m=len(vals). For time complexity see the
-// InsertVector section of https://go.dev/wiki/SliceTricks
-func (v *SyncedVector[T, U]) InsertSequential(idx int, vals ...T) error {
-	v.Lock()
-	defer v.Unlock()
-	return v.Vector.insertSequentialImpl(idx, vals)
-}
-
-func (v *Vector[T, U]) insertSequentialImpl(idx int, vals []T) error {
 	if idx >= 0 && idx < len(*v) && len(*v) > 0 {
 		*v = append((*v)[:idx], append(vals, (*v)[idx:]...)...)
 		return nil
@@ -538,6 +482,19 @@ func (v *Vector[T, U]) insertSequentialImpl(idx int, vals []T) error {
 		return nil
 	}
 	return getIndexOutOfBoundsError(idx, 0, len(*v))
+}
+
+// Description: Places a write lock on the underlying vector and then calls the
+// underlying vectors [Vector.InsertSequential] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n+m), where m=len(vals). For time complexity see the
+// InsertVector section of https://go.dev/wiki/SliceTricks
+func (v *SyncedVector[T, U]) InsertSequential(idx int, vals ...T) error {
+	v.Lock()
+	defer v.Unlock()
+	return v.Vector.InsertSequential(idx,vals...)
 }
 
 // Description: Pop will remove all occurrences of val in the vector. All
@@ -550,9 +507,7 @@ func (v *Vector[T, U]) Pop(val T) int {
 }
 
 // Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.Pop] implementation method. The [Vector.Pop]
-// method is not called directly to avoid copying the value twice, which could
-// be expensive with a large type for the T generic or a large number of values.
+// underlying vectors [Vector.Pop] implementation method.
 //
 // Lock Type: Write
 //
@@ -577,10 +532,7 @@ func (v *Vector[T, U]) PopSequential(val T, num int) int {
 }
 
 // Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.PopSequential] implementation method. The
-// [Vector.PopSequential] method is not called directly to avoid copying the
-// value twice, which could be expensive with a large type for the T generic or
-// a large number of values.
+// underlying vectors [Vector.PopSequential] implementation method.
 //
 // Lock Type: Write
 //
@@ -597,7 +549,7 @@ func (v *SyncedVector[T, U]) PopSequential(val T, num int) int {
 func (v *Vector[T, U]) popSequentialImpl(val *T, num int) int {
 	cntr := 0
 	prevIndex := -1
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < len(*v); i++ {
 		if w.Eq(val, &(*v)[i]) && cntr+1 <= num {
 			if prevIndex == -1 { // Initial value found
@@ -628,7 +580,7 @@ func (v *Vector[T, U]) Delete(idx int) error {
 	if idx < 0 || idx >= len(*v) {
 		return getIndexOutOfBoundsError(idx, 0, len(*v))
 	} else if idx >= 0 && idx < len(*v) && len(*v) > 0 {
-		w := widgets.NewWidget[T, U]()
+		w := widgets.Widget[T, U]{}
 		w.Zero(&(*v)[idx])
 		*v = append((*v)[:idx], (*v)[idx+1:]...)
 	}
@@ -662,7 +614,7 @@ func (v *Vector[T, U]) DeleteSequential(start int, end int) error {
 	if end <= start {
 		return getStartEndIndexError(start, end)
 	}
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := start; i < end; i++ {
 		w.Zero(&(*v)[i])
 	}
@@ -686,7 +638,7 @@ func (v *SyncedVector[T, U]) DeleteSequential(start int, end int) error {
 //
 // Time Complexity: O(n) (Because of zeroing)
 func (v *Vector[T, U]) Clear() {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < len(*v); i++ {
 		w.Zero(&(*v)[i])
 	}
@@ -823,9 +775,7 @@ func (v *Vector[T, U]) PopFront() (T, error) {
 }
 
 // Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.PopFront] implementation method. The
-// [Vector.PopFront] method is not called directly to avoid copying the return
-// value twice, which could be expensive with a large type for the T generic.
+// underlying vectors [Vector.PopFront] implementation method.
 //
 // Lock Type: Write
 //
@@ -838,7 +788,7 @@ func (v *SyncedVector[T, U]) PopFront() (T, error) {
 }
 
 func (v *Vector[T, U]) popFontImpl(rv *T) error {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	if len(*v) > 0 {
 		*rv = (*v)[0]
 		w.Zero(&(*v)[0])
@@ -858,9 +808,7 @@ func (v *Vector[T, U]) PopBack() (T, error) {
 }
 
 // Description: Places a write lock on the underlying vector and then calls the
-// underlying vectors [Vector.PopFront] implementation method. The
-// [Vector.PopBack] method is not called directly to avoid copying the return
-// value twice, which could be expensive with a large type for the T generic.
+// underlying vectors [Vector.PopFront] implementation method.
 //
 // Lock Type: Write
 //
@@ -873,7 +821,7 @@ func (v *SyncedVector[T, U]) PopBack() (T, error) {
 }
 
 func (v *Vector[T, U]) popBackImpl(rv *T) error {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	if len(*v) > 0 {
 		*rv = (*v)[len(*v)-1]
 		w.Zero(&(*v)[len(*v)-1])
@@ -1118,7 +1066,7 @@ func (v *SyncedVector[T, U]) UnorderedEq(
 func (v *Vector[T, U]) KeyedEq(
 	other containerTypes.KeyedComparisonsOtherConstraint[int, T],
 ) bool {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	rv := (len(*v) == other.Length())
 	for i := 0; i < len(*v) && rv; i++ {
 		if otherV, err := addressableSafeGet[int, T](other, i); err == nil {
@@ -1401,21 +1349,21 @@ func (v *SyncedVector[T, U]) IsSubset(
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [Vector.KeyedEq]. Returns true
 // if l==r, false otherwise.
-func (v *Vector[T, U]) Eq(l *Vector[T, U], r *Vector[T, U]) bool {
+func (_ *Vector[T, U]) Eq(l *Vector[T, U], r *Vector[T, U]) bool {
 	return l.KeyedEq(r)
 }
 
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [SyncedVector.KeyedEq]. Returns
 // true if l==r, false otherwise.
-func (v *SyncedVector[T, U]) Eq(l *SyncedVector[T, U], r *SyncedVector[T, U]) bool {
+func (_ *SyncedVector[T, U]) Eq(l *SyncedVector[T, U], r *SyncedVector[T, U]) bool {
 	return l.KeyedEq(r)
 }
 
 // A function that implements the [algo.widget.WidgetInterface] less than
 // operation on vectors. The l and r vectors will be compared lexographically.
-func (v *Vector[T, U]) Lt(l *Vector[T, U], r *Vector[T, U]) bool {
-	w := widgets.NewWidget[T, U]()
+func (_ *Vector[T, U]) Lt(l *Vector[T, U], r *Vector[T, U]) bool {
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < min(len(*l), len(*r)); i++ {
 		if w.Lt(&(*l)[i], &(*r)[i]) {
 			return true
@@ -1433,7 +1381,7 @@ func (v *Vector[T, U]) Lt(l *Vector[T, U], r *Vector[T, U]) bool {
 // operation on vectors. The l and r vectors will be compared lexographically.
 // Read locks are placed on l and r before calling the underlying vectors
 // [Vector.Lt] method.
-func (v *SyncedVector[T, U]) Lt(l *SyncedVector[T, U], r *SyncedVector[T, U]) bool {
+func (_ *SyncedVector[T, U]) Lt(l *SyncedVector[T, U], r *SyncedVector[T, U]) bool {
 	l.RLock()
 	r.RLock()
 	defer l.RUnlock()
@@ -1446,9 +1394,9 @@ func (v *SyncedVector[T, U]) Lt(l *SyncedVector[T, U], r *SyncedVector[T, U]) bo
 // are produced from the elements of the vector are combined in a way that
 // maintains identity, making it so the hash will represent the same equality
 // operation that [Vector.KeyedEq] and [Vector.Eq] provide.
-func (c *Vector[T, U]) Hash(other *Vector[T, U]) hash.Hash {
+func (_ *Vector[T, U]) Hash(other *Vector[T, U]) hash.Hash {
 	var rv hash.Hash
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	if len(*other) > 0 {
 		rv = w.Hash(&(*other)[0])
 		for i := 1; i < len(*other); i++ {
@@ -1461,20 +1409,20 @@ func (c *Vector[T, U]) Hash(other *Vector[T, U]) hash.Hash {
 // Places a read lock on the underlying vector of other and then calls others
 // underlying vector [Vector.IsSubset] method. Implements the
 // [algo.widget.WidgetInterface].
-func (v *SyncedVector[T, U]) Hash(other *SyncedVector[T, U]) hash.Hash {
+func (_ *SyncedVector[T, U]) Hash(other *SyncedVector[T, U]) hash.Hash {
 	other.RLock()
 	defer other.RUnlock()
-	return v.Vector.Hash(&v.Vector)
+	return other.Vector.Hash(&other.Vector)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [Vector.Clear].
-func (v *Vector[T, U]) Zero(other *Vector[T, U]) {
+func (_ *Vector[T, U]) Zero(other *Vector[T, U]) {
 	other.Clear()
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [SyncedVector.Clear].
-func (v *SyncedVector[T, U]) Zero(other *SyncedVector[T, U]) {
+func (_ *SyncedVector[T, U]) Zero(other *SyncedVector[T, U]) {
 	other.Clear()
 }

@@ -16,6 +16,16 @@ func dynamicVectorWriteInterface[U any](c dynamicContainers.WriteVector[U]) {}
 func dynamicVectorInterface[U any](c dynamicContainers.Vector[U])           {}
 
 // Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynVectorInterfaceSyncableInterface[V any](
+	factory func(capacity int) dynamicContainers.Vector[V],
+	t *testing.T,
+) {
+	var container containerTypes.RWSyncable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
 // [containerTypes.Addressable] interface.
 func DynVectorInterfaceAddressableInterface[V any](
 	factory func(capacity int) dynamicContainers.Vector[V],

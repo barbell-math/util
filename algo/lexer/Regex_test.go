@@ -97,3 +97,68 @@ func TestSpecialCharEncoding(t *testing.T){
 		t,
 	)
 }
+
+func TestRegexToNFASimple(t *testing.T) {
+	r:=Regex("a")
+	tokens:=r.toTokenStream()
+	nfa,_,err:=r.buildNFA(0,tokens,0)
+	test.Nil(err,t)
+	test.Nil(tokens.Stop(),t)
+	test.Eq("map[0:{2 [{97 1}]} 1:{4 []}]", fmt.Sprint(nfa), t)
+
+	r=Regex("abc")
+	tokens=r.toTokenStream()
+	nfa,_,err=r.buildNFA(0,tokens,0)
+	test.Nil(err,t)
+	test.Nil(tokens.Stop(),t)
+	test.Eq(
+		"map[0:{2 [{97 1}]} 1:{0 [{98 2}]} 2:{0 [{99 3}]} 3:{4 []}]",
+		fmt.Sprint(nfa),
+		t,
+	)
+}
+
+func TestRegexToNFASingleSpecialChar(t *testing.T) {
+	r:=Regex("a*")
+	tokens:=r.toTokenStream()
+	nfa,_,err:=r.buildNFA(0,tokens,0)
+	test.Nil(err,t)
+	test.Nil(tokens.Stop(),t)
+	test.Eq(
+		"map[0:{2 [{128 2}]} 1:{0 [{128 3}]} 2:{0 [{97 1}]} 3:{4 [{128 2}]}]", 
+		fmt.Sprint(nfa), 
+		t,
+	)
+
+	r=Regex("a|b")
+	tokens=r.toTokenStream()
+	nfa,_,err=r.buildNFA(0,tokens,0)
+	test.Nil(err,t)
+	test.Nil(tokens.Stop(),t)
+	test.Eq(
+		"map[0:{2 [{97 1} {98 2}]} 1:{0 [{128 3}]} 2:{0 [{128 3}]} 3:{4 []}]",
+		fmt.Sprint(nfa), 
+		t,
+	)
+
+	r=Regex("(a)")
+	tokens=r.toTokenStream()
+	nfa,_,err=r.buildNFA(0,tokens,0)
+	test.Nil(err,t)
+	test.Nil(tokens.Stop(),t)
+	test.Eq("map[0:{2 [{97 1}]} 1:{4 []}]", fmt.Sprint(nfa), t)
+}
+
+func TestRegexInbalancedParens(t *testing.T) {
+	r:=Regex("(a")
+	dfa,err:=r.Compile()
+	test.ContainsError(RegexSyntaxError,err,t)
+	test.ContainsError(RegexInbalancedParens,err,t)
+	test.Eq("map[]", fmt.Sprint(dfa), t)
+
+	r=Regex("a)")
+	dfa,err=r.Compile()
+	test.ContainsError(RegexSyntaxError,err,t)
+	test.ContainsError(RegexInbalancedParens,err,t)
+	test.Eq("map[]", fmt.Sprint(dfa), t)
+}

@@ -12,16 +12,13 @@ type (
 		transitions []basic.Pair[byte,nfaID]
 	}
 
-	NFA struct {
-		// curId nfaID
-		graph map[nfaID]nfaNode
-	}
+	NFA map[nfaID]nfaNode
 )
 
 const (
-	start nfaID=0
-	source nfaFlag=1<<iota
-	sink
+	nfaStart nfaID=0
+	nfaSource nfaFlag=1<<iota
+	nfaSink
 )
 
 func (n *nfaNode)addTransition(c byte, id nfaID) {
@@ -34,51 +31,51 @@ func NewNFA() NFA {
 	return rv
 }
 
-func (n *NFA)initNFA() {
-	n.graph=map[nfaID]nfaNode{
-		start: {
-			flags: source | sink,
-			transitions: []basic.Pair[byte,nfaID]{},
-		},
+func (n NFA)initNFA() {
+	for k,_:=range(n) {
+		delete(n,k)
 	}
-	// n.curId=0
+	n[nfaStart]=nfaNode{
+		flags: nfaSource | nfaSink,
+		transitions: []basic.Pair[byte,nfaID]{},
+	}
 }
 
-func (n *NFA)AppendTransition(c byte) {
-	if len(n.graph)==0 {
+func (n NFA)AppendTransition(c byte) {
+	if len(n)==0 {
 		n.initNFA()
 	}
-	n.changeAndSave(n.sink(), func(node *nfaNode) error {
-		node.flags&=^sink
-		node.addTransition(c,n.sink()+1)
+	n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
+		node.flags&=^nfaSink
+		node.addTransition(c,n.nfaSink()+1)
 		return nil
 	})
 	n.addNode(nfaNode {
-		flags: sink,
+		flags: nfaSink,
 		transitions: []basic.Pair[byte,nfaID]{},
 	})
 }
 
-func (n *NFA)AppendNFA(other *NFA) {
+func (n NFA)AppendNFA(other NFA) {
 	// Other is nothing more than a just inited NFA, nothing to add
-	if len(other.graph)<=1 || other.sink()<=0 {
+	if len(other)<=1 || other.nfaSink()<=0 {
 		return
 	}
-	if len(n.graph)==0 {
+	if len(n)==0 {
 		n.initNFA()
 	}
-	n.changeAndSave(n.sink(), func(node *nfaNode) error {
-		for _,v:=range(other.graph[start].transitions) {
-			node.addTransition(v.A,v.B+n.sink())
+	n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
+		for _,v:=range(other[nfaStart].transitions) {
+			node.addTransition(v.A,v.B+n.nfaSink())
 		}
-		node.flags&=^sink
+		node.flags&=^nfaSink
 		return nil
 	})
 
-	oldNFASize:=n.sink()
-	for i:=start+1; i<=other.sink(); i++ {
-		iterNode:=other.graph[i]
-		iterNode.flags&=^source
+	oldNFASize:=n.nfaSink()
+	for i:=nfaStart+1; i<=other.nfaSink(); i++ {
+		iterNode:=other[i]
+		iterNode.flags&=^nfaSource
 		for j:=0; j<len(iterNode.transitions); j++ {
 			iterNode.transitions[j].B+=oldNFASize
 		}
@@ -86,101 +83,108 @@ func (n *NFA)AppendNFA(other *NFA) {
 	}
 }
 
-func (n *NFA)ApplyKleene() {
-	if len(n.graph)==0 {
+func (n NFA)ApplyKleene() {
+	if len(n)==0 {
 		n.initNFA()
 	}
 	alreadyKleened:=false
-	for i:=0; i<len(n.graph[n.sink()].transitions) && !alreadyKleened; i++ {
-		v:=n.graph[n.sink()].transitions[i]
-		alreadyKleened=(v.A==lambdaChar && v.B==n.sink()-1)
+	for i:=0; i<len(n[n.nfaSink()].transitions) && !alreadyKleened; i++ {
+		v:=n[n.nfaSink()].transitions[i]
+		alreadyKleened=(v.A==lambdaChar && v.B==n.nfaSink()-1)
 	}
-	alreadyKleened=(alreadyKleened && len(n.graph[start].transitions)==1)
-	alreadyKleened=(alreadyKleened && n.graph[start].transitions[0].A==lambdaChar)
-	alreadyKleened=(alreadyKleened && n.graph[start].transitions[0].B==n.sink()-1)
+	alreadyKleened=(alreadyKleened && len(n[nfaStart].transitions)==1)
+	alreadyKleened=(alreadyKleened && n[nfaStart].transitions[0].A==lambdaChar)
+	alreadyKleened=(alreadyKleened && n[nfaStart].transitions[0].B==n.nfaSink()-1)
 	if !alreadyKleened {
-		n.changeAndSave(n.sink(), func(node *nfaNode) error {
-			node.flags&=^sink
-			node.addTransition(lambdaChar, n.sink()+2)
+		n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
+			node.flags&=^nfaSink
+			node.addTransition(lambdaChar, n.nfaSink()+2)
 			return nil
 		})
 		n.addNode(nfaNode{
 			flags: 0,
-			transitions: n.graph[start].transitions,
+			transitions: n[nfaStart].transitions,
 		})
-		n.changeAndSave(start, func(node *nfaNode) error {
-			node.transitions=[]basic.Pair[byte, nfaID]{{lambdaChar, n.sink()}}
+		n.changeAndSave(nfaStart, func(node *nfaNode) error {
+			node.transitions=[]basic.Pair[byte, nfaID]{{lambdaChar, n.nfaSink()}}
 			return nil
 		})
 		n.addNode(nfaNode{
-			flags: sink,
-			transitions: []basic.Pair[byte, nfaID]{{lambdaChar, n.sink()}},
+			flags: nfaSink,
+			transitions: []basic.Pair[byte, nfaID]{{lambdaChar, n.nfaSink()}},
 		})
 	}
 }
 
-func (n *NFA)AddBranch(other *NFA) {
+func (n NFA)AddBranch(other NFA) {
 	// Other is nothing more than a just inited NFA, nothing to add
-	if len(other.graph)<=1 || other.sink()<=0 {
+	if len(other)<=1 || other.nfaSink()<=0 {
 		return
 	}
 	// This NFA is nothing more than a just inited NFA, simply copy other
-	if len(n.graph)<=1 || n.sink()<=0 {
-		*n=*other
+	if len(n)<=1 || n.nfaSink()<=0 {
+		n.clearAndCopy(other)
 		return
 	}
-	n.changeAndSave(start, func(node *nfaNode) error {
-		for _,v:=range(other.graph[start].transitions) {
-			node.addTransition(v.A,v.B+n.sink())
+	n.changeAndSave(nfaStart, func(node *nfaNode) error {
+		for _,v:=range(other[nfaStart].transitions) {
+			node.addTransition(v.A,v.B+n.nfaSink())
 		}
 		return nil
 	})
-	n.changeAndSave(n.sink(), func(node *nfaNode) error {
-		node.flags&=^sink
-		node.addTransition(lambdaChar, n.sink()+other.sink()+1)
+	n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
+		node.flags&=^nfaSink
+		node.addTransition(lambdaChar, n.nfaSink()+other.nfaSink()+1)
 		return nil
 	})
 
-	oldNFASize:=n.sink()
-	for i:=start+1; i<other.sink(); i++ {
-		iterNode:=other.graph[i]
-		iterNode.flags&=^(source|sink)
+	oldNFASize:=n.nfaSink()
+	for i:=nfaStart+1; i<other.nfaSink(); i++ {
+		iterNode:=other[i]
+		iterNode.flags&=^(nfaSource|nfaSink)
 		for j:=0; j<len(iterNode.transitions); j++ {
 			iterNode.transitions[j].B+=oldNFASize
 		}
 		n.addNode(iterNode)
 	}
 
-	otherEndNode:=other.graph[other.sink()]
+	otherEndNode:=other[other.nfaSink()]
 	for j:=0; j<len(otherEndNode.transitions); j++ {
 		otherEndNode.transitions[j].B+=oldNFASize
 	}
-	otherEndNode.flags&=^(source|sink)
-	otherEndNode.addTransition(lambdaChar, n.sink()+2)
+	otherEndNode.flags&=^(nfaSource|nfaSink)
+	otherEndNode.addTransition(lambdaChar, n.nfaSink()+2)
 	n.addNode(otherEndNode)
 
 	n.addNode(nfaNode{
-		flags: sink,
+		flags: nfaSink,
 		transitions: []basic.Pair[byte,nfaID]{},
 	})
 }
 
-func (n *NFA)addNode(node nfaNode) {
-	// n.curId++
-	// n.graph[n.curId]=node
-	n.graph[n.sink()+1]=node
+func (n NFA)addNode(node nfaNode) {
+	n[n.nfaSink()+1]=node
 }
 
-func (n *NFA)changeAndSave(id nfaID, op func(node *nfaNode) error ) error {
-	node:=n.graph[id]
+func (n NFA)changeAndSave(id nfaID, op func(node *nfaNode) error ) error {
+	node:=n[id]
 	if err:=op(&node); err==nil {
-		n.graph[id]=node
+		n[id]=node
 	} else {
 		return err
 	}
 	return nil
 }
 
-func (n *NFA)sink() nfaID {
-	return nfaID(len(n.graph))-1
+func (n NFA)nfaSink() nfaID {
+	return nfaID(len(n))-1
+}
+
+func (n NFA)clearAndCopy(other NFA) {
+	for k,_:=range(n) {
+		delete(n,k)
+	}
+	for k,v:=range(other) {
+		n[k]=v
+	}
 }

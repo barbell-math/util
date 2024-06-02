@@ -5,6 +5,7 @@ import "github.com/barbell-math/util/container/containerTypes"
 // An interface that only allows read operations on a queue.
 type ReadQueue[V any] interface {
 	containerTypes.RWSyncable
+	containerTypes.Addressable
 	containerTypes.Length
 	containerTypes.Capacity
 	containerTypes.FirstElemRead[V]

@@ -14,6 +14,26 @@ func dynamicSetWriteInterface[U any](c dynamicContainers.WriteSet[U]) {}
 func dynamicSetInterface[U any](c dynamicContainers.Set[U])           {}
 
 // Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynSetInterfaceSyncableInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
+	t *testing.T,
+) {
+	var container containerTypes.RWSyncable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynSetInterfaceAddressableInterface[V any](
+	factory func(capacity int) dynamicContainers.Set[V],
+	t *testing.T,
+) {
+	var container containerTypes.Addressable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
 // [containerTypes.Length] interface.
 func DynSetInterfaceLengthInterface[V any](
 	factory func(capacity int) dynamicContainers.Set[V],

@@ -59,20 +59,16 @@ type (
     }
 
     // The base widget implementation that all the containers in the [containers]
-    // package use as a type restriction. This type must be instantiaed with the
-    // [NewWidget] function; zero valued Widget's are not valid and will result
-    // in nil pointer errors. Internally, this struct will create an interface
-    // value of type [WidgetInterface] that points to nil data. All methods on
-    // widget are then very thin pass through functions that call the needed
-    // methods on the interface value with the supplied values.
+    // package use as a type restriction. Internally, this struct will create an
+    // interface value of type [WidgetInterface] that points to nil data. All 
+    // methods on widget are then very thin pass through functions that call the 
+    // needed methods on the interface value with the supplied values.
     Widget[T any, I WidgetInterface[T]] struct {
         iFace I
     }
 
     // An arithmitic aware version of the base [Widget] type that some of the
-    // containers in the [container] package use as a type restriction. This
-    // type must be instantiated with the [NewArithWidget] function; zero valued
-    // ArithWidget's are not value and will result in nil pointer errors.
+    // containers in the [container] package use as a type restriction.
     // Internally, this struct will create an interface value of type 
     // [ArithWidgetInterface] that points to nil data. All methods on
     // widget are then very thin pass through functions that call the needed
@@ -81,20 +77,6 @@ type (
         iFace I
     }
 )
-
-// Creates a new widget and sets its internal state so that it is valid and can
-// be used without error.
-func NewWidget[T any, I WidgetInterface[T]]() Widget[T,I] {
-    var iFaceImpl I
-    return Widget[T, I]{iFace: iFaceImpl}
-}
-
-// Creates a new arithmitic aware widget and sets its internal state so that it
-// is valid and can be used without error.
-func NewArithWidget[T any, I ArithWidgetInterface[T]]() ArithWidget[T,I] {
-    var iFaceImpl I
-    return ArithWidget[T,I]{iFace: iFaceImpl}
-}
 
 // Zeros the supplied value using the logic defined by the interface that was
 // supplied as a generic type.
@@ -244,3 +226,8 @@ func (w *ArithWidget[T, I])Div(res *T, l *T, r *T) {
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=float64
 
 //go:generate go run widgetInterfaceImpl.go -package=widgets -type=string
+
+// This is a special case that is only allowed because the widget package itself
+// relies on hash.Hash, making it so the hash.Hash package cannot implement the
+// widget interface on itself, would create circular imports.
+//go:generate go run widgetInterfaceImpl.go -package=widgets -type=hash.Hash

@@ -291,7 +291,7 @@ func (c *SyncedCircularBuffer[T, U]) ForcePushBack(v ...T) {
 }
 
 func (c *CircularBuffer[T, U]) forcePushBackImpl(vals []T) {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	maxVals := min(len(c.vals), len(vals))
 	leftoverSpace := len(c.vals) - c.numElems
 	if maxVals > leftoverSpace {
@@ -334,7 +334,7 @@ func (c *SyncedCircularBuffer[T, U]) ForcePushFront(v ...T) {
 }
 
 func (c *CircularBuffer[T, U]) forcePushFrontImpl(vals []T) {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	maxVals := min(len(c.vals), len(vals))
 	leftoverSpace := len(c.vals) - c.numElems
 	if maxVals > leftoverSpace {
@@ -540,7 +540,7 @@ func (c *SyncedCircularBuffer[T, U]) Contains(val T) bool {
 // Time Complexity: O(n) (linear search)
 func (c *CircularBuffer[T, U]) ContainsPntr(val *T) bool {
 	found := false
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < c.numElems && !found; i++ {
 		found = w.Eq(val, &c.vals[c.start.GetProperIndex(i, len(c.vals))])
 	}
@@ -587,7 +587,7 @@ func (c *SyncedCircularBuffer[T, U]) KeyOf(val T) (int, bool) {
 }
 
 func (c *CircularBuffer[T, U]) keyOfImpl(val *T) (int, bool) {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < c.numElems; i++ {
 		if w.Eq(val, &c.vals[c.start.GetProperIndex(i, len(c.vals))]) {
 			return i, true
@@ -899,7 +899,7 @@ func (c *SyncedCircularBuffer[T, U]) PopFront() (T, error) {
 }
 
 func (c *CircularBuffer[T, U]) popFrontImpl(rv *T) error {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	if c.numElems > 0 {
 		*rv = c.vals[c.start]
 		w.Zero(&c.vals[c.start])
@@ -936,7 +936,7 @@ func (c *SyncedCircularBuffer[T, U]) PopBack() (T, error) {
 }
 
 func (c *CircularBuffer[T, U]) popBackImpl(rv *T) error {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	if c.numElems > 0 {
 		*rv = c.vals[c.inclusiveEnd()]
 		w.Zero(&c.vals[c.inclusiveEnd()])
@@ -954,7 +954,7 @@ func (c *CircularBuffer[T, U]) Delete(idx int) error {
 	if idx < 0 || idx >= c.numElems {
 		return getIndexOutOfBoundsError(idx, 0, c.numElems)
 	}
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	w.Zero(&c.vals[c.start.GetProperIndex(idx, len(c.vals))])
 	if c.numElems == 1 && idx == 0 {
 		c.numElems--
@@ -1008,7 +1008,7 @@ func (c *CircularBuffer[T, U]) DeleteSequential(start int, end int) error {
 	if end <= start {
 		return getStartEndIndexError(start, end)
 	}
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := start; i < end; i++ {
 		w.Zero(&c.vals[c.start.GetProperIndex(i, c.numElems)])
 	}
@@ -1109,7 +1109,7 @@ func (c *SyncedCircularBuffer[T, U]) PopSequential(val T, num int) int {
 func (c *CircularBuffer[T, U]) popSequentialImpl(val *T, num int) int {
 	rv := 0
 	curIdx := -1
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < c.numElems; i++ {
 		if w.Eq(&c.vals[c.start.GetProperIndex(i, len(c.vals))], val) && rv < num {
 			if rv == 0 {
@@ -1130,7 +1130,7 @@ func (c *CircularBuffer[T, U]) popSequentialImpl(val *T, num int) int {
 //
 // Time Complexity: O(n) (Because of zeroing)
 func (c *CircularBuffer[T, U]) Clear() {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < c.numElems; i++ {
 		w.Zero(&c.vals[c.start.GetProperIndex(i, len(c.vals))])
 	}
@@ -1250,7 +1250,7 @@ func (c *CircularBuffer[T, U]) distanceFromBack(idx int) int {
 func (c *CircularBuffer[T, U]) KeyedEq(
 	other containerTypes.KeyedComparisonsOtherConstraint[int, T],
 ) bool {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	rv := (c.numElems == other.Length())
 	for i := 0; i < c.numElems && rv; i++ {
 		if otherV, err := addressableSafeGet[int, T](other, i); err == nil {
@@ -1565,7 +1565,7 @@ func (c *SyncedCircularBuffer[T, U]) IsSubset(
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [CircularBuffer.KeyedEq]. Returns
 // true if l==r, false otherwise.
-func (c *CircularBuffer[T, U]) Eq(
+func (_ *CircularBuffer[T, U]) Eq(
 	l *CircularBuffer[T, U],
 	r *CircularBuffer[T, U],
 ) bool {
@@ -1575,7 +1575,7 @@ func (c *CircularBuffer[T, U]) Eq(
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [SyncedCircularBuffer.KeyedEq].
 // Returns true if l==r, false otherwise.
-func (c *SyncedCircularBuffer[T, U]) Eq(
+func (_ *SyncedCircularBuffer[T, U]) Eq(
 	l *SyncedCircularBuffer[T, U],
 	r *SyncedCircularBuffer[T, U],
 ) bool {
@@ -1585,11 +1585,11 @@ func (c *SyncedCircularBuffer[T, U]) Eq(
 // A function that implements the [algo.widget.WidgetInterface] less than
 // operation on circular buffers. The l and r vectors will be compared
 // lexographically.
-func (c *CircularBuffer[T, U]) Lt(
+func (_ *CircularBuffer[T, U]) Lt(
 	l *CircularBuffer[T, U],
 	r *CircularBuffer[T, U],
 ) bool {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := 0; i < min(r.numElems, l.numElems); i++ {
 		if w.Lt(
 			&l.vals[l.start.GetProperIndex(i, len(l.vals))],
@@ -1613,7 +1613,7 @@ func (c *CircularBuffer[T, U]) Lt(
 // operation on circular buffers. The l and r vectors will be compared
 // lexographically. Read locks are placed on l and r before calling the
 // underlying circular buffers [CircularBuffer.Lt] method.
-func (c *SyncedCircularBuffer[T, U]) Lt(
+func (_ *SyncedCircularBuffer[T, U]) Lt(
 	l *SyncedCircularBuffer[T, U],
 	r *SyncedCircularBuffer[T, U],
 ) bool {
@@ -1621,7 +1621,7 @@ func (c *SyncedCircularBuffer[T, U]) Lt(
 	r.RLock()
 	defer l.RUnlock()
 	defer r.RUnlock()
-	return c.CircularBuffer.Lt(&l.CircularBuffer, &r.CircularBuffer)
+	return l.CircularBuffer.Lt(&l.CircularBuffer, &r.CircularBuffer)
 }
 
 // A function that returns a hash of a circular buffer to implement the
@@ -1630,9 +1630,9 @@ func (c *SyncedCircularBuffer[T, U]) Lt(
 // that maintains identity, making it so the hash will represent the same
 // equality operation that [CircularBuffer.KeyedEq] and [CircularBuffer.Eq]
 // provide.
-func (c *CircularBuffer[T, U]) Hash(other *CircularBuffer[T, U]) hash.Hash {
+func (_ *CircularBuffer[T, U]) Hash(other *CircularBuffer[T, U]) hash.Hash {
 	var rv hash.Hash
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	if other.numElems > 0 {
 		rv = w.Hash(&other.vals[other.start])
 		for i := 1; i < other.numElems; i++ {
@@ -1647,22 +1647,22 @@ func (c *CircularBuffer[T, U]) Hash(other *CircularBuffer[T, U]) hash.Hash {
 // Places a read lock on the underlying circular buffer of other and then calls
 // others underlying circular buffer [CircularBuffer.IsSubset] method.
 // Implements the [algo.widget.WidgetInterface].
-func (c *SyncedCircularBuffer[T, U]) Hash(
+func (_ *SyncedCircularBuffer[T, U]) Hash(
 	other *SyncedCircularBuffer[T, U],
 ) hash.Hash {
 	other.RLock()
 	defer other.RUnlock()
-	return c.CircularBuffer.Hash(&other.CircularBuffer)
+	return other.CircularBuffer.Hash(&other.CircularBuffer)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [CircularBuffer.Clear].
-func (c *CircularBuffer[T, U]) Zero(other *CircularBuffer[T, U]) {
+func (_ *CircularBuffer[T, U]) Zero(other *CircularBuffer[T, U]) {
 	other.Clear()
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [SyncedCircularBuffer.Clear].
-func (c *SyncedCircularBuffer[T, U]) Zero(other *SyncedCircularBuffer[T, U]) {
+func (_ *SyncedCircularBuffer[T, U]) Zero(other *SyncedCircularBuffer[T, U]) {
 	other.Clear()
 }

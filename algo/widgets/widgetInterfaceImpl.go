@@ -34,13 +34,23 @@ var VALID_TYPES []string=[]string{
 	"float32",
 	"float64",
 	"string",
+	// This is a special case that is only allowed because the widget package itself
+	// relies on hash.Hash, making it so the hash.Hash package cannot implement the
+	// widget interface on itself, would create circular imports.
+	"hash.Hash",
 }
 
 func main() {
 	setupFlags()
 	parseArgs()
 	checkRequiredArgs()
-	VALS.CapType=fmt.Sprintf("%s%s",strings.ToUpper(VALS.Type)[:1],VALS.Type[1:])
+
+	VALS.CapType=VALS.Type
+	dotSplit:=strings.SplitN(VALS.CapType,".",2)
+	if len(dotSplit)>1 {
+		VALS.CapType=dotSplit[len(dotSplit)-1]
+	}
+	VALS.CapType=fmt.Sprintf("%s%s",strings.ToUpper(VALS.CapType)[:1],VALS.CapType[1:])
 
 	if VALS.ShowInfo {
 		fmt.Println("Making widget for type ",VALS.Type, " using the below options.")
@@ -133,7 +143,7 @@ func checkRequiredArgs() {
 		}
 	}
 	if !foundType {
-		fmt.Println("ERROR | The supplied type was not one of the types recognzed by this tool.")
+		fmt.Println("ERROR | The supplied type was not one of the types recognized by this tool.")
 		fmt.Println("The following types are recognized: ",VALID_TYPES)
 		fmt.Println("The following type was recieved: ",VALS.Type)
 		os.Exit(1)
@@ -150,7 +160,7 @@ func generateImports() string {
 
 func generateGlobals() string {
 	if VALS.Type=="string" {
-		return "// The random seed will be differrent every time the program runs"+
+		return "// The random seed will be different every time the program runs"+
 			"// meaning that between runs the hash values will not be consistent.\n"+
 			"// This was done for security purposes.\n"+
 			"var RANDOM_SEED_{{ .Type }} maphash.Seed=maphash.MakeSeed()\n\n"
@@ -170,7 +180,8 @@ func generateHashFunction() string {
 		case "uint8": fallthrough
 		case "uint16": fallthrough
 		case "uint32": fallthrough
-		case "uint64":
+		case "uint64": fallthrough
+		case "hash.Hash":
 			return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n"+
 				"    return hash.Hash(*v)\n"+
 			    "}\n\n"
@@ -207,7 +218,8 @@ func generateZeroFunction() string {
 		case "uint32": fallthrough
 		case "uint64": fallthrough
 		case "float32": fallthrough
-		case "float64":
+		case "float64": fallthrough
+		case "hash.Hash":
 			return "func (a Builtin{{ .CapType }})Zero(v *{{ .Type }}) {\n"+
 				"    *v={{ .Type }}(0)\n"+
 				"}\n\n"
@@ -239,7 +251,8 @@ func generateArithFuncs() string {
 		case "uint32": fallthrough
 		case "uint64": fallthrough
 		case "float32": fallthrough
-		case "float64":
+		case "float64": fallthrough
+		case "hash.Hash":
 			return "func (a Builtin{{ .CapType }})ZeroVal() {{ .Type }} {\n"+
 				"    return {{ .Type }}(0)\n"+
 				"}\n\n"+

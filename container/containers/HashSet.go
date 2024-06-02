@@ -137,8 +137,8 @@ func (h *HashSet[T, U]) Vals() iter.Iter[T] {
 }
 
 // Description: Modifies the iterator chain returned by the unerlying
-// [hash set.Vals] method such that a read lock will be placed on the underlying
-// hash set when iterator is consumer. The hash set will have a read lock the
+// [HashSet.Vals] method such that a read lock will be placed on the underlying
+// hash set when iterator is consumed. The hash set will have a read lock the
 // entire time the iteration is being performed. The lock will not be applied
 // until the iterator starts to be consumed.
 //
@@ -161,7 +161,7 @@ func (h *HashSet[T, U]) ValPntrs() iter.Iter[*T] {
 // set, false otherwise. All equality comparisons are performed by the generic U
 // widget type that the hash set was initialized with.
 //
-// Time Complexity: The time complexity of Contains on a hash set is O(1).
+// Time Complexity: O(1).
 func (h *HashSet[T, U]) Contains(v T) bool {
 	return h.ContainsPntr(&v)
 }
@@ -171,7 +171,7 @@ func (h *HashSet[T, U]) Contains(v T) bool {
 //
 // Lock Type: Read
 //
-// Time Complexity: O(n) (linear search)
+// Time Complexity: O(1)
 func (h *SyncedHashSet[T, U]) Contains(v T) bool {
 	h.RLock()
 	defer h.RUnlock()
@@ -182,7 +182,7 @@ func (h *SyncedHashSet[T, U]) Contains(v T) bool {
 // hash set, false otherwise. All equality comparisons are performed by the
 // generic U widget type that the hash set was initialized with.
 //
-// Time Complexity: O(n) (linear search)
+// Time Complexity: O(1)
 func (h *HashSet[T, U]) ContainsPntr(v *T) bool {
 	_, rv := h.getHashPosition(v)
 	return rv
@@ -193,7 +193,7 @@ func (h *HashSet[T, U]) ContainsPntr(v *T) bool {
 //
 // Lock Type: Read
 //
-// Time Complexity: O(n) (linear search)
+// Time Complexity: O(1)
 func (h *SyncedHashSet[T, U]) ContainsPntr(v *T) bool {
 	h.RLock()
 	defer h.RUnlock()
@@ -201,7 +201,7 @@ func (h *SyncedHashSet[T, U]) ContainsPntr(v *T) bool {
 }
 
 func (h *HashSet[T, U]) getHashPosition(v *T) (hash.Hash, bool) {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := w.Hash(v); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; found && w.Eq(v, &iterV) {
 			return i, true
@@ -244,7 +244,7 @@ func (h *SyncedHashSet[T, U]) AppendUnique(vals ...T) error {
 }
 
 func (h *HashSet[T, U]) appendOp(v *T) {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for i := w.Hash(v); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; !found {
 			h.internalHashSetImpl[i] = *v
@@ -281,7 +281,7 @@ func (h *SyncedHashSet[T, U]) Pop(v T) int {
 }
 
 func (h *HashSet[T, U]) popImpl(v *T) int {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	if i, cont := h.getHashPosition(v); cont {
 		delete(h.internalHashSetImpl, i)
 		curPos := i
@@ -310,7 +310,7 @@ func (h *HashSet[T, U]) popImpl(v *T) int {
 //
 // Time Complexity: O(1)
 func (h *HashSet[T, U]) Clear() {
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for _, v := range h.internalHashSetImpl {
 		w.Zero(&v)
 	}
@@ -633,29 +633,31 @@ func (h *SyncedHashSet[T, U]) IsSubset(
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [HashSet.UnorderedEq]. Returns
 // true if l==r, false otherwise.
-func (h *HashSet[T, U]) Eq(l *HashSet[T, U], r *HashSet[T, U]) bool {
+func (_ *HashSet[T, U]) Eq(l *HashSet[T, U], r *HashSet[T, U]) bool {
 	return l.UnorderedEq(r)
 }
 
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [SyncedHashSet.UnorderedEq].
 // Returns true if l==r, false otherwise.
-func (h *SyncedHashSet[T, U]) Eq(
+func (_ *SyncedHashSet[T, U]) Eq(
 	l *SyncedHashSet[T, U],
 	r *SyncedHashSet[T, U],
 ) bool {
-	h.RLock()
-	defer h.RUnlock()
+	l.RLock()
+	r.RLock()
+	defer l.RUnlock()
+	defer r.RUnlock()
 	return l.UnorderedEq(r)
 }
 
 // Panics, sets cannot be compared for order.
-func (h *HashSet[T, U]) Lt(l *HashSet[T, U], r *HashSet[T, U]) bool {
+func (_ *HashSet[T, U]) Lt(l *HashSet[T, U], r *HashSet[T, U]) bool {
 	panic("Sets cannot be compared relative to each other.")
 }
 
 // Panics, sets cannot be compared for order.
-func (h *SyncedHashSet[T, U]) Lt(
+func (_ *SyncedHashSet[T, U]) Lt(
 	l *SyncedHashSet[T, U],
 	r *SyncedHashSet[T, U],
 ) bool {
@@ -666,10 +668,10 @@ func (h *SyncedHashSet[T, U]) Lt(
 // hashes that are produced from the elements of the hash set are combined in a
 // way that maintains identity, making it so the hash will represent the same
 // equality operation that [HashSet.KeyedEq] and [HashSet.Eq] provide.
-func (h *HashSet[T, U]) Hash(other *HashSet[T, U]) hash.Hash {
+func (_ *HashSet[T, U]) Hash(other *HashSet[T, U]) hash.Hash {
 	cntr := 0
 	var rv hash.Hash
-	w := widgets.NewWidget[T, U]()
+	w := widgets.Widget[T, U]{}
 	for _, v := range other.internalHashSetImpl {
 		if cntr == 0 {
 			rv = w.Hash(&v)
@@ -683,20 +685,20 @@ func (h *HashSet[T, U]) Hash(other *HashSet[T, U]) hash.Hash {
 
 // Places a read lock on the underlying hash set of other and then calls others
 // underlying hash set [hash set.IsSubset] method.
-func (h *SyncedHashSet[T, U]) Hash(other *SyncedHashSet[T, U]) hash.Hash {
+func (_ *SyncedHashSet[T, U]) Hash(other *SyncedHashSet[T, U]) hash.Hash {
 	other.RLock()
 	defer other.RUnlock()
-	return h.HashSet.Hash(&other.HashSet)
+	return other.HashSet.Hash(&other.HashSet)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [HashSet.Clear].
-func (h *HashSet[T, U]) Zero(other *HashSet[T, U]) {
+func (_ *HashSet[T, U]) Zero(other *HashSet[T, U]) {
 	other.Clear()
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [SyncedHashSet.Clear].
-func (v *SyncedHashSet[T, U]) Zero(other *SyncedHashSet[T, U]) {
+func (_ *SyncedHashSet[T, U]) Zero(other *SyncedHashSet[T, U]) {
 	other.Clear()
 }

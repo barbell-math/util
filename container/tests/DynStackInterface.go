@@ -14,6 +14,26 @@ func dynStackWriteInterface[U any](c dynamicContainers.WriteStack[U]) {}
 func dynStackInterface[U any](c dynamicContainers.Stack[U])           {}
 
 // Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynStackInterfaceSyncableInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
+	t *testing.T,
+) {
+	var container containerTypes.RWSyncable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynStackInterfaceAddressableInterface[V any](
+	factory func(capacity int) dynamicContainers.Stack[V],
+	t *testing.T,
+) {
+	var container containerTypes.Addressable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
 // [containerTypes.Length] interface.
 func DynStackInterfaceLengthInterface[V any](
 	factory func(capacity int) dynamicContainers.Stack[V],

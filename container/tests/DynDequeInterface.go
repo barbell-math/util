@@ -14,6 +14,26 @@ func dynDequeWriteInterface[U any](c dynamicContainers.WriteDeque[U]) {}
 func dynDequeInterface[U any](c dynamicContainers.Deque[U])           {}
 
 // Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynDequeInterfaceSyncableInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
+	t *testing.T,
+) {
+	var container containerTypes.RWSyncable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
+// [containerTypes.RWSyncable] interface.
+func DynDequeInterfaceAddressableInterface[V any](
+	factory func(capacity int) dynamicContainers.Deque[V],
+	t *testing.T,
+) {
+	var container containerTypes.Addressable = factory(0)
+	_ = container
+}
+
+// Tests that the value supplied by the factory implements the
 // [containerTypes.Length] interface.
 func DynDequeInterfaceLengthInterface[V any](
 	factory func(capacity int) dynamicContainers.Deque[V],

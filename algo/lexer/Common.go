@@ -1,23 +1,41 @@
 package lexer
 
-import "github.com/barbell-math/util/container/basic"
+type MatchStatus byte
 
 const (
-	LambdaChar byte=0
+    NoMatch MatchStatus=0
+    Match MatchStatus=1<<iota
+    PossibleMatch
 )
 
-type dfaNode struct {
-	flags int
-	transitions []basic.Pair[byte,int]
-}
+const (
+	validCharLowerBound byte=0
+	validCharUpperBound byte=127
+	invalid byte=iota+127
+    lambdaChar
+	lParenChar
+	rParenChar
+	backSlashChar
+	starChar
+	barChar
+)
 
-type DFA map[int]dfaNode
+var (
+	escapeChars map[byte]struct{}=map[byte]struct{}{
+		'\\': {},
+		'(': {},
+		')': {},
+		'*': {},
+		'|': {},
+		'_': {},
+	}
 
-type Token struct {
-	Line int
-	Char int
-	Id int
-}
-
-type Lexer map[Regex]Token
+	specialCharEncoding map[byte]byte=map[byte]byte{
+		'(': lParenChar,
+		')': rParenChar,
+		'*': starChar,
+		'|': barChar,
+		'_': lambdaChar,
+	}
+)
 

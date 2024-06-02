@@ -28,7 +28,7 @@ type (
 	}
 
 	// A synchronized version of HashMap. All operations will be wrapped in the
-	// appropriate calls the embedded RWMutex. A pointer to a RWMutex is
+	// appropriate calls to the embedded RWMutex. A pointer to a RWMutex is
 	// embedded rather than a value to avoid copying the lock value.
 	SyncedHashMap[
 		K any,
@@ -116,7 +116,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) RLock() { m.RWMutex.RLock() }
 // actually apply the mutex operation.
 func (m *SyncedHashMap[K, V, KI, VI]) RUnlock() { m.RWMutex.RUnlock() }
 
-// Returns false, maps are addressable.
+// Returns false, maps are not addressable.
 func (m *HashMap[K, V, KI, VI]) IsAddressable() bool { return false }
 
 // Returns false, a map is not synced.
@@ -171,7 +171,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) Contains(v V) bool {
 //
 // Time Complexity: O(n) (linear search)
 func (m *HashMap[K, V, KI, VI]) ContainsPntr(v *V) bool {
-	w := widgets.NewWidget[V, VI]()
+	w := widgets.Widget[V, VI]{}
 	for _, iterV := range m.internalHashMapImpl {
 		if w.Eq(v, &iterV.B) {
 			return true
@@ -224,7 +224,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) Get(k K) (V, error) {
 }
 
 func (h *HashMap[K, V, KI, VI]) getHashPosition(k *K) (hash.Hash, bool) {
-	w := widgets.NewWidget[K, KI]()
+	w := widgets.Widget[K, KI]{}
 	for i := w.Hash(k); ; i++ {
 		if iterV, found := h.internalHashMapImpl[i]; found && w.Eq(k, &iterV.A) {
 			return i, true
@@ -268,7 +268,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) KeyOf(v V) (K, bool) {
 }
 
 func (m *HashMap[K, V, KI, VI]) keyOfImpl(k *K, v *V) bool {
-	w := widgets.NewWidget[V, VI]()
+	w := widgets.Widget[V, VI]{}
 	for _, iterV := range m.internalHashMapImpl {
 		if w.Eq(v, &iterV.B) {
 			*k = iterV.A
@@ -320,17 +320,26 @@ func (m *HashMap[K, V, KI, VI]) setImpl(kvPairs []basic.Pair[K, V]) error {
 //
 // Time Complexity: O(m), where m=len(vals)
 func (m *HashMap[K, V, KI, VI]) Emplace(vals ...basic.Pair[K, V]) error {
+	kw := widgets.Widget[K, KI]{}
 	for i := 0; i < len(vals); i++ {
-		m.emplaceImpl(&vals[i])
+		for j := kw.Hash(&vals[i].A); ; j++ {
+			if iterV, found := m.internalHashMapImpl[j]; !found {
+				// Reached end of collision chain, insert
+				m.internalHashMapImpl[j] = vals[i]
+				break
+			} else if kw.Eq(&vals[i].A, &iterV.A) {
+				// Found value in collision chain, set value
+				m.zeroKVPair(j)
+				m.internalHashMapImpl[j] = vals[i]
+				break
+			}
+		}
 	}
 	return nil
 }
 
 // Description: Places a write lock on the underlying hash map and then calls
-// the underlying hash maps [HashMap.Insert] implementation method. The
-// [HashMap.Insert] method is not called directly to avoid copying the vals
-// varargs twice, which could be expensive with a large types for the K or V
-// generics or a large number of values.
+// the underlying hash maps [HashMap.Insert] method.
 //
 // Lock Type: Write
 //
@@ -338,26 +347,7 @@ func (m *HashMap[K, V, KI, VI]) Emplace(vals ...basic.Pair[K, V]) error {
 func (m *SyncedHashMap[K, V, KI, VI]) Emplace(vals ...basic.Pair[K, V]) error {
 	m.Lock()
 	defer m.Unlock()
-	for i := 0; i < len(vals); i++ {
-		m.emplaceImpl(&vals[i])
-	}
-	return nil
-}
-
-func (m *HashMap[K, V, KI, VI]) emplaceImpl(v *basic.Pair[K, V]) {
-	kw := widgets.NewWidget[K, KI]()
-	for i := kw.Hash(&v.A); ; i++ {
-		if iterV, found := m.internalHashMapImpl[i]; !found {
-			// Reached end of collision chain, insert
-			m.internalHashMapImpl[i] = *v
-			break
-		} else if kw.Eq(&v.A, &iterV.A) {
-			// Found value in collision chain, set value
-			m.zeroKVPair(i)
-			m.internalHashMapImpl[i] = *v
-			break
-		}
-	}
+	return m.HashMap.Emplace(vals...)
 }
 
 // Description: Pop will remove the first num occurrences of val in the map.
@@ -365,28 +355,28 @@ func (m *HashMap[K, V, KI, VI]) emplaceImpl(v *basic.Pair[K, V]) {
 // map was initialized with. If num is <=0 then no values will be poped and
 // the map will not change.
 //
-// Time Complexity: O(n)
+// Time Complexity: O(1)
 func (m *HashMap[K, V, KI, VI]) Pop(v V) int {
 	return m.popImpl(&v)
 }
 
 // Description: Places a write lock on the underlying map and then calls the
-// underlying map [Map.Pop] implementation method. The [Map.Pop] method is not
-// called directly to avoid copying the value twice, which could be expensive
-// with a large type for the V generic or a large number of values.
+// underlying map [Map.Pop] implementation method. The [HashMap.Pop] method is
+// not called directly to avoid copying the v argument twice, which could be 
+// expensive with a large type for the T generic.
 //
 // Lock Type: Write
 //
-// Time Complexity: O(n)
+// Time Complexity: O(1)
 func (m *SyncedHashMap[K, V, KI, VI]) Pop(v V) int {
 	m.Lock()
 	defer m.Unlock()
-	return m.popImpl(&v)
+	return m.HashMap.popImpl(&v)
 }
 
-func (m *HashMap[K, V, KI, VI]) popImpl(v *V) int {
+func (m *HashMap[K,V,KI,VI])popImpl(v *V) int {
 	rv := 0
-	vw := widgets.NewWidget[V, VI]()
+	vw := widgets.Widget[V, VI]{}
 	for iterH, iterV := range m.internalHashMapImpl {
 		if vw.Eq(&iterV.B, v) {
 			m.removeMultipleValues(iterH, v)
@@ -397,8 +387,8 @@ func (m *HashMap[K, V, KI, VI]) popImpl(v *V) int {
 }
 
 func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
-	kw := widgets.NewWidget[K, KI]()
-	vw := widgets.NewWidget[V, VI]()
+	kw := widgets.Widget[K, KI]{}
+	vw := widgets.Widget[V, VI]{}
 	m.zeroKVPair(h)
 	delete(m.internalHashMapImpl, h)
 	curPos := h
@@ -416,8 +406,8 @@ func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
 			// Scenario 1: The value is the last value of the collision chain
 			//   The value will be orphaned an unaccessable using the standard
 			//   Get method but will be deleted by a future iteration of the
-			//   popImpl function. If it were moved this 're-teration' would not
-			//   be guarinteed.
+			//   popImpl function. If it were moved this 're-iteration' would 
+			//	 not be guarinteed.
 			// Scenario 2: The value is in the middle of a collision chain. in
 			//   this case the hole that is created will be filled by an
 			//   appripriate value later in the collision chain.
@@ -425,7 +415,7 @@ func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
 				continue
 			}
 			m.internalHashMapImpl[curPos] = m.internalHashMapImpl[j]
-			m.zeroKVPair(h)
+			m.zeroKVPair(j)
 			delete(m.internalHashMapImpl, j)
 			curPos = j
 		} else {
@@ -435,8 +425,8 @@ func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
 }
 
 func (m *HashMap[K, V, KI, VI]) zeroKVPair(h hash.Hash) {
-	kw := widgets.NewWidget[K, KI]()
-	vw := widgets.NewWidget[V, VI]()
+	kw := widgets.Widget[K, KI]{}
+	vw := widgets.Widget[V, VI]{}
 	if v, ok := m.internalHashMapImpl[h]; ok {
 		kw.Zero(&v.A)
 		vw.Zero(&v.B)
@@ -472,7 +462,7 @@ func (m *HashMap[K, V, KI, VI]) deleteImpl(k *K) error {
 }
 
 func (m *HashMap[K, V, KI, VI]) removeSingleValue(h hash.Hash) {
-	kw := widgets.NewWidget[K, KI]()
+	kw := widgets.Widget[K, KI]{}
 	m.zeroKVPair(h)
 	delete(m.internalHashMapImpl, h)
 	curPos := h
@@ -499,8 +489,8 @@ func (m *HashMap[K, V, KI, VI]) removeSingleValue(h hash.Hash) {
 //
 // Time Complexity: O(1)
 func (m *HashMap[K, V, KI, VI]) Clear() {
-	kw := widgets.NewWidget[K, KI]()
-	vw := widgets.NewWidget[V, VI]()
+	kw := widgets.Widget[K, KI]{}
+	vw := widgets.Widget[V, VI]{}
 	for _, v := range m.internalHashMapImpl {
 		kw.Zero(&v.A)
 		vw.Zero(&v.B)
@@ -593,7 +583,7 @@ func (m *HashMap[K, V, KI, VI]) ValPntrs() iter.Iter[*V] {
 func (m *HashMap[K, V, KI, VI]) KeyedEq(
 	other containerTypes.KeyedComparisonsOtherConstraint[K, V],
 ) bool {
-	vw := widgets.NewWidget[V, VI]()
+	vw := widgets.Widget[V, VI]{}
 	if len(m.internalHashMapImpl) != other.Length() {
 		return false
 	}
@@ -633,7 +623,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) KeyedEq(
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [HashMap.KeyedEq]. Returns true
 // if l==r, false otherwise.
-func (m *HashMap[K, V, KI, VI]) Eq(
+func (_ *HashMap[K, V, KI, VI]) Eq(
 	l *HashMap[K, V, KI, VI],
 	r *HashMap[K, V, KI, VI],
 ) bool {
@@ -643,7 +633,7 @@ func (m *HashMap[K, V, KI, VI]) Eq(
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [SyncedHashMap.KeyedEq]. Returns
 // true if l==r, false otherwise.
-func (m *SyncedHashMap[K, V, KI, VI]) Eq(
+func (_ *SyncedHashMap[K, V, KI, VI]) Eq(
 	l *SyncedHashMap[K, V, KI, VI],
 	r *SyncedHashMap[K, V, KI, VI],
 ) bool {
@@ -651,7 +641,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) Eq(
 }
 
 // Panics, hash maps cannot be compared for order.
-func (m *HashMap[K, V, KI, VI]) Lt(
+func (_ *HashMap[K, V, KI, VI]) Lt(
 	l *HashMap[K, V, KI, VI],
 	r *HashMap[K, V, KI, VI],
 ) bool {
@@ -659,7 +649,7 @@ func (m *HashMap[K, V, KI, VI]) Lt(
 }
 
 // Panics, hash maps cannot be compared for order.
-func (m *SyncedHashMap[K, V, KI, VI]) Lt(
+func (_ *SyncedHashMap[K, V, KI, VI]) Lt(
 	l *SyncedHashMap[K, V, KI, VI],
 	r *SyncedHashMap[K, V, KI, VI],
 ) bool {
@@ -671,12 +661,12 @@ func (m *SyncedHashMap[K, V, KI, VI]) Lt(
 // combined in a way that maintains identity, making it so the hash will
 // represent the same equality operation that [HashMap.KeyedEq] and
 // [HashMap.Eq] provide.
-func (m *HashMap[K, V, KI, VI]) Hash(other *HashMap[K, V, KI, VI]) hash.Hash {
+func (_ *HashMap[K, V, KI, VI]) Hash(other *HashMap[K, V, KI, VI]) hash.Hash {
 	cntr := 0
 	var rv hash.Hash
-	kw := widgets.NewWidget[K, KI]()
-	vw := widgets.NewWidget[V, VI]()
-	for _, iterV := range m.internalHashMapImpl {
+	kw := widgets.Widget[K, KI]{}
+	vw := widgets.Widget[V, VI]{}
+	for _, iterV := range other.internalHashMapImpl {
 		iterH := kw.Hash(&iterV.A).Combine(vw.Hash(&iterV.B))
 		if cntr == 0 {
 			rv = iterH
@@ -690,22 +680,22 @@ func (m *HashMap[K, V, KI, VI]) Hash(other *HashMap[K, V, KI, VI]) hash.Hash {
 
 // Places a read lock on the underlying hash map of other and then calls others
 // underlying hash maps [HashMap.IsSubset] method.
-func (m *SyncedHashMap[K, V, KI, VI]) Hash(
+func (_ *SyncedHashMap[K, V, KI, VI]) Hash(
 	other *SyncedHashMap[K, V, KI, VI],
 ) hash.Hash {
 	other.RLock()
 	defer other.RUnlock()
-	return m.HashMap.Hash(&other.HashMap)
+	return other.HashMap.Hash(&other.HashMap)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [HashMap.Clear].
-func (m *HashMap[K, V, KI, VI]) Zero(other *HashMap[K, V, KI, VI]) {
+func (_ *HashMap[K, V, KI, VI]) Zero(other *HashMap[K, V, KI, VI]) {
 	other.Clear()
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [SyncedHashMap.Clear].
-func (m *SyncedHashMap[K, V, KI, VI]) Zero(other *SyncedHashMap[K, V, KI, VI]) {
+func (_ *SyncedHashMap[K, V, KI, VI]) Zero(other *SyncedHashMap[K, V, KI, VI]) {
 	other.Clear()
 }

@@ -1,4 +1,4 @@
-// This package hold the concrete implementations of the containers.
+// This package holds the concrete implementations of the containers.
 package containers
 
 import (
@@ -90,5 +90,25 @@ func getStartEndIndexError(start int, end int) error {
 		customerr.InvalidValue,
 		"The end index (%d) must be > the start index (%d).",
 		end, start,
+	)
+}
+
+func getVertexError[V any](v *V) error {
+	return customerr.AppendError(
+		customerr.Wrap(
+			customerr.InvalidValue,
+			"The supplied vertex was not found.",
+		),
+		getKeyError[V](v),
+	)
+}
+
+func getEdgeError[E any](e *E) error {
+	return customerr.AppendError(
+		customerr.Wrap(
+			customerr.InvalidValue,
+			"The supplied edge was not found.",
+		),
+		getKeyError[E](e),
 	)
 }
