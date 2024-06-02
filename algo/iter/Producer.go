@@ -3,7 +3,6 @@ package iter
 import (
 	"bufio"
 	"os"
-	// "time"
 
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/customerr"
@@ -226,7 +225,6 @@ func MapVals[K comparable, V any](m map[K]V) Iter[V] {
 		if f == Break {
 			close(cont)
 			_ = <-c
-			// time.Sleep(1*time.Second)
 		}
 		var tmp V
 		return tmp, nil, false

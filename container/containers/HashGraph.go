@@ -622,7 +622,7 @@ func (g *SyncedHashGraph[V,E,VI,EI])AddEdges(e ...E) error {
 // according to the hash and equals method on the vertex widget interface. Non-
 // unique vertices will not be added. This function will never return an error.
 //
-// Time Complexity: O(n), where n=len(vals)
+// Time Complexity: O(n), where n=len(v)
 func (g *HashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 	ew:=widgets.Widget[V,VI]{}
 	for _,iterV:=range(v) {
@@ -640,8 +640,8 @@ func (g *HashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 //
 // Lock Type: Write
 //
-// Time Complexity: O(n), where n=len(vals)
-func (g *SyncedHashGraph[V,E,VI,EI])AddVertices(vals ...V) error {
+// Time Complexity: O(n), where n=len(v)
+func (g *SyncedHashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.AddVertices(vals...)
