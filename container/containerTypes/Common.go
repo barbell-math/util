@@ -3,12 +3,7 @@
 // to allow for very specific sub-types of containers to be specified.
 package containerTypes
 
-import (
-	"math"
-
-	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/container/basic"
-)
+import "math"
 
 
 const (
@@ -49,31 +44,21 @@ type StaticCapacity interface {
     Full() bool
 }
 
-// This is what the comparison functions SHOULD be.
-// Waiting on: https://go-review.googlesource.com/c/go/+/559656/1..5?tab=comments
-// type Comparisons[RI any, K any, V any] interface {
-//  UnorderedEq(other RI) bool
-//  Intersection(l RI, r RI)
-//  Union(l RI, r RI)
-//  Difference(l RI, r RI)
-//  IsSuperset(other RI) bool
-//  IsSubset(other RI) bool
-// }
 // An interface that defines what value-only comparisons can be performed on a
 // container.
-type Comparisons[K any, V any] interface {
-    UnorderedEq(other ComparisonsOtherConstraint[V]) bool
-    Intersection(l ComparisonsOtherConstraint[V], r ComparisonsOtherConstraint[V])
-    Union(l ComparisonsOtherConstraint[V], r ComparisonsOtherConstraint[V])
-    Difference(l ComparisonsOtherConstraint[V], r ComparisonsOtherConstraint[V])
-    IsSuperset(other ComparisonsOtherConstraint[V]) bool
-    IsSubset(other ComparisonsOtherConstraint[V]) bool
+type Comparisons[RI any, K any, V any] interface {
+    UnorderedEq(other RI) bool
+    Intersection(l RI, r RI)
+    Union(l RI, r RI)
+    Difference(l RI, r RI)
+    IsSuperset(other RI) bool
+    IsSubset(other RI) bool
 }
 
 // An interface that defines what key/value comparisons can be performed on a
 // container that has keyed values.
-type KeyedComparisons[K any, V any] interface {
-    KeyedEq(other KeyedComparisonsOtherConstraint[K,V]) bool
+type KeyedComparisons[RI any, K any, V any] interface {
+    KeyedEq(other RI) bool
 }
 
 // An interface that defines what kinds values can be passed to the methods in
@@ -92,164 +77,4 @@ type KeyedComparisonsOtherConstraint[K any, V any] interface {
     Addressable
     Length
     ReadKeyedOps[K,V]
-}
-
-// An interface that enforces implementation of read-only, value-only, operations.
-type ReadOps[V any] interface {
-    Vals() iter.Iter[V]
-    ValPntrs() iter.Iter[*V]
-    Contains(v V) bool
-    ContainsPntr(v *V) bool
-}
-
-// An interface that enforces implementation of read-only, key/value, operations.
-type ReadKeyedOps[K any, V any] interface {
-    Get(k K) (V,error)
-    GetPntr(k K) (*V,error)
-    KeyOf(v V) (K,bool)
-    Keys() iter.Iter[K]
-}
-
-// An interface that enforces implementation of read-only, graph structure,
-// opertions.
-type ReadGraphOps[V any, E any] interface {
-    NumLinks() int
-    NumEdges() int
-    NumVertices() int
-    Edges() iter.Iter[E]
-    EdgePntrs() iter.Iter[*E]
-    Vertices() iter.Iter[V]
-    VerticePntrs() iter.Iter[*V]
-    ContainsEdge(e E) bool
-    ContainsEdgePntr(e *E) bool
-    ContainsVertex(v V) bool
-    ContainsVertexPntr(v *V) bool
-    OutEdges(v V) iter.Iter[E]
-    OutEdgePntrs(v *V) iter.Iter[*E]
-    OutVertices(v V) iter.Iter[V]
-    OutVerticePntrs(v *V) iter.Iter[*V]
-    OutEdgesAndVertices(v V) iter.Iter[basic.Pair[E,V]]
-    OutEdgesAndVerticePntrs(v *V) iter.Iter[basic.Pair[*E,*V]]
-    EdgesBetween(from V, to V) iter.Iter[E]
-    EdgesBetweenPntr(from *V, to *V) iter.Iter[*E]
-    ContainsLink(from V, to V, e E) bool
-    ContainsLinkPntr(from *V, to *V, e *E) bool
-}
-
-// An interface that enforces implementation of write-only, value-only, unique 
-// valued, operations.
-type WriteUniqueOps[K any, V any] interface {
-    AppendUnique(vals ...V) error
-}
-
-// An interface that enforces implementation of write-only, key/value, unique 
-// valued, operations.
-type WriteUniqueKeyedOps[K any, V any] interface {
-    EmplaceUnique(idx K, v V) error
-}
-
-// An interface that enforces implementation of write-only, value-only, operations.
-type WriteOps[V any] interface {
-    Append(vals ...V) error
-}
-// An interface that enforces implementation of write-only, key/value, operations.
-type WriteKeyedOps[K any, V any] interface {
-    Set(kvPairs ...basic.Pair[K,V]) error;
-}
-// An interface that enforces implementation of write-only, key/value, 
-// sequential operations.
-type WriteKeyedSequentialOps[K any, V any] interface {
-    SetSequential(k K, v ...V) error;
-}
-
-// An interface that enforces implementation of write-only, key/value, 
-// dynamic key, operations. A dynamic key operation is an operation that allows
-// changing the value of a key but also allows changing of multiple keys as a
-// result of that operation.
-type WriteDynKeyedOps[K any, V any] interface {
-    Insert(kvPairs ...basic.Pair[K,V]) error
-    InsertSequential(idx K, v ...V) error
-}
-// An interface that enforces implementation of write-only, key/value, 
-// static key, sequential, operations. A static key operation is an operation 
-// that allows changing the value of a key but does not allow changing of
-// multiple keys as a result of that operation.
-type WriteStaticKeyedOps[K any, V any] interface {
-    Emplace(kvPairs ...basic.Pair[K,V]) error;
-}
-// An interface that enforces implementation of write-only, key/value, 
-// static key, operations. A static key operation is an operation that allows
-// changing the value of a key but does not allow changing of multiple keys as a
-// result of that operation.
-type WriteStaticKeyedSequentialOps[K any, V any] interface {
-    EmplaceSequential(idk K, v ...V) error;
-}
-
-// An interface that enforces implementation of write-only, graph structure,
-// operations.
-type WriteGraphOps[V any, E any] interface {
-    AddEdges(e ...E) error
-    AddVertices(v ...V) error
-    Link(from V, to V, e E) error
-    LinkPntr(from *V, to *V, e *E) error
-}
-
-// An interface that enforces implementation of delete-only, value-only, operations.
-type DeleteOps[K any, V any] interface {
-    Pop(v V) int
-}
-// An interface that enforces implementation of delete-only, value-only, 
-// sequential operations.
-type DeleteSequentialOps[K any, V any] interface {
-    PopSequential(v V, num int) int
-}
-// An interface that enforces implementation of delete-only, key/value, operations.
-type DeleteKeyedOps[K any, V any] interface {
-    Delete(idx K) error
-}
-// An interface that enforces implementation of delete-only, key/value, operations.
-type DeleteKeyedSequentialOps[K any, V any] interface {
-    DeleteSequential(start int, end int) error
-}
-
-// An interface that enforces implementaiton of delete-only, graph structure,
-// operations.
-type DeleteGraphOps[V any, E any] interface {
-    DeleteVertex(v V) error
-    DeleteVertexPntr(v *V) error
-    DeleteEdge(e E) error
-    DeleteEdgePntr(e *E) error
-    DeleteLink(from V, to V, e E) error
-    DeleteLinkPntr(from *V, to *V, e *E) error
-    DeleteLinks(from V, to V) error
-    DeleteLinksPntr(from *V, to *V) error
-}
-
-// An interface that enforces the implementation of read-only first element access.
-type FirstElemRead[V any] interface {
-    PeekFront() (V,error);
-    PeekPntrFront() (*V,error);
-}
-// An interface that enforces the implementation of write-only first element access.
-type FirstElemWrite[V any] interface {
-    PushFront(v ...V) error;
-    ForcePushFront(v ...V)
-}
-// An interface that enforces the implementation of delete-only first element access.
-type FirstElemDelete[V any] interface {
-    PopFront() (V,error);
-}
-
-// An interface that enforces the implementation of read-only last element access.
-type LastElemRead[V any] interface {
-    PeekBack() (V,error);
-    PeekPntrBack() (*V,error)
-}
-type LastElemWrite[V any] interface {
-    PushBack(v ...V) (error);
-    ForcePushBack(v ...V)
-}
-// An interface that enforces the implementation of delete-only last element access.
-type LastElemDelete[V any] interface {
-    PopBack() (V,error);
 }

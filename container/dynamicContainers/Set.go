@@ -8,7 +8,11 @@ type ReadSet[V any] interface {
 	containerTypes.Addressable
 	containerTypes.Length
 	containerTypes.ReadOps[V]
-	containerTypes.Comparisons[uint64, V]
+	containerTypes.Comparisons[
+		containerTypes.ComparisonsOtherConstraint[V],
+		uint64,
+		V,
+	]
 }
 
 // An interface that only allows write operations on a set.

@@ -9,7 +9,11 @@ type ReadMap[K any, V any] interface {
 	containerTypes.Length
 	containerTypes.ReadOps[V]
 	containerTypes.ReadKeyedOps[K, V]
-	containerTypes.KeyedComparisons[K, V]
+	containerTypes.KeyedComparisons[
+		containerTypes.KeyedComparisonsOtherConstraint[K,V],
+		K,
+		V,
+	]
 }
 
 // An interface that only allows write operations on a map.

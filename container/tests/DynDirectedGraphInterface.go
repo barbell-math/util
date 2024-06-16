@@ -12,13 +12,13 @@ import (
 
 
 func graphReadInterface[T any, U any](c dynamicContainers.ReadGraph[T, U])   {}
-func graphWriteInterface[T any, U any](c dynamicContainers.WriteGraph[T, U]) {}
-func graphInterface[T any, U any](c dynamicContainers.Graph[T, U])           {}
+func graphWriteInterface[T any, U any](c dynamicContainers.WriteDirectedGraph[T, U]) {}
+func graphInterface[T any, U any](c dynamicContainers.DirectedGraph[T, U])           {}
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.RWSyncable] interface.
-func DynGraphInterfaceSyncableInterface[V any, E any](
-	factory func(capacity int) dynamicContainers.Graph[V, E],
+func DynDirectedGraphInterfaceSyncableInterface[V any, E any](
+	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
 	var container containerTypes.RWSyncable = factory(0)
@@ -27,8 +27,8 @@ func DynGraphInterfaceSyncableInterface[V any, E any](
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.RWSyncable] interface.
-func DynGraphInterfaceAddressableInterface[V any, E any](
-	factory func(capacity int) dynamicContainers.Graph[V, E],
+func DynDirectedGraphInterfaceAddressableInterface[V any, E any](
+	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
 	var container containerTypes.Addressable = factory(0)
@@ -37,8 +37,8 @@ func DynGraphInterfaceAddressableInterface[V any, E any](
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.Clear] interface.
-func DynGraphInterfaceClearInterface[V any, E any](
-	factory func(capacity int) dynamicContainers.Graph[V, E],
+func DynDirectedGraphInterfaceClearInterface[V any, E any](
+	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
 	var container containerTypes.Clear = factory(0)
@@ -46,27 +46,27 @@ func DynGraphInterfaceClearInterface[V any, E any](
 }
 
 // Tests that the value supplied by the factory implements the
-// [dynamicContainers.GraphRead] interface.
-func ReadDynGraphInterface[V any, E any](
-	factory func(capacity int) dynamicContainers.Graph[V, E],
+// [dynamicContainers.DirectedGraphRead] interface.
+func ReadDynDirectedGraphInterface[V any, E any](
+	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
 	graphReadInterface[V, E](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
-// [dynamicContainers.WriteGraph] interface.
-func WriteDynGraphInterface[V any, E any](
-	factory func(capacity int) dynamicContainers.Graph[V, E],
+// [dynamicContainers.WriteDirectedGraph] interface.
+func WriteDynDirectedGraphInterface[V any, E any](
+	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
 	graphWriteInterface[V, E](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
-// [dynamicContainers.Graph] interface.
-func DynGraphInterfaceInterface[V any, E any](
-	factory func(capacity int) dynamicContainers.Graph[V, E],
+// [dynamicContainers.DirectedGraph] interface.
+func DynDirectedGraphInterfaceInterface[V any, E any](
+	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
 	graphInterface[V, E](factory(0))
@@ -74,8 +74,8 @@ func DynGraphInterfaceInterface[V any, E any](
 
 // Tests that the value supplied by the factory does not implement the
 // [staticContainers.Map] interface.
-func DynGraphInterfaceStaticCapacityInterface[V any, E any](
-	factory func(capacity int) dynamicContainers.Graph[V, E],
+func DynDirectedGraphInterfaceStaticCapacityInterface[V any, E any](
+	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
 	test.Panics(
@@ -90,7 +90,7 @@ func DynGraphInterfaceStaticCapacityInterface[V any, E any](
 }
 
 func graphContainsEdgeHelper(
-	g dynamicContainers.Graph[int,int],
+	g dynamicContainers.DirectedGraph[int,int],
 	l int,
 	t *testing.T,
 ){
@@ -102,8 +102,8 @@ func graphContainsEdgeHelper(
 	test.False(g.ContainsEdge(l),t)
 }
 // Tests the ContainsEdge method functionality of a dynamic graph
-func DynGraphInterfaceContainsEdge(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynDirectedGraphInterfaceContainsEdge(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	graphContainsEdgeHelper(factory(0), 0, t)
@@ -113,7 +113,7 @@ func DynGraphInterfaceContainsEdge(
 }
 
 func graphContainsEdgePntrHelper(
-	g dynamicContainers.Graph[int,int],
+	g dynamicContainers.DirectedGraph[int,int],
 	l int,
 	t *testing.T,
 ){
@@ -126,8 +126,8 @@ func graphContainsEdgePntrHelper(
 	test.False(g.ContainsEdgePntr(&l),t)
 }
 // Tests the ContainsEdgePntr method functionality of a dynamic graph
-func DynGraphInterfaceContainsEdgePntr(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynDirectedGraphInterfaceContainsEdgePntr(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	graphContainsEdgePntrHelper(factory(0), 0, t)
@@ -137,7 +137,7 @@ func DynGraphInterfaceContainsEdgePntr(
 }
 
 func graphContainsVertexHelper(
-	g dynamicContainers.Graph[int,int],
+	g dynamicContainers.DirectedGraph[int,int],
 	l int,
 	t *testing.T,
 ){
@@ -149,8 +149,8 @@ func graphContainsVertexHelper(
 	test.False(g.ContainsVertex(l),t)
 }
 // Tests the ContainsVertex method functionality of a dynamic graph
-func DynGraphInterfaceContainsVertex(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynDirectedGraphInterfaceContainsVertex(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	graphContainsVertexHelper(factory(0), 0, t)
@@ -160,7 +160,7 @@ func DynGraphInterfaceContainsVertex(
 }
 
 func graphContainsVertexPntrHelper(
-	g dynamicContainers.Graph[int,int],
+	g dynamicContainers.DirectedGraph[int,int],
 	l int,
 	t *testing.T,
 ){
@@ -173,8 +173,8 @@ func graphContainsVertexPntrHelper(
 	test.False(g.ContainsVertexPntr(&l),t)
 }
 // Tests the ContainsVertexPntr method functionality of a dynamic graph
-func DynGraphInterfaceContainsVertexPntr(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynDirectedGraphInterfaceContainsVertexPntr(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	graphContainsVertexPntrHelper(factory(0), 0, t)
@@ -183,8 +183,8 @@ func DynGraphInterfaceContainsVertexPntr(
 	graphContainsVertexPntrHelper(factory(0), 5, t)
 }
 
-func testHashGraphEdgesHelper(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func testHashDirectedGraphEdgesHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
 ) {
@@ -201,18 +201,18 @@ func testHashGraphEdgesHelper(
 	test.Eq(l, cnt, t)
 }
 // Tests the Edges method functionality of a dynamic graph.
-func DynGraphInterfaceEdges(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynDirectedGraphInterfaceEdges(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	testHashGraphEdgesHelper(factory, 0, t)
-	testHashGraphEdgesHelper(factory, 1, t)
-	testHashGraphEdgesHelper(factory, 2, t)
-	testHashGraphEdgesHelper(factory, 5, t)
+	testHashDirectedGraphEdgesHelper(factory, 0, t)
+	testHashDirectedGraphEdgesHelper(factory, 1, t)
+	testHashDirectedGraphEdgesHelper(factory, 2, t)
+	testHashDirectedGraphEdgesHelper(factory, 5, t)
 }
 
-func testHashGraphEdgePntrsHelper(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func testHashDirectedGraphEdgePntrsHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
 ) {
@@ -233,22 +233,22 @@ func testHashGraphEdgePntrsHelper(
 
 // Tests the EdgePntrs method functionality of a dynamic graph.
 func DynMapInterfaceEdgePntrs(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	container := factory(0)
 	if container.IsAddressable() {
-		testHashGraphEdgePntrsHelper(factory, 0, t)
-		testHashGraphEdgePntrsHelper(factory, 1, t)
-		testHashGraphEdgePntrsHelper(factory, 2, t)
-		testHashGraphEdgePntrsHelper(factory, 5, t)
+		testHashDirectedGraphEdgePntrsHelper(factory, 0, t)
+		testHashDirectedGraphEdgePntrsHelper(factory, 1, t)
+		testHashDirectedGraphEdgePntrsHelper(factory, 2, t)
+		testHashDirectedGraphEdgePntrsHelper(factory, 5, t)
 	} else {
 		test.Panics(func() { container.EdgePntrs() }, t)
 	}
 }
 
-func testHashGraphVerticesHelper(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func testHashDirectedGraphVerticesHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
 ) {
@@ -267,18 +267,18 @@ func testHashGraphVerticesHelper(
 	test.Eq(l, cnt, t)
 }
 // Tests the Vertices method functionality of a dynamic graph.
-func DynGraphInterfaceVertices(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynDirectedGraphInterfaceVertices(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	testHashGraphVerticesHelper(factory, 0, t)
-	testHashGraphVerticesHelper(factory, 1, t)
-	testHashGraphVerticesHelper(factory, 2, t)
-	testHashGraphVerticesHelper(factory, 5, t)
+	testHashDirectedGraphVerticesHelper(factory, 0, t)
+	testHashDirectedGraphVerticesHelper(factory, 1, t)
+	testHashDirectedGraphVerticesHelper(factory, 2, t)
+	testHashDirectedGraphVerticesHelper(factory, 5, t)
 }
 
-func testHashGraphVerticePntrsHelper(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func testHashDirectedGraphVerticePntrsHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
 ) {
@@ -298,23 +298,23 @@ func testHashGraphVerticePntrsHelper(
 }
 
 // Tests the VerticePntrs method functionality of a dynamic graph.
-func DynHashGraphInterfaceVerticePntrs(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphInterfaceVerticePntrs(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	container := factory(0)
 	if container.IsAddressable() {
-		testHashGraphVerticePntrsHelper(factory, 0, t)
-		testHashGraphVerticePntrsHelper(factory, 1, t)
-		testHashGraphVerticePntrsHelper(factory, 2, t)
-		testHashGraphVerticePntrsHelper(factory, 5, t)
+		testHashDirectedGraphVerticePntrsHelper(factory, 0, t)
+		testHashDirectedGraphVerticePntrsHelper(factory, 1, t)
+		testHashDirectedGraphVerticePntrsHelper(factory, 2, t)
+		testHashDirectedGraphVerticePntrsHelper(factory, 5, t)
 	} else {
 		test.Panics(func() { container.VerticePntrs() }, t)
 	}
 }
 
-func hashGraphLinkHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphLinkHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -350,11 +350,11 @@ func hashGraphLinkHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the Link method functionality of a dynamic graph.
-func DynHashGraphLink(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphLink(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashGraphLinkHelper(
+	hashDirectedGraphLinkHelper(
 		factory(0), 5, 4,
 		[][3]int{
 			[3]int{0,1,0},
@@ -364,7 +364,7 @@ func DynHashGraphLink(
 		},
 		t,
 	)
-	hashGraphLinkHelper(
+	hashDirectedGraphLinkHelper(
 		factory(0), 5, 5,
 		[][3]int{
 			[3]int{0,1,0},
@@ -382,8 +382,8 @@ func DynHashGraphLink(
 	)
 }
 
-func hashGraphLinkPntrHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphLinkPntrHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -421,11 +421,11 @@ func hashGraphLinkPntrHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the LinkPntr method functionality of a dynamic graph.
-func DynHashGraphLinkPntr(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphLinkPntr(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashGraphLinkPntrHelper(
+	hashDirectedGraphLinkPntrHelper(
 		factory(0), 5, 4,
 		[][3]int{
 			[3]int{0,1,0},
@@ -435,7 +435,7 @@ func DynHashGraphLinkPntr(
 		},
 		t,
 	)
-	hashGraphLinkPntrHelper(
+	hashDirectedGraphLinkPntrHelper(
 		factory(0), 5, 5,
 		[][3]int{
 			[3]int{0,1,0},
@@ -453,8 +453,8 @@ func DynHashGraphLinkPntr(
 	)
 }
 
-func hashGraphOutEdgesHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphOutEdgesHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -494,11 +494,11 @@ func hashGraphOutEdgesHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the OutEdges method functionality of a dynamic graph.
-func DynHashGraphOutEdges(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphOutEdges(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashGraphOutEdgesHelper(
+	hashDirectedGraphOutEdgesHelper(
 		factory(0), 6, 4,
 		[][3]int{
 			[3]int{0,1,0},
@@ -516,7 +516,7 @@ func DynHashGraphOutEdges(
 		},
 		t,
 	)
-	hashGraphOutEdgesHelper(
+	hashDirectedGraphOutEdgesHelper(
 		factory(0), 5, 5,
 		[][3]int{
 			[3]int{0,1,0},
@@ -542,8 +542,8 @@ func DynHashGraphOutEdges(
 	)
 }
 
-func hashGraphOutEdgePntrsHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphOutEdgePntrsHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -583,13 +583,13 @@ func hashGraphOutEdgePntrsHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the OutEdgePntrs method functionality of a dynamic graph.
-func DynHashGraphOutEdgePntrs(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphOutEdgePntrs(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
 	container:=factory(0)
 	if container.IsAddressable() {
-		hashGraphOutEdgesHelper(
+		hashDirectedGraphOutEdgesHelper(
 			factory(0), 6, 4,
 			[][3]int{
 				[3]int{0,1,0},
@@ -607,7 +607,7 @@ func DynHashGraphOutEdgePntrs(
 			},
 			t,
 		)
-		hashGraphOutEdgesHelper(
+		hashDirectedGraphOutEdgesHelper(
 			factory(0), 5, 5,
 			[][3]int{
 				[3]int{0,1,0},
@@ -637,8 +637,8 @@ func DynHashGraphOutEdgePntrs(
 	}
 }
 
-func hashGraphOutVerticesHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphOutVerticesHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -678,11 +678,11 @@ func hashGraphOutVerticesHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the OutVertices method functionality of a dynamic graph.
-func DynHashGraphOutVertices(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphOutVertices(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashGraphOutVerticesHelper(
+	hashDirectedGraphOutVerticesHelper(
 		factory(0), 6, 4,
 		[][3]int{
 			[3]int{0,1,0},
@@ -700,7 +700,7 @@ func DynHashGraphOutVertices(
 		},
 		t,
 	)
-	hashGraphOutVerticesHelper(
+	hashDirectedGraphOutVerticesHelper(
 		factory(0), 5, 5,
 		[][3]int{
 			[3]int{0,1,0},
@@ -726,8 +726,8 @@ func DynHashGraphOutVertices(
 	)
 }
 
-func hashGraphOutVerticePntrsHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphOutVerticePntrsHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -768,13 +768,13 @@ func hashGraphOutVerticePntrsHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the OutVerticePntrs method functionality of a dynamic graph.
-func DynHashGraphOutVerticePntrs(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphOutVerticePntrs(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
 	container:=factory(0)
 	if container.IsAddressable() {
-		hashGraphOutVerticePntrsHelper(
+		hashDirectedGraphOutVerticePntrsHelper(
 			factory(0), 6, 4,
 			[][3]int{
 				[3]int{0,1,0},
@@ -792,7 +792,7 @@ func DynHashGraphOutVerticePntrs(
 			},
 			t,
 		)
-		hashGraphOutVerticePntrsHelper(
+		hashDirectedGraphOutVerticePntrsHelper(
 			factory(0), 5, 5,
 			[][3]int{
 				[3]int{0,1,0},
@@ -822,8 +822,8 @@ func DynHashGraphOutVerticePntrs(
 	}
 }
 
-func hashGraphOutEdgesAndVerticesHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphOutEdgesAndVerticesHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -871,11 +871,11 @@ func hashGraphOutEdgesAndVerticesHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the OutEdgesAndVertices method functionality of a dynamic graph.
-func DynHashGraphOutEdgesAndVertices(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphOutEdgesAndVertices(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashGraphOutEdgesAndVerticesHelper(
+	hashDirectedGraphOutEdgesAndVerticesHelper(
 		factory(0), 6, 4,
 		[][3]int{
 			[3]int{0,1,0},
@@ -901,7 +901,7 @@ func DynHashGraphOutEdgesAndVertices(
 		},
 		t,
 	)
-	hashGraphOutEdgesAndVerticesHelper(
+	hashDirectedGraphOutEdgesAndVerticesHelper(
 		factory(0), 5, 5,
 		[][3]int{
 			[3]int{0,1,0},
@@ -935,8 +935,8 @@ func DynHashGraphOutEdgesAndVertices(
 	)
 }
 
-func hashGraphOutEdgesAndVerticePntrsHelper(
-	container dynamicContainers.Graph[int, int],
+func hashDirectedGraphOutEdgesAndVerticePntrsHelper(
+	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
 	links [][3]int,
@@ -985,13 +985,13 @@ func hashGraphOutEdgesAndVerticePntrsHelper(
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
 // Tests the OutEdgesAndVerticePntrs method functionality of a dynamic graph.
-func DynHashGraphOutEdgesAndVerticePntrs(
-	factory func(capacity int) dynamicContainers.Graph[int, int],
+func DynHashDirectedGraphOutEdgesAndVerticePntrs(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
 	container:=factory(0)
 	if container.IsAddressable() {
-		hashGraphOutEdgesAndVerticePntrsHelper(
+		hashDirectedGraphOutEdgesAndVerticePntrsHelper(
 			factory(0), 6, 4,
 			[][3]int{
 				[3]int{0,1,0},
@@ -1017,7 +1017,7 @@ func DynHashGraphOutEdgesAndVerticePntrs(
 			},
 			t,
 		)
-		hashGraphOutEdgesAndVerticePntrsHelper(
+		hashDirectedGraphOutEdgesAndVerticePntrsHelper(
 			factory(0), 5, 5,
 			[][3]int{
 				[3]int{0,1,0},

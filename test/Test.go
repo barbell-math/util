@@ -46,7 +46,7 @@ func NoPanic(action func(), t *testing.T){
             _, f, line, _ := runtime.Caller(1)
             FormatError(
                 "panic","",
-                "The supplied funciton paniced when it should have.",
+                "The supplied funciton paniced when it shouldn't have.",
                 f,line,t,
             )
         }

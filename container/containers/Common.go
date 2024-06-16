@@ -10,7 +10,10 @@ import (
 )
 
 func addressableSafeGet[K any, V any](
-	other containerTypes.KeyedComparisonsOtherConstraint[K, V],
+	other interface {
+		containerTypes.Addressable
+		containerTypes.ReadKeyedOps[K,V] 
+	},
 	k K,
 ) (*V, error) {
 	if other.IsAddressable() {
@@ -23,7 +26,10 @@ func addressableSafeGet[K any, V any](
 }
 
 func addressableSafeValIter[T any](
-	other containerTypes.ComparisonsOtherConstraint[T],
+	other interface {
+		containerTypes.Addressable
+		containerTypes.ReadOps[T]
+	},
 	iterOp func(index int, val *T) (iter.IteratorFeedback, error),
 ) {
 	if other.IsAddressable() {

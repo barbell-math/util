@@ -84,7 +84,7 @@ func main() {
 
 	testFuncs := viableFuncs()
 	fmt.Printf(
-		"Type: %-30s | Interface type: %-10s %-10s | Num Funcs: %3d\n",
+		"Type: %-30s | Interface type: %-10s %-20s | Num Funcs: %3d\n",
 		VALS.Type, VALS.Cat.String(), VALS.Interface, len(testFuncs),
 	)
 

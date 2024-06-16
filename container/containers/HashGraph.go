@@ -7,6 +7,7 @@ import (
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
+	"github.com/barbell-math/util/container/dynamicContainers"
 )
 
 type (
@@ -99,19 +100,19 @@ func NewSyncedHashGraph[
 }
 
 // A empty pass through function that performs no action. Needed for the
-// [containerTypes.Comparisons] interface.
+// [dynamicContainers.Comparisons] interface.
 func (g *HashGraph[V, E, VI, EI]) Lock() {}
 
 // A empty pass through function that performs no action. Needed for the
-// [containerTypes.Comparisons] interface.
+// [dynamicContainers.Comparisons] interface.
 func (g *HashGraph[V, E, VI, EI]) Unlock() {}
 
 // A empty pass through function that performs no action. Needed for the
-// [containerTypes.Comparisons] interface.
+// [dynamicContainers.Comparisons] interface.
 func (g *HashGraph[V, E, VI, EI]) RLock() {}
 
 // A empty pass through function that performs no action. Needed for the
-// [containerTypes.Comparisons] interface.
+// [dynamicContainers.Comparisons] interface.
 func (g *HashGraph[V, E, VI, EI]) RUnlock() {}
 
 // The SyncedHashGraph method to override the HashGraph pass through function
@@ -582,8 +583,39 @@ func (g *HashGraph[V,E,VI,EI])OutEdgesAndVerticePntrs(
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
+// Description: Returns the list of edges that exist between the supplied
+// vertices. Any returned edges will follow the direction specified by the
+// arguments.
+//
+// Time Complexity: O(n), where n=the number of edges that are returned
 func (g *HashGraph[V,E,VI,EI])EdgesBetween(from V, to V) iter.Iter[E] {
-	return iter.NoElem[E]()
+	vw:=widgets.Widget[V,VI]{}
+	fromHash:=vertexHash(vw.Hash(&from))
+	toHash:=vertexHash(vw.Hash(&to))
+
+	if _,ok:=g.vertices[fromHash]; !ok {
+		var tmp E
+		return iter.ValElem[E](tmp,getVertexError[V](&from),1)
+	}
+	if _,ok:=g.vertices[toHash]; !ok {
+		var tmp E
+		return iter.ValElem[E](tmp,getVertexError[V](&to),1)
+	}
+	if _,ok:=g.graph[fromHash]; !ok {
+		// The from vertex is a valid vertex, just has no outgoing edges.
+		return iter.NoElem[E]()
+	}
+
+	return iter.Map[graphEdge,E](
+		iter.SliceElems[graphEdge](g.graph[fromHash]).Filter(
+			func(index int, val graphEdge) bool {
+				return val.B==toHash
+			},
+		),
+		func(index int, val graphEdge) (E, error) {
+			return g.edges[val.A], nil
+		},
+	)
 }
 
 // Panics, hash graphs are non-addressable.
@@ -644,7 +676,7 @@ func (g *HashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 func (g *SyncedHashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 	g.Lock()
 	defer g.Unlock()
-	return g.HashGraph.AddVertices(vals...)
+	return g.HashGraph.AddVertices(v...)
 }
 
 // Description: Adds a link between an existing edge and vertices in the graph.
@@ -759,3 +791,53 @@ func (g *HashGraph[V,E,VI,EI])DeleteLinksPntr(from *V, to *V) error {
 }
 
 func (g *HashGraph[V,E,VI,EI])Clear() {}
+
+func (g *HashGraph[V,E,VI,EI])KeyedEq(
+	other dynamicContainers.ReadGraph[V,E],
+) bool {
+	return false
+}
+func (g *HashGraph[V,E,VI,EI])UnorderedEq(
+	other dynamicContainers.ReadGraph[V,E],
+) bool {
+	return false
+}
+func (g *HashGraph[V,E,VI,EI])Intersection(
+	l dynamicContainers.ReadGraph[V,E],
+	r dynamicContainers.ReadGraph[V,E],
+) {}
+func (g *HashGraph[V,E,VI,EI])Union(
+	l dynamicContainers.ReadGraph[V,E],
+	r dynamicContainers.ReadGraph[V,E],
+) {}
+func (g *HashGraph[V,E,VI,EI])Difference(
+	l dynamicContainers.ReadGraph[V,E],
+	r dynamicContainers.ReadGraph[V,E],
+) {}
+func (g *HashGraph[V,E,VI,EI])IsSuperset(
+	other dynamicContainers.ReadGraph[V,E],
+) bool {
+	return false
+}
+func (g *HashGraph[V,E,VI,EI])IsSubset(
+	other dynamicContainers.ReadGraph[V,E],
+) bool {
+	return false
+}
+
+func (_ *HashGraph[V,E,VI,EI])Eq(
+	l *HashGraph[V,E,VI,EI],
+	r *HashGraph[V,E,VI,EI],
+) bool {
+	return false
+}
+func (_ *HashGraph[V,E,VI,EI])Lt(
+	l *HashGraph[V,E,VI,EI],
+	r *HashGraph[V,E,VI,EI],
+) bool {
+	return false
+}
+func (_ *HashGraph[V,E,VI,EI])Hash(other *HashGraph[V,E,VI,EI]) hash.Hash {
+	return hash.Hash(0)
+}
+func (_ *HashGraph[V,E,VI,EI])Zero(other *HashGraph[V,E,VI,EI]) {}
