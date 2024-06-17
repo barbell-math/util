@@ -5,13 +5,30 @@ import (
 )
 
 
-// An interface that only allows read operations on a graph. All graphs share
-// the same read interface, regardless of subtype.
-type ReadGraph[V any, E any] interface {
-	containerTypes.RWSyncable
-	containerTypes.Addressable
-	containerTypes.ReadGraphOps[V,E]
-	containerTypes.Comparisons[ReadGraph[V,E], V, E]
+// An interface that only allows read operations in a directed graph.
+type ReadDirectedGraph[V any, E any] interface {
+    containerTypes.RWSyncable
+    containerTypes.Addressable
+    containerTypes.ReadGraphOps[V,E]
+	containerTypes.Comparisons[
+		containerTypes.GraphComparisonsConstraint[V,E],
+		V,
+		E,
+	]
+	containerTypes.ReadDirectedGraphOps[V,E]
+}
+
+// An interface that only allows read operations in an undirected graph.
+type ReadUndirectedGraph[V any, E any] interface {
+    containerTypes.RWSyncable
+    containerTypes.Addressable
+    containerTypes.ReadGraphOps[V,E]
+	containerTypes.Comparisons[
+		containerTypes.GraphComparisonsConstraint[V,E],
+		V,
+		E,
+	]
+	containerTypes.ReadUndirectedGraphOps[V,E]
 }
 
 // An interface that only allows write operations on a directed graph.
@@ -36,13 +53,13 @@ type WriteUndirectedGraph[V any, E any] interface {
 // An interface that represents a directed graph with no restrictions on reading
 // or writing.
 type DirectedGraph[V any, E any] interface {
-	ReadGraph[V,E]
+	ReadDirectedGraph[V,E]
 	WriteDirectedGraph[V,E]
 }
 
 // An interface that represents an undirected graph with no restrictions on
 // reading or writing.
 type UndirectedGraph[V any, E any] interface {
-	ReadGraph[V,E]
+	ReadUndirectedGraph[V,E]
 	WriteDirectedGraph[V,E]
 }

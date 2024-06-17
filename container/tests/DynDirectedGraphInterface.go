@@ -12,7 +12,7 @@ import (
 )
 
 
-func graphReadInterface[T any, U any](c dynamicContainers.ReadGraph[T, U])   {}
+func graphReadInterface[T any, U any](c dynamicContainers.ReadDirectedGraph[T, U])   {}
 func graphWriteInterface[T any, U any](c dynamicContainers.WriteDirectedGraph[T, U]) {}
 func graphInterface[T any, U any](c dynamicContainers.DirectedGraph[T, U])           {}
 

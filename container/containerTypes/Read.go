@@ -58,3 +58,15 @@ type ReadGraphOps[V any, E any] interface {
     ContainsLink(from V, to V, e E) bool
     ContainsLinkPntr(from *V, to *V, e *E) bool
 }
+
+// An interface that enforces implementation of read-only, directed, graph
+// structure, operations.
+type ReadDirectedGraphOps[V any, E any] interface {
+    NumLinks() int
+}
+
+// An interface that enforces implementation of read-only, undirected, graph
+// structure, operations.
+type ReadUndirectedGraphOps[V any, E any] interface {
+    NumUndirectedLinks() int
+}

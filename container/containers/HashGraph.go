@@ -7,7 +7,7 @@ import (
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
-	"github.com/barbell-math/util/container/dynamicContainers"
+	"github.com/barbell-math/util/container/containerTypes"
 )
 
 type (
@@ -590,17 +590,38 @@ func (g *HashGraph[V,E,VI,EI])OutEdgesAndVerticePntrs(
 // Time Complexity: O(n), where n=the number of outgoing edges on the from
 // vertex
 func (g *HashGraph[V,E,VI,EI])EdgesBetween(from V, to V) iter.Iter[E] {
+	return g.edgesBetweenImpl(&from,&to)
+}
+
+// Description: Modifies the iterator chain returned by the underlying 
+// [HashGraph.EdgesBetween] method such that a read lock will be placed
+// on the underlying hash graph when the iterator is consumed. The hash graph
+// will have a read lock the entire time the iteration is being performed. The
+// lock will not be applied until the iterator chain starts to be consumed.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n), where n=the number of outgoing edges on the from 
+// vertex
+func (g *SyncedHashGraph[V, E, VI, EI])EdgesBetween(from V, to V) iter.Iter[E] {
+	return g.HashGraph.edgesBetweenImpl(&from,&to).SetupTeardown(
+		func() error { g.RLock(); return nil },
+		func() error { g.RUnlock(); return nil },
+	)
+}
+
+func (g *HashGraph[V, E, VI, EI])edgesBetweenImpl(from *V, to *V) iter.Iter[E] {
 	vw:=widgets.Widget[V,VI]{}
-	fromHash:=vertexHash(vw.Hash(&from))
-	toHash:=vertexHash(vw.Hash(&to))
+	fromHash:=vertexHash(vw.Hash(from))
+	toHash:=vertexHash(vw.Hash(to))
 
 	if _,ok:=g.vertices[fromHash]; !ok {
 		var tmp E
-		return iter.ValElem[E](tmp,getVertexError[V](&from),1)
+		return iter.ValElem[E](tmp,getVertexError[V](from),1)
 	}
 	if _,ok:=g.vertices[toHash]; !ok {
 		var tmp E
-		return iter.ValElem[E](tmp,getVertexError[V](&to),1)
+		return iter.ValElem[E](tmp,getVertexError[V](to),1)
 	}
 	if _,ok:=g.graph[fromHash]; !ok {
 		// The from vertex is a valid vertex, just has no outgoing edges.
@@ -794,34 +815,34 @@ func (g *HashGraph[V,E,VI,EI])DeleteLinksPntr(from *V, to *V) error {
 func (g *HashGraph[V,E,VI,EI])Clear() {}
 
 func (g *HashGraph[V,E,VI,EI])KeyedEq(
-	other dynamicContainers.ReadGraph[V,E],
+	other containerTypes.GraphComparisonsConstraint[V,E],
 ) bool {
 	return false
 }
 func (g *HashGraph[V,E,VI,EI])UnorderedEq(
-	other dynamicContainers.ReadGraph[V,E],
+	other containerTypes.GraphComparisonsConstraint[V,E],
 ) bool {
 	return false
 }
 func (g *HashGraph[V,E,VI,EI])Intersection(
-	l dynamicContainers.ReadGraph[V,E],
-	r dynamicContainers.ReadGraph[V,E],
+	l containerTypes.GraphComparisonsConstraint[V,E],
+	r containerTypes.GraphComparisonsConstraint[V,E],
 ) {}
 func (g *HashGraph[V,E,VI,EI])Union(
-	l dynamicContainers.ReadGraph[V,E],
-	r dynamicContainers.ReadGraph[V,E],
+	l containerTypes.GraphComparisonsConstraint[V,E],
+	r containerTypes.GraphComparisonsConstraint[V,E],
 ) {}
 func (g *HashGraph[V,E,VI,EI])Difference(
-	l dynamicContainers.ReadGraph[V,E],
-	r dynamicContainers.ReadGraph[V,E],
+	l containerTypes.GraphComparisonsConstraint[V,E],
+	r containerTypes.GraphComparisonsConstraint[V,E],
 ) {}
 func (g *HashGraph[V,E,VI,EI])IsSuperset(
-	other dynamicContainers.ReadGraph[V,E],
+	other containerTypes.GraphComparisonsConstraint[V,E],
 ) bool {
 	return false
 }
 func (g *HashGraph[V,E,VI,EI])IsSubset(
-	other dynamicContainers.ReadGraph[V,E],
+	other containerTypes.GraphComparisonsConstraint[V,E],
 ) bool {
 	return false
 }

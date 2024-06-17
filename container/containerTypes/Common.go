@@ -61,8 +61,8 @@ type KeyedComparisons[RI any, K any, V any] interface {
     KeyedEq(other RI) bool
 }
 
-// An interface that defines what kinds values can be passed to the methods in
-// the [Comparisons] interface.
+// An interface that defines what kinds of values can be passed to the methods
+// in the [Comparisons] interface.
 type ComparisonsOtherConstraint[V any] interface {
     RWSyncable
     Addressable
@@ -70,11 +70,19 @@ type ComparisonsOtherConstraint[V any] interface {
     ReadOps[V]
 }
 
-// An interface that defines what kinds values can be passed to the methods in
-// the [KeyedComparisons] interface.
+// An interface that defines what kinds of values can be passed to the methods
+// in the [KeyedComparisons] interface.
 type KeyedComparisonsOtherConstraint[K any, V any] interface {
     RWSyncable
     Addressable
     Length
     ReadKeyedOps[K,V]
+}
+
+// An interface that defines what kinds of values can be passed to the methods
+// in the [Comparisons] and [KeyedComparisons] interfaces.
+type GraphComparisonsConstraint[V any, E any] interface {
+    RWSyncable
+    Addressable
+    ReadGraphOps[V,E]
 }
