@@ -64,7 +64,7 @@ func Range[
 // elements. No error will ever be returned by this producer. This producer is
 // not thread safe. If the underlying slice is modified while it is being
 // iterated over the behavior will be undefined. For a thread safe
-// implementation of SliceElems use the SyncedVector.Elems method from the 
+// implementation of SliceElems use the SyncedVector.Elems method from the
 // collections package.
 func SliceElems[T any](s []T) Iter[T] {
 	i := -1

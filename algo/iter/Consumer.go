@@ -30,7 +30,7 @@ func (i Iter[T]) ForEach(
 		}
 	}
 	_, cleanUpErr, _ := i(Break)
-	return customerr.AppendError(err,opErr,cleanUpErr)
+	return customerr.AppendError(err, opErr, cleanUpErr)
 }
 
 // Why is stop not a pseudo consumer? It breaks the parent calling convention
@@ -58,7 +58,7 @@ func (i Iter[T]) Stop() error {
 // its stream of values. Stop must be called manually to do this. Continuing to
 // call PullOne after the end of the iterator stream has been reached will not
 // result in any undefined behavior.
-func (i Iter[T])PullOne() (T,error,bool) {
+func (i Iter[T]) PullOne() (T, error, bool) {
 	return i(Iterate)
 }
 
@@ -68,23 +68,23 @@ func (i Iter[T])PullOne() (T,error,bool) {
 // iterator chain has been reached. It will return the values, an error if one
 // occurred while obtaining the values, and a boolean flag to indicate success.
 // The values that is returned should be assumed to be valid, even if err is not
-// nil or the boolean flag is false. This function *does not* clean up the 
+// nil or the boolean flag is false. This function *does not* clean up the
 // iterator chain once the chains producer has reached the end of its stream of
 // values. Stop must be called manually to do this. Continuing to call Pull
 // after the end of the iterator stream has been reached will not result in any
 // undefined behavior.
-func (i Iter[T])Pull(num int) ([]T,error,bool) {
+func (i Iter[T]) Pull(num int) ([]T, error, bool) {
 	j := 0
-	rv:=make([]T,num)
+	rv := make([]T, num)
 	var next T
 	var err error
 	var cont bool = true
-	for cont && err == nil && j<num {
+	for cont && err == nil && j < num {
 		next, err, cont = i(Iterate)
 		if err == nil && cont {
-			rv[j]=next
+			rv[j] = next
 			j++
 		}
 	}
-	return rv,err,cont
+	return rv, err, cont
 }

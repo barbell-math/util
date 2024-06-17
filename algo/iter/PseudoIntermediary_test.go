@@ -89,6 +89,40 @@ func TestMap(t *testing.T) {
 	mapIterHelper([]int{}, t)
 }
 
+func valToPntrHelper[T any](expected []T, t *testing.T) {
+	mapped, err := ValToPntr[T](SliceElems(expected)).Collect()
+	test.Nil(err, t)
+	test.Eq(len(expected), len(mapped), t)
+	for i, v := range expected {
+		test.Eq(v, *mapped[i], t)
+	}
+}
+func TestMapToPntr(t *testing.T) {
+	valToPntrHelper[int]([]int{}, t)
+	valToPntrHelper[int]([]int{0}, t)
+	valToPntrHelper[int]([]int{0, 1}, t)
+	valToPntrHelper[int]([]int{0, 1, 2, 3, 4}, t)
+}
+
+func pntrToValHelper[T any](expected []T, t *testing.T) {
+	pntrs := make([]*T, len(expected))
+	for i, _ := range expected {
+		pntrs[i] = &expected[i]
+	}
+	mapped, err := PntrToVal[T](SliceElems(pntrs)).Collect()
+	test.Nil(err, t)
+	test.Eq(len(expected), len(mapped), t)
+	for i, v := range expected {
+		test.Eq(v, mapped[i], t)
+	}
+}
+func TestMapFromPntr(t *testing.T) {
+	pntrToValHelper[int]([]int{}, t)
+	pntrToValHelper[int]([]int{0}, t)
+	pntrToValHelper[int]([]int{0, 1}, t)
+	pntrToValHelper[int]([]int{0, 1, 2, 3, 4}, t)
+}
+
 func TestFilter(t *testing.T) {
 	cntr, err := SliceElems([]int{1, 2, 3, 4}).Filter(func(index int, val int) bool {
 		return val < 3

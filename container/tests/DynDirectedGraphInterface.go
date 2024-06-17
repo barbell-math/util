@@ -567,7 +567,7 @@ func directedGraphOutEdgePntrsHelper(
 	test.Eq(len(links),container.NumLinks(),t)
 
 	for i:=0; i<numVertices; i++ {
-		mappedValues,err:=iter.MapFromPntr[int](
+		mappedValues,err:=iter.PntrToVal[int](
 			container.OutEdgePntrs(&i),
 		).Collect()
 		test.Eq(len(outEdges[i]),len(mappedValues),t)
@@ -747,7 +747,7 @@ func directedGraphOutVerticePntrsHelper(
 	test.Eq(len(links),container.NumLinks(),t)
 
 	for i:=0; i<numVertices; i++ {
-		mappedValues,err:=iter.MapFromPntr[int](
+		mappedValues,err:=iter.PntrToVal[int](
 			container.OutVerticePntrs(&i),
 		).Collect()
 		test.Eq(len(outVertices[i]),len(mappedValues),t)
@@ -1162,7 +1162,7 @@ func directedGraphEdgesBetweenPntrHelper(
 
 	for from,allTo:=range(structure) {
 		for to,edges:=range(allTo) {
-			res,err:=iter.MapFromPntr[int](
+			res,err:=iter.PntrToVal[int](
 				container.EdgesBetweenPntr(&from, &to),
 			).Collect()
 			test.Nil(err,t)
