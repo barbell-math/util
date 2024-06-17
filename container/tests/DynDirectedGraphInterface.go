@@ -321,7 +321,7 @@ func directedGraphLinkHelper(
 	links [][3]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
@@ -392,7 +392,7 @@ func directedGraphLinkPntrHelper(
 	links [][3]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
@@ -466,14 +466,14 @@ func directedGraphOutEdgesHelper(
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
 		test.Nil(container.AddVertices(i),t)
 	}
 	for i:=0; i<len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
 	}
 	for i:=0; i<len(links); i++ {
 		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
@@ -552,14 +552,14 @@ func directedGraphOutEdgePntrsHelper(
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
 		test.Nil(container.AddVertices(i),t)
 	}
 	for i:=0; i<len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
 	}
 	for i:=0; i<len(links); i++ {
 		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
@@ -646,14 +646,14 @@ func directedGraphOutVerticesHelper(
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
 		test.Nil(container.AddVertices(i),t)
 	}
 	for i:=0; i<len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
 	}
 	for i:=0; i<len(links); i++ {
 		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
@@ -732,14 +732,14 @@ func directedGraphOutVerticePntrsHelper(
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
 		test.Nil(container.AddVertices(i),t)
 	}
 	for i:=0; i<len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
 	}
 	for i:=0; i<len(links); i++ {
 		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
@@ -828,14 +828,14 @@ func directedGraphOutEdgesAndVerticesHelper(
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
 		test.Nil(container.AddVertices(i),t)
 	}
 	for i:=0; i<len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
 	}
 	for i:=0; i<len(links); i++ {
 		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
@@ -950,14 +950,14 @@ func directedGraphOutEdgesAndVerticePntrsHelper(
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
 		test.Nil(container.AddVertices(i),t)
 	}
 	for i:=0; i<len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
 	}
 	for i:=0; i<len(links); i++ {
 		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
@@ -1075,33 +1075,141 @@ func directedGraphEdgesBetweenHelper(
 	numVertices int,
 	numEdges int,
 	links [][3]int,
-	from int,
-	to int,
-	outEdges map[int][]int,
+	structure map[int]map[int][]int,
 	t *testing.T,
 ){
-	for i:=0; i<numVertices; i++ {
+	for i:=0; i<numEdges; i++ {
 		test.Nil(container.AddEdges(i),t)
 	}
 	for i:=0; i<numVertices; i++ {
 		test.Nil(container.AddVertices(i),t)
 	}
 	for i:=0; i<len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
 	}
 	for i:=0; i<len(links); i++ {
 		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
 	}
 	test.Eq(len(links),container.NumLinks(),t)
 
-	res,err:=container.EdgesBetween(from, to).Collect()
-	test.Nil(err,t)
-	test.SlicesMatchUnordered[int](res, outEdges[from], t)
+	for from,allTo:=range(structure) {
+		for to,edges:=range(allTo) {
+			res,err:=container.EdgesBetween(from, to).Collect()
+			test.Nil(err,t)
+			test.SlicesMatchUnordered[int](edges, res, t)
+		}
+	}
 }
 // Tests the EdgesBetween method functionality of a dynamic directed graph.
 func DynDirectedGraphEdgesBetween(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
+	directedGraphEdgesBetweenHelper(
+		factory(0),
+		3,
+		5,
+		[][3]int{
+			// from, to, e
+			[3]int{0,1,0},
+			[3]int{0,1,1},
+			[3]int{0,1,2},
+			[3]int{0,2,3},
+			[3]int{0,2,4},
+			[3]int{1,0,0},
+			[3]int{1,2,1},
+		},
+		map[int]map[int][]int{
+			// from: to: e
+			0: map[int][]int{
+				// to: e
+				0: []int{},
+				1: []int{0,1,2},
+				2: []int{3,4},
+			},
+			1: map[int][]int{
+				// to: e
+				0: []int{0},
+				1: []int{},
+				2: []int{1},
+			},
+		},
+		t,
+	)
+}
 
+func directedGraphEdgesBetweenPntrHelper(
+	container dynamicContainers.DirectedGraph[int, int],
+	numVertices int,
+	numEdges int,
+	links [][3]int,
+	structure map[int]map[int][]int,
+	t *testing.T,
+){
+	for i:=0; i<numEdges; i++ {
+		test.Nil(container.AddEdges(i),t)
+	}
+	for i:=0; i<numVertices; i++ {
+		test.Nil(container.AddVertices(i),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
+	}
+	test.Eq(len(links),container.NumLinks(),t)
+
+	for from,allTo:=range(structure) {
+		for to,edges:=range(allTo) {
+			res,err:=iter.MapFromPntr[int](
+				container.EdgesBetweenPntr(&from, &to),
+			).Collect()
+			test.Nil(err,t)
+			test.SlicesMatchUnordered[int](edges, res, t)
+		}
+	}
+}
+// Tests the EdgesBetweenPntr method functionality of a dynamic directed graph.
+func DynDirectedGraphEdgesBetweenPntr(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	container:=factory(0)
+	if container.IsAddressable() {
+		directedGraphEdgesBetweenPntrHelper(
+			factory(0),
+			3,
+			5,
+			[][3]int{
+				// from, to, e
+				[3]int{0,1,0},
+				[3]int{0,1,1},
+				[3]int{0,1,2},
+				[3]int{0,2,3},
+				[3]int{0,2,4},
+				[3]int{1,0,0},
+				[3]int{1,2,1},
+			},
+			map[int]map[int][]int{
+				// from: to: e
+				0: map[int][]int{
+					// to: e
+					0: []int{},
+					1: []int{0,1,2},
+					2: []int{3,4},
+				},
+				1: map[int][]int{
+					// to: e
+					0: []int{0},
+					1: []int{},
+					2: []int{1},
+				},
+			},
+			t,
+		)
+	} else {
+		tmp:=-1
+		test.Panics(func() { container.EdgesBetweenPntr(&tmp, &tmp) }, t)
+	}
 }
