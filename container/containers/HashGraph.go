@@ -587,7 +587,8 @@ func (g *HashGraph[V,E,VI,EI])OutEdgesAndVerticePntrs(
 // vertices. Any returned edges will follow the direction specified by the
 // arguments.
 //
-// Time Complexity: O(n), where n=the number of edges that are returned
+// Time Complexity: O(n), where n=the number of outgoing edges on the from
+// vertex
 func (g *HashGraph[V,E,VI,EI])EdgesBetween(from V, to V) iter.Iter[E] {
 	vw:=widgets.Widget[V,VI]{}
 	fromHash:=vertexHash(vw.Hash(&from))

@@ -64,6 +64,43 @@ func Map[T any, U any](
 
 // This function is an intermediary.
 //
+// MapToPntr will map a stream of values to a stream of pointers to the values.
+// MapToPntr will stop iteration if an error is returned from it's parent
+// iterator regardless of if it has fully consumed it's input stream of values.
+// MapToPntr will never be the cause of an error.
+// TODO - test
+func MapToPntr[T any](i Iter[T]) Iter[*T] {
+	return Next[T,*T](i,
+		func(index int, val T, status IteratorFeedback) (IteratorFeedback, *T, error) {
+			if status == Break {
+				return Break, nil, nil
+			}
+			return Continue, &val, nil
+		},
+	)
+}
+
+// This function is an intermediary.
+//
+// MapFromPntr will map a stream of pointers to values to a stream of values.
+// MapFromPntr will stop iteration if an error is returned from it's parent
+// iterator regardless of if it has fully consumed it's input stream of values.
+// MapFromPntr will never be the cause of an error.
+// TODO - test
+func MapFromPntr[T any](i Iter[*T]) Iter[T] {
+	return Next[*T,T](i,
+		func(index int, val *T, status IteratorFeedback) (IteratorFeedback, T, error) {
+			if status == Break {
+				var tmp T
+				return Break, tmp, nil
+			}
+			return Continue, *val, nil
+		},
+	)
+}
+
+// This function is an intermediary.
+//
 // Map will create a mapping between two iterators of the same type. This is
 // equivilent the calling the previous Map function and providing it with the
 // same types. Iteraton will stop if an error is generated.

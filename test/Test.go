@@ -152,11 +152,7 @@ func SlicesMatch[T any](actual []T, generated []T, t *testing.T){
             f,line,t,
         )
     }
-    min:=len(generated);
-    if len(actual)<len(generated) {
-        min=len(actual);
-    }
-    for i:=0; i<min; i++ {
+    for i:=0; i<len(actual); i++ {
         if any(actual[i])!=any(generated[i]) {
             FormatError(
                 actual[i],
@@ -165,5 +161,49 @@ func SlicesMatch[T any](actual []T, generated []T, t *testing.T){
                 f,line,t,
             )
         }
+    }
+}
+
+func SlicesMatchUnordered[T any](actual []T, generated []T, t *testing.T) {
+    _, f, line, _ := runtime.Caller(1)
+    if len(actual)!=len(generated) {
+        FormatError(
+            len(actual),
+            len(generated),
+            "Slices do not match in length.",
+            f,line,t,
+        )
+    }
+    usedIndexes:=[]int{}
+    for i:=0; i<len(actual); i++ {
+        found:=false
+        for j:=0; j<len(generated) && !found; j++ {
+            if any(actual[i])==any(generated[j]) {
+                indexUsed:=false
+                for k:=0; k<len(usedIndexes) && !indexUsed; k++ {
+                    indexUsed=(j==usedIndexes[k])
+                }
+                if !indexUsed {
+                    found=true
+                    usedIndexes = append(usedIndexes, j)
+                }
+            }
+        }
+        if !found {
+            FormatError(
+                actual,
+                generated[i],
+                fmt.Sprintf("Slice value was not accounted for | Index: %d",i),
+                f,line,t,
+            )
+        }
+    }
+    if len(usedIndexes)!=len(actual) {
+        FormatError(
+            actual,
+            generated,
+            "The slices were not found to have equivalent elements.",
+            f,line,t,
+        )
     }
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/customerr"
@@ -183,7 +184,7 @@ func DynDirectedGraphInterfaceContainsVertexPntr(
 	graphContainsVertexPntrHelper(factory(0), 5, t)
 }
 
-func testHashDirectedGraphEdgesHelper(
+func testDirectedGraphEdgesHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -200,18 +201,18 @@ func testHashDirectedGraphEdgesHelper(
 	})
 	test.Eq(l, cnt, t)
 }
-// Tests the Edges method functionality of a dynamic graph.
+// Tests the Edges method functionality of a dynamic directed graph.
 func DynDirectedGraphInterfaceEdges(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	testHashDirectedGraphEdgesHelper(factory, 0, t)
-	testHashDirectedGraphEdgesHelper(factory, 1, t)
-	testHashDirectedGraphEdgesHelper(factory, 2, t)
-	testHashDirectedGraphEdgesHelper(factory, 5, t)
+	testDirectedGraphEdgesHelper(factory, 0, t)
+	testDirectedGraphEdgesHelper(factory, 1, t)
+	testDirectedGraphEdgesHelper(factory, 2, t)
+	testDirectedGraphEdgesHelper(factory, 5, t)
 }
 
-func testHashDirectedGraphEdgePntrsHelper(
+func testDirectedGraphEdgePntrsHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -231,23 +232,23 @@ func testHashDirectedGraphEdgePntrsHelper(
 	test.Eq(l, cnt, t)
 }
 
-// Tests the EdgePntrs method functionality of a dynamic graph.
+// Tests the EdgePntrs method functionality of a dynamic directed graph.
 func DynMapInterfaceEdgePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	container := factory(0)
 	if container.IsAddressable() {
-		testHashDirectedGraphEdgePntrsHelper(factory, 0, t)
-		testHashDirectedGraphEdgePntrsHelper(factory, 1, t)
-		testHashDirectedGraphEdgePntrsHelper(factory, 2, t)
-		testHashDirectedGraphEdgePntrsHelper(factory, 5, t)
+		testDirectedGraphEdgePntrsHelper(factory, 0, t)
+		testDirectedGraphEdgePntrsHelper(factory, 1, t)
+		testDirectedGraphEdgePntrsHelper(factory, 2, t)
+		testDirectedGraphEdgePntrsHelper(factory, 5, t)
 	} else {
 		test.Panics(func() { container.EdgePntrs() }, t)
 	}
 }
 
-func testHashDirectedGraphVerticesHelper(
+func testDirectedGraphVerticesHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -266,18 +267,18 @@ func testHashDirectedGraphVerticesHelper(
 	)
 	test.Eq(l, cnt, t)
 }
-// Tests the Vertices method functionality of a dynamic graph.
+// Tests the Vertices method functionality of a dynamic directed graph.
 func DynDirectedGraphInterfaceVertices(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	testHashDirectedGraphVerticesHelper(factory, 0, t)
-	testHashDirectedGraphVerticesHelper(factory, 1, t)
-	testHashDirectedGraphVerticesHelper(factory, 2, t)
-	testHashDirectedGraphVerticesHelper(factory, 5, t)
+	testDirectedGraphVerticesHelper(factory, 0, t)
+	testDirectedGraphVerticesHelper(factory, 1, t)
+	testDirectedGraphVerticesHelper(factory, 2, t)
+	testDirectedGraphVerticesHelper(factory, 5, t)
 }
 
-func testHashDirectedGraphVerticePntrsHelper(
+func testDirectedGraphVerticePntrsHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -297,23 +298,23 @@ func testHashDirectedGraphVerticePntrsHelper(
 	test.Eq(l, cnt, t)
 }
 
-// Tests the VerticePntrs method functionality of a dynamic graph.
-func DynHashDirectedGraphInterfaceVerticePntrs(
+// Tests the VerticePntrs method functionality of a dynamic directed graph.
+func DynDirectedGraphInterfaceVerticePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	container := factory(0)
 	if container.IsAddressable() {
-		testHashDirectedGraphVerticePntrsHelper(factory, 0, t)
-		testHashDirectedGraphVerticePntrsHelper(factory, 1, t)
-		testHashDirectedGraphVerticePntrsHelper(factory, 2, t)
-		testHashDirectedGraphVerticePntrsHelper(factory, 5, t)
+		testDirectedGraphVerticePntrsHelper(factory, 0, t)
+		testDirectedGraphVerticePntrsHelper(factory, 1, t)
+		testDirectedGraphVerticePntrsHelper(factory, 2, t)
+		testDirectedGraphVerticePntrsHelper(factory, 5, t)
 	} else {
 		test.Panics(func() { container.VerticePntrs() }, t)
 	}
 }
 
-func hashDirectedGraphLinkHelper(
+func directedGraphLinkHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -349,14 +350,15 @@ func hashDirectedGraphLinkHelper(
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the Link method functionality of a dynamic graph.
-func DynHashDirectedGraphLink(
+// Tests the Link method functionality of a dynamic directed graph.
+func DynDirectedGraphLink(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashDirectedGraphLinkHelper(
+	directedGraphLinkHelper(
 		factory(0), 5, 4,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{1,2,1},
 			[3]int{2,3,2},
@@ -364,9 +366,10 @@ func DynHashDirectedGraphLink(
 		},
 		t,
 	)
-	hashDirectedGraphLinkHelper(
+	directedGraphLinkHelper(
 		factory(0), 5, 5,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{0,2,1},
 			[3]int{0,3,2},
@@ -382,7 +385,7 @@ func DynHashDirectedGraphLink(
 	)
 }
 
-func hashDirectedGraphLinkPntrHelper(
+func directedGraphLinkPntrHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -420,14 +423,15 @@ func hashDirectedGraphLinkPntrHelper(
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the LinkPntr method functionality of a dynamic graph.
-func DynHashDirectedGraphLinkPntr(
+// Tests the LinkPntr method functionality of a dynamic directed graph.
+func DynDirectedGraphLinkPntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashDirectedGraphLinkPntrHelper(
+	directedGraphLinkPntrHelper(
 		factory(0), 5, 4,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{1,2,1},
 			[3]int{2,3,2},
@@ -435,9 +439,10 @@ func DynHashDirectedGraphLinkPntr(
 		},
 		t,
 	)
-	hashDirectedGraphLinkPntrHelper(
+	directedGraphLinkPntrHelper(
 		factory(0), 5, 5,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{0,2,1},
 			[3]int{0,3,2},
@@ -453,7 +458,7 @@ func DynHashDirectedGraphLinkPntr(
 	)
 }
 
-func hashDirectedGraphOutEdgesHelper(
+func directedGraphOutEdgesHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -476,37 +481,32 @@ func hashDirectedGraphOutEdgesHelper(
 	test.Eq(len(links),container.NumLinks(),t)
 
 	for i:=0; i<numVertices; i++ {
-		iterOutEdges,err:=container.OutEdges(i).Collect()
+		mappedValues,err:=container.OutEdges(i).Collect()
+		test.Eq(len(outEdges[i]),len(mappedValues),t)
 		test.Nil(err,t)
-		test.Eq(len(outEdges[i]),len(iterOutEdges),t)
-
-		for j:=0; j<len(outEdges[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutEdges) && !found; k++ {
-				found=(iterOutEdges[k]==outEdges[i][j])
-			}
-			test.True(found,t)
-		}
+		test.SlicesMatchUnordered[int](outEdges[i], mappedValues, t)
 	}
 
 	err:=container.OutEdges(-1).Consume()
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the OutEdges method functionality of a dynamic graph.
-func DynHashDirectedGraphOutEdges(
+// Tests the OutEdges method functionality of a dynamic directed graph.
+func DynDirectedGraphOutEdges(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashDirectedGraphOutEdgesHelper(
+	directedGraphOutEdgesHelper(
 		factory(0), 6, 4,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{1,2,1},
 			[3]int{2,3,2},
 			[3]int{3,4,3},
 		},
 		map[int][]int{
+			// from, e
 			0: []int{0},
 			1: []int{1},
 			2: []int{2},
@@ -516,9 +516,10 @@ func DynHashDirectedGraphOutEdges(
 		},
 		t,
 	)
-	hashDirectedGraphOutEdgesHelper(
+	directedGraphOutEdgesHelper(
 		factory(0), 5, 5,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{0,2,1},
 			[3]int{0,3,2},
@@ -531,6 +532,7 @@ func DynHashDirectedGraphOutEdges(
 			[3]int{3,4,4},
 		},
 		map[int][]int{
+			// from, e
 			0: []int{0,1,2,3},
 			1: []int{1,2,3},
 			2: []int{2,3},
@@ -542,7 +544,7 @@ func DynHashDirectedGraphOutEdges(
 	)
 }
 
-func hashDirectedGraphOutEdgePntrsHelper(
+func directedGraphOutEdgePntrsHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -565,39 +567,36 @@ func hashDirectedGraphOutEdgePntrsHelper(
 	test.Eq(len(links),container.NumLinks(),t)
 
 	for i:=0; i<numVertices; i++ {
-		iterOutEdges,err:=container.OutEdgePntrs(&i).Collect()
+		mappedValues,err:=iter.MapFromPntr[int](
+			container.OutEdgePntrs(&i),
+		).Collect()
+		test.Eq(len(outEdges[i]),len(mappedValues),t)
 		test.Nil(err,t)
-		test.Eq(len(outEdges[i]),len(iterOutEdges),t)
-
-		for j:=0; j<len(outEdges[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutEdges) && !found; k++ {
-				found=(*iterOutEdges[k]==outEdges[i][j])
-			}
-			test.True(found,t)
-		}
+		test.SlicesMatchUnordered[int](outEdges[i], mappedValues, t)
 	}
 
 	err:=container.OutEdges(-1).Consume()
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the OutEdgePntrs method functionality of a dynamic graph.
-func DynHashDirectedGraphOutEdgePntrs(
+// Tests the OutEdgePntrs method functionality of a dynamic directed graph.
+func DynDirectedGraphOutEdgePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
 	container:=factory(0)
 	if container.IsAddressable() {
-		hashDirectedGraphOutEdgesHelper(
+		directedGraphOutEdgesHelper(
 			factory(0), 6, 4,
 			[][3]int{
+				// from, to, e
 				[3]int{0,1,0},
 				[3]int{1,2,1},
 				[3]int{2,3,2},
 				[3]int{3,4,3},
 			},
 			map[int][]int{
+				// from, e
 				0: []int{0},
 				1: []int{1},
 				2: []int{2},
@@ -607,9 +606,10 @@ func DynHashDirectedGraphOutEdgePntrs(
 			},
 			t,
 		)
-		hashDirectedGraphOutEdgesHelper(
+		directedGraphOutEdgesHelper(
 			factory(0), 5, 5,
 			[][3]int{
+				// from, to, e
 				[3]int{0,1,0},
 				[3]int{0,2,1},
 				[3]int{0,3,2},
@@ -622,6 +622,7 @@ func DynHashDirectedGraphOutEdgePntrs(
 				[3]int{3,4,4},
 			},
 			map[int][]int{
+				// from, e
 				0: []int{0,1,2,3},
 				1: []int{1,2,3},
 				2: []int{2,3},
@@ -637,7 +638,7 @@ func DynHashDirectedGraphOutEdgePntrs(
 	}
 }
 
-func hashDirectedGraphOutVerticesHelper(
+func directedGraphOutVerticesHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -660,37 +661,32 @@ func hashDirectedGraphOutVerticesHelper(
 	test.Eq(len(links),container.NumLinks(),t)
 
 	for i:=0; i<numVertices; i++ {
-		iterOutVertices,err:=container.OutVertices(i).Collect()
+		mappedValues,err:=container.OutVertices(i).Collect()
+		test.Eq(len(outVertices[i]),len(mappedValues),t)
 		test.Nil(err,t)
-		test.Eq(len(outVertices[i]),len(iterOutVertices),t)
-
-		for j:=0; j<len(outVertices[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutVertices) && !found; k++ {
-				found=(iterOutVertices[k]==outVertices[i][j])
-			}
-			test.True(found,t)
-		}
+		test.SlicesMatchUnordered[int](outVertices[i], mappedValues, t)
 	}
 
 	err:=container.OutVertices(-1).Consume()
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the OutVertices method functionality of a dynamic graph.
-func DynHashDirectedGraphOutVertices(
+// Tests the OutVertices method functionality of a dynamic directed graph.
+func DynDirectedGraphOutVertices(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashDirectedGraphOutVerticesHelper(
+	directedGraphOutVerticesHelper(
 		factory(0), 6, 4,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{1,2,1},
 			[3]int{2,3,2},
 			[3]int{3,4,3},
 		},
 		map[int][]int{
+			// from, to
 			0: []int{1},
 			1: []int{2},
 			2: []int{3},
@@ -700,9 +696,10 @@ func DynHashDirectedGraphOutVertices(
 		},
 		t,
 	)
-	hashDirectedGraphOutVerticesHelper(
+	directedGraphOutVerticesHelper(
 		factory(0), 5, 5,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{0,2,1},
 			[3]int{0,3,2},
@@ -715,6 +712,7 @@ func DynHashDirectedGraphOutVertices(
 			[3]int{3,4,4},
 		},
 		map[int][]int{
+			// from, to
 			0: []int{1,2,3,4},
 			1: []int{2,3,4},
 			2: []int{3,4},
@@ -726,7 +724,7 @@ func DynHashDirectedGraphOutVertices(
 	)
 }
 
-func hashDirectedGraphOutVerticePntrsHelper(
+func directedGraphOutVerticePntrsHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -749,17 +747,12 @@ func hashDirectedGraphOutVerticePntrsHelper(
 	test.Eq(len(links),container.NumLinks(),t)
 
 	for i:=0; i<numVertices; i++ {
-		iterOutVertices,err:=container.OutVerticePntrs(&i).Collect()
+		mappedValues,err:=iter.MapFromPntr[int](
+			container.OutVerticePntrs(&i),
+		).Collect()
+		test.Eq(len(outVertices[i]),len(mappedValues),t)
 		test.Nil(err,t)
-		test.Eq(len(outVertices[i]),len(iterOutVertices),t)
-
-		for j:=0; j<len(outVertices[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutVertices) && !found; k++ {
-				found=(*iterOutVertices[k]==outVertices[i][j])
-			}
-			test.True(found,t)
-		}
+		test.SlicesMatchUnordered[int](outVertices[i], mappedValues, t)
 	}
 
 	tmp:=-1
@@ -767,22 +760,24 @@ func hashDirectedGraphOutVerticePntrsHelper(
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the OutVerticePntrs method functionality of a dynamic graph.
-func DynHashDirectedGraphOutVerticePntrs(
+// Tests the OutVerticePntrs method functionality of a dynamic directed graph.
+func DynDirectedGraphOutVerticePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
 	container:=factory(0)
 	if container.IsAddressable() {
-		hashDirectedGraphOutVerticePntrsHelper(
+		directedGraphOutVerticePntrsHelper(
 			factory(0), 6, 4,
 			[][3]int{
+				// from, to, e
 				[3]int{0,1,0},
 				[3]int{1,2,1},
 				[3]int{2,3,2},
 				[3]int{3,4,3},
 			},
 			map[int][]int{
+				// from, to
 				0: []int{1},
 				1: []int{2},
 				2: []int{3},
@@ -792,9 +787,10 @@ func DynHashDirectedGraphOutVerticePntrs(
 			},
 			t,
 		)
-		hashDirectedGraphOutVerticePntrsHelper(
+		directedGraphOutVerticePntrsHelper(
 			factory(0), 5, 5,
 			[][3]int{
+				// from, to, e
 				[3]int{0,1,0},
 				[3]int{0,2,1},
 				[3]int{0,3,2},
@@ -807,6 +803,7 @@ func DynHashDirectedGraphOutVerticePntrs(
 				[3]int{3,4,4},
 			},
 			map[int][]int{
+				// from, to
 				0: []int{1,2,3,4},
 				1: []int{2,3,4},
 				2: []int{3,4},
@@ -822,7 +819,7 @@ func DynHashDirectedGraphOutVerticePntrs(
 	}
 }
 
-func hashDirectedGraphOutEdgesAndVerticesHelper(
+func directedGraphOutEdgesAndVerticesHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -850,40 +847,45 @@ func hashDirectedGraphOutEdgesAndVerticesHelper(
 		test.Nil(err,t)
 		test.Eq(len(outEdges[i]),len(iterOutEdgesAndVertices),t)
 
-		for j:=0; j<len(outEdges[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutEdgesAndVertices) && !found; k++ {
-				found=(iterOutEdgesAndVertices[k].A==outEdges[i][j])
-			}
-			test.True(found,t)
-		}
-		for j:=0; j<len(outVertices[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutEdgesAndVertices) && !found; k++ {
-				found=(iterOutEdgesAndVertices[k].B==outVertices[i][j])
-			}
-			test.True(found,t)
-		}
+		iterOutEdges,err:=iter.Map[basic.Pair[int,int],int](
+			iter.SliceElems[basic.Pair[int,int]](iterOutEdgesAndVertices),
+			func(index int, val basic.Pair[int, int]) (int, error) {
+				return val.A, nil
+			},
+		).Collect()
+		test.Nil(err,t)
+		test.SlicesMatchUnordered[int](outEdges[i], iterOutEdges, t)
+
+		iterOutVertices,err:=iter.Map[basic.Pair[int,int],int](
+			iter.SliceElems[basic.Pair[int,int]](iterOutEdgesAndVertices),
+			func(index int, val basic.Pair[int, int]) (int, error) {
+				return val.B, nil
+			},
+		).Collect()
+		test.Nil(err,t)
+		test.SlicesMatchUnordered[int](outVertices[i], iterOutVertices, t)
 	}
 
 	err:=container.OutVertices(-1).Consume()
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the OutEdgesAndVertices method functionality of a dynamic graph.
-func DynHashDirectedGraphOutEdgesAndVertices(
+// Tests the OutEdgesAndVertices method functionality of a dynamic directed graph.
+func DynDirectedGraphOutEdgesAndVertices(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
-	hashDirectedGraphOutEdgesAndVerticesHelper(
+	directedGraphOutEdgesAndVerticesHelper(
 		factory(0), 6, 4,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{1,2,1},
 			[3]int{2,3,2},
 			[3]int{3,4,3},
 		},
 		map[int][]int{
+			// from, e
 			0: []int{0},
 			1: []int{1},
 			2: []int{2},
@@ -892,6 +894,7 @@ func DynHashDirectedGraphOutEdgesAndVertices(
 			5: []int{},
 		},
 		map[int][]int{
+			// from, to
 			0: []int{1},
 			1: []int{2},
 			2: []int{3},
@@ -901,9 +904,10 @@ func DynHashDirectedGraphOutEdgesAndVertices(
 		},
 		t,
 	)
-	hashDirectedGraphOutEdgesAndVerticesHelper(
+	directedGraphOutEdgesAndVerticesHelper(
 		factory(0), 5, 5,
 		[][3]int{
+			// from, to, e
 			[3]int{0,1,0},
 			[3]int{0,2,1},
 			[3]int{0,3,2},
@@ -916,6 +920,7 @@ func DynHashDirectedGraphOutEdgesAndVertices(
 			[3]int{3,4,4},
 		},
 		map[int][]int{
+			// from, e
 			0: []int{0,1,2,3},
 			1: []int{1,2,3},
 			2: []int{2,3},
@@ -924,6 +929,7 @@ func DynHashDirectedGraphOutEdgesAndVertices(
 			5: []int{},
 		},
 		map[int][]int{
+			// from, to
 			0: []int{1,2,3,4},
 			1: []int{2,3,4},
 			2: []int{3,4},
@@ -935,7 +941,7 @@ func DynHashDirectedGraphOutEdgesAndVertices(
 	)
 }
 
-func hashDirectedGraphOutEdgesAndVerticePntrsHelper(
+func directedGraphOutEdgesAndVerticePntrsHelper(
 	container dynamicContainers.DirectedGraph[int, int],
 	numVertices int,
 	numEdges int,
@@ -964,42 +970,47 @@ func hashDirectedGraphOutEdgesAndVerticePntrsHelper(
 		test.Nil(err,t)
 		test.Eq(len(outEdges[i]),len(iterOutEdgesAndVertices),t)
 
-		for j:=0; j<len(outEdges[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutEdgesAndVertices) && !found; k++ {
-				found=(*iterOutEdgesAndVertices[k].A==outEdges[i][j])
-			}
-			test.True(found,t)
-		}
-		for j:=0; j<len(outVertices[i]); j++ {
-			found:=false
-			for k:=0; k<len(iterOutEdgesAndVertices) && !found; k++ {
-				found=(*iterOutEdgesAndVertices[k].B==outVertices[i][j])
-			}
-			test.True(found,t)
-		}
+		iterOutEdges,err:=iter.Map[basic.Pair[*int,*int],int](
+			iter.SliceElems[basic.Pair[*int,*int]](iterOutEdgesAndVertices),
+			func(index int, val basic.Pair[*int, *int]) (int, error) {
+				return *val.A, nil
+			},
+		).Collect()
+		test.Nil(err,t)
+		test.SlicesMatchUnordered[int](outEdges[i], iterOutEdges, t)
+
+		iterOutVertices,err:=iter.Map[basic.Pair[*int,*int],int](
+			iter.SliceElems[basic.Pair[*int,*int]](iterOutEdgesAndVertices),
+			func(index int, val basic.Pair[*int, *int]) (int, error) {
+				return *val.B, nil
+			},
+		).Collect()
+		test.Nil(err,t)
+		test.SlicesMatchUnordered[int](outVertices[i], iterOutVertices, t)
 	}
 
 	err:=container.OutVertices(-1).Consume()
 	test.ContainsError(customerr.InvalidValue,err,t)
 	test.ContainsError(containerTypes.KeyError,err,t)
 }
-// Tests the OutEdgesAndVerticePntrs method functionality of a dynamic graph.
-func DynHashDirectedGraphOutEdgesAndVerticePntrs(
+// Tests the OutEdgesAndVerticePntrs method functionality of a dynamic directed graph.
+func DynDirectedGraphOutEdgesAndVerticePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ){
 	container:=factory(0)
 	if container.IsAddressable() {
-		hashDirectedGraphOutEdgesAndVerticePntrsHelper(
+		directedGraphOutEdgesAndVerticePntrsHelper(
 			factory(0), 6, 4,
 			[][3]int{
+				// from, to, e
 				[3]int{0,1,0},
 				[3]int{1,2,1},
 				[3]int{2,3,2},
 				[3]int{3,4,3},
 			},
 			map[int][]int{
+				// from, e
 				0: []int{0},
 				1: []int{1},
 				2: []int{2},
@@ -1008,6 +1019,7 @@ func DynHashDirectedGraphOutEdgesAndVerticePntrs(
 				5: []int{},
 			},
 			map[int][]int{
+				// from, to
 				0: []int{1},
 				1: []int{2},
 				2: []int{3},
@@ -1017,9 +1029,10 @@ func DynHashDirectedGraphOutEdgesAndVerticePntrs(
 			},
 			t,
 		)
-		hashDirectedGraphOutEdgesAndVerticePntrsHelper(
+		directedGraphOutEdgesAndVerticePntrsHelper(
 			factory(0), 5, 5,
 			[][3]int{
+				// from, to, e
 				[3]int{0,1,0},
 				[3]int{0,2,1},
 				[3]int{0,3,2},
@@ -1032,6 +1045,7 @@ func DynHashDirectedGraphOutEdgesAndVerticePntrs(
 				[3]int{3,4,4},
 			},
 			map[int][]int{
+				// from, e
 				0: []int{0,1,2,3},
 				1: []int{1,2,3},
 				2: []int{2,3},
@@ -1040,6 +1054,7 @@ func DynHashDirectedGraphOutEdgesAndVerticePntrs(
 				5: []int{},
 			},
 			map[int][]int{
+				// from, to
 				0: []int{1,2,3,4},
 				1: []int{2,3,4},
 				2: []int{3,4},
@@ -1053,4 +1068,40 @@ func DynHashDirectedGraphOutEdgesAndVerticePntrs(
 		tmp:=-1
 		test.Panics(func() { container.OutEdgesAndVerticePntrs(&tmp) }, t)
 	}
+}
+
+func directedGraphEdgesBetweenHelper(
+	container dynamicContainers.DirectedGraph[int, int],
+	numVertices int,
+	numEdges int,
+	links [][3]int,
+	from int,
+	to int,
+	outEdges map[int][]int,
+	t *testing.T,
+){
+	for i:=0; i<numVertices; i++ {
+		test.Nil(container.AddEdges(i),t)
+	}
+	for i:=0; i<numVertices; i++ {
+		test.Nil(container.AddVertices(i),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.Nil(container.LinkPntr(&links[i][0],&links[i][1],&links[i][2]),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
+	}
+	test.Eq(len(links),container.NumLinks(),t)
+
+	res,err:=container.EdgesBetween(from, to).Collect()
+	test.Nil(err,t)
+	test.SlicesMatchUnordered[int](res, outEdges[from], t)
+}
+// Tests the EdgesBetween method functionality of a dynamic directed graph.
+func DynDirectedGraphEdgesBetween(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+
 }
