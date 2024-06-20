@@ -1213,3 +1213,141 @@ func DynDirectedGraphEdgesBetweenPntr(
 		test.Panics(func() { container.EdgesBetweenPntr(&tmp, &tmp) }, t)
 	}
 }
+
+func directedGraphDeleteLinkHelper(
+	container dynamicContainers.DirectedGraph[int, int],
+	numVertices int,
+	numEdges int,
+	links [][3]int,
+	deleteLinks [][3]int,
+	t *testing.T,
+) {
+	for i:=0; i<numEdges; i++ {
+		test.Nil(container.AddEdges(i),t)
+	}
+	for i:=0; i<numVertices; i++ {
+		test.Nil(container.AddVertices(i),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
+	}
+	test.Eq(len(links),container.NumLinks(),t)
+
+	for i:=0; i<len(deleteLinks); i++ {
+		test.Nil(
+			container.DeleteLink(
+				deleteLinks[i][0],
+				deleteLinks[i][1],
+				deleteLinks[i][2],
+			),
+			t,
+		)
+	}
+	for i:=0; i<len(deleteLinks); i++ {
+		test.False(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
+	}
+	test.Eq(len(links)-len(deleteLinks),container.NumLinks(),t)
+}
+// Tests the DeleteLink method functionality of a dynamic directed graph.
+func DynDirectedGraphDeleteLink(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	directedGraphDeleteLinkPntrHelper(
+		factory(0),
+		3,
+		5,
+		[][3]int{
+			// from, to, e
+			[3]int{0,1,0},
+			[3]int{0,1,1},
+			[3]int{0,1,2},
+			[3]int{0,2,3},
+			[3]int{0,2,4},
+			[3]int{1,0,0},
+			[3]int{1,2,1},
+		},
+		[][3]int{
+			[3]int{0,1,0},
+			[3]int{0,1,1},
+			[3]int{1,0,0},
+		},
+		t,
+	)
+}
+
+// TODO - need to test the error portion of all methods (invalid vertex and edges)
+func directedGraphDeleteLinkPntrHelper(
+	container dynamicContainers.DirectedGraph[int, int],
+	numVertices int,
+	numEdges int,
+	links [][3]int,
+	deleteLinks [][3]int,
+	t *testing.T,
+) {
+	for i:=0; i<numEdges; i++ {
+		test.Nil(container.AddEdges(i),t)
+	}
+	for i:=0; i<numVertices; i++ {
+		test.Nil(container.AddVertices(i),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.Nil(container.Link(links[i][0],links[i][1],links[i][2]),t)
+	}
+	for i:=0; i<len(links); i++ {
+		test.True(container.ContainsLink(links[i][0],links[i][1],links[i][2]),t)
+	}
+	test.Eq(len(links),container.NumLinks(),t)
+
+	for i:=0; i<len(deleteLinks); i++ {
+		test.Nil(
+			container.DeleteLinkPntr(
+				&deleteLinks[i][0],
+				&deleteLinks[i][1],
+				&deleteLinks[i][2],
+			),
+			t,
+		)
+	}
+	for i:=0; i<len(deleteLinks); i++ {
+		test.False(
+			container.ContainsLink(
+				deleteLinks[i][0],
+				deleteLinks[i][1],
+				deleteLinks[i][2],
+			),
+			t,
+		)
+	}
+	test.Eq(len(links)-len(deleteLinks),container.NumLinks(),t)
+}
+// Tests the DeleteLinkPntr method functionality of a dynamic directed graph.
+func DynDirectedGraphDeleteLinkPntr(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	directedGraphDeleteLinkPntrHelper(
+		factory(0),
+		3,
+		5,
+		[][3]int{
+			// from, to, e
+			[3]int{0,1,0},
+			[3]int{0,1,1},
+			[3]int{0,1,2},
+			[3]int{0,2,3},
+			[3]int{0,2,4},
+			[3]int{1,0,0},
+			[3]int{1,2,1},
+		},
+		[][3]int{
+			[3]int{0,1,0},
+			[3]int{0,1,1},
+			[3]int{1,0,0},
+		},
+		t,
+	)
+}

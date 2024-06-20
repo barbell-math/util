@@ -14,6 +14,7 @@ type (
 	edgeHash hash.Hash
 	vertexHash hash.Hash
 	graphEdge basic.Pair[edgeHash, vertexHash]
+	internalHashGraphImpl map[vertexHash]Vector[graphEdge, *graphEdge]
 
 	// A type to represent an arbitrary graph with the specified vertex and edge
 	// types. The graph will maintain a set of vertices that are connected by a
@@ -31,7 +32,7 @@ type (
 		numLinks int
 		edges map[edgeHash]E
 		vertices map[vertexHash]V
-		graph map[vertexHash][]graphEdge
+		graph internalHashGraphImpl
 	}
 
 	// A synchronized version of HashGraph. All operations will be wrapped in 
@@ -47,6 +48,28 @@ type (
 		HashGraph[V,E,VI,EI]
 	}
 )
+
+func (_ *graphEdge)Eq(l *graphEdge, r *graphEdge) bool {
+	hw:=widgets.BuiltinHash{}
+	return (
+		hw.Eq((*hash.Hash)(&l.A),(*hash.Hash)(&r.A)) && 
+		hw.Eq((*hash.Hash)(&l.B),(*hash.Hash)(&r.B)))
+}
+
+func (_ *graphEdge)Lt(l *graphEdge, r *graphEdge) bool {
+	hw:=widgets.BuiltinHash{}
+	return (
+		hw.Lt((*hash.Hash)(&l.A),(*hash.Hash)(&r.A)) && 
+		hw.Lt((*hash.Hash)(&l.B),(*hash.Hash)(&r.B)))
+}
+
+func (_ *graphEdge)Hash(other *graphEdge) hash.Hash {
+	return ((hash.Hash)(other.A)).Combine((hash.Hash)(other.B))
+}
+
+func (_ *graphEdge)Zero(other *graphEdge) {
+	*other=graphEdge{A: edgeHash(0), B: vertexHash(0) }
+}
 
 // Creates a new hash graph initialized with enough memory to hold the specified
 // amount of vertices and edges. Both numVertices and numEdges must be >=0, an
@@ -66,7 +89,7 @@ func NewHashGraph[
 	}
 	em:=make(map[edgeHash]E,numEdges)
 	vm:=make(map[vertexHash]V,numVertices)
-	g:=make(map[vertexHash][]graphEdge,numVertices)
+	g:=make(internalHashGraphImpl,numVertices)
 	return HashGraph[V, E, VI, EI]{
 		numLinks: 0,
 		edges: em,
@@ -750,11 +773,7 @@ func (g *HashGraph[V,E,VI,EI])LinkPntr(from *V, to *V, e *E) error {
 	}
 
 	gNode,_:=g.graph[fromHash]
-	linkExists:=false
-	for i:=0; i<len(gNode) && !linkExists; i++ {
-		linkExists=(gNode[i].A==eHash && gNode[i].B==toHash)
-	}
-	if linkExists {
+	if _,found:=gNode.KeyOf(graphEdge{eHash, toHash}); found {
 		return nil
 	}
 
@@ -773,7 +792,7 @@ func (g *HashGraph[V,E,VI,EI])LinkPntr(from *V, to *V, e *E) error {
 //
 // Lock Type: Write
 //
-// Time Complexity: O(n), where n=num of outgoing edges from the start vertex
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
 func (g *SyncedHashGraph[V, E, VI, EI])LinkPntr(from *V, to *V, e *E) error {
 	g.Lock()
 	defer g.Unlock()
@@ -796,12 +815,78 @@ func (g *HashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
 	return nil
 }
 
+// Description: Removes a link within the graph without removing the underlying
+// vertices or edge. This may leave vertices with no links, and edges that don't
+// correspond to any edges. An error will be returned if either vertice does not
+// exist in the graph or if the supplied edge does not exist in the graph.
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
 func (g *HashGraph[V,E,VI,EI])DeleteLink(from V, to V, e E) error {
+	return g.DeleteLinkPntr(&from,&to,&e)
+}
+
+// Description: Places a write lock on the underlying hash graph before calling
+// the underlying hash graphs [HashGraph.DeleteLinkPntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
+func (g *SyncedHashGraph[V, E, VI, EI])DeleteLink(from V, to V, e E) error {
+	g.Lock()
+	defer g.Unlock()
+	return g.HashGraph.DeleteLinkPntr(&from,&to,&e)
+}
+
+// Description: Removes a link within the graph without removing the underlying
+// vertices or edge. This may leave vertices with no links, and edges that don't
+// correspond to any edges. An error will be returned if either vertice does not
+// exist in the graph or if the supplied edge does not exist in the graph.
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
+func (g *HashGraph[V,E,VI,EI])DeleteLinkPntr(from *V, to *V, e *E) error {
+	vw:=widgets.Widget[V,VI]{}
+	ew:=widgets.Widget[E,EI]{}
+	fromHash:=vertexHash(vw.Hash(from))
+	toHash:=vertexHash(vw.Hash(to))
+	eHash:=edgeHash(ew.Hash(e))
+
+	if _,ok:=g.vertices[fromHash]; !ok {
+		return getVertexError[V](from)
+	}
+	if _,ok:=g.vertices[toHash]; !ok {
+		return getVertexError[V](to)
+	}
+	if _,ok:=g.edges[eHash]; !ok {
+		return getEdgeError[E](e)
+	}
+
+	gNode,_:=g.graph[fromHash]
+	if idx,found:=gNode.KeyOf(graphEdge{eHash, toHash}); found {
+		if len(gNode) > 1 {
+			gNode.Delete(idx)
+			g.numLinks--
+			// g.graph[fromHash]=gNode -- eh??
+		} else if len(gNode)==1 {
+			delete(g.graph,fromHash)
+		}
+	}
 	return nil
 }
 
-func (g *HashGraph[V,E,VI,EI])DeleteLinkPntr(from *V, to *V, e *E) error {
-	return nil
+// Description: Places a write lock on the underlying hash graph before calling
+// the underlying hash graphs [HashGraph.DeleteLinkPntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
+func (g *SyncedHashGraph[V, E, VI, EI])DeleteLinkPntr(
+	from *V,
+	to *V,
+	e *E,
+) error {
+	g.Lock()
+	defer g.Unlock()
+	return g.HashGraph.DeleteLinkPntr(from, to, e)
 }
 
 func (g *HashGraph[V,E,VI,EI])DeleteLinks(from V, to V) error {
