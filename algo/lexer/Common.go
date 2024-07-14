@@ -3,16 +3,16 @@ package lexer
 type MatchStatus byte
 
 const (
-    NoMatch MatchStatus=0
-    Match MatchStatus=1<<iota
-    PossibleMatch
+	NoMatch MatchStatus = 0
+	Match   MatchStatus = 1 << iota
+	PossibleMatch
 )
 
 const (
-	validCharLowerBound byte=0
-	validCharUpperBound byte=127
-	invalid byte=iota+127
-    lambdaChar
+	validCharLowerBound byte = 0
+	validCharUpperBound byte = 127
+	invalid             byte = iota + 127
+	lambdaChar
 	lParenChar
 	rParenChar
 	backSlashChar
@@ -21,16 +21,16 @@ const (
 )
 
 var (
-	escapeChars map[byte]struct{}=map[byte]struct{}{
+	escapeChars map[byte]struct{} = map[byte]struct{}{
 		'\\': {},
-		'(': {},
-		')': {},
-		'*': {},
-		'|': {},
-		'_': {},
+		'(':  {},
+		')':  {},
+		'*':  {},
+		'|':  {},
+		'_':  {},
 	}
 
-	specialCharEncoding map[byte]byte=map[byte]byte{
+	specialCharEncoding map[byte]byte = map[byte]byte{
 		'(': lParenChar,
 		')': rParenChar,
 		'*': starChar,
@@ -38,4 +38,3 @@ var (
 		'_': lambdaChar,
 	}
 )
-

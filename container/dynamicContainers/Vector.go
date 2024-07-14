@@ -16,7 +16,7 @@ type ReadVector[V any] interface {
 		V,
 	]
 	containerTypes.KeyedComparisons[
-		containerTypes.KeyedComparisonsOtherConstraint[int,V],
+		containerTypes.KeyedComparisonsOtherConstraint[int, V],
 		int,
 		V,
 	]

@@ -51,7 +51,7 @@ func (v Variant[A, B]) dataStart() unsafe.Pointer {
 // type B is attempted to be accessed.
 func (v Variant[A, B]) SetValA(newVal A) Variant[A, B] {
 	v.initData()
-	v.aOrB=aVal
+	v.aOrB = aVal
 	*(*A)(v.dataStart()) = newVal
 	return v
 }
@@ -61,7 +61,7 @@ func (v Variant[A, B]) SetValA(newVal A) Variant[A, B] {
 // type A is attempted to be accessed.
 func (v Variant[A, B]) SetValB(newVal B) Variant[A, B] {
 	v.initData()
-	v.aOrB=bVal
+	v.aOrB = bVal
 	*(*B)(v.dataStart()) = newVal
 	return v
 }

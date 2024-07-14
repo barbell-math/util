@@ -3,11 +3,11 @@ package tests
 import (
 	"testing"
 
-	"github.com/barbell-math/util/test"
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
+	"github.com/barbell-math/util/test"
 )
 
 func mapReadInterface[T any, U any](c dynamicContainers.ReadMap[T, U])   {}

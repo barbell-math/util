@@ -10,7 +10,7 @@ type ReadMap[K any, V any] interface {
 	containerTypes.ReadOps[V]
 	containerTypes.ReadKeyedOps[K, V]
 	containerTypes.KeyedComparisons[
-		containerTypes.KeyedComparisonsOtherConstraint[K,V],
+		containerTypes.KeyedComparisonsOtherConstraint[K, V],
 		K,
 		V,
 	]

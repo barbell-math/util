@@ -494,7 +494,7 @@ func (v *Vector[T, U]) InsertSequential(idx int, vals ...T) error {
 func (v *SyncedVector[T, U]) InsertSequential(idx int, vals ...T) error {
 	v.Lock()
 	defer v.Unlock()
-	return v.Vector.InsertSequential(idx,vals...)
+	return v.Vector.InsertSequential(idx, vals...)
 }
 
 // Description: Pop will remove all occurrences of val in the vector. All

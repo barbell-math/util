@@ -362,7 +362,7 @@ func (m *HashMap[K, V, KI, VI]) Pop(v V) int {
 
 // Description: Places a write lock on the underlying map and then calls the
 // underlying map [Map.Pop] implementation method. The [HashMap.Pop] method is
-// not called directly to avoid copying the v argument twice, which could be 
+// not called directly to avoid copying the v argument twice, which could be
 // expensive with a large type for the T generic.
 //
 // Lock Type: Write
@@ -374,7 +374,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) Pop(v V) int {
 	return m.HashMap.popImpl(&v)
 }
 
-func (m *HashMap[K,V,KI,VI])popImpl(v *V) int {
+func (m *HashMap[K, V, KI, VI]) popImpl(v *V) int {
 	rv := 0
 	vw := widgets.Widget[V, VI]{}
 	for iterH, iterV := range m.internalHashMapImpl {
@@ -406,7 +406,7 @@ func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
 			// Scenario 1: The value is the last value of the collision chain
 			//   The value will be orphaned an unaccessable using the standard
 			//   Get method but will be deleted by a future iteration of the
-			//   popImpl function. If it were moved this 're-iteration' would 
+			//   popImpl function. If it were moved this 're-iteration' would
 			//	 not be guarinteed.
 			// Scenario 2: The value is in the middle of a collision chain. in
 			//   this case the hole that is created will be filled by an

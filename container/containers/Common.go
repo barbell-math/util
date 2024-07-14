@@ -12,7 +12,7 @@ import (
 func addressableSafeGet[K any, V any](
 	other interface {
 		containerTypes.Addressable
-		containerTypes.ReadKeyedOps[K,V] 
+		containerTypes.ReadKeyedOps[K, V]
 	},
 	k K,
 ) (*V, error) {

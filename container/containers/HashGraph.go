@@ -11,9 +11,9 @@ import (
 )
 
 type (
-	edgeHash hash.Hash
-	vertexHash hash.Hash
-	graphLink basic.Pair[edgeHash, vertexHash]
+	edgeHash              hash.Hash
+	vertexHash            hash.Hash
+	graphLink             basic.Pair[edgeHash, vertexHash]
 	internalHashGraphImpl map[vertexHash]Vector[graphLink, *graphLink]
 
 	// This is used when only the vertex part of a graph edge is needed
@@ -25,8 +25,8 @@ type (
 	// types. The graph will maintain a set of vertices that are connected by a
 	// set of edges. The type constraints on the generics define the logic for
 	// for how specific operations, such as equality comparisons, will be
-	// handled. The hash and equals methods defined in the widget types *must* 
-	// be congruent as they are both used when creating the graph internally. 
+	// handled. The hash and equals methods defined in the widget types *must*
+	// be congruent as they are both used when creating the graph internally.
 	// The graph will grow as edges and vertices are added.
 	HashGraph[
 		V any,
@@ -35,12 +35,12 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		numLinks int
-		edges map[edgeHash]E
+		edges    map[edgeHash]E
 		vertices map[vertexHash]V
-		graph internalHashGraphImpl
+		graph    internalHashGraphImpl
 	}
 
-	// A synchronized version of HashGraph. All operations will be wrapped in 
+	// A synchronized version of HashGraph. All operations will be wrapped in
 	// the appropriate calls to the embedded RWMutex. A pointer to a RWMutex is
 	// embedded rather than a value to avoid copying the lock value.
 	SyncedHashGraph[
@@ -50,57 +50,55 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		*sync.RWMutex
-		HashGraph[V,E,VI,EI]
+		HashGraph[V, E, VI, EI]
 	}
 )
 
-func (_ *graphLink)Eq(l *graphLink, r *graphLink) bool {
-	hw:=widgets.BuiltinHash{}
-	return (
-		hw.Eq((*hash.Hash)(&l.A),(*hash.Hash)(&r.A)) && 
-		hw.Eq((*hash.Hash)(&l.B),(*hash.Hash)(&r.B)))
+func (_ *graphLink) Eq(l *graphLink, r *graphLink) bool {
+	hw := widgets.BuiltinHash{}
+	return (hw.Eq((*hash.Hash)(&l.A), (*hash.Hash)(&r.A)) &&
+		hw.Eq((*hash.Hash)(&l.B), (*hash.Hash)(&r.B)))
 }
-func (_ *graphLink)Lt(l *graphLink, r *graphLink) bool {
-	hw:=widgets.BuiltinHash{}
-	return (
-		hw.Lt((*hash.Hash)(&l.A),(*hash.Hash)(&r.A)) && 
-		hw.Lt((*hash.Hash)(&l.B),(*hash.Hash)(&r.B)))
+func (_ *graphLink) Lt(l *graphLink, r *graphLink) bool {
+	hw := widgets.BuiltinHash{}
+	return (hw.Lt((*hash.Hash)(&l.A), (*hash.Hash)(&r.A)) &&
+		hw.Lt((*hash.Hash)(&l.B), (*hash.Hash)(&r.B)))
 }
-func (_ *graphLink)Hash(other *graphLink) hash.Hash {
+func (_ *graphLink) Hash(other *graphLink) hash.Hash {
 	return ((hash.Hash)(other.A)).Combine((hash.Hash)(other.B))
 }
-func (_ *graphLink)Zero(other *graphLink) {
-	*other=graphLink{A: edgeHash(0), B: vertexHash(0) }
+func (_ *graphLink) Zero(other *graphLink) {
+	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
 }
 
-func (_ *vertexOnlyGraphLinkWidget)Eq(l *graphLink, r *graphLink) bool {
-	hw:=widgets.BuiltinHash{}
-	return hw.Eq((*hash.Hash)(&l.B),(*hash.Hash)(&r.B))
+func (_ *vertexOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
+	hw := widgets.BuiltinHash{}
+	return hw.Eq((*hash.Hash)(&l.B), (*hash.Hash)(&r.B))
 }
-func (_ *vertexOnlyGraphLinkWidget)Lt(l *graphLink, r *graphLink) bool {
-	hw:=widgets.BuiltinHash{}
-	return hw.Lt((*hash.Hash)(&l.B),(*hash.Hash)(&r.B))
+func (_ *vertexOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
+	hw := widgets.BuiltinHash{}
+	return hw.Lt((*hash.Hash)(&l.B), (*hash.Hash)(&r.B))
 }
-func (_ *vertexOnlyGraphLinkWidget)Hash(other *graphLink) hash.Hash {
+func (_ *vertexOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return (hash.Hash)(other.B)
 }
-func (_ *vertexOnlyGraphLinkWidget)Zero(other *graphLink) {
-	*other=graphLink{A: edgeHash(0), B: vertexHash(0) }
+func (_ *vertexOnlyGraphLinkWidget) Zero(other *graphLink) {
+	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
 }
 
-func (_ *edgeOnlyGraphLinkWidget)Eq(l *graphLink, r *graphLink) bool {
-	hw:=widgets.BuiltinHash{}
-	return hw.Eq((*hash.Hash)(&l.A),(*hash.Hash)(&r.A))
+func (_ *edgeOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
+	hw := widgets.BuiltinHash{}
+	return hw.Eq((*hash.Hash)(&l.A), (*hash.Hash)(&r.A))
 }
-func (_ *edgeOnlyGraphLinkWidget)Lt(l *graphLink, r *graphLink) bool {
-	hw:=widgets.BuiltinHash{}
-	return hw.Lt((*hash.Hash)(&l.A),(*hash.Hash)(&r.A))
+func (_ *edgeOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
+	hw := widgets.BuiltinHash{}
+	return hw.Lt((*hash.Hash)(&l.A), (*hash.Hash)(&r.A))
 }
-func (_ *edgeOnlyGraphLinkWidget)Hash(other *graphLink) hash.Hash {
+func (_ *edgeOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return (hash.Hash)(other.A)
 }
-func (_ *edgeOnlyGraphLinkWidget)Zero(other *graphLink) {
-	*other=graphLink{A: edgeHash(0), B: vertexHash(0) }
+func (_ *edgeOnlyGraphLinkWidget) Zero(other *graphLink) {
+	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
 }
 
 // Creates a new hash graph initialized with enough memory to hold the specified
@@ -112,21 +110,21 @@ func NewHashGraph[
 	E any,
 	VI widgets.WidgetInterface[V],
 	EI widgets.WidgetInterface[E],
-](numVertices int, numEdges int) (HashGraph[V,E,VI,EI],error) {
-	if numVertices<0 {
+](numVertices int, numEdges int) (HashGraph[V, E, VI, EI], error) {
+	if numVertices < 0 {
 		return HashGraph[V, E, VI, EI]{}, getSizeError(numVertices)
 	}
-	if numEdges<0 {
+	if numEdges < 0 {
 		return HashGraph[V, E, VI, EI]{}, getSizeError(numEdges)
 	}
-	em:=make(map[edgeHash]E,numEdges)
-	vm:=make(map[vertexHash]V,numVertices)
-	g:=make(internalHashGraphImpl,numVertices)
+	em := make(map[edgeHash]E, numEdges)
+	vm := make(map[vertexHash]V, numVertices)
+	g := make(internalHashGraphImpl, numVertices)
 	return HashGraph[V, E, VI, EI]{
 		numLinks: 0,
-		edges: em,
+		edges:    em,
 		vertices: vm,
-		graph: g,
+		graph:    g,
 	}, nil
 }
 
@@ -140,16 +138,16 @@ func NewSyncedHashGraph[
 	E any,
 	VI widgets.WidgetInterface[V],
 	EI widgets.WidgetInterface[E],
-](numVertices int, numEdges int) (SyncedHashGraph[V,E,VI,EI],error) {
-	if numVertices<0 {
+](numVertices int, numEdges int) (SyncedHashGraph[V, E, VI, EI], error) {
+	if numVertices < 0 {
 		return SyncedHashGraph[V, E, VI, EI]{}, getSizeError(numVertices)
 	}
-	if numEdges<0 {
+	if numEdges < 0 {
 		return SyncedHashGraph[V, E, VI, EI]{}, getSizeError(numEdges)
 	}
-	rv,err:=NewHashGraph[V,E,VI,EI](numVertices, numEdges)
+	rv, err := NewHashGraph[V, E, VI, EI](numVertices, numEdges)
 	return SyncedHashGraph[V, E, VI, EI]{
-		RWMutex: &sync.RWMutex{},
+		RWMutex:   &sync.RWMutex{},
 		HashGraph: rv,
 	}, err
 }
@@ -191,25 +189,26 @@ func (g *SyncedHashGraph[V, E, VI, EI]) RUnlock() { g.RWMutex.RUnlock() }
 func (g *HashGraph[V, E, VI, EI]) IsAddressable() bool { return false }
 
 // Returns false, a hash graph is not synced.
-func (g *HashGraph[V,E,VI,EI]) IsSynced() bool { return false }
+func (g *HashGraph[V, E, VI, EI]) IsSynced() bool { return false }
 
 // Returns true, a synced hash graph is synced.
-func (g *SyncedHashGraph[V,E,VI,EI]) IsSynced() bool { return true }
+func (g *SyncedHashGraph[V, E, VI, EI]) IsSynced() bool { return true }
 
 // Description: NumEdges will return the number of edges in the graph. This will
 // include any unconnected edges.
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V,E,VI,EI])NumEdges() int {
+func (g *HashGraph[V, E, VI, EI]) NumEdges() int {
 	return len(g.edges)
 }
+
 // Description: NumEdges will return the number of edges in the graph. This will
 // include any unconnected edges.
 //
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V,E,VI,EI])NumEdges() int {
+func (g *SyncedHashGraph[V, E, VI, EI]) NumEdges() int {
 	g.RLock()
 	defer g.RUnlock()
 	return len(g.edges)
@@ -219,7 +218,7 @@ func (g *SyncedHashGraph[V,E,VI,EI])NumEdges() int {
 // will include any unconnected vertices.
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V,E,VI,EI])NumVertices() int {
+func (g *HashGraph[V, E, VI, EI]) NumVertices() int {
 	return len(g.vertices)
 }
 
@@ -229,7 +228,7 @@ func (g *HashGraph[V,E,VI,EI])NumVertices() int {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V,E,VI,EI])NumVertices() int {
+func (g *SyncedHashGraph[V, E, VI, EI]) NumVertices() int {
 	g.RLock()
 	defer g.RUnlock()
 	return len(g.vertices)
@@ -240,9 +239,10 @@ func (g *SyncedHashGraph[V,E,VI,EI])NumVertices() int {
 // any orphaned edges.
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V,E,VI,EI])NumLinks() int {
+func (g *HashGraph[V, E, VI, EI]) NumLinks() int {
 	return g.numLinks
 }
+
 // Description: NumLinks will return the number of links in the graph. This is
 // different from the number of edges, as the number of links will not include
 // any orphaned edges.
@@ -250,7 +250,7 @@ func (g *HashGraph[V,E,VI,EI])NumLinks() int {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V,E,VI,EI])NumLinks() int {
+func (g *SyncedHashGraph[V, E, VI, EI]) NumLinks() int {
 	g.RLock()
 	defer g.RUnlock()
 	return g.numLinks
@@ -259,8 +259,8 @@ func (g *SyncedHashGraph[V,E,VI,EI])NumLinks() int {
 // Description: Returns an iterator that iterates over the edges in the graph.
 //
 // Time Complexity: O(n), where n=num edges
-func (g *HashGraph[V,E,VI,EI])Edges() iter.Iter[E] {
-	return iter.MapVals[edgeHash,E](g.edges)
+func (g *HashGraph[V, E, VI, EI]) Edges() iter.Iter[E] {
+	return iter.MapVals[edgeHash, E](g.edges)
 }
 
 // Description: Modifies the iterator chain returned by the underlying
@@ -272,15 +272,15 @@ func (g *HashGraph[V,E,VI,EI])Edges() iter.Iter[E] {
 // Lock Type: Read
 //
 // Time Complexity: O(n), where n=num edges
-func (g *SyncedHashGraph[V,E,VI,EI])Edges() iter.Iter[E] {
-	return iter.MapVals[edgeHash,E](g.edges).SetupTeardown(
+func (g *SyncedHashGraph[V, E, VI, EI]) Edges() iter.Iter[E] {
+	return iter.MapVals[edgeHash, E](g.edges).SetupTeardown(
 		func() error { g.RLock(); return nil },
 		func() error { g.RUnlock(); return nil },
 	)
 }
 
 // Panics, hash graphs are not addressable.
-func (g *HashGraph[V,E,VI,EI]) EdgePntrs() iter.Iter[*E] {
+func (g *HashGraph[V, E, VI, EI]) EdgePntrs() iter.Iter[*E] {
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
@@ -288,9 +288,10 @@ func (g *HashGraph[V,E,VI,EI]) EdgePntrs() iter.Iter[*E] {
 // graph.
 //
 // Time Complexity: O(n), where n=num edges
-func (g *HashGraph[V,E,VI,EI])Vertices() iter.Iter[V] {
-	return iter.MapVals[vertexHash,V](g.vertices)
+func (g *HashGraph[V, E, VI, EI]) Vertices() iter.Iter[V] {
+	return iter.MapVals[vertexHash, V](g.vertices)
 }
+
 // Description: Modifies the iterator chain returned by the underlying
 // [HashGraph.Vertices] method such that a read lock will be placed on the
 // underlying hash graph when the iterator is consumed. The hash graph will have
@@ -300,15 +301,15 @@ func (g *HashGraph[V,E,VI,EI])Vertices() iter.Iter[V] {
 // Lock Type: Read
 //
 // Time Complexity: O(n), where n=num vertices
-func (g *SyncedHashGraph[V,E,VI,EI])Vertices() iter.Iter[V] {
-	return iter.MapVals[vertexHash,V](g.vertices).SetupTeardown(
+func (g *SyncedHashGraph[V, E, VI, EI]) Vertices() iter.Iter[V] {
+	return iter.MapVals[vertexHash, V](g.vertices).SetupTeardown(
 		func() error { g.RLock(); return nil },
 		func() error { g.RUnlock(); return nil },
 	)
 }
 
 // Panics, hash graphs are not addressable.
-func (g *HashGraph[V,E,VI,EI]) VerticePntrs() iter.Iter[*V] {
+func (g *HashGraph[V, E, VI, EI]) VerticePntrs() iter.Iter[*V] {
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
@@ -317,9 +318,9 @@ func (g *HashGraph[V,E,VI,EI]) VerticePntrs() iter.Iter[*V] {
 // that the hash graph was initialized with.
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V,E,VI,EI])ContainsVertex(v V) bool {
-	vw:=widgets.Widget[V,VI]{}
-	_,ok:=g.vertices[vertexHash(vw.Hash(&v))]
+func (g *HashGraph[V, E, VI, EI]) ContainsVertex(v V) bool {
+	vw := widgets.Widget[V, VI]{}
+	_, ok := g.vertices[vertexHash(vw.Hash(&v))]
 	return ok
 }
 
@@ -331,11 +332,11 @@ func (g *HashGraph[V,E,VI,EI])ContainsVertex(v V) bool {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V,E,VI,EI])ContainsVertex(v V) bool {
+func (g *SyncedHashGraph[V, E, VI, EI]) ContainsVertex(v V) bool {
 	g.RLock()
 	defer g.RUnlock()
-	vw:=widgets.Widget[V,VI]{}
-	_,ok:=g.vertices[vertexHash(vw.Hash(&v))]
+	vw := widgets.Widget[V, VI]{}
+	_, ok := g.vertices[vertexHash(vw.Hash(&v))]
 	return ok
 }
 
@@ -344,9 +345,9 @@ func (g *SyncedHashGraph[V,E,VI,EI])ContainsVertex(v V) bool {
 // the generic VI widget type that the hash graph was initialized with.
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V,E,VI,EI])ContainsVertexPntr(v *V) bool {
-	vw:=widgets.Widget[V,VI]{}
-	_,ok:=g.vertices[vertexHash(vw.Hash(v))]
+func (g *HashGraph[V, E, VI, EI]) ContainsVertexPntr(v *V) bool {
+	vw := widgets.Widget[V, VI]{}
+	_, ok := g.vertices[vertexHash(vw.Hash(v))]
 	return ok
 }
 
@@ -356,11 +357,11 @@ func (g *HashGraph[V,E,VI,EI])ContainsVertexPntr(v *V) bool {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V,E,VI,EI])ContainsVertexPntr(v *V) bool {
+func (g *SyncedHashGraph[V, E, VI, EI]) ContainsVertexPntr(v *V) bool {
 	g.RLock()
 	defer g.RUnlock()
-	vw:=widgets.Widget[V,VI]{}
-	_,ok:=g.vertices[vertexHash(vw.Hash(v))]
+	vw := widgets.Widget[V, VI]{}
+	_, ok := g.vertices[vertexHash(vw.Hash(v))]
 	return ok
 }
 
@@ -369,9 +370,9 @@ func (g *SyncedHashGraph[V,E,VI,EI])ContainsVertexPntr(v *V) bool {
 // that the hash graph was initialized with.
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V,E,VI,EI])ContainsEdge(e E) bool {
-	ew:=widgets.Widget[E,EI]{}
-	_,ok:=g.edges[edgeHash(ew.Hash(&e))]
+func (g *HashGraph[V, E, VI, EI]) ContainsEdge(e E) bool {
+	ew := widgets.Widget[E, EI]{}
+	_, ok := g.edges[edgeHash(ew.Hash(&e))]
 	return ok
 }
 
@@ -383,11 +384,11 @@ func (g *HashGraph[V,E,VI,EI])ContainsEdge(e E) bool {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V,E,VI,EI])ContainsEdge(e E) bool {
+func (g *SyncedHashGraph[V, E, VI, EI]) ContainsEdge(e E) bool {
 	g.RLock()
 	defer g.RUnlock()
-	ew:=widgets.Widget[E,EI]{}
-	_,ok:=g.edges[edgeHash(ew.Hash(&e))]
+	ew := widgets.Widget[E, EI]{}
+	_, ok := g.edges[edgeHash(ew.Hash(&e))]
 	return ok
 }
 
@@ -396,9 +397,9 @@ func (g *SyncedHashGraph[V,E,VI,EI])ContainsEdge(e E) bool {
 // generic EI widget type that the hash graph was initialized with.
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V,E,VI,EI])ContainsEdgePntr(e *E) bool {
-	ew:=widgets.Widget[E,EI]{}
-	_,ok:=g.edges[edgeHash(ew.Hash(e))]
+func (g *HashGraph[V, E, VI, EI]) ContainsEdgePntr(e *E) bool {
+	ew := widgets.Widget[E, EI]{}
+	_, ok := g.edges[edgeHash(ew.Hash(e))]
 	return ok
 }
 
@@ -408,19 +409,19 @@ func (g *HashGraph[V,E,VI,EI])ContainsEdgePntr(e *E) bool {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V,E,VI,EI])ContainsEdgePntr(e *E) bool {
+func (g *SyncedHashGraph[V, E, VI, EI]) ContainsEdgePntr(e *E) bool {
 	g.RLock()
 	defer g.RUnlock()
-	ew:=widgets.Widget[E,EI]{}
-	_,ok:=g.edges[edgeHash(ew.Hash(e))]
+	ew := widgets.Widget[E, EI]{}
+	_, ok := g.edges[edgeHash(ew.Hash(e))]
 	return ok
 }
 
 // Description: Returns true if the supplied edge links the supplied vertices.
 //
 // Time Complexity: O(n), where n=num outgoing edges from the starting vertex.
-func (g *HashGraph[V,E,VI,EI])ContainsLink(from V, to V, e E) bool {
-	return g.ContainsLinkPntr(&from,&to,&e)
+func (g *HashGraph[V, E, VI, EI]) ContainsLink(from V, to V, e E) bool {
+	return g.ContainsLinkPntr(&from, &to, &e)
 }
 
 // Description: Places a read lock on the underlying hash graph and then calls
@@ -431,36 +432,36 @@ func (g *HashGraph[V,E,VI,EI])ContainsLink(from V, to V, e E) bool {
 // Lock Type: Read
 //
 // Time Complexity: O(n), where n=num outgoing edges from the starting vertex.
-func (g *SyncedHashGraph[V,E,VI,EI])ContainsLink(from V, to V, e E) bool {
+func (g *SyncedHashGraph[V, E, VI, EI]) ContainsLink(from V, to V, e E) bool {
 	g.RLock()
 	defer g.RUnlock()
-	return g.HashGraph.ContainsLinkPntr(&from,&to,&e)
+	return g.HashGraph.ContainsLinkPntr(&from, &to, &e)
 }
 
 // Description: Returns true if the supplied edge links the supplied vertices.
 //
 // Time Complexity: O(n), where n=num outgoing edges from the starting vertex.
-func (g *HashGraph[V,E,VI,EI])ContainsLinkPntr(from *V, to *V, e *E) bool {
-	vw:=widgets.Widget[V,VI]{}
-	ew:=widgets.Widget[E,EI]{}
-	fromHash:=vertexHash(vw.Hash(from))
-	toHash:=vertexHash(vw.Hash(to))
-	eHash:=edgeHash(ew.Hash(e))
+func (g *HashGraph[V, E, VI, EI]) ContainsLinkPntr(from *V, to *V, e *E) bool {
+	vw := widgets.Widget[V, VI]{}
+	ew := widgets.Widget[E, EI]{}
+	fromHash := vertexHash(vw.Hash(from))
+	toHash := vertexHash(vw.Hash(to))
+	eHash := edgeHash(ew.Hash(e))
 
-	if _,ok:=g.vertices[fromHash]; !ok {
+	if _, ok := g.vertices[fromHash]; !ok {
 		return false
 	}
-	if _,ok:=g.vertices[toHash]; !ok {
+	if _, ok := g.vertices[toHash]; !ok {
 		return false
 	}
-	if _,ok:=g.edges[eHash]; !ok {
+	if _, ok := g.edges[eHash]; !ok {
 		return false
 	}
 
-	gNode,_:=g.graph[fromHash]
-	linkExists:=false
-	for i:=0; i<len(gNode) && !linkExists; i++ {
-		linkExists=(gNode[i].A==eHash && gNode[i].B==toHash)
+	gNode, _ := g.graph[fromHash]
+	linkExists := false
+	for i := 0; i < len(gNode) && !linkExists; i++ {
+		linkExists = (gNode[i].A == eHash && gNode[i].B == toHash)
 	}
 	if !linkExists {
 		return false
@@ -474,17 +475,17 @@ func (g *HashGraph[V,E,VI,EI])ContainsLinkPntr(from *V, to *V, e *E) bool {
 // Lock Type: Read
 //
 // Time Complexity: O(n), where n=num outgoing edges from the starting vertex.
-func (g *SyncedHashGraph[V,E,VI,EI])ContainsLinkPntr(from *V, to *V, e *E) bool {
+func (g *SyncedHashGraph[V, E, VI, EI]) ContainsLinkPntr(from *V, to *V, e *E) bool {
 	g.RLock()
 	defer g.RUnlock()
-	return g.HashGraph.ContainsLinkPntr(from,to,e)
+	return g.HashGraph.ContainsLinkPntr(from, to, e)
 }
 
 // Description: Returns the number of outgoing edges from the supplied vertex
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V, E, VI, EI])NumOutEdges(v V) int {
-	return g.NumOutEdgesPntr(&v)	
+func (g *HashGraph[V, E, VI, EI]) NumOutEdges(v V) int {
+	return g.NumOutEdgesPntr(&v)
 }
 
 // Description: Places a read lock on the underlying hash graph and then calls
@@ -493,7 +494,7 @@ func (g *HashGraph[V, E, VI, EI])NumOutEdges(v V) int {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V, E, VI, EI])NumOutEdges(v V) int {
+func (g *SyncedHashGraph[V, E, VI, EI]) NumOutEdges(v V) int {
 	g.RLock()
 	defer g.RUnlock()
 	return g.HashGraph.NumOutEdgesPntr(&v)
@@ -502,14 +503,14 @@ func (g *SyncedHashGraph[V, E, VI, EI])NumOutEdges(v V) int {
 // Description: Returns the number of outgoing edges from the supplied vertex
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V, E, VI, EI])NumOutEdgesPntr(v *V) int {
-	vw:=widgets.Widget[V,VI]{}
-	vHash:=vertexHash(vw.Hash(v))
+func (g *HashGraph[V, E, VI, EI]) NumOutEdgesPntr(v *V) int {
+	vw := widgets.Widget[V, VI]{}
+	vHash := vertexHash(vw.Hash(v))
 
-	if _,ok:=g.vertices[vHash]; !ok {
+	if _, ok := g.vertices[vHash]; !ok {
 		return 0
 	}
-	if _,ok:=g.graph[vHash]; !ok {
+	if _, ok := g.graph[vHash]; !ok {
 		return 0
 	}
 	return len(g.graph[vHash])
@@ -521,7 +522,7 @@ func (g *HashGraph[V, E, VI, EI])NumOutEdgesPntr(v *V) int {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V, E, VI, EI])NumOutEdgesPntr(v *V) int {
+func (g *SyncedHashGraph[V, E, VI, EI]) NumOutEdgesPntr(v *V) int {
 	g.RLock()
 	defer g.RUnlock()
 	return g.HashGraph.NumOutEdgesPntr(v)
@@ -532,11 +533,11 @@ func (g *SyncedHashGraph[V, E, VI, EI])NumOutEdgesPntr(v *V) int {
 // single edge may be returned multiple times by the iterator.
 //
 // Time Complexity: O(n), where n=num of outgoing edges
-func (g *HashGraph[V,E,VI,EI])OutEdges(v V) iter.Iter[E] {
+func (g *HashGraph[V, E, VI, EI]) OutEdges(v V) iter.Iter[E] {
 	return g.outEdgesImpl(&v)
 }
 
-// Description: Modifies the iterator chain returned by the underlying 
+// Description: Modifies the iterator chain returned by the underlying
 // [HashGraph.OutEdges] method such that a read lock will be placed on the
 // underlying hash graph when the iterator is consumed. The hash graph will have
 // a read lock the entire time the iteration is being performed. The lock will
@@ -545,7 +546,7 @@ func (g *HashGraph[V,E,VI,EI])OutEdges(v V) iter.Iter[E] {
 // Lock Type: Read
 //
 // Time Complexity: O(n), where n=num of outgoing edges
-func (g *SyncedHashGraph[V, E, VI, EI])OutEdges(v V) iter.Iter[E] {
+func (g *SyncedHashGraph[V, E, VI, EI]) OutEdges(v V) iter.Iter[E] {
 	return g.HashGraph.outEdgesImpl(&v).SetupTeardown(
 		func() error { g.RLock(); return nil },
 		func() error { g.RUnlock(); return nil },
@@ -553,22 +554,22 @@ func (g *SyncedHashGraph[V, E, VI, EI])OutEdges(v V) iter.Iter[E] {
 }
 
 // Panics, hash graphs are non-addressable.
-func (g *HashGraph[V, E, VI, EI])OutEdgePntrs(v *V) iter.Iter[*E] {
+func (g *HashGraph[V, E, VI, EI]) OutEdgePntrs(v *V) iter.Iter[*E] {
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
-func (g *HashGraph[V, E, VI, EI])outEdgesImpl(v *V) iter.Iter[E] {
-	vw:=widgets.Widget[V,VI]{}
-	vHash:=vertexHash(vw.Hash(v))
-	if _,ok:=g.vertices[vHash]; !ok {
+func (g *HashGraph[V, E, VI, EI]) outEdgesImpl(v *V) iter.Iter[E] {
+	vw := widgets.Widget[V, VI]{}
+	vHash := vertexHash(vw.Hash(v))
+	if _, ok := g.vertices[vHash]; !ok {
 		var tmp E
-		return iter.ValElem[E](tmp,getVertexError[V](v),1)
+		return iter.ValElem[E](tmp, getVertexError[V](v), 1)
 	}
-	if _,ok:=g.graph[vHash]; !ok {
+	if _, ok := g.graph[vHash]; !ok {
 		// It is a valid vertex, just has no out going edges
 		return iter.NoElem[E]()
 	}
-	return iter.Map[graphLink,E](
+	return iter.Map[graphLink, E](
 		iter.SliceElems[graphLink](g.graph[vHash]),
 		func(index int, val graphLink) (E, error) {
 			return g.edges[val.A], nil
@@ -577,15 +578,15 @@ func (g *HashGraph[V, E, VI, EI])outEdgesImpl(v *V) iter.Iter[E] {
 }
 
 // Description: Returns an iterator that supplies all of the outgoing vertices
-// from the supplied vertex. Duplicate vertices will not be filtered out, 
+// from the supplied vertex. Duplicate vertices will not be filtered out,
 // meaning a single vertex may be returned multiple times by the iterator.
 //
 // Time Complexity: O(n), where n=num of outgoing edges
-func (g *HashGraph[V,E,VI,EI])OutVertices(v V) iter.Iter[V] {
+func (g *HashGraph[V, E, VI, EI]) OutVertices(v V) iter.Iter[V] {
 	return g.outVerticesImpl(&v)
 }
 
-// Description: Modifies the iterator chain returned by the underlying 
+// Description: Modifies the iterator chain returned by the underlying
 // [HashGraph.OutVertices] method such that a read lock will be placed on the
 // underlying hash graph when the iterator is consumed. The hash graph will have
 // a read lock the entire time the iteration is being performed. The lock will
@@ -594,7 +595,7 @@ func (g *HashGraph[V,E,VI,EI])OutVertices(v V) iter.Iter[V] {
 // Lock Type: Read
 //
 // Time Complexity: O(n), where n=num of outgoing edges
-func (g *SyncedHashGraph[V,E,VI,EI])OutVertices(v V) iter.Iter[V] {
+func (g *SyncedHashGraph[V, E, VI, EI]) OutVertices(v V) iter.Iter[V] {
 	return g.HashGraph.outVerticesImpl(&v).SetupTeardown(
 		func() error { g.RLock(); return nil },
 		func() error { g.RUnlock(); return nil },
@@ -602,22 +603,22 @@ func (g *SyncedHashGraph[V,E,VI,EI])OutVertices(v V) iter.Iter[V] {
 }
 
 // Panics, hash graphs are non-addressable
-func (g *HashGraph[V, E, VI, EI])OutVerticePntrs(v *V) iter.Iter[*V] {
+func (g *HashGraph[V, E, VI, EI]) OutVerticePntrs(v *V) iter.Iter[*V] {
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
-func (g *HashGraph[V,E,VI,EI])outVerticesImpl(v *V) iter.Iter[V] {
-	vw:=widgets.Widget[V,VI]{}
-	vHash:=vertexHash(vw.Hash(v))
-	if _,ok:=g.vertices[vHash]; !ok {
+func (g *HashGraph[V, E, VI, EI]) outVerticesImpl(v *V) iter.Iter[V] {
+	vw := widgets.Widget[V, VI]{}
+	vHash := vertexHash(vw.Hash(v))
+	if _, ok := g.vertices[vHash]; !ok {
 		var tmp V
-		return iter.ValElem[V](tmp,getVertexError[V](v),1)
+		return iter.ValElem[V](tmp, getVertexError[V](v), 1)
 	}
-	if _,ok:=g.graph[vHash]; !ok {
+	if _, ok := g.graph[vHash]; !ok {
 		// It is a valid vertex, just has no out going edges
 		return iter.NoElem[V]()
 	}
-	return iter.Map[graphLink,V](
+	return iter.Map[graphLink, V](
 		iter.SliceElems[graphLink](g.graph[vHash]),
 		func(index int, val graphLink) (V, error) {
 			return g.vertices[val.B], nil
@@ -629,13 +630,13 @@ func (g *HashGraph[V,E,VI,EI])outVerticesImpl(v *V) iter.Iter[V] {
 // paired with there associated vertices.
 //
 // Time Complexity: O(n), where n=num of outgoing edges
-func (g *HashGraph[V,E,VI,EI])OutEdgesAndVertices(
+func (g *HashGraph[V, E, VI, EI]) OutEdgesAndVertices(
 	v V,
-) iter.Iter[basic.Pair[E,V]] {
+) iter.Iter[basic.Pair[E, V]] {
 	return g.outEdgesAndVerticesImpl(&v)
 }
 
-// Description: Modifies the iterator chain returned by the underlying 
+// Description: Modifies the iterator chain returned by the underlying
 // [HashGraph.OutEdgesAndVertices] method such that a read lock will be placed
 // on the underlying hash graph when the iterator is consumed. The hash graph
 // will have a read lock the entire time the iteration is being performed. The
@@ -644,44 +645,44 @@ func (g *HashGraph[V,E,VI,EI])OutEdgesAndVertices(
 // Lock Type: Read
 //
 // Time Complexity: O(n), where n=num of outgoing edges
-func (g *SyncedHashGraph[V,E,VI,EI])OutEdgeAndVertices(
+func (g *SyncedHashGraph[V, E, VI, EI]) OutEdgeAndVertices(
 	v V,
-) iter.Iter[basic.Pair[E,V]] {
+) iter.Iter[basic.Pair[E, V]] {
 	return g.HashGraph.outEdgesAndVerticesImpl(&v).SetupTeardown(
 		func() error { g.RLock(); return nil },
 		func() error { g.RUnlock(); return nil },
 	)
 }
 
-func (g *HashGraph[V,E,VI,EI])outEdgesAndVerticesImpl(
+func (g *HashGraph[V, E, VI, EI]) outEdgesAndVerticesImpl(
 	v *V,
-) iter.Iter[basic.Pair[E,V]] {
-	vw:=widgets.Widget[V,VI]{}
-	vHash:=vertexHash(vw.Hash(v))
-	if _,ok:=g.vertices[vHash]; !ok {
-		var tmp basic.Pair[E,V]
-		return iter.ValElem[basic.Pair[E,V]](
+) iter.Iter[basic.Pair[E, V]] {
+	vw := widgets.Widget[V, VI]{}
+	vHash := vertexHash(vw.Hash(v))
+	if _, ok := g.vertices[vHash]; !ok {
+		var tmp basic.Pair[E, V]
+		return iter.ValElem[basic.Pair[E, V]](
 			tmp,
 			getVertexError[V](v),
 			1,
 		)
 	}
-	if _,ok:=g.graph[vHash]; !ok {
+	if _, ok := g.graph[vHash]; !ok {
 		// It is a valid vertex, just has no out going edges
-		return iter.NoElem[basic.Pair[E,V]]()
+		return iter.NoElem[basic.Pair[E, V]]()
 	}
-	return iter.Map[graphLink,basic.Pair[E,V]](
+	return iter.Map[graphLink, basic.Pair[E, V]](
 		iter.SliceElems[graphLink](g.graph[vHash]),
-		func(index int, val graphLink) (basic.Pair[E,V], error) {
-			return basic.Pair[E,V]{g.edges[val.A], g.vertices[val.B]}, nil
+		func(index int, val graphLink) (basic.Pair[E, V], error) {
+			return basic.Pair[E, V]{g.edges[val.A], g.vertices[val.B]}, nil
 		},
 	)
 }
 
 // Panics, hash graphs are non-addressable.
-func (g *HashGraph[V,E,VI,EI])OutEdgesAndVerticePntrs(
+func (g *HashGraph[V, E, VI, EI]) OutEdgesAndVerticePntrs(
 	v *V,
-) iter.Iter[basic.Pair[*E,*V]] {
+) iter.Iter[basic.Pair[*E, *V]] {
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
@@ -691,11 +692,11 @@ func (g *HashGraph[V,E,VI,EI])OutEdgesAndVerticePntrs(
 //
 // Time Complexity: O(n), where n=the number of outgoing edges on the from
 // vertex
-func (g *HashGraph[V,E,VI,EI])EdgesBetween(from V, to V) iter.Iter[E] {
-	return g.edgesBetweenImpl(&from,&to)
+func (g *HashGraph[V, E, VI, EI]) EdgesBetween(from V, to V) iter.Iter[E] {
+	return g.edgesBetweenImpl(&from, &to)
 }
 
-// Description: Modifies the iterator chain returned by the underlying 
+// Description: Modifies the iterator chain returned by the underlying
 // [HashGraph.EdgesBetween] method such that a read lock will be placed
 // on the underlying hash graph when the iterator is consumed. The hash graph
 // will have a read lock the entire time the iteration is being performed. The
@@ -703,37 +704,37 @@ func (g *HashGraph[V,E,VI,EI])EdgesBetween(from V, to V) iter.Iter[E] {
 //
 // Lock Type: Read
 //
-// Time Complexity: O(n), where n=the number of outgoing edges on the from 
+// Time Complexity: O(n), where n=the number of outgoing edges on the from
 // vertex
-func (g *SyncedHashGraph[V, E, VI, EI])EdgesBetween(from V, to V) iter.Iter[E] {
-	return g.HashGraph.edgesBetweenImpl(&from,&to).SetupTeardown(
+func (g *SyncedHashGraph[V, E, VI, EI]) EdgesBetween(from V, to V) iter.Iter[E] {
+	return g.HashGraph.edgesBetweenImpl(&from, &to).SetupTeardown(
 		func() error { g.RLock(); return nil },
 		func() error { g.RUnlock(); return nil },
 	)
 }
 
-func (g *HashGraph[V, E, VI, EI])edgesBetweenImpl(from *V, to *V) iter.Iter[E] {
-	vw:=widgets.Widget[V,VI]{}
-	fromHash:=vertexHash(vw.Hash(from))
-	toHash:=vertexHash(vw.Hash(to))
+func (g *HashGraph[V, E, VI, EI]) edgesBetweenImpl(from *V, to *V) iter.Iter[E] {
+	vw := widgets.Widget[V, VI]{}
+	fromHash := vertexHash(vw.Hash(from))
+	toHash := vertexHash(vw.Hash(to))
 
-	if _,ok:=g.vertices[fromHash]; !ok {
+	if _, ok := g.vertices[fromHash]; !ok {
 		var tmp E
-		return iter.ValElem[E](tmp,getVertexError[V](from),1)
+		return iter.ValElem[E](tmp, getVertexError[V](from), 1)
 	}
-	if _,ok:=g.vertices[toHash]; !ok {
+	if _, ok := g.vertices[toHash]; !ok {
 		var tmp E
-		return iter.ValElem[E](tmp,getVertexError[V](to),1)
+		return iter.ValElem[E](tmp, getVertexError[V](to), 1)
 	}
-	if _,ok:=g.graph[fromHash]; !ok {
+	if _, ok := g.graph[fromHash]; !ok {
 		// The from vertex is a valid vertex, just has no outgoing edges.
 		return iter.NoElem[E]()
 	}
 
-	return iter.Map[graphLink,E](
+	return iter.Map[graphLink, E](
 		iter.SliceElems[graphLink](g.graph[fromHash]).Filter(
 			func(index int, val graphLink) bool {
-				return val.B==toHash
+				return val.B == toHash
 			},
 		),
 		func(index int, val graphLink) (E, error) {
@@ -743,7 +744,7 @@ func (g *HashGraph[V, E, VI, EI])edgesBetweenImpl(from *V, to *V) iter.Iter[E] {
 }
 
 // Panics, hash graphs are non-addressable.
-func (g *HashGraph[V,E,VI,EI])EdgesBetweenPntr(from *V, to *V) iter.Iter[*E] {
+func (g *HashGraph[V, E, VI, EI]) EdgesBetweenPntr(from *V, to *V) iter.Iter[*E] {
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
@@ -797,7 +798,7 @@ func (g *HashGraph[V,E,VI,EI])EdgesBetweenPntr(from *V, to *V) iter.Iter[*E] {
 // 		},
 // 	)
 // }
-// 
+//
 // func (g *HashGraph[V, E, VI, EI])LinkPntrs() iter.Iter[struct{from *V; to *V; e *E}] {
 // 	return iter.NoElem[struct{from *V; to *V; e *E}]()
 // }
@@ -806,12 +807,12 @@ func (g *HashGraph[V,E,VI,EI])EdgesBetweenPntr(from *V, to *V) iter.Iter[*E] {
 // Duplicate edges will be ignored. This method will never return an error.
 //
 // Time Complexity: O(n), where n=len(e)
-func (g *HashGraph[V,E,VI,EI])AddEdges(e ...E) error {
-	ew:=widgets.Widget[E,EI]{}
-	for _,iterE:=range(e) {
-		iterEHash:=edgeHash(ew.Hash(&iterE))
-		if _,ok:=g.edges[iterEHash]; !ok {
-			g.edges[iterEHash]=iterE
+func (g *HashGraph[V, E, VI, EI]) AddEdges(e ...E) error {
+	ew := widgets.Widget[E, EI]{}
+	for _, iterE := range e {
+		iterEHash := edgeHash(ew.Hash(&iterE))
+		if _, ok := g.edges[iterEHash]; !ok {
+			g.edges[iterEHash] = iterE
 		}
 	}
 	return nil
@@ -823,7 +824,7 @@ func (g *HashGraph[V,E,VI,EI])AddEdges(e ...E) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=len(e)
-func (g *SyncedHashGraph[V,E,VI,EI])AddEdges(e ...E) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) AddEdges(e ...E) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.AddEdges(e...)
@@ -834,12 +835,12 @@ func (g *SyncedHashGraph[V,E,VI,EI])AddEdges(e ...E) error {
 // unique vertices will not be added. This function will never return an error.
 //
 // Time Complexity: O(n), where n=len(v)
-func (g *HashGraph[V,E,VI,EI])AddVertices(v ...V) error {
-	ew:=widgets.Widget[V,VI]{}
-	for _,iterV:=range(v) {
-		iterVHash:=vertexHash(ew.Hash(&iterV))
-		if _,ok:=g.vertices[iterVHash]; !ok {
-			g.vertices[iterVHash]=iterV
+func (g *HashGraph[V, E, VI, EI]) AddVertices(v ...V) error {
+	ew := widgets.Widget[V, VI]{}
+	for _, iterV := range v {
+		iterVHash := vertexHash(ew.Hash(&iterV))
+		if _, ok := g.vertices[iterVHash]; !ok {
+			g.vertices[iterVHash] = iterV
 		}
 	}
 	return nil
@@ -852,7 +853,7 @@ func (g *HashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=len(v)
-func (g *SyncedHashGraph[V,E,VI,EI])AddVertices(v ...V) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) AddVertices(v ...V) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.AddVertices(v...)
@@ -865,8 +866,8 @@ func (g *SyncedHashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 // no error will be returned.
 //
 // Time Complexity: O(n), where n=num of outgoing edges from the start vertex
-func (g *HashGraph[V,E,VI,EI])Link(from V, to V, e E) error {
-	return g.LinkPntr(&from,&to,&e)
+func (g *HashGraph[V, E, VI, EI]) Link(from V, to V, e E) error {
+	return g.LinkPntr(&from, &to, &e)
 }
 
 // Description: Places a write lock on the underlying hash graph and then adds
@@ -876,10 +877,10 @@ func (g *HashGraph[V,E,VI,EI])Link(from V, to V, e E) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of outgoing edges from the start vertex
-func (g *SyncedHashGraph[V, E, VI, EI])Link(from V, to V, e E) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) Link(from V, to V, e E) error {
 	g.Lock()
 	defer g.Unlock()
-	return g.HashGraph.LinkPntr(&from,&to,&e)
+	return g.HashGraph.LinkPntr(&from, &to, &e)
 }
 
 // Description: Adds a link between an existing edge and vertices in the graph.
@@ -889,34 +890,34 @@ func (g *SyncedHashGraph[V, E, VI, EI])Link(from V, to V, e E) error {
 // no error will be returned.
 //
 // Time Complexity: O(n), where n=num of outgoing edges from the start vertex
-func (g *HashGraph[V,E,VI,EI])LinkPntr(from *V, to *V, e *E) error {
-	vw:=widgets.Widget[V,VI]{}
-	ew:=widgets.Widget[E,EI]{}
-	fromHash:=vertexHash(vw.Hash(from))
-	toHash:=vertexHash(vw.Hash(to))
-	eHash:=edgeHash(ew.Hash(e))
+func (g *HashGraph[V, E, VI, EI]) LinkPntr(from *V, to *V, e *E) error {
+	vw := widgets.Widget[V, VI]{}
+	ew := widgets.Widget[E, EI]{}
+	fromHash := vertexHash(vw.Hash(from))
+	toHash := vertexHash(vw.Hash(to))
+	eHash := edgeHash(ew.Hash(e))
 
-	if _,ok:=g.vertices[fromHash]; !ok {
+	if _, ok := g.vertices[fromHash]; !ok {
 		return getVertexError[V](from)
 	}
-	if _,ok:=g.vertices[toHash]; !ok {
+	if _, ok := g.vertices[toHash]; !ok {
 		return getVertexError[V](to)
 	}
-	if _,ok:=g.edges[eHash]; !ok {
+	if _, ok := g.edges[eHash]; !ok {
 		return getEdgeError[E](e)
 	}
 
-	gl:=graphLink{eHash, toHash}
-	gNode,_:=g.graph[fromHash]
+	gl := graphLink{eHash, toHash}
+	gNode, _ := g.graph[fromHash]
 	if gNode.Contains(gl) {
 		return nil
 	}
 
 	g.numLinks++
 	gNode.Append(graphLink{eHash, toHash})
-	g.graph[fromHash]=gNode
-	if gNode,ok:=g.graph[toHash]; !ok {
-		g.graph[toHash]=gNode
+	g.graph[fromHash] = gNode
+	if gNode, ok := g.graph[toHash]; !ok {
+		g.graph[toHash] = gNode
 	}
 	return nil
 }
@@ -928,10 +929,10 @@ func (g *HashGraph[V,E,VI,EI])LinkPntr(from *V, to *V, e *E) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *SyncedHashGraph[V, E, VI, EI])LinkPntr(from *V, to *V, e *E) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) LinkPntr(from *V, to *V, e *E) error {
 	g.Lock()
 	defer g.Unlock()
-	return g.HashGraph.LinkPntr(from,to,e)
+	return g.HashGraph.LinkPntr(from, to, e)
 }
 
 // Description: Deletes a vertex from the graph, removing any links that
@@ -939,7 +940,7 @@ func (g *SyncedHashGraph[V, E, VI, EI])LinkPntr(from *V, to *V, e *E) error {
 // may result in orphaned edges.
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *HashGraph[V,E,VI,EI])DeleteVertex(v V) error {
+func (g *HashGraph[V, E, VI, EI]) DeleteVertex(v V) error {
 	return g.DeleteVertexPntr(&v)
 }
 
@@ -950,7 +951,7 @@ func (g *HashGraph[V,E,VI,EI])DeleteVertex(v V) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *SyncedHashGraph[V, E, VI, EI])DeleteVertex(v V) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteVertex(v V) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.DeleteVertexPntr(&v)
@@ -961,31 +962,31 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteVertex(v V) error {
 // may result in orphaned edges.
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *HashGraph[V,E,VI,EI])DeleteVertexPntr(v *V) error {
-	vw:=widgets.Widget[V,VI]{}
-	vHash:=vertexHash(vw.Hash(v))
+func (g *HashGraph[V, E, VI, EI]) DeleteVertexPntr(v *V) error {
+	vw := widgets.Widget[V, VI]{}
+	vHash := vertexHash(vw.Hash(v))
 
-	if _,ok:=g.vertices[vHash]; !ok {
+	if _, ok := g.vertices[vHash]; !ok {
 		return getVertexError[V](v)
 	}
-	tmpV:=g.vertices[vHash]
+	tmpV := g.vertices[vHash]
 	vw.Zero(&tmpV)
-	delete(g.vertices,vHash)
+	delete(g.vertices, vHash)
 
-	if gNode,ok:=g.graph[vHash]; ok {
-		g.numLinks-=gNode.Length()
-		delete(g.graph,vHash)
+	if gNode, ok := g.graph[vHash]; ok {
+		g.numLinks -= gNode.Length()
+		delete(g.graph, vHash)
 	}
 
-	for iterHash,_:=range(g.graph) {
-		gNode:=(Vector[graphLink,*vertexOnlyGraphLinkWidget])(
+	for iterHash, _ := range g.graph {
+		gNode := (Vector[graphLink, *vertexOnlyGraphLinkWidget])(
 			([]graphLink)(g.graph[iterHash]),
 		)
-		g.numLinks-=gNode.Pop(graphLink{B: vHash})
-		if len(gNode)==0 {
-			delete(g.graph,iterHash)
+		g.numLinks -= gNode.Pop(graphLink{B: vHash})
+		if len(gNode) == 0 {
+			delete(g.graph, iterHash)
 		} else {
-			g.graph[iterHash]=(Vector[graphLink,*graphLink])(
+			g.graph[iterHash] = (Vector[graphLink, *graphLink])(
 				([]graphLink)(gNode),
 			)
 		}
@@ -1000,7 +1001,7 @@ func (g *HashGraph[V,E,VI,EI])DeleteVertexPntr(v *V) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *SyncedHashGraph[V, E, VI, EI])DeleteVertexPntr(v *V) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteVertexPntr(v *V) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.DeleteVertexPntr(v)
@@ -1011,7 +1012,7 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteVertexPntr(v *V) error {
 // operation may result in orphaned vertices.
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *HashGraph[V,E,VI,EI])DeleteEdge(e E) error {
+func (g *HashGraph[V, E, VI, EI]) DeleteEdge(e E) error {
 	return g.DeleteEdgePntr(&e)
 }
 
@@ -1022,7 +1023,7 @@ func (g *HashGraph[V,E,VI,EI])DeleteEdge(e E) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *SyncedHashGraph[V, E, VI, EI])DeleteEdge(e E) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteEdge(e E) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.DeleteEdgePntr(&e)
@@ -1033,26 +1034,26 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteEdge(e E) error {
 // operation may result in orphaned vertices.
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *HashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
-	ew:=widgets.Widget[E,EI]{}
-	eHash:=edgeHash(ew.Hash(e))
+func (g *HashGraph[V, E, VI, EI]) DeleteEdgePntr(e *E) error {
+	ew := widgets.Widget[E, EI]{}
+	eHash := edgeHash(ew.Hash(e))
 
-	if _,ok:=g.edges[eHash]; !ok {
+	if _, ok := g.edges[eHash]; !ok {
 		return getEdgeError[E](e)
 	}
-	tmpE:=g.edges[eHash]
+	tmpE := g.edges[eHash]
 	ew.Zero(&tmpE)
-	delete(g.edges,eHash)
+	delete(g.edges, eHash)
 
-	for iterHash,_:=range(g.graph) {
-		gNode:=(Vector[graphLink,*edgeOnlyGraphLinkWidget])(
+	for iterHash, _ := range g.graph {
+		gNode := (Vector[graphLink, *edgeOnlyGraphLinkWidget])(
 			([]graphLink)(g.graph[iterHash]),
 		)
-		g.numLinks-=gNode.Pop(graphLink{A: eHash})
-		if len(gNode)==0 {
-			delete(g.graph,iterHash)
+		g.numLinks -= gNode.Pop(graphLink{A: eHash})
+		if len(gNode) == 0 {
+			delete(g.graph, iterHash)
 		} else {
-			g.graph[iterHash]=(Vector[graphLink,*graphLink])(
+			g.graph[iterHash] = (Vector[graphLink, *graphLink])(
 				([]graphLink)(gNode),
 			)
 		}
@@ -1067,7 +1068,7 @@ func (g *HashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of links in the graph
-func (g *SyncedHashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteEdgePntr(e *E) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.DeleteEdgePntr(e)
@@ -1079,8 +1080,8 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
 // exist in the graph or if the supplied edge does not exist in the graph.
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *HashGraph[V,E,VI,EI])DeleteLink(from V, to V, e E) error {
-	return g.DeleteLinkPntr(&from,&to,&e)
+func (g *HashGraph[V, E, VI, EI]) DeleteLink(from V, to V, e E) error {
+	return g.DeleteLinkPntr(&from, &to, &e)
 }
 
 // Description: Places a write lock on the underlying hash graph before calling
@@ -1089,10 +1090,10 @@ func (g *HashGraph[V,E,VI,EI])DeleteLink(from V, to V, e E) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *SyncedHashGraph[V, E, VI, EI])DeleteLink(from V, to V, e E) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteLink(from V, to V, e E) error {
 	g.Lock()
 	defer g.Unlock()
-	return g.HashGraph.DeleteLinkPntr(&from,&to,&e)
+	return g.HashGraph.DeleteLinkPntr(&from, &to, &e)
 }
 
 // Description: Removes a link within the graph without removing the underlying
@@ -1101,31 +1102,31 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteLink(from V, to V, e E) error {
 // exist in the graph or if the supplied edge does not exist in the graph.
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *HashGraph[V,E,VI,EI])DeleteLinkPntr(from *V, to *V, e *E) error {
-	vw:=widgets.Widget[V,VI]{}
-	ew:=widgets.Widget[E,EI]{}
-	fromHash:=vertexHash(vw.Hash(from))
-	toHash:=vertexHash(vw.Hash(to))
-	eHash:=edgeHash(ew.Hash(e))
+func (g *HashGraph[V, E, VI, EI]) DeleteLinkPntr(from *V, to *V, e *E) error {
+	vw := widgets.Widget[V, VI]{}
+	ew := widgets.Widget[E, EI]{}
+	fromHash := vertexHash(vw.Hash(from))
+	toHash := vertexHash(vw.Hash(to))
+	eHash := edgeHash(ew.Hash(e))
 
-	if _,ok:=g.vertices[fromHash]; !ok {
+	if _, ok := g.vertices[fromHash]; !ok {
 		return getVertexError[V](from)
 	}
-	if _,ok:=g.vertices[toHash]; !ok {
+	if _, ok := g.vertices[toHash]; !ok {
 		return getVertexError[V](to)
 	}
-	if _,ok:=g.edges[eHash]; !ok {
+	if _, ok := g.edges[eHash]; !ok {
 		return getEdgeError[E](e)
 	}
 
-	gNode,_:=g.graph[fromHash]
-	if idx,found:=gNode.KeyOf(graphLink{eHash, toHash}); found {
+	gNode, _ := g.graph[fromHash]
+	if idx, found := gNode.KeyOf(graphLink{eHash, toHash}); found {
 		if len(gNode) > 1 {
 			gNode.Delete(idx)
 			g.numLinks--
-			g.graph[fromHash]=gNode
-		} else if len(gNode)==1 {
-			delete(g.graph,fromHash)
+			g.graph[fromHash] = gNode
+		} else if len(gNode) == 1 {
+			delete(g.graph, fromHash)
 		}
 	}
 	return nil
@@ -1137,7 +1138,7 @@ func (g *HashGraph[V,E,VI,EI])DeleteLinkPntr(from *V, to *V, e *E) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *SyncedHashGraph[V, E, VI, EI])DeleteLinkPntr(
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteLinkPntr(
 	from *V,
 	to *V,
 	e *E,
@@ -1153,8 +1154,8 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteLinkPntr(
 // returned if either vertex does not exist in the graph.
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *HashGraph[V,E,VI,EI])DeleteLinks(from V, to V) error {
-	return g.DeleteLinksPntr(&from,&to)
+func (g *HashGraph[V, E, VI, EI]) DeleteLinks(from V, to V) error {
+	return g.DeleteLinksPntr(&from, &to)
 }
 
 // Description: Places a write lock on the underlying hash graph before calling
@@ -1163,10 +1164,10 @@ func (g *HashGraph[V,E,VI,EI])DeleteLinks(from V, to V) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *SyncedHashGraph[V, E, VI, EI])DeleteLinks(from V, to V) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteLinks(from V, to V) error {
 	g.Lock()
 	defer g.Unlock()
-	return g.HashGraph.DeleteLinksPntr(&from,&to)
+	return g.HashGraph.DeleteLinksPntr(&from, &to)
 }
 
 // Description: Removes all links starting at from and ending at to without
@@ -1175,27 +1176,27 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteLinks(from V, to V) error {
 // returned if either vertex does not exist in the graph.
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *HashGraph[V,E,VI,EI])DeleteLinksPntr(from *V, to *V) error {
-	vw:=widgets.Widget[V,VI]{}
-	fromHash:=vertexHash(vw.Hash(from))
-	toHash:=vertexHash(vw.Hash(to))
+func (g *HashGraph[V, E, VI, EI]) DeleteLinksPntr(from *V, to *V) error {
+	vw := widgets.Widget[V, VI]{}
+	fromHash := vertexHash(vw.Hash(from))
+	toHash := vertexHash(vw.Hash(to))
 
-	if _,ok:=g.vertices[fromHash]; !ok {
+	if _, ok := g.vertices[fromHash]; !ok {
 		return getVertexError[V](from)
 	}
-	if _,ok:=g.vertices[toHash]; !ok {
+	if _, ok := g.vertices[toHash]; !ok {
 		return getVertexError[V](to)
 	}
 
-	gNode:=(Vector[graphLink,*vertexOnlyGraphLinkWidget])(
+	gNode := (Vector[graphLink, *vertexOnlyGraphLinkWidget])(
 		([]graphLink)(g.graph[fromHash]),
 	)
-	g.numLinks-=gNode.Pop(graphLink{B: toHash})
+	g.numLinks -= gNode.Pop(graphLink{B: toHash})
 
-	if len(gNode)==0 {
-		delete(g.graph,fromHash)
+	if len(gNode) == 0 {
+		delete(g.graph, fromHash)
 	} else {
-		g.graph[fromHash]=(Vector[graphLink,*graphLink])(([]graphLink)(gNode))
+		g.graph[fromHash] = (Vector[graphLink, *graphLink])(([]graphLink)(gNode))
 	}
 	return nil
 }
@@ -1206,29 +1207,29 @@ func (g *HashGraph[V,E,VI,EI])DeleteLinksPntr(from *V, to *V) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
-func (g *SyncedHashGraph[V,E,VI,EI])DeleteLinksPntr(from *V, to *V) error {
+func (g *SyncedHashGraph[V, E, VI, EI]) DeleteLinksPntr(from *V, to *V) error {
 	g.Lock()
 	g.Unlock()
-	return g.HashGraph.DeleteLinksPntr(from,to)
+	return g.HashGraph.DeleteLinksPntr(from, to)
 }
 
 // Description: Removes all edges, vertices, and links.
 //
 // Time Complexity: O(n+m), where n=num vertices and m=num edges
-func (g *HashGraph[V,E,VI,EI])Clear() {
-	ew:=widgets.Widget[E,EI]{}
-	vw:=widgets.Widget[V,VI]{}
-	for _,iterE:=range(g.edges) {
+func (g *HashGraph[V, E, VI, EI]) Clear() {
+	ew := widgets.Widget[E, EI]{}
+	vw := widgets.Widget[V, VI]{}
+	for _, iterE := range g.edges {
 		ew.Zero(&iterE)
 	}
-	for _,iterV:=range(g.vertices) {
+	for _, iterV := range g.vertices {
 		vw.Zero(&iterV)
 	}
 
-	g.edges=make(map[edgeHash]E)
-	g.vertices=make(map[vertexHash]V)
-	g.graph=make(internalHashGraphImpl)
-	g.numLinks=0
+	g.edges = make(map[edgeHash]E)
+	g.vertices = make(map[vertexHash]V)
+	g.graph = make(internalHashGraphImpl)
+	g.numLinks = 0
 }
 
 // Description: Places a write lock on the underlying hash graph before calling
@@ -1237,7 +1238,7 @@ func (g *HashGraph[V,E,VI,EI])Clear() {
 // Lock Type: Write
 //
 // Time Complexity: O(n+m), where n=num vertices and m=num edges
-func (g *SyncedHashGraph[V, E, VI, EI])Clear() {
+func (g *SyncedHashGraph[V, E, VI, EI]) Clear() {
 	g.Lock()
 	defer g.Unlock()
 	g.HashGraph.Clear()
@@ -1250,25 +1251,24 @@ func (g *SyncedHashGraph[V, E, VI, EI])Clear() {
 //
 // Time Complexity: Dependent on the time complexity of the implementation of
 // the ContainsLink method on other. In big-O it might look something like this,
-// O(n*O(other.ContainsLink))), where n is the number of links in this graph 
+// O(n*O(other.ContainsLink))), where n is the number of links in this graph
 // and O(other.ContainsLink) represents the time complexity of the ContainsLink
 // method on other.
-func (g *HashGraph[V,E,VI,EI])KeyedEq(
-	other containerTypes.GraphComparisonsConstraint[V,E],
+func (g *HashGraph[V, E, VI, EI]) KeyedEq(
+	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
-	if !(
-		g.NumEdges()==other.NumEdges() && 
-		g.NumVertices()==other.NumVertices() && 
-		g.NumLinks()==other.NumLinks()) {
+	if !(g.NumEdges() == other.NumEdges() &&
+		g.NumVertices() == other.NumVertices() &&
+		g.NumLinks() == other.NumLinks()) {
 		return false
 	}
 
-	containsOp:=func(from vertexHash, gLink graphLink) bool {
+	containsOp := func(from vertexHash, gLink graphLink) bool {
 		if other.IsAddressable() {
-			tmpFrom:=g.vertices[from]
-			tmpTo:=g.vertices[gLink.B]
-			tmpE:=g.edges[gLink.A]
-			return other.ContainsLinkPntr(&tmpFrom,&tmpTo,&tmpE)
+			tmpFrom := g.vertices[from]
+			tmpTo := g.vertices[gLink.B]
+			tmpE := g.edges[gLink.A]
+			return other.ContainsLinkPntr(&tmpFrom, &tmpTo, &tmpE)
 		} else {
 			return other.ContainsLink(
 				g.vertices[from],
@@ -1278,11 +1278,11 @@ func (g *HashGraph[V,E,VI,EI])KeyedEq(
 		}
 	}
 
-	for from, gNode:=range(g.graph) {
-		if len(gNode)!=other.NumOutEdges(g.vertices[from]) {
+	for from, gNode := range g.graph {
+		if len(gNode) != other.NumOutEdges(g.vertices[from]) {
 			return false
 		}
-		for _,gLink:=range(gNode) {
+		for _, gLink := range gNode {
 			if !containsOp(from, gLink) {
 				return false
 			}
@@ -1300,11 +1300,11 @@ func (g *HashGraph[V,E,VI,EI])KeyedEq(
 //
 // Time Complexity: Dependent on the time complexity of the implementation of
 // the ContainsLink method on other. In big-O it might look something like this,
-// O(n*O(other.ContainsLink))), where n is the number of links in this graph 
+// O(n*O(other.ContainsLink))), where n is the number of links in this graph
 // and O(other.ContainsLink) represents the time complexity of the ContainsLink
 // method on other.
-func (g *SyncedHashGraph[V, E, VI, EI])KeyedEq(
-	other containerTypes.GraphComparisonsConstraint[V,E],
+func (g *SyncedHashGraph[V, E, VI, EI]) KeyedEq(
+	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
 	g.RLock()
 	other.RLock()
@@ -1314,69 +1314,72 @@ func (g *SyncedHashGraph[V, E, VI, EI])KeyedEq(
 }
 
 // Isomorphic equality
-func (g *HashGraph[V,E,VI,EI])UnorderedEq(
-	other containerTypes.GraphComparisonsConstraint[V,E],
+func (g *HashGraph[V, E, VI, EI]) UnorderedEq(
+	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
 	return false
 }
-func (g *HashGraph[V,E,VI,EI])Intersection(
-	l containerTypes.GraphComparisonsConstraint[V,E],
-	r containerTypes.GraphComparisonsConstraint[V,E],
-) {}
-func (g *HashGraph[V,E,VI,EI])Union(
-	l containerTypes.GraphComparisonsConstraint[V,E],
-	r containerTypes.GraphComparisonsConstraint[V,E],
-) {}
-func (g *HashGraph[V,E,VI,EI])Difference(
-	l containerTypes.GraphComparisonsConstraint[V,E],
-	r containerTypes.GraphComparisonsConstraint[V,E],
-) {}
-func (g *HashGraph[V,E,VI,EI])IsSuperset(
-	other containerTypes.GraphComparisonsConstraint[V,E],
+func (g *HashGraph[V, E, VI, EI]) Intersection(
+	l containerTypes.GraphComparisonsConstraint[V, E],
+	r containerTypes.GraphComparisonsConstraint[V, E],
+) {
+}
+func (g *HashGraph[V, E, VI, EI]) Union(
+	l containerTypes.GraphComparisonsConstraint[V, E],
+	r containerTypes.GraphComparisonsConstraint[V, E],
+) {
+}
+func (g *HashGraph[V, E, VI, EI]) Difference(
+	l containerTypes.GraphComparisonsConstraint[V, E],
+	r containerTypes.GraphComparisonsConstraint[V, E],
+) {
+}
+func (g *HashGraph[V, E, VI, EI]) IsSuperset(
+	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
 	return false
 }
-func (g *HashGraph[V,E,VI,EI])IsSubset(
-	other containerTypes.GraphComparisonsConstraint[V,E],
+func (g *HashGraph[V, E, VI, EI]) IsSubset(
+	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
 	return false
 }
 
-func (_ *HashGraph[V,E,VI,EI])Eq(
-	l *HashGraph[V,E,VI,EI],
-	r *HashGraph[V,E,VI,EI],
+func (_ *HashGraph[V, E, VI, EI]) Eq(
+	l *HashGraph[V, E, VI, EI],
+	r *HashGraph[V, E, VI, EI],
 ) bool {
 	return false
 }
 
 // Panics, hash graphs cannot be compared for order.
-func (_ *HashGraph[V,E,VI,EI])Lt(
-	l *HashGraph[V,E,VI,EI],
-	r *HashGraph[V,E,VI,EI],
+func (_ *HashGraph[V, E, VI, EI]) Lt(
+	l *HashGraph[V, E, VI, EI],
+	r *HashGraph[V, E, VI, EI],
 ) bool {
 	panic("Hash graphs maps cannot be compared relative to each other.")
 }
 
 // Panics, hash graphs cannot be compared for order.
-func (_ *SyncedHashGraph[V,E,VI,EI])Lt(
-	l *SyncedHashGraph[V,E,VI,EI],
-	r *SyncedHashGraph[V,E,VI,EI],
+func (_ *SyncedHashGraph[V, E, VI, EI]) Lt(
+	l *SyncedHashGraph[V, E, VI, EI],
+	r *SyncedHashGraph[V, E, VI, EI],
 ) bool {
 	panic("Hash graphs maps cannot be compared relative to each other.")
 }
 
-func (_ *HashGraph[V,E,VI,EI])Hash(other *HashGraph[V,E,VI,EI]) hash.Hash {
+func (_ *HashGraph[V, E, VI, EI]) Hash(other *HashGraph[V, E, VI, EI]) hash.Hash {
 	return hash.Hash(0)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [HashGraph.Clear].
-func (_ *HashGraph[V,E,VI,EI])Zero(other *HashGraph[V,E,VI,EI]) {
+func (_ *HashGraph[V, E, VI, EI]) Zero(other *HashGraph[V, E, VI, EI]) {
 	other.Clear()
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [SyncedHashGraph.Clear].
-func (_ *SyncedHashGraph[V,E,VI,EI])Zero(other *SyncedHashGraph[V,E,VI,EI]) {
+func (_ *SyncedHashGraph[V, E, VI, EI]) Zero(other *SyncedHashGraph[V, E, VI, EI]) {
 	other.Clear()
 }

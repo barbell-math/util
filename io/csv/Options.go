@@ -4,7 +4,7 @@ import "time"
 
 type (
 	optionsFlag int
-	options struct {
+	options     struct {
 		flags optionsFlag
 
 		comment   rune
@@ -13,12 +13,12 @@ type (
 		structTagName  string
 		dateTimeFormat string
 
-		headers         []string
+		headers []string
 	}
 )
 
 const (
-	hasHeaders optionsFlag=1<<iota
+	hasHeaders optionsFlag = 1 << iota
 	ignoreHeaders
 	useStructTags
 	writeHeaders
@@ -30,12 +30,12 @@ const (
 // passed to the other functions in this package that require options.
 func NewOptions() *options {
 	return &options{
-		flags: 0 | hasHeaders | useStructTags | writeHeaders,
-		comment:         '#',
-		delimiter:       ',',
-		structTagName:   "csv",
-		dateTimeFormat:  time.DateTime,
-		headers:         []string{},
+		flags:          0 | hasHeaders | useStructTags | writeHeaders,
+		comment:        '#',
+		delimiter:      ',',
+		structTagName:  "csv",
+		dateTimeFormat: time.DateTime,
+		headers:        []string{},
 	}
 }
 
@@ -68,9 +68,9 @@ func (o *options) Delimiter(d rune) *options {
 // Default: true
 func (o *options) HasHeaders(b bool) *options {
 	if b {
-		o.flags|=hasHeaders
+		o.flags |= hasHeaders
 	} else {
-		o.flags&=^hasHeaders
+		o.flags &= ^hasHeaders
 	}
 	return o
 }
@@ -84,9 +84,9 @@ func (o *options) HasHeaders(b bool) *options {
 // Default: false
 func (o *options) IgnoreHeaders(b bool) *options {
 	if b {
-		o.flags|=ignoreHeaders
+		o.flags |= ignoreHeaders
 	} else {
-		o.flags&=^ignoreHeaders
+		o.flags &= ^ignoreHeaders
 	}
 	return o
 }
@@ -100,9 +100,9 @@ func (o *options) IgnoreHeaders(b bool) *options {
 // Default: true
 func (o *options) UseStructTags(b bool) *options {
 	if b {
-		o.flags|=useStructTags
+		o.flags |= useStructTags
 	} else {
-		o.flags&=^useStructTags
+		o.flags &= ^useStructTags
 	}
 	return o
 }
@@ -138,9 +138,9 @@ func (o *options) DateTimeFormat(f string) *options {
 // Default: true
 func (o *options) WriteHeaders(b bool) *options {
 	if b {
-		o.flags|=writeHeaders
+		o.flags |= writeHeaders
 	} else {
-		o.flags&=^writeHeaders
+		o.flags &= ^writeHeaders
 	}
 	return o
 }
@@ -154,7 +154,7 @@ func (o *options) WriteHeaders(b bool) *options {
 // Default: true
 func (o *options) Headers(h []string) *options {
 	o.headers = h
-	o.flags|=headersSupplied
+	o.flags |= headersSupplied
 	return o
 }
 
@@ -166,13 +166,13 @@ func (o *options) Headers(h []string) *options {
 // Default: false
 func (o *options) WriteZeroValues(b bool) *options {
 	if b {
-		o.flags|=writeZeroValues
+		o.flags |= writeZeroValues
 	} else {
-		o.flags&=^writeZeroValues
+		o.flags &= ^writeZeroValues
 	}
 	return o
 }
 
 func (o *options) getFlag(flag optionsFlag) bool {
-	return o.flags&flag>0
+	return o.flags&flag > 0
 }
