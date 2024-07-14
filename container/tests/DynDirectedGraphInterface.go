@@ -1920,6 +1920,7 @@ func DynDirectedGraphDeleteEdgePntr(
 	)
 }
 
+// Tests the Clear method functionality of a dynamic directed graph.
 func DynDirectedGraphClear(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
@@ -1945,4 +1946,12 @@ func DynDirectedGraphClear(
 	test.Eq(0,container.NumLinks(),t)
 	test.Eq(0,container.NumVertices(),t)
 	test.Eq(0,container.NumEdges(),t)
+}
+
+// Tests the KeyedEq method functionality of a dynamic directed graph.
+func DynDirectedGraphKeyedEq(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+
 }

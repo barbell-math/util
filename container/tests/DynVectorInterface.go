@@ -905,3 +905,310 @@ func DynVectorInterfaceKeyedEq(
 	test.True(v.KeyedEq(v2), t)
 	test.True(v2.KeyedEq(v), t)
 }
+
+// Tests the UnorderedEq method functionality of a dynamic vector.
+func DynVectorInterfaceUnorderedEq(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	v := factory(0)
+	v.Append(1, 2, 3)
+	v2 := factory(0)
+	v2.Append(1, 2, 3)
+	test.True(v.UnorderedEq(v2), t)
+	test.True(v2.UnorderedEq(v), t)
+	v.Pop(3)
+	test.False(v.UnorderedEq(v2), t)
+	test.False(v2.UnorderedEq(v), t)
+	v.Append(3)
+	v2 = factory(0)
+	v2.Append(3, 1, 2)
+	test.True(v.UnorderedEq(v2), t)
+	test.True(v2.UnorderedEq(v), t)
+	v.Pop(3)
+	test.False(v.UnorderedEq(v2), t)
+	test.False(v2.UnorderedEq(v), t)
+	v.Append(3)
+	v2 = factory(0)
+	v2.Append(2, 3, 1)
+	test.True(v.UnorderedEq(v2), t)
+	test.True(v2.UnorderedEq(v), t)
+	v.Pop(3)
+	test.False(v.UnorderedEq(v2), t)
+	test.False(v2.UnorderedEq(v), t)
+	v = factory(0)
+	v.Append(0)
+	v2 = factory(0)
+	v2.Append(0)
+	test.True(v.UnorderedEq(v2), t)
+	test.True(v2.UnorderedEq(v), t)
+	v.Pop(0)
+	test.False(v.UnorderedEq(v2), t)
+	test.False(v2.UnorderedEq(v), t)
+	v = factory(0)
+	v2 = factory(0)
+	test.True(v.UnorderedEq(v2), t)
+	test.True(v2.UnorderedEq(v), t)
+}
+
+func dynVectorIntersectionHelper(
+	res dynamicContainers.Vector[int],
+	l dynamicContainers.Vector[int],
+	r dynamicContainers.Vector[int],
+	exp []int,
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	tester := func(c dynamicContainers.Vector[int]) {
+		test.Eq(len(exp), c.Length(), t)
+		for _, v := range exp {
+			test.True(c.Contains(v), t)
+		}
+	}
+	res.Intersection(l, r)
+	tester(res)
+	res.Intersection(r, l)
+	tester(res)
+}
+
+// Tests the Intersection method functionality of a dynamic vector.
+func DynVectorInterfaceIntersection(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	v := factory(0)
+	v2 := factory(0)
+	dynVectorIntersectionHelper(factory(0), v, v2, []int{}, factory, t)
+	v.Append(1)
+	dynVectorIntersectionHelper(factory(0), v, v2, []int{}, factory, t)
+	v2.Append(1)
+	dynVectorIntersectionHelper(factory(0), v, v2, []int{1}, factory, t)
+	v2.Append(2)
+	dynVectorIntersectionHelper(factory(0), v, v2, []int{1}, factory, t)
+	v.Append(2)
+	dynVectorIntersectionHelper(factory(0), v, v2, []int{1, 2}, factory, t)
+	v.Append(3)
+	dynVectorIntersectionHelper(factory(0), v, v2, []int{1, 2}, factory, t)
+	v2.Append(3)
+	dynVectorIntersectionHelper(factory(0), v, v2, []int{1, 2, 3}, factory, t)
+
+	if !v.IsSynced() {
+		v = factory(0)
+		v2 = factory(0)
+		v.Append(1, 2, 3, 4)
+		v2.Append(2, 4)
+		dynVectorIntersectionHelper(v, v, v2, []int{2, 4}, factory, t)
+	}
+}
+
+func dynVectorUnionHelper(
+	res dynamicContainers.Vector[int],
+	l dynamicContainers.Vector[int],
+	r dynamicContainers.Vector[int],
+	exp []int,
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	tester := func(c dynamicContainers.Vector[int]) {
+		test.Eq(len(exp), c.Length(), t)
+		for _, v := range exp {
+			test.True(c.Contains(v), t)
+		}
+	}
+	res.Union(l, r)
+	tester(res)
+	res.Union(r, l)
+	tester(res)
+}
+
+// Tests the Union method functionality of a dynamic vector.
+func DynVectorInterfaceUnion(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	v := factory(0)
+	v2 := factory(0)
+	dynVectorUnionHelper(factory(0), v, v2, []int{}, factory, t)
+	v.Append(1)
+	dynVectorUnionHelper(factory(0), v, v2, []int{1}, factory, t)
+	v2.Append(1)
+	dynVectorUnionHelper(factory(0), v, v2, []int{1}, factory, t)
+	v2.Append(2)
+	dynVectorUnionHelper(factory(0), v, v2, []int{1, 2}, factory, t)
+	v.Append(2)
+	dynVectorUnionHelper(factory(0), v, v2, []int{1, 2}, factory, t)
+	v.Append(3)
+	dynVectorUnionHelper(factory(0), v, v2, []int{1, 2, 3}, factory, t)
+	v2.Append(3)
+	dynVectorUnionHelper(factory(0), v, v2, []int{1, 2, 3}, factory, t)
+
+	if !v.IsSynced() {
+		v = factory(0)
+		v2 = factory(0)
+		v.Append(1, 2, 3, 4)
+		v2.Append(2, 4, 5, 6)
+		dynVectorUnionHelper(v, v, v2, []int{1, 2, 3, 4, 5, 6}, factory, t)
+	}
+}
+
+func dynVectorDifferenceHelper(
+	res dynamicContainers.Vector[int],
+	l dynamicContainers.Vector[int],
+	r dynamicContainers.Vector[int],
+	exp []int,
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	res.Difference(l, r)
+	test.Eq(len(exp), res.Length(), t)
+	for _, v := range exp {
+		test.True(res.Contains(v), t)
+	}
+}
+
+// Tests the Difference method functionality of a dynamic vector.
+func DynVectorInterfaceDifference(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	innerFactory := func(vals ...int) dynamicContainers.Vector[int] {
+		rv := factory(0)
+		rv.Append(vals...)
+		return rv
+	}
+	v := innerFactory()
+	v2 := innerFactory()
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{}, factory, t)
+
+	v = innerFactory(1)
+	v2 = innerFactory()
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{1}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{}, factory, t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1)
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{}, factory, t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1, 2)
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{2}, factory, t)
+
+	v = innerFactory(1, 2)
+	v2 = innerFactory(1, 2)
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{}, factory, t)
+
+	v = innerFactory(1, 2, 3)
+	v2 = innerFactory(1, 2)
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{3}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{}, factory, t)
+
+	v = innerFactory(1, 2, 3)
+	v2 = innerFactory(1, 2, 3)
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{}, factory, t)
+
+	v = innerFactory(1, 2, 3, 4, 5, 6)
+	v2 = innerFactory(1, 2, 3)
+	dynVectorDifferenceHelper(factory(0), v, v2, []int{4, 5, 6}, factory, t)
+	dynVectorDifferenceHelper(factory(0), v2, v, []int{}, factory, t)
+
+	if !v.IsSynced() {
+		v = innerFactory(1, 2, 3, 4)
+		v2 = innerFactory(2, 4)
+		dynVectorDifferenceHelper(v, v, v2, []int{1, 3}, factory, t)
+	}
+}
+
+func DynVectorInterfaceIsSuperset(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	innerFactory := func(vals ...int) dynamicContainers.Vector[int] {
+		rv := factory(0)
+		rv.Append(vals...)
+		return rv
+	}
+
+	v := innerFactory()
+	v2 := innerFactory()
+	test.True(v.IsSuperset(v2), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory()
+	test.True(v.IsSuperset(v2), t)
+	test.False(v2.IsSuperset(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1)
+	test.True(v.IsSuperset(v2), t)
+	test.True(v2.IsSuperset(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1, 2)
+	test.False(v.IsSuperset(v2), t)
+	test.True(v2.IsSuperset(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1, 2, 3)
+	test.False(v.IsSuperset(v2), t)
+	test.True(v2.IsSuperset(v), t)
+
+	v = innerFactory(1, 2, 3)
+	v2 = innerFactory(1, 2, 3)
+	test.True(v.IsSuperset(v2), t)
+	test.True(v2.IsSuperset(v), t)
+
+	v = innerFactory(1, 2, 3, 4, 5)
+	v2 = innerFactory(1, 2, 3)
+	test.True(v.IsSuperset(v2), t)
+	test.False(v2.IsSuperset(v), t)
+}
+
+func DynVectorInterfaceIsSubset(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	innerFactory := func(vals ...int) dynamicContainers.Vector[int] {
+		rv := factory(0)
+		rv.Append(vals...)
+		return rv
+	}
+
+	v := innerFactory()
+	v2 := innerFactory()
+	test.True(v.IsSubset(v2), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory()
+	test.False(v.IsSubset(v2), t)
+	test.True(v2.IsSubset(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1)
+	test.True(v.IsSubset(v2), t)
+	test.True(v2.IsSubset(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1, 2)
+	test.True(v.IsSubset(v2), t)
+	test.False(v2.IsSubset(v), t)
+
+	v = innerFactory(1)
+	v2 = innerFactory(1, 2, 3)
+	test.True(v.IsSubset(v2), t)
+	test.False(v2.IsSubset(v), t)
+
+	v = innerFactory(1, 2, 3)
+	v2 = innerFactory(1, 2, 3)
+	test.True(v.IsSubset(v2), t)
+	test.True(v2.IsSubset(v), t)
+
+	v = innerFactory(1, 2, 3, 4, 5)
+	v2 = innerFactory(1, 2, 3)
+	test.False(v.IsSubset(v2), t)
+	test.True(v2.IsSubset(v), t)
+}
