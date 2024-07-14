@@ -13,8 +13,13 @@ import (
 type (
 	edgeHash hash.Hash
 	vertexHash hash.Hash
-	graphEdge basic.Pair[edgeHash, vertexHash]
-	internalHashGraphImpl map[vertexHash]Vector[graphEdge, *graphEdge]
+	graphLink basic.Pair[edgeHash, vertexHash]
+	internalHashGraphImpl map[vertexHash]Vector[graphLink, *graphLink]
+
+	// This is used when only the vertex part of a graph edge is needed
+	vertexOnlyGraphLinkWidget graphLink
+	// This is used when only the edge part of a graph edge is needed
+	edgeOnlyGraphLinkWidget graphLink
 
 	// A type to represent an arbitrary graph with the specified vertex and edge
 	// types. The graph will maintain a set of vertices that are connected by a
@@ -49,26 +54,53 @@ type (
 	}
 )
 
-func (_ *graphEdge)Eq(l *graphEdge, r *graphEdge) bool {
+func (_ *graphLink)Eq(l *graphLink, r *graphLink) bool {
 	hw:=widgets.BuiltinHash{}
 	return (
 		hw.Eq((*hash.Hash)(&l.A),(*hash.Hash)(&r.A)) && 
 		hw.Eq((*hash.Hash)(&l.B),(*hash.Hash)(&r.B)))
 }
-
-func (_ *graphEdge)Lt(l *graphEdge, r *graphEdge) bool {
+func (_ *graphLink)Lt(l *graphLink, r *graphLink) bool {
 	hw:=widgets.BuiltinHash{}
 	return (
 		hw.Lt((*hash.Hash)(&l.A),(*hash.Hash)(&r.A)) && 
 		hw.Lt((*hash.Hash)(&l.B),(*hash.Hash)(&r.B)))
 }
-
-func (_ *graphEdge)Hash(other *graphEdge) hash.Hash {
+func (_ *graphLink)Hash(other *graphLink) hash.Hash {
 	return ((hash.Hash)(other.A)).Combine((hash.Hash)(other.B))
 }
+func (_ *graphLink)Zero(other *graphLink) {
+	*other=graphLink{A: edgeHash(0), B: vertexHash(0) }
+}
 
-func (_ *graphEdge)Zero(other *graphEdge) {
-	*other=graphEdge{A: edgeHash(0), B: vertexHash(0) }
+func (_ *vertexOnlyGraphLinkWidget)Eq(l *graphLink, r *graphLink) bool {
+	hw:=widgets.BuiltinHash{}
+	return hw.Eq((*hash.Hash)(&l.B),(*hash.Hash)(&r.B))
+}
+func (_ *vertexOnlyGraphLinkWidget)Lt(l *graphLink, r *graphLink) bool {
+	hw:=widgets.BuiltinHash{}
+	return hw.Lt((*hash.Hash)(&l.B),(*hash.Hash)(&r.B))
+}
+func (_ *vertexOnlyGraphLinkWidget)Hash(other *graphLink) hash.Hash {
+	return (hash.Hash)(other.B)
+}
+func (_ *vertexOnlyGraphLinkWidget)Zero(other *graphLink) {
+	*other=graphLink{A: edgeHash(0), B: vertexHash(0) }
+}
+
+func (_ *edgeOnlyGraphLinkWidget)Eq(l *graphLink, r *graphLink) bool {
+	hw:=widgets.BuiltinHash{}
+	return hw.Eq((*hash.Hash)(&l.A),(*hash.Hash)(&r.A))
+}
+func (_ *edgeOnlyGraphLinkWidget)Lt(l *graphLink, r *graphLink) bool {
+	hw:=widgets.BuiltinHash{}
+	return hw.Lt((*hash.Hash)(&l.A),(*hash.Hash)(&r.A))
+}
+func (_ *edgeOnlyGraphLinkWidget)Hash(other *graphLink) hash.Hash {
+	return (hash.Hash)(other.A)
+}
+func (_ *edgeOnlyGraphLinkWidget)Zero(other *graphLink) {
+	*other=graphLink{A: edgeHash(0), B: vertexHash(0) }
 }
 
 // Creates a new hash graph initialized with enough memory to hold the specified
@@ -448,6 +480,53 @@ func (g *SyncedHashGraph[V,E,VI,EI])ContainsLinkPntr(from *V, to *V, e *E) bool 
 	return g.HashGraph.ContainsLinkPntr(from,to,e)
 }
 
+// Description: Returns the number of outgoing edges from the supplied vertex
+//
+// Time Complexity: O(1)
+func (g *HashGraph[V, E, VI, EI])NumOutEdges(v V) int {
+	return g.NumOutEdgesPntr(&v)	
+}
+
+// Description: Places a read lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.NumOutEdgesPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (g *SyncedHashGraph[V, E, VI, EI])NumOutEdges(v V) int {
+	g.RLock()
+	defer g.RUnlock()
+	return g.HashGraph.NumOutEdgesPntr(&v)
+}
+
+// Description: Returns the number of outgoing edges from the supplied vertex
+//
+// Time Complexity: O(1)
+func (g *HashGraph[V, E, VI, EI])NumOutEdgesPntr(v *V) int {
+	vw:=widgets.Widget[V,VI]{}
+	vHash:=vertexHash(vw.Hash(v))
+
+	if _,ok:=g.vertices[vHash]; !ok {
+		return 0
+	}
+	if _,ok:=g.graph[vHash]; !ok {
+		return 0
+	}
+	return len(g.graph[vHash])
+}
+
+// Description: Places a read lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.NumOutEdgesPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (g *SyncedHashGraph[V, E, VI, EI])NumOutEdgesPntr(v *V) int {
+	g.RLock()
+	defer g.RUnlock()
+	return g.HashGraph.NumOutEdgesPntr(v)
+}
+
 // Description: Returns an iterator that supplies all of the outgoing edges from
 // the supplied vertex. Duplicate edges will not be filtered out, meaning a
 // single edge may be returned multiple times by the iterator.
@@ -489,9 +568,9 @@ func (g *HashGraph[V, E, VI, EI])outEdgesImpl(v *V) iter.Iter[E] {
 		// It is a valid vertex, just has no out going edges
 		return iter.NoElem[E]()
 	}
-	return iter.Map[graphEdge,E](
-		iter.SliceElems[graphEdge](g.graph[vHash]),
-		func(index int, val graphEdge) (E, error) {
+	return iter.Map[graphLink,E](
+		iter.SliceElems[graphLink](g.graph[vHash]),
+		func(index int, val graphLink) (E, error) {
 			return g.edges[val.A], nil
 		},
 	)
@@ -538,9 +617,9 @@ func (g *HashGraph[V,E,VI,EI])outVerticesImpl(v *V) iter.Iter[V] {
 		// It is a valid vertex, just has no out going edges
 		return iter.NoElem[V]()
 	}
-	return iter.Map[graphEdge,V](
-		iter.SliceElems[graphEdge](g.graph[vHash]),
-		func(index int, val graphEdge) (V, error) {
+	return iter.Map[graphLink,V](
+		iter.SliceElems[graphLink](g.graph[vHash]),
+		func(index int, val graphLink) (V, error) {
 			return g.vertices[val.B], nil
 		},
 	)
@@ -591,9 +670,9 @@ func (g *HashGraph[V,E,VI,EI])outEdgesAndVerticesImpl(
 		// It is a valid vertex, just has no out going edges
 		return iter.NoElem[basic.Pair[E,V]]()
 	}
-	return iter.Map[graphEdge,basic.Pair[E,V]](
-		iter.SliceElems[graphEdge](g.graph[vHash]),
-		func(index int, val graphEdge) (basic.Pair[E,V], error) {
+	return iter.Map[graphLink,basic.Pair[E,V]](
+		iter.SliceElems[graphLink](g.graph[vHash]),
+		func(index int, val graphLink) (basic.Pair[E,V], error) {
 			return basic.Pair[E,V]{g.edges[val.A], g.vertices[val.B]}, nil
 		},
 	)
@@ -651,13 +730,13 @@ func (g *HashGraph[V, E, VI, EI])edgesBetweenImpl(from *V, to *V) iter.Iter[E] {
 		return iter.NoElem[E]()
 	}
 
-	return iter.Map[graphEdge,E](
-		iter.SliceElems[graphEdge](g.graph[fromHash]).Filter(
-			func(index int, val graphEdge) bool {
+	return iter.Map[graphLink,E](
+		iter.SliceElems[graphLink](g.graph[fromHash]).Filter(
+			func(index int, val graphLink) bool {
 				return val.B==toHash
 			},
 		),
-		func(index int, val graphEdge) (E, error) {
+		func(index int, val graphLink) (E, error) {
 			return g.edges[val.A], nil
 		},
 	)
@@ -667,6 +746,61 @@ func (g *HashGraph[V, E, VI, EI])edgesBetweenImpl(from *V, to *V) iter.Iter[E] {
 func (g *HashGraph[V,E,VI,EI])EdgesBetweenPntr(from *V, to *V) iter.Iter[*E] {
 	panic(getNonAddressablePanicText("hash graph"))
 }
+
+// TODO - probably delete
+// func (g *HashGraph[V, E, VI, EI])Links() iter.Iter[struct{from V; to V; e E}] {
+// 	type tmpHash struct {
+// 		from vertexHash
+// 		to vertexHash
+// 		e edgeHash
+// 	}
+// 	prevIndex:=-1
+// 	return iter.Map[tmpHash, struct {from, to V; e E}](
+// 		iter.Map[vertexHash, tmpHash](
+// 			iter.MapKeys[vertexHash](g.graph),
+// 			func(index int, val vertexHash,) (tmpHash, error) {
+// 				return struct{from vertexHash; to vertexHash; e edgeHash}{
+// 					from: val,
+// 				}, nil
+// 			},
+// 		).Next(
+// 			func(
+// 				index int,
+// 				val tmpHash,
+// 				status iter.IteratorFeedback,
+// 			) (
+// 				iter.IteratorFeedback,
+// 				tmpHash,
+// 				error,
+// 			) {
+// 				if status==iter.Break {
+// 					return iter.Break, tmpHash{}, nil
+// 				}
+// 				if prevIndex<len(g.graph[val.from]) {
+// 					prevIndex++
+// 					return iter.Continue, tmpHash{
+// 						from: val.from,
+// 						to: g.graph[val.from][prevIndex].B,
+// 						e: g.graph[val.from][prevIndex].A,
+// 					}, nil
+// 				}
+// 				prevIndex=-1
+// 				return iter.Iterate, tmpHash{}, nil
+// 			},
+// 		),
+// 		func(index int, val tmpHash) (struct{from V; to V; e E}, error) {
+// 			return struct{from V; to V; e E}{
+// 				from: g.vertices[val.from],
+// 				to: g.vertices[val.to],
+// 				e: g.edges[val.e],
+// 			}, nil
+// 		},
+// 	)
+// }
+// 
+// func (g *HashGraph[V, E, VI, EI])LinkPntrs() iter.Iter[struct{from *V; to *V; e *E}] {
+// 	return iter.NoElem[struct{from *V; to *V; e *E}]()
+// }
 
 // Description: Adds edges to the graph without connecting them to any vertices.
 // Duplicate edges will be ignored. This method will never return an error.
@@ -726,7 +860,7 @@ func (g *SyncedHashGraph[V,E,VI,EI])AddVertices(v ...V) error {
 
 // Description: Adds a link between an existing edge and vertices in the graph.
 // The edge and vertices must have been added to the graph prior to calling
-// this funciton or an error will be returned. If a link already exists between
+// this function or an error will be returned. If a link already exists between
 // the provided vertices with the provided edge then no action will be taken and
 // no error will be returned.
 //
@@ -750,7 +884,7 @@ func (g *SyncedHashGraph[V, E, VI, EI])Link(from V, to V, e E) error {
 
 // Description: Adds a link between an existing edge and vertices in the graph.
 // The edge and vertices must have been added to the graph prior to calling
-// this funciton or an error will be returned. If a link already exists between
+// this function or an error will be returned. If a link already exists between
 // the provided vertices with the provided edge then no action will be taken and
 // no error will be returned.
 //
@@ -772,13 +906,14 @@ func (g *HashGraph[V,E,VI,EI])LinkPntr(from *V, to *V, e *E) error {
 		return getEdgeError[E](e)
 	}
 
+	gl:=graphLink{eHash, toHash}
 	gNode,_:=g.graph[fromHash]
-	if _,found:=gNode.KeyOf(graphEdge{eHash, toHash}); found {
+	if gNode.Contains(gl) {
 		return nil
 	}
 
 	g.numLinks++
-	gNode = append(gNode, graphEdge{eHash, toHash})
+	gNode.Append(graphLink{eHash, toHash})
 	g.graph[fromHash]=gNode
 	if gNode,ok:=g.graph[toHash]; !ok {
 		g.graph[toHash]=gNode
@@ -799,25 +934,148 @@ func (g *SyncedHashGraph[V, E, VI, EI])LinkPntr(from *V, to *V, e *E) error {
 	return g.HashGraph.LinkPntr(from,to,e)
 }
 
+// Description: Deletes a vertex from the graph, removing any links that
+// previously used the vertex. No edges will be deleted, meaning this operation
+// may result in orphaned edges.
+//
+// Time Complexity: O(n), where n=num of links in the graph
 func (g *HashGraph[V,E,VI,EI])DeleteVertex(v V) error {
-	return nil
+	return g.DeleteVertexPntr(&v)
 }
 
+// Description: Places a write lock on the underlying hash graph and then
+// removes the vertex from the graph. Exhibits the same behavior as the
+// non-synced [HashGraph.DeleteVertexPntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of links in the graph
+func (g *SyncedHashGraph[V, E, VI, EI])DeleteVertex(v V) error {
+	g.Lock()
+	defer g.Unlock()
+	return g.HashGraph.DeleteVertexPntr(&v)
+}
+
+// Description: Deletes a vertex from the graph, removing any links that
+// previously used the vertex. No edges will be deleted, meaning this operation
+// may result in orphaned edges.
+//
+// Time Complexity: O(n), where n=num of links in the graph
 func (g *HashGraph[V,E,VI,EI])DeleteVertexPntr(v *V) error {
+	vw:=widgets.Widget[V,VI]{}
+	vHash:=vertexHash(vw.Hash(v))
+
+	if _,ok:=g.vertices[vHash]; !ok {
+		return getVertexError[V](v)
+	}
+	tmpV:=g.vertices[vHash]
+	vw.Zero(&tmpV)
+	delete(g.vertices,vHash)
+
+	if gNode,ok:=g.graph[vHash]; ok {
+		g.numLinks-=gNode.Length()
+		delete(g.graph,vHash)
+	}
+
+	for iterHash,_:=range(g.graph) {
+		gNode:=(Vector[graphLink,*vertexOnlyGraphLinkWidget])(
+			([]graphLink)(g.graph[iterHash]),
+		)
+		g.numLinks-=gNode.Pop(graphLink{B: vHash})
+		if len(gNode)==0 {
+			delete(g.graph,iterHash)
+		} else {
+			g.graph[iterHash]=(Vector[graphLink,*graphLink])(
+				([]graphLink)(gNode),
+			)
+		}
+	}
 	return nil
 }
 
+// Description: Places a write lock on the underlying hash graph and then
+// removes the vertex from the graph. Exhibits the same behavior as the
+// non-synced [HashGraph.DeleteVertexPntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of links in the graph
+func (g *SyncedHashGraph[V, E, VI, EI])DeleteVertexPntr(v *V) error {
+	g.Lock()
+	defer g.Unlock()
+	return g.HashGraph.DeleteVertexPntr(v)
+}
+
+// Description: Deletes an edge from the graph, removing any links that
+// previously used the vertex. No vertices will be deleted, meaning this
+// operation may result in orphaned vertices.
+//
+// Time Complexity: O(n), where n=num of links in the graph
 func (g *HashGraph[V,E,VI,EI])DeleteEdge(e E) error {
+	return g.DeleteEdgePntr(&e)
+}
+
+// Description: Places a write lock on the underlying hash graph and then
+// removes the edge from the graph. Exhibits the same behavior as the
+// non-synced [HashGraph.DeleteEdgePntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of links in the graph
+func (g *SyncedHashGraph[V, E, VI, EI])DeleteEdge(e E) error {
+	g.Lock()
+	defer g.Unlock()
+	return g.HashGraph.DeleteEdgePntr(&e)
+}
+
+// Description: Deletes an edge from the graph, removing any links that
+// previously used the vertex. No vertices will be deleted, meaning this
+// operation may result in orphaned vertices.
+//
+// Time Complexity: O(n), where n=num of links in the graph
+func (g *HashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
+	ew:=widgets.Widget[E,EI]{}
+	eHash:=edgeHash(ew.Hash(e))
+
+	if _,ok:=g.edges[eHash]; !ok {
+		return getEdgeError[E](e)
+	}
+	tmpE:=g.edges[eHash]
+	ew.Zero(&tmpE)
+	delete(g.edges,eHash)
+
+	for iterHash,_:=range(g.graph) {
+		gNode:=(Vector[graphLink,*edgeOnlyGraphLinkWidget])(
+			([]graphLink)(g.graph[iterHash]),
+		)
+		g.numLinks-=gNode.Pop(graphLink{A: eHash})
+		if len(gNode)==0 {
+			delete(g.graph,iterHash)
+		} else {
+			g.graph[iterHash]=(Vector[graphLink,*graphLink])(
+				([]graphLink)(gNode),
+			)
+		}
+	}
 	return nil
 }
 
-func (g *HashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
-	return nil
+// Description: Places a write lock on the underlying hash graph and then
+// removes the edge from the graph. Exhibits the same behavior as the
+// non-synced [HashGraph.DeleteEdgePntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of links in the graph
+func (g *SyncedHashGraph[V, E, VI, EI])DeleteEdgePntr(e *E) error {
+	g.Lock()
+	defer g.Unlock()
+	return g.HashGraph.DeleteEdgePntr(e)
 }
 
 // Description: Removes a link within the graph without removing the underlying
 // vertices or edge. This may leave vertices with no links, and edges that don't
-// correspond to any edges. An error will be returned if either vertice does not
+// correspond to any links. An error will be returned if either vertice does not
 // exist in the graph or if the supplied edge does not exist in the graph.
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
@@ -839,7 +1097,7 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteLink(from V, to V, e E) error {
 
 // Description: Removes a link within the graph without removing the underlying
 // vertices or edge. This may leave vertices with no links, and edges that don't
-// correspond to any edges. An error will be returned if either vertice does not
+// correspond to any links. An error will be returned if either vertice does not
 // exist in the graph or if the supplied edge does not exist in the graph.
 //
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
@@ -861,11 +1119,11 @@ func (g *HashGraph[V,E,VI,EI])DeleteLinkPntr(from *V, to *V, e *E) error {
 	}
 
 	gNode,_:=g.graph[fromHash]
-	if idx,found:=gNode.KeyOf(graphEdge{eHash, toHash}); found {
+	if idx,found:=gNode.KeyOf(graphLink{eHash, toHash}); found {
 		if len(gNode) > 1 {
 			gNode.Delete(idx)
 			g.numLinks--
-			// g.graph[fromHash]=gNode -- eh??
+			g.graph[fromHash]=gNode
 		} else if len(gNode)==1 {
 			delete(g.graph,fromHash)
 		}
@@ -889,21 +1147,173 @@ func (g *SyncedHashGraph[V, E, VI, EI])DeleteLinkPntr(
 	return g.HashGraph.DeleteLinkPntr(from, to, e)
 }
 
+// Description: Removes all links starting at from and ending at to without
+// removing the underlying vertices or edges. This may leave vertices with no
+// links, and edges that don't correspond to any links. An error will be
+// returned if either vertex does not exist in the graph.
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
 func (g *HashGraph[V,E,VI,EI])DeleteLinks(from V, to V) error {
-	return nil
+	return g.DeleteLinksPntr(&from,&to)
 }
 
+// Description: Places a write lock on the underlying hash graph before calling
+// the underlying hash graphs [HashGraph.DeleteLinksPntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
+func (g *SyncedHashGraph[V, E, VI, EI])DeleteLinks(from V, to V) error {
+	g.Lock()
+	defer g.Unlock()
+	return g.HashGraph.DeleteLinksPntr(&from,&to)
+}
+
+// Description: Removes all links starting at from and ending at to without
+// removing the underlying vertices or edges. This may leave vertices with no
+// links, and edges that don't correspond to any links. An error will be
+// returned if either vertex does not exist in the graph.
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
 func (g *HashGraph[V,E,VI,EI])DeleteLinksPntr(from *V, to *V) error {
+	vw:=widgets.Widget[V,VI]{}
+	fromHash:=vertexHash(vw.Hash(from))
+	toHash:=vertexHash(vw.Hash(to))
+
+	if _,ok:=g.vertices[fromHash]; !ok {
+		return getVertexError[V](from)
+	}
+	if _,ok:=g.vertices[toHash]; !ok {
+		return getVertexError[V](to)
+	}
+
+	gNode:=(Vector[graphLink,*vertexOnlyGraphLinkWidget])(
+		([]graphLink)(g.graph[fromHash]),
+	)
+	g.numLinks-=gNode.Pop(graphLink{B: toHash})
+
+	if len(gNode)==0 {
+		delete(g.graph,fromHash)
+	} else {
+		g.graph[fromHash]=(Vector[graphLink,*graphLink])(([]graphLink)(gNode))
+	}
 	return nil
 }
 
-func (g *HashGraph[V,E,VI,EI])Clear() {}
+// Description: Places a write lock on the underlying hash graph before calling
+// the underlying hash graphs [HashGraph.DeleteLinksPntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n), where n=num of outgoing edges on the from vertex
+func (g *SyncedHashGraph[V,E,VI,EI])DeleteLinksPntr(from *V, to *V) error {
+	g.Lock()
+	g.Unlock()
+	return g.HashGraph.DeleteLinksPntr(from,to)
+}
 
+// Description: Removes all edges, vertices, and links.
+//
+// Time Complexity: O(n+m), where n=num vertices and m=num edges
+func (g *HashGraph[V,E,VI,EI])Clear() {
+	ew:=widgets.Widget[E,EI]{}
+	vw:=widgets.Widget[V,VI]{}
+	for _,iterE:=range(g.edges) {
+		ew.Zero(&iterE)
+	}
+	for _,iterV:=range(g.vertices) {
+		vw.Zero(&iterV)
+	}
+
+	g.edges=make(map[edgeHash]E)
+	g.vertices=make(map[vertexHash]V)
+	g.graph=make(internalHashGraphImpl)
+	g.numLinks=0
+}
+
+// Description: Places a write lock on the underlying hash graph before calling
+// the underlying [HashGraph.Clear] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n+m), where n=num vertices and m=num edges
+func (g *SyncedHashGraph[V, E, VI, EI])Clear() {
+	g.Lock()
+	defer g.Unlock()
+	g.HashGraph.Clear()
+}
+
+// Description: Returns true if the two supplied graphs are considered equal.
+// In order for two graphs to be equal they must have the same structure and all
+// of the corresponding vertices and edges must be equal as defined by the Eq
+// method of the supplied VI and EI widgets.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLink method on other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink))), where n is the number of links in this graph 
+// and O(other.ContainsLink) represents the time complexity of the ContainsLink
+// method on other.
 func (g *HashGraph[V,E,VI,EI])KeyedEq(
 	other containerTypes.GraphComparisonsConstraint[V,E],
 ) bool {
-	return false
+	if !(
+		g.NumEdges()==other.NumEdges() && 
+		g.NumVertices()==other.NumVertices() && 
+		g.NumLinks()==other.NumLinks()) {
+		return false
+	}
+
+	containsOp:=func(from vertexHash, gLink graphLink) bool {
+		if other.IsAddressable() {
+			tmpFrom:=g.vertices[from]
+			tmpTo:=g.vertices[gLink.B]
+			tmpE:=g.edges[gLink.A]
+			return other.ContainsLinkPntr(&tmpFrom,&tmpTo,&tmpE)
+		} else {
+			return other.ContainsLink(
+				g.vertices[from],
+				g.vertices[gLink.B],
+				g.edges[gLink.A],
+			)
+		}
+	}
+
+	for from, gNode:=range(g.graph) {
+		if len(gNode)!=other.NumOutEdges(g.vertices[from]) {
+			return false
+		}
+		for _,gLink:=range(gNode) {
+			if !containsOp(from, gLink) {
+				return false
+			}
+		}
+	}
+	return true
 }
+
+// Description: Places a read lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.KeyedEq] method. Attempts to place a
+// read lock on other but whether or not that happens is implementation
+// dependent.
+//
+// Lock Type: Read on this hash graph, read on other
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLink method on other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink))), where n is the number of links in this graph 
+// and O(other.ContainsLink) represents the time complexity of the ContainsLink
+// method on other.
+func (g *SyncedHashGraph[V, E, VI, EI])KeyedEq(
+	other containerTypes.GraphComparisonsConstraint[V,E],
+) bool {
+	g.RLock()
+	other.RLock()
+	defer g.RUnlock()
+	defer other.RUnlock()
+	return g.HashGraph.KeyedEq(other)
+}
+
+// Isomorphic equality
 func (g *HashGraph[V,E,VI,EI])UnorderedEq(
 	other containerTypes.GraphComparisonsConstraint[V,E],
 ) bool {
@@ -938,13 +1348,35 @@ func (_ *HashGraph[V,E,VI,EI])Eq(
 ) bool {
 	return false
 }
+
+// Panics, hash graphs cannot be compared for order.
 func (_ *HashGraph[V,E,VI,EI])Lt(
 	l *HashGraph[V,E,VI,EI],
 	r *HashGraph[V,E,VI,EI],
 ) bool {
-	return false
+	panic("Hash graphs maps cannot be compared relative to each other.")
 }
+
+// Panics, hash graphs cannot be compared for order.
+func (_ *SyncedHashGraph[V,E,VI,EI])Lt(
+	l *SyncedHashGraph[V,E,VI,EI],
+	r *SyncedHashGraph[V,E,VI,EI],
+) bool {
+	panic("Hash graphs maps cannot be compared relative to each other.")
+}
+
 func (_ *HashGraph[V,E,VI,EI])Hash(other *HashGraph[V,E,VI,EI]) hash.Hash {
 	return hash.Hash(0)
 }
-func (_ *HashGraph[V,E,VI,EI])Zero(other *HashGraph[V,E,VI,EI]) {}
+
+// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// Internally this is equivalent to [HashGraph.Clear].
+func (_ *HashGraph[V,E,VI,EI])Zero(other *HashGraph[V,E,VI,EI]) {
+	other.Clear()
+}
+
+// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// Internally this is equivalent to [SyncedHashGraph.Clear].
+func (_ *SyncedHashGraph[V,E,VI,EI])Zero(other *SyncedHashGraph[V,E,VI,EI]) {
+	other.Clear()
+}

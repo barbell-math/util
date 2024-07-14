@@ -49,6 +49,8 @@ type ReadGraphOps[V any, E any] interface {
     ContainsVertexPntr(v *V) bool
     OutEdges(v V) iter.Iter[E]
     OutEdgePntrs(v *V) iter.Iter[*E]
+    NumOutEdges(v V) int
+    NumOutEdgesPntr(v *V) int
     OutVertices(v V) iter.Iter[V]
     OutVerticePntrs(v *V) iter.Iter[*V]
     OutEdgesAndVertices(v V) iter.Iter[basic.Pair[E,V]]
