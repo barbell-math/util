@@ -396,8 +396,7 @@ func (h *HashSet[T, U]) Intersection(
 			internalHashSetImpl[T], (l.Length()+r.Length())/2,
 		),
 	}
-	addressableSafeValIter[T](
-		r,
+	addressableSafeValIter[T](r).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if l.ContainsPntr(val) {
 				newH.appendOp(val)
@@ -461,8 +460,8 @@ func (h *HashSet[T, U]) Union(
 		newH.appendOp(val) // This also works with AppendUnique?? Shouldn't, check sync
 		return iter.Continue, nil
 	}
-	addressableSafeValIter[T](l, op)
-	addressableSafeValIter[T](r, op)
+	addressableSafeValIter[T](l).ForEach(op)
+	addressableSafeValIter[T](r).ForEach(op)
 	h.Clear()
 	*h = newH
 }
@@ -513,8 +512,7 @@ func (h *HashSet[T, U]) Difference(
 			internalHashSetImpl[T], len(h.internalHashSetImpl)/2,
 		),
 	}
-	addressableSafeValIter[T](
-		l,
+	addressableSafeValIter[T](l).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if !r.ContainsPntr(val) {
 				newH.appendOp(val)
@@ -562,8 +560,7 @@ func (h *HashSet[T, U]) IsSuperset(
 	if !rv {
 		return false
 	}
-	addressableSafeValIter[T](
-		other,
+	addressableSafeValIter[T](other).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if rv = h.ContainsPntr(val); !rv {
 				return iter.Break, nil

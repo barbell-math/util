@@ -26,21 +26,16 @@ func addressableSafeGet[K any, V any](
 	}
 }
 
-// TODO - use iter ValToPntr instead
 func addressableSafeValIter[T any](
 	other interface {
 		containerTypes.Addressable
 		containerTypes.ReadOps[T]
 	},
-	iterOp func(index int, val *T) (iter.IteratorFeedback, error),
-) {
+) iter.Iter[*T] {
 	if other.IsAddressable() {
-		other.ValPntrs().ForEach(iterOp)
-	} else {
-		other.Vals().ForEach(func(index int, val T) (iter.IteratorFeedback, error) {
-			return iterOp(index, &val)
-		})
+		return other.ValPntrs()
 	}
+	return iter.ValToPntr[T](other.Vals())
 }
 
 func addressableSafeVerticesIter[V any, E any](

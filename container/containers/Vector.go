@@ -1120,8 +1120,7 @@ func (v *Vector[T, U]) Intersection(
 	r containerTypes.ComparisonsOtherConstraint[T],
 ) {
 	newV := make(Vector[T, U], 0, (l.Length()+r.Length())/2)
-	addressableSafeValIter[T](
-		l,
+	addressableSafeValIter[T](l).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if r.ContainsPntr(val) {
 				newV = append(newV, *val)
@@ -1184,8 +1183,8 @@ func (v *Vector[T, U]) Union(
 		}
 		return iter.Continue, nil
 	}
-	addressableSafeValIter[T](l, oper)
-	addressableSafeValIter[T](r, oper)
+	addressableSafeValIter[T](l).ForEach(oper)
+	addressableSafeValIter[T](r).ForEach(oper)
 	v.Clear()
 	*v = newV
 }
@@ -1231,8 +1230,7 @@ func (v *Vector[T, U]) Difference(
 	r containerTypes.ComparisonsOtherConstraint[T],
 ) {
 	newV := make(Vector[T, U], 0, l.Length()/2)
-	addressableSafeValIter[T](
-		l,
+	addressableSafeValIter[T](l).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if !r.ContainsPntr(val) {
 				newV = append(newV, *val)
@@ -1280,8 +1278,7 @@ func (v *Vector[T, U]) IsSuperset(
 	if !rv {
 		return false
 	}
-	addressableSafeValIter[T](
-		other,
+	addressableSafeValIter[T](other).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if rv = v.ContainsPntr(val); !rv {
 				return iter.Break, nil

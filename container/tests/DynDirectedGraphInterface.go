@@ -2095,3 +2095,5 @@ func DynDirectedGraphKeyedEq(
 		t,
 	)
 }
+
+// TODO - test graph intersection

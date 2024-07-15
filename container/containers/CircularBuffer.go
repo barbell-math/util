@@ -1341,8 +1341,7 @@ func (c *CircularBuffer[T, U]) Intersection(
 	r containerTypes.ComparisonsOtherConstraint[T],
 ) {
 	newC, _ := NewCircularBuffer[T, U](l.Length() + r.Length())
-	addressableSafeValIter[T](
-		l,
+	addressableSafeValIter[T](l).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if r.ContainsPntr(val) {
 				newC.Append(*val)
@@ -1399,8 +1398,8 @@ func (c *CircularBuffer[T, U]) Union(
 		newC.AppendUnique(*val)
 		return iter.Continue, nil
 	}
-	addressableSafeValIter[T](l, oper)
-	addressableSafeValIter[T](r, oper)
+	addressableSafeValIter[T](l).ForEach(oper)
+	addressableSafeValIter[T](r).ForEach(oper)
 	c.Clear()
 	*c = newC
 }
@@ -1444,8 +1443,7 @@ func (c *CircularBuffer[T, U]) Difference(
 	r containerTypes.ComparisonsOtherConstraint[T],
 ) {
 	newC, _ := NewCircularBuffer[T, U](l.Length())
-	addressableSafeValIter[T](
-		l,
+	addressableSafeValIter[T](l).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if !r.ContainsPntr(val) {
 				newC.Append(*val)
@@ -1494,8 +1492,7 @@ func (c *CircularBuffer[T, U]) IsSuperset(
 	if !rv {
 		return false
 	}
-	addressableSafeValIter[T](
-		other,
+	addressableSafeValIter[T](other).ForEach(
 		func(index int, val *T) (iter.IteratorFeedback, error) {
 			if rv = c.ContainsPntr(val); !rv {
 				return iter.Break, nil
