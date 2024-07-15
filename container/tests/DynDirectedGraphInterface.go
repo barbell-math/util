@@ -1978,10 +1978,120 @@ func DynDirectedGraphClear(
 	test.Eq(0, container.NumEdges(), t)
 }
 
+func directedGraphKeyedEqHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	links1 [][3]int,
+	links2 [][3]int,
+	expResult bool,
+	t *testing.T,
+) {
+	container1:=factory(0)
+	container2:=factory(0)
+	directedGraphMakeGraph(container1, len(links1), len(links1), links1,t)
+	directedGraphMakeGraph(container2, len(links2), len(links2), links2,t)
+}
 // Tests the KeyedEq method functionality of a dynamic directed graph.
 func DynDirectedGraphKeyedEq(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-
+	directedGraphKeyedEqHelper(
+		factory,
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 0},
+		},
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 0},
+		},
+		true,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 0},
+			[3]int{2, 1, 0},
+		},
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 0},
+		},
+		false,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 1},
+		},
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 0},
+		},
+		false,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 1, 0},
+		},
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 0},
+		},
+		false,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		[][3]int{
+			// from, to, e
+			[3]int{0, 0, 0},
+			[3]int{1, 0, 0},
+		},
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{1, 0, 0},
+		},
+		false,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{0, 2, 1},
+			[3]int{0, 3, 2},
+			[3]int{1, 2, 0},
+			[3]int{1, 3, 2},
+			[3]int{1, 0, 4},
+		},
+		[][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{0, 2, 1},
+			[3]int{0, 3, 2},
+			[3]int{1, 2, 0},
+			[3]int{1, 3, 2},
+			[3]int{1, 0, 4},
+		},
+		false,
+		t,
+	)
 }

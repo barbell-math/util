@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/barbell-math/util/algo/hash"
@@ -1319,11 +1320,78 @@ func (g *HashGraph[V, E, VI, EI]) UnorderedEq(
 ) bool {
 	return false
 }
+
+// Description: Takes the intersection of l and r and puts the result in this
+// graph. All values from this graph will be cleared before storing the new
+// result. Vertices and edges are compared using the supplied VI and EI widgets.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLinkPntr method on other. In big-O it might look something like
+// this, O(n*O(other.ContainsLinkPntr))), where n is the number of links in this
+// graph and O(other.ContainsLinkPntr) represents the time complexity of the
+// ContainsLinkPntr method on other.
 func (g *HashGraph[V, E, VI, EI]) Intersection(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
+	newG,err:=NewHashGraph[V,E,VI,EI](r.NumVertices()/2, r.NumEdges()/2)
+	if err!=nil {
+		panic(fmt.Sprintf("An error occurred making a new hash graph: %s",err))
+	}
+	// This implementation chooses to optimize the case where a link is not
+	// created in the graph. It does this by using pointers to values whenever
+	// possible. Note that in the case when a link must be made that values
+	// will be copied from out of scope, which might entail the GC.
+	addressableSafeVerticesIter[V,E](r).ForEach(
+		func(index int, fromV *V) (iter.IteratorFeedback, error) {
+			if !l.ContainsVertexPntr(fromV) {
+				return iter.Continue, nil
+			}
+			addressableSafeOutVerticesAndEdgesIter[V,E](r,*fromV).ForEach(
+				func(
+					index int,
+					toVAndE basic.Pair[*E, *V],
+				) (iter.IteratorFeedback, error) {
+					if l.ContainsLinkPntr(fromV, toVAndE.B, toVAndE.A) {
+						newG.AddEdges(*toVAndE.A)
+						newG.AddVertices(*fromV, *toVAndE.B)
+						newG.LinkPntr(fromV, toVAndE.B, toVAndE.A)
+					}
+					return iter.Continue, nil
+				},
+			)
+			return iter.Continue, nil
+		},
+	)
+	g.Clear()
+	*g=newG
 }
+
+// Description: Places a write lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.Intersection] method. Attempts to place
+// a read lock on l and r but whether or not that happens is implementation
+// dependent.
+//
+// Lock Type: Write on this vector, read on l and r
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLinkPntr method on other. In big-O it might look something like
+// this, O(n*O(other.ContainsLinkPntr))), where n is the number of links in this
+// graph and O(other.ContainsLinkPntr) represents the time complexity of the
+// ContainsLinkPntr method on other.
+func (g *SyncedHashGraph[V, E, VI, EI]) Intersection(
+	l containerTypes.GraphComparisonsConstraint[V,E],
+	r containerTypes.GraphComparisonsConstraint[V,E],
+) {
+	g.Lock()
+	l.RLock()
+	r.RLock()
+	defer g.Unlock()
+	defer l.RUnlock()
+	defer r.RUnlock()
+	g.HashGraph.Intersection(l,r)
+}
+
 func (g *HashGraph[V, E, VI, EI]) Union(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
@@ -1349,7 +1417,18 @@ func (_ *HashGraph[V, E, VI, EI]) Eq(
 	l *HashGraph[V, E, VI, EI],
 	r *HashGraph[V, E, VI, EI],
 ) bool {
-	return false
+	return l.KeyedEq(r)
+}
+
+func (_ *SyncedHashGraph[V, E, VI, EI])Eq(
+	l *SyncedHashGraph[V, E, VI, EI],
+	r *SyncedHashGraph[V, E, VI, EI],
+) bool {
+	l.RLock()
+	r.RLock()
+	defer l.RUnlock()
+	defer r.RUnlock()
+	return l.HashGraph.KeyedEq(r)
 }
 
 // Panics, hash graphs cannot be compared for order.

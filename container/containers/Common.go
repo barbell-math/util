@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/customerr"
 )
@@ -25,6 +26,7 @@ func addressableSafeGet[K any, V any](
 	}
 }
 
+// TODO - use iter ValToPntr instead
 func addressableSafeValIter[T any](
 	other interface {
 		containerTypes.Addressable
@@ -39,6 +41,30 @@ func addressableSafeValIter[T any](
 			return iterOp(index, &val)
 		})
 	}
+}
+
+func addressableSafeVerticesIter[V any, E any](
+	other containerTypes.GraphComparisonsConstraint[V, E],
+) iter.Iter[*V] {
+	if other.IsAddressable() {
+		return other.VerticePntrs()
+	}
+	return iter.ValToPntr[V](other.Vertices())
+}
+
+func addressableSafeOutVerticesAndEdgesIter[V any, E any](
+	other containerTypes.GraphComparisonsConstraint[V, E],
+	fromV V,
+) iter.Iter[basic.Pair[*E, *V]] {
+	if other.IsAddressable() {
+		return other.OutEdgesAndVerticePntrs(&fromV)
+	}
+	return iter.Map[basic.Pair[E,V], basic.Pair[*E,*V]](
+		other.OutEdgesAndVertices(fromV),
+		func(index int, val basic.Pair[E, V]) (basic.Pair[*E, *V], error) {
+			return basic.Pair[*E,*V]{A: &val.A, B: &val.B}, nil
+		},
+	)
 }
 
 func getNonAddressablePanicText(thingName string) string {
