@@ -1404,7 +1404,7 @@ func (_ *Vector[T, U]) Hash(other *Vector[T, U]) hash.Hash {
 }
 
 // Places a read lock on the underlying vector of other and then calls others
-// underlying vector [Vector.IsSubset] method. Implements the
+// underlying vector [Vector.Hash] method. Implements the
 // [algo.widget.WidgetInterface].
 func (_ *SyncedVector[T, U]) Hash(other *SyncedVector[T, U]) hash.Hash {
 	other.RLock()

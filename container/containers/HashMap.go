@@ -679,7 +679,7 @@ func (_ *HashMap[K, V, KI, VI]) Hash(other *HashMap[K, V, KI, VI]) hash.Hash {
 }
 
 // Places a read lock on the underlying hash map of other and then calls others
-// underlying hash maps [HashMap.IsSubset] method.
+// underlying hash maps [HashMap.Hash] method.
 func (_ *SyncedHashMap[K, V, KI, VI]) Hash(
 	other *SyncedHashMap[K, V, KI, VI],
 ) hash.Hash {

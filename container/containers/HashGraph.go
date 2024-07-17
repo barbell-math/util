@@ -980,14 +980,14 @@ func (g *HashGraph[V, E, VI, EI]) DeleteVertexPntr(v *V) error {
 	}
 
 	for iterHash, _ := range g.graph {
-		gNode := (Vector[graphLink, *vertexOnlyGraphLinkWidget])(
+		gNode := Vector[graphLink, *vertexOnlyGraphLinkWidget](
 			([]graphLink)(g.graph[iterHash]),
 		)
 		g.numLinks -= gNode.Pop(graphLink{B: vHash})
 		if len(gNode) == 0 {
 			delete(g.graph, iterHash)
 		} else {
-			g.graph[iterHash] = (Vector[graphLink, *graphLink])(
+			g.graph[iterHash] = Vector[graphLink, *graphLink](
 				([]graphLink)(gNode),
 			)
 		}
@@ -1047,14 +1047,14 @@ func (g *HashGraph[V, E, VI, EI]) DeleteEdgePntr(e *E) error {
 	delete(g.edges, eHash)
 
 	for iterHash, _ := range g.graph {
-		gNode := (Vector[graphLink, *edgeOnlyGraphLinkWidget])(
+		gNode := Vector[graphLink, *edgeOnlyGraphLinkWidget](
 			([]graphLink)(g.graph[iterHash]),
 		)
 		g.numLinks -= gNode.Pop(graphLink{A: eHash})
 		if len(gNode) == 0 {
 			delete(g.graph, iterHash)
 		} else {
-			g.graph[iterHash] = (Vector[graphLink, *graphLink])(
+			g.graph[iterHash] = Vector[graphLink, *graphLink](
 				([]graphLink)(gNode),
 			)
 		}
@@ -1724,6 +1724,9 @@ func (g *SyncedHashGraph[V, E, VI, EI])IsSubset(
 	return g.HashGraph.IsSubset(other)
 }
 
+// An equality function that implements the [algo.widget.WidgetInterface]
+// interface. Internally this is equivalent to [HashGraph.KeyedEq]. Returns true
+// if l==r, false otherwise.
 func (_ *HashGraph[V, E, VI, EI]) Eq(
 	l *HashGraph[V, E, VI, EI],
 	r *HashGraph[V, E, VI, EI],
@@ -1731,6 +1734,9 @@ func (_ *HashGraph[V, E, VI, EI]) Eq(
 	return l.KeyedEq(r)
 }
 
+// An equality function that implements the [algo.widget.WidgetInterface]
+// interface. Internally this is equivalent to [SyncedHashGraph.KeyedEq].
+// Returns true if l==r, false otherwise.
 func (_ *SyncedHashGraph[V, E, VI, EI])Eq(
 	l *SyncedHashGraph[V, E, VI, EI],
 	r *SyncedHashGraph[V, E, VI, EI],
@@ -1758,8 +1764,41 @@ func (_ *SyncedHashGraph[V, E, VI, EI]) Lt(
 	panic("Hash graphs maps cannot be compared relative to each other.")
 }
 
-func (_ *HashGraph[V, E, VI, EI]) Hash(other *HashGraph[V, E, VI, EI]) hash.Hash {
-	return hash.Hash(0)
+// A function that returns a hash of a hash graph. To do this all of the
+// individual hashes that are produced from the elements of the hash graph are
+// combined in a way that maintains identity, making it so the hash will
+// represent the same equality operation that [HashMap.KeyedEq] and
+// [HashMap.Eq] provide.
+func (_ *HashGraph[V, E, VI, EI]) Hash(
+	other *HashGraph[V, E, VI, EI],
+) hash.Hash {
+	cntr := 0
+	var rv hash.Hash
+	for vHash, gNode:=range(other.graph) {
+		for _,gLink:=range(gNode) {
+			iterH:=(hash.Hash(vHash)).Combine(
+				hash.Hash(gLink.B),
+				hash.Hash(gLink.A),
+			)
+			if cntr ==0 {
+				rv=iterH
+				cntr++
+			} else {
+				rv=rv.CombineUnordered(iterH)
+			}
+		}
+	}
+	return rv
+}
+
+// Places a read lock on the underlying hash graph of other and then calls others
+// underlying hash maps [HashMap.Hash] method.
+func (_ *SyncedHashGraph[V, E, VI, EI])Hash(
+	other *SyncedHashGraph[V,E,VI,EI],
+) hash.Hash {
+	other.RLock()
+	defer other.RUnlock()
+	return other.HashGraph.Hash(&other.HashGraph)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
