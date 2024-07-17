@@ -47,6 +47,15 @@ func addressableSafeVerticesIter[V any, E any](
 	return iter.ValToPntr[V](other.Vertices())
 }
 
+func addressableSafeEdgesIter[V any, E any](
+	other containerTypes.GraphComparisonsConstraint[V, E],
+) iter.Iter[*E] {
+	if other.IsAddressable() {
+		return other.EdgePntrs()
+	}
+	return iter.ValToPntr[E](other.Edges())
+}
+
 func addressableSafeOutVerticesAndEdgesIter[V any, E any](
 	other containerTypes.GraphComparisonsConstraint[V, E],
 	fromV V,

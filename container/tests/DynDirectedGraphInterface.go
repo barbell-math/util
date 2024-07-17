@@ -11,6 +11,50 @@ import (
 	"github.com/barbell-math/util/test"
 )
 
+type graphConstruction struct {
+	vertices iter.Iter[int]
+	edges iter.Iter[int]
+	links [][3]int
+	numVertices int
+	numEdges int
+}
+
+func (g *graphConstruction)makeGraph(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) dynamicContainers.DirectedGraph[int, int] {
+	g.numEdges=0
+	g.numVertices=0
+	rv:=factory(0)
+	g.edges.ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+		g.numEdges++
+		test.Nil(rv.AddEdges(val), t)
+		return iter.Continue, nil
+	})
+	g.vertices.ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+		g.numVertices++
+		test.Nil(rv.AddVertices(val), t)
+		return iter.Continue, nil
+	})
+	for i := 0; i < len(g.links); i++ {
+		test.Nil(rv.Link( g.links[i][0], g.links[i][1], g.links[i][2],), t)
+	}
+	for i := 0; i < len(g.links); i++ {
+		test.True(
+			rv.ContainsLink(
+				g.links[i][0],
+				g.links[i][1],
+				g.links[i][2],
+			),
+			t,
+		)
+	}
+	test.Eq(len(g.links), rv.NumLinks(), t)
+	test.Eq(g.numVertices, rv.NumVertices(), t)
+	test.Eq(g.numEdges, rv.NumEdges(), t)
+	return rv
+}
+
 func graphReadInterface[T any, U any](c dynamicContainers.ReadDirectedGraph[T, U])   {}
 func graphWriteInterface[T any, U any](c dynamicContainers.WriteDirectedGraph[T, U]) {}
 func graphInterface[T any, U any](c dynamicContainers.DirectedGraph[T, U])           {}
@@ -323,44 +367,26 @@ func DynDirectedGraphInterfaceVerticePntrs(
 	}
 }
 
-func directedGraphMakeGraph(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
-	t *testing.T,
-) {
-	for i := 0; i < numEdges; i++ {
-		test.Nil(container.AddEdges(i), t)
-	}
-	for i := 0; i < numVertices; i++ {
-		test.Nil(container.AddVertices(i), t)
-	}
-	for i := 0; i < len(links); i++ {
-		test.Nil(container.Link(links[i][0], links[i][1], links[i][2]), t)
-	}
-	for i := 0; i < len(links); i++ {
-		test.True(container.ContainsLink(links[i][0], links[i][1], links[i][2]), t)
-	}
-	test.Eq(len(links), container.NumLinks(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(numEdges, container.NumEdges(), t)
-}
-
 func directedGraphLinkHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func (capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < len(links); i++ {
-		test.Nil(container.Link(links[i][0], links[i][1], links[i][2]), t)
+	container:=construction.makeGraph(factory, t)
+
+	for i := 0; i < len(construction.links); i++ {
+		test.Nil(
+			container.Link(
+				construction.links[i][0],
+				construction.links[i][1],
+				construction.links[i][2],
+			),
+			t,
+		)
 	}
-	test.Eq(len(links), container.NumLinks(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(numEdges, container.NumEdges(), t)
+	test.Eq(len(construction.links), container.NumLinks(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
 
 	err := container.Link(-1, 0, 0)
 	test.ContainsError(customerr.InvalidValue, err, t)
@@ -379,49 +405,63 @@ func DynDirectedGraphLink(
 	t *testing.T,
 ) {
 	directedGraphLinkHelper(
-		factory(0), 5, 4,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 2, 1},
-			[3]int{2, 3, 2},
-			[3]int{3, 4, 3},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,4,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 2},
+				[3]int{3, 4, 3},
+			},
 		},
 		t,
 	)
 	directedGraphLinkHelper(
-		factory(0), 5, 5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{0, 4, 3},
-			[3]int{1, 2, 1},
-			[3]int{1, 3, 2},
-			[3]int{1, 4, 3},
-			[3]int{2, 3, 2},
-			[3]int{2, 4, 3},
-			[3]int{3, 4, 4},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{0, 4, 3},
+				[3]int{1, 2, 1},
+				[3]int{1, 3, 2},
+				[3]int{1, 4, 3},
+				[3]int{2, 3, 2},
+				[3]int{2, 4, 3},
+				[3]int{3, 4, 4},
+			},
 		},
 		t,
 	)
 }
 
 func directedGraphLinkPntrHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func (capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < len(links); i++ {
-		test.Nil(container.LinkPntr(&links[i][0], &links[i][1], &links[i][2]), t)
+	container:=construction.makeGraph(factory,t)
+
+	for i := 0; i < len(construction.links); i++ {
+		test.Nil(
+			container.LinkPntr(
+				&construction.links[i][0],
+				&construction.links[i][1],
+				&construction.links[i][2],
+			),
+			t,
+		)
 	}
-	test.Eq(len(links), container.NumLinks(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(numEdges, container.NumEdges(), t)
+	test.Eq(len(construction.links), container.NumLinks(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
 
 	tmp1 := -1
 	tmp2 := 0
@@ -442,64 +482,73 @@ func DynDirectedGraphLinkPntr(
 	t *testing.T,
 ) {
 	directedGraphLinkPntrHelper(
-		factory(0), 5, 4,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 2, 1},
-			[3]int{2, 3, 2},
-			[3]int{3, 4, 3},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,4,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 2},
+				[3]int{3, 4, 3},
+			},
 		},
 		t,
 	)
 	directedGraphLinkPntrHelper(
-		factory(0), 5, 5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{0, 4, 3},
-			[3]int{1, 2, 1},
-			[3]int{1, 3, 2},
-			[3]int{1, 4, 3},
-			[3]int{2, 3, 2},
-			[3]int{2, 4, 3},
-			[3]int{3, 4, 4},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{0, 4, 3},
+				[3]int{1, 2, 1},
+				[3]int{1, 3, 2},
+				[3]int{1, 4, 3},
+				[3]int{2, 3, 2},
+				[3]int{2, 4, 3},
+				[3]int{3, 4, 4},
+			},
 		},
 		t,
 	)
 }
 
-func directedGraphNumOutEdgesHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+func directedGraphNumOutLinksHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
-		test.Eq(len(outEdges[i]), container.NumOutEdges(i), t)
+	container:=construction.makeGraph(factory,t)
+	for i := 0; i < construction.numVertices; i++ {
+		test.Eq(len(outEdges[i]), container.NumOutLinks(i), t)
 	}
 
-	test.Eq(0, container.NumOutEdges(-1), t)
+	test.Eq(0, container.NumOutLinks(-1), t)
 }
-
-// Tests the NumOutEdges method functionality of a dynamic directed graph.
-func DynDirectedGraphNumOutEdges(
+// Tests the NumOutLinks method functionality of a dynamic directed graph.
+func DynDirectedGraphNumOutLinks(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	directedGraphNumOutEdgesHelper(
-		factory(0), 6, 4,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 2, 1},
-			[3]int{2, 3, 2},
-			[3]int{3, 4, 3},
+	directedGraphNumOutLinksHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,6,1),
+			edges: iter.Range[int](0,4,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 2},
+				[3]int{3, 4, 3},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -512,20 +561,24 @@ func DynDirectedGraphNumOutEdges(
 		},
 		t,
 	)
-	directedGraphNumOutEdgesHelper(
-		factory(0), 5, 5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{0, 4, 3},
-			[3]int{1, 2, 1},
-			[3]int{1, 3, 2},
-			[3]int{1, 4, 3},
-			[3]int{2, 3, 2},
-			[3]int{2, 4, 3},
-			[3]int{3, 4, 4},
+	directedGraphNumOutLinksHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{0, 4, 3},
+				[3]int{1, 2, 1},
+				[3]int{1, 3, 2},
+				[3]int{1, 4, 3},
+				[3]int{2, 3, 2},
+				[3]int{2, 4, 3},
+				[3]int{3, 4, 4},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -540,36 +593,37 @@ func DynDirectedGraphNumOutEdges(
 	)
 }
 
-func directedGraphNumOutEdgesPntrHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+func directedGraphNumOutLinksPntrHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
-		test.Eq(len(outEdges[i]), container.NumOutEdgesPntr(&i), t)
+	container:=construction.makeGraph(factory, t)
+	for i := 0; i < construction.numVertices; i++ {
+		test.Eq(len(outEdges[i]), container.NumOutLinksPntr(&i), t)
 	}
 
 	tmp := -1
-	test.Eq(0, container.NumOutEdgesPntr(&tmp), t)
+	test.Eq(0, container.NumOutLinksPntr(&tmp), t)
 }
-
-// Tests the NumOutEdgesPntr method functionality of a dynamic directed graph.
-func DynDirectedGraphNumOutEdgesPntr(
+// Tests the NumOutLinksPntr method functionality of a dynamic directed graph.
+func DynDirectedGraphNumOutLinksPntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	directedGraphNumOutEdgesPntrHelper(
-		factory(0), 6, 4,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 2, 1},
-			[3]int{2, 3, 2},
-			[3]int{3, 4, 3},
+	directedGraphNumOutLinksPntrHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,6,1),
+			edges: iter.Range[int](0,4,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 2},
+				[3]int{3, 4, 3},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -582,20 +636,24 @@ func DynDirectedGraphNumOutEdgesPntr(
 		},
 		t,
 	)
-	directedGraphNumOutEdgesPntrHelper(
-		factory(0), 5, 5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{0, 4, 3},
-			[3]int{1, 2, 1},
-			[3]int{1, 3, 2},
-			[3]int{1, 4, 3},
-			[3]int{2, 3, 2},
-			[3]int{2, 4, 3},
-			[3]int{3, 4, 4},
+	directedGraphNumOutLinksPntrHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{0, 4, 3},
+				[3]int{1, 2, 1},
+				[3]int{1, 3, 2},
+				[3]int{1, 4, 3},
+				[3]int{2, 3, 2},
+				[3]int{2, 4, 3},
+				[3]int{3, 4, 4},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -611,15 +669,13 @@ func DynDirectedGraphNumOutEdgesPntr(
 }
 
 func directedGraphOutEdgesHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
+	container:=construction.makeGraph(factory, t)
+	for i := 0; i < construction.numVertices; i++ {
 		mappedValues, err := container.OutEdges(i).Collect()
 		test.Eq(len(outEdges[i]), len(mappedValues), t)
 		test.Nil(err, t)
@@ -630,20 +686,23 @@ func directedGraphOutEdgesHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the OutEdges method functionality of a dynamic directed graph.
 func DynDirectedGraphOutEdges(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphOutEdgesHelper(
-		factory(0), 6, 4,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 2, 1},
-			[3]int{2, 3, 2},
-			[3]int{3, 4, 3},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,6,1),
+			edges: iter.Range[int](0,4,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 2},
+				[3]int{3, 4, 3},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -657,19 +716,23 @@ func DynDirectedGraphOutEdges(
 		t,
 	)
 	directedGraphOutEdgesHelper(
-		factory(0), 5, 5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{0, 4, 3},
-			[3]int{1, 2, 1},
-			[3]int{1, 3, 2},
-			[3]int{1, 4, 3},
-			[3]int{2, 3, 2},
-			[3]int{2, 4, 3},
-			[3]int{3, 4, 4},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{0, 4, 3},
+				[3]int{1, 2, 1},
+				[3]int{1, 3, 2},
+				[3]int{1, 4, 3},
+				[3]int{2, 3, 2},
+				[3]int{2, 4, 3},
+				[3]int{3, 4, 4},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -685,15 +748,13 @@ func DynDirectedGraphOutEdges(
 }
 
 func directedGraphOutEdgePntrsHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
+	container:=construction.makeGraph(factory, t)
+	for i := 0; i < construction.numVertices; i++ {
 		mappedValues, err := iter.PntrToVal[int](
 			container.OutEdgePntrs(&i),
 		).Collect()
@@ -706,7 +767,6 @@ func directedGraphOutEdgePntrsHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the OutEdgePntrs method functionality of a dynamic directed graph.
 func DynDirectedGraphOutEdgePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
@@ -715,13 +775,17 @@ func DynDirectedGraphOutEdgePntrs(
 	container := factory(0)
 	if container.IsAddressable() {
 		directedGraphOutEdgesHelper(
-			factory(0), 6, 4,
-			[][3]int{
-				// from, to, e
-				[3]int{0, 1, 0},
-				[3]int{1, 2, 1},
-				[3]int{2, 3, 2},
-				[3]int{3, 4, 3},
+			factory,
+			graphConstruction{
+				vertices: iter.Range[int](0,6,1),
+				edges: iter.Range[int](0,4,1),
+				links: [][3]int{
+					// from, to, e
+					[3]int{0, 1, 0},
+					[3]int{1, 2, 1},
+					[3]int{2, 3, 2},
+					[3]int{3, 4, 3},
+				},
 			},
 			map[int][]int{
 				// from, e
@@ -735,19 +799,23 @@ func DynDirectedGraphOutEdgePntrs(
 			t,
 		)
 		directedGraphOutEdgesHelper(
-			factory(0), 5, 5,
-			[][3]int{
-				// from, to, e
-				[3]int{0, 1, 0},
-				[3]int{0, 2, 1},
-				[3]int{0, 3, 2},
-				[3]int{0, 4, 3},
-				[3]int{1, 2, 1},
-				[3]int{1, 3, 2},
-				[3]int{1, 4, 3},
-				[3]int{2, 3, 2},
-				[3]int{2, 4, 3},
-				[3]int{3, 4, 4},
+			factory,
+			graphConstruction{
+				vertices: iter.Range[int](0,5,1),
+				edges: iter.Range[int](0,5,1),
+				links: [][3]int{
+					// from, to, e
+					[3]int{0, 1, 0},
+					[3]int{0, 2, 1},
+					[3]int{0, 3, 2},
+					[3]int{0, 4, 3},
+					[3]int{1, 2, 1},
+					[3]int{1, 3, 2},
+					[3]int{1, 4, 3},
+					[3]int{2, 3, 2},
+					[3]int{2, 4, 3},
+					[3]int{3, 4, 4},
+				},
 			},
 			map[int][]int{
 				// from, e
@@ -767,15 +835,13 @@ func DynDirectedGraphOutEdgePntrs(
 }
 
 func directedGraphOutVerticesHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
+	container:=construction.makeGraph(factory, t)
+	for i := 0; i < construction.numVertices; i++ {
 		mappedValues, err := container.OutVertices(i).Collect()
 		test.Eq(len(outVertices[i]), len(mappedValues), t)
 		test.Nil(err, t)
@@ -786,20 +852,23 @@ func directedGraphOutVerticesHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the OutVertices method functionality of a dynamic directed graph.
 func DynDirectedGraphOutVertices(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphOutVerticesHelper(
-		factory(0), 6, 4,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 2, 1},
-			[3]int{2, 3, 2},
-			[3]int{3, 4, 3},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,6,1),
+			edges: iter.Range[int](0,4,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 2},
+				[3]int{3, 4, 3},
+			},
 		},
 		map[int][]int{
 			// from, to
@@ -813,19 +882,23 @@ func DynDirectedGraphOutVertices(
 		t,
 	)
 	directedGraphOutVerticesHelper(
-		factory(0), 5, 5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{0, 4, 3},
-			[3]int{1, 2, 1},
-			[3]int{1, 3, 2},
-			[3]int{1, 4, 3},
-			[3]int{2, 3, 2},
-			[3]int{2, 4, 3},
-			[3]int{3, 4, 4},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{0, 4, 3},
+				[3]int{1, 2, 1},
+				[3]int{1, 3, 2},
+				[3]int{1, 4, 3},
+				[3]int{2, 3, 2},
+				[3]int{2, 4, 3},
+				[3]int{3, 4, 4},
+			},
 		},
 		map[int][]int{
 			// from, to
@@ -841,15 +914,13 @@ func DynDirectedGraphOutVertices(
 }
 
 func directedGraphOutVerticePntrsHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
+	container:=construction.makeGraph(factory, t)
+	for i := 0; i < construction.numVertices; i++ {
 		mappedValues, err := iter.PntrToVal[int](
 			container.OutVerticePntrs(&i),
 		).Collect()
@@ -863,7 +934,6 @@ func directedGraphOutVerticePntrsHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the OutVerticePntrs method functionality of a dynamic directed graph.
 func DynDirectedGraphOutVerticePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
@@ -872,13 +942,17 @@ func DynDirectedGraphOutVerticePntrs(
 	container := factory(0)
 	if container.IsAddressable() {
 		directedGraphOutVerticePntrsHelper(
-			factory(0), 6, 4,
-			[][3]int{
-				// from, to, e
-				[3]int{0, 1, 0},
-				[3]int{1, 2, 1},
-				[3]int{2, 3, 2},
-				[3]int{3, 4, 3},
+			factory,
+			graphConstruction{
+				vertices: iter.Range[int](0,6,1),
+				edges: iter.Range[int](0,4,1),
+				links: [][3]int{
+					// from, to, e
+					[3]int{0, 1, 0},
+					[3]int{1, 2, 1},
+					[3]int{2, 3, 2},
+					[3]int{3, 4, 3},
+				},
 			},
 			map[int][]int{
 				// from, to
@@ -892,19 +966,23 @@ func DynDirectedGraphOutVerticePntrs(
 			t,
 		)
 		directedGraphOutVerticePntrsHelper(
-			factory(0), 5, 5,
-			[][3]int{
-				// from, to, e
-				[3]int{0, 1, 0},
-				[3]int{0, 2, 1},
-				[3]int{0, 3, 2},
-				[3]int{0, 4, 3},
-				[3]int{1, 2, 1},
-				[3]int{1, 3, 2},
-				[3]int{1, 4, 3},
-				[3]int{2, 3, 2},
-				[3]int{2, 4, 3},
-				[3]int{3, 4, 4},
+			factory,
+			graphConstruction{
+				vertices: iter.Range[int](0,5,1),
+				edges: iter.Range[int](0,5,1),
+				links: [][3]int{
+					// from, to, e
+					[3]int{0, 1, 0},
+					[3]int{0, 2, 1},
+					[3]int{0, 3, 2},
+					[3]int{0, 4, 3},
+					[3]int{1, 2, 1},
+					[3]int{1, 3, 2},
+					[3]int{1, 4, 3},
+					[3]int{2, 3, 2},
+					[3]int{2, 4, 3},
+					[3]int{3, 4, 4},
+				},
 			},
 			map[int][]int{
 				// from, to
@@ -924,16 +1002,14 @@ func DynDirectedGraphOutVerticePntrs(
 }
 
 func directedGraphOutEdgesAndVerticesHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outEdges map[int][]int,
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
+	container:=construction.makeGraph(factory, t)
+	for i := 0; i < construction.numVertices; i++ {
 		iterOutEdgesAndVertices, err := container.OutEdgesAndVertices(i).Collect()
 		test.Nil(err, t)
 		test.Eq(len(outEdges[i]), len(iterOutEdgesAndVertices), t)
@@ -956,25 +1032,27 @@ func directedGraphOutEdgesAndVerticesHelper(
 		test.Nil(err, t)
 		test.SlicesMatchUnordered[int](outVertices[i], iterOutVertices, t)
 	}
-
 	err := container.OutVertices(-1).Consume()
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the OutEdgesAndVertices method functionality of a dynamic directed graph.
 func DynDirectedGraphOutEdgesAndVertices(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphOutEdgesAndVerticesHelper(
-		factory(0), 6, 4,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 2, 1},
-			[3]int{2, 3, 2},
-			[3]int{3, 4, 3},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,6,1),
+			edges: iter.Range[int](0,4,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 2},
+				[3]int{3, 4, 3},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -997,19 +1075,23 @@ func DynDirectedGraphOutEdgesAndVertices(
 		t,
 	)
 	directedGraphOutEdgesAndVerticesHelper(
-		factory(0), 5, 5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{0, 4, 3},
-			[3]int{1, 2, 1},
-			[3]int{1, 3, 2},
-			[3]int{1, 4, 3},
-			[3]int{2, 3, 2},
-			[3]int{2, 4, 3},
-			[3]int{3, 4, 4},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{0, 4, 3},
+				[3]int{1, 2, 1},
+				[3]int{1, 3, 2},
+				[3]int{1, 4, 3},
+				[3]int{2, 3, 2},
+				[3]int{2, 4, 3},
+				[3]int{3, 4, 4},
+			},
 		},
 		map[int][]int{
 			// from, e
@@ -1034,16 +1116,14 @@ func DynDirectedGraphOutEdgesAndVertices(
 }
 
 func directedGraphOutEdgesAndVerticePntrsHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacuty int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	outEdges map[int][]int,
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
-	for i := 0; i < numVertices; i++ {
+	container:=construction.makeGraph(factory, t)
+	for i := 0; i < construction.numVertices; i++ {
 		iterOutEdgesAndVertices, err := container.
 			OutEdgesAndVerticePntrs(&i).Collect()
 		test.Nil(err, t)
@@ -1072,7 +1152,6 @@ func directedGraphOutEdgesAndVerticePntrsHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the OutEdgesAndVerticePntrs method functionality of a dynamic directed graph.
 func DynDirectedGraphOutEdgesAndVerticePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
@@ -1081,13 +1160,17 @@ func DynDirectedGraphOutEdgesAndVerticePntrs(
 	container := factory(0)
 	if container.IsAddressable() {
 		directedGraphOutEdgesAndVerticePntrsHelper(
-			factory(0), 6, 4,
-			[][3]int{
-				// from, to, e
-				[3]int{0, 1, 0},
-				[3]int{1, 2, 1},
-				[3]int{2, 3, 2},
-				[3]int{3, 4, 3},
+			factory,
+			graphConstruction{
+				vertices: iter.Range[int](0,6,1),
+				edges: iter.Range[int](0,4,1),
+				links: [][3]int{
+					// from, to, e
+					[3]int{0, 1, 0},
+					[3]int{1, 2, 1},
+					[3]int{2, 3, 2},
+					[3]int{3, 4, 3},
+				},
 			},
 			map[int][]int{
 				// from, e
@@ -1110,19 +1193,23 @@ func DynDirectedGraphOutEdgesAndVerticePntrs(
 			t,
 		)
 		directedGraphOutEdgesAndVerticePntrsHelper(
-			factory(0), 5, 5,
-			[][3]int{
-				// from, to, e
-				[3]int{0, 1, 0},
-				[3]int{0, 2, 1},
-				[3]int{0, 3, 2},
-				[3]int{0, 4, 3},
-				[3]int{1, 2, 1},
-				[3]int{1, 3, 2},
-				[3]int{1, 4, 3},
-				[3]int{2, 3, 2},
-				[3]int{2, 4, 3},
-				[3]int{3, 4, 4},
+			factory,
+			graphConstruction{
+				vertices: iter.Range[int](0,5,1),
+				edges: iter.Range[int](0,5,1),
+				links: [][3]int{
+					// from, to, e
+					[3]int{0, 1, 0},
+					[3]int{0, 2, 1},
+					[3]int{0, 3, 2},
+					[3]int{0, 4, 3},
+					[3]int{1, 2, 1},
+					[3]int{1, 3, 2},
+					[3]int{1, 4, 3},
+					[3]int{2, 3, 2},
+					[3]int{2, 4, 3},
+					[3]int{3, 4, 4},
+				},
 			},
 			map[int][]int{
 				// from, e
@@ -1151,14 +1238,12 @@ func DynDirectedGraphOutEdgesAndVerticePntrs(
 }
 
 func directedGraphEdgesBetweenHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	structure map[int]map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory,t)
 	for from, allTo := range structure {
 		for to, edges := range allTo {
 			res, err := container.EdgesBetween(from, to).Collect()
@@ -1182,25 +1267,26 @@ func directedGraphEdgesBetweenHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the EdgesBetween method functionality of a dynamic directed graph.
 func DynDirectedGraphEdgesBetween(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphEdgesBetweenHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		map[int]map[int][]int{
 			// from: to: e
@@ -1222,14 +1308,12 @@ func DynDirectedGraphEdgesBetween(
 }
 
 func directedGraphEdgesBetweenPntrHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	structure map[int]map[int][]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory,t)
 	for from, allTo := range structure {
 		for to, edges := range allTo {
 			res, err := iter.PntrToVal[int](
@@ -1263,7 +1347,6 @@ func directedGraphEdgesBetweenPntrHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the EdgesBetweenPntr method functionality of a dynamic directed graph.
 func DynDirectedGraphEdgesBetweenPntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
@@ -1272,18 +1355,20 @@ func DynDirectedGraphEdgesBetweenPntr(
 	container := factory(0)
 	if container.IsAddressable() {
 		directedGraphEdgesBetweenPntrHelper(
-			factory(0),
-			3,
-			5,
-			[][3]int{
-				// from, to, e
-				[3]int{0, 1, 0},
-				[3]int{0, 1, 1},
-				[3]int{0, 1, 2},
-				[3]int{0, 2, 3},
-				[3]int{0, 2, 4},
-				[3]int{1, 0, 0},
-				[3]int{1, 2, 1},
+			factory,
+			graphConstruction{
+				vertices: iter.Range[int](0,3,1),
+				edges: iter.Range[int](0,5,1),
+				links: [][3]int{
+					// from, to, e
+					[3]int{0, 1, 0},
+					[3]int{0, 1, 1},
+					[3]int{0, 1, 2},
+					[3]int{0, 2, 3},
+					[3]int{0, 2, 4},
+					[3]int{1, 0, 0},
+					[3]int{1, 2, 1},
+				},
 			},
 			map[int]map[int][]int{
 				// from: to: e
@@ -1309,14 +1394,12 @@ func DynDirectedGraphEdgesBetweenPntr(
 }
 
 func directedGraphDeleteLinkHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteLinks [][3]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory, t)
 	for i := 0; i < len(deleteLinks); i++ {
 		test.Nil(
 			container.DeleteLink(
@@ -1337,9 +1420,9 @@ func directedGraphDeleteLinkHelper(
 			t,
 		)
 	}
-	test.Eq(numEdges, container.NumEdges(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(len(links)-len(deleteLinks), container.NumLinks(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(len(construction.links)-len(deleteLinks), container.NumLinks(), t)
 
 	err := container.DeleteLink(-1, 0, 0)
 	test.ContainsError(customerr.InvalidValue, err, t)
@@ -1353,25 +1436,26 @@ func directedGraphDeleteLinkHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteLink method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteLink(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	directedGraphDeleteLinkPntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+	directedGraphDeleteLinkHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[][3]int{
 			[3]int{0, 1, 0},
@@ -1383,14 +1467,12 @@ func DynDirectedGraphDeleteLink(
 }
 
 func directedGraphDeleteLinkPntrHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteLinks [][3]int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory, t)
 	for i := 0; i < len(deleteLinks); i++ {
 		test.Nil(
 			container.DeleteLinkPntr(
@@ -1411,9 +1493,9 @@ func directedGraphDeleteLinkPntrHelper(
 			t,
 		)
 	}
-	test.Eq(numEdges, container.NumEdges(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(len(links)-len(deleteLinks), container.NumLinks(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(len(construction.links)-len(deleteLinks), container.NumLinks(), t)
 
 	tmp1 := 0
 	tmp2 := -1
@@ -1429,25 +1511,26 @@ func directedGraphDeleteLinkPntrHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteLinkPntr method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteLinkPntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphDeleteLinkPntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[][3]int{
 			[3]int{0, 1, 0},
@@ -1459,25 +1542,23 @@ func DynDirectedGraphDeleteLinkPntr(
 }
 
 func directedGraphDeleteLinksHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteLinks [2]int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory, t)
 	test.Nil(container.DeleteLinks(deleteLinks[0], deleteLinks[1]), t)
-	for i := 0; i < numEdges; i++ {
+	for i := 0; i < construction.numEdges; i++ {
 		test.False(
 			container.ContainsLink(deleteLinks[0], deleteLinks[1], i),
 			t,
 		)
 	}
-	test.Eq(numEdges, container.NumEdges(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(len(links)-numDeletedLinks, container.NumLinks(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteLinks(-1, 0)
 	test.ContainsError(customerr.InvalidValue, err, t)
@@ -1487,43 +1568,46 @@ func directedGraphDeleteLinksHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteLinks method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteLinks(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphDeleteLinksHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[2]int{0, 1},
 		3,
 		t,
 	)
 	directedGraphDeleteLinksHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[2]int{1, 0},
 		1,
@@ -1532,25 +1616,23 @@ func DynDirectedGraphDeleteLinks(
 }
 
 func directedGraphDeleteLinksPntrHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteLinks [2]int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory, t)
 	test.Nil(container.DeleteLinksPntr(&deleteLinks[0], &deleteLinks[1]), t)
-	for i := 0; i < numEdges; i++ {
+	for i := 0; i < construction.numEdges; i++ {
 		test.False(
 			container.ContainsLink(deleteLinks[0], deleteLinks[1], i),
 			t,
 		)
 	}
-	test.Eq(numEdges, container.NumEdges(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(len(links)-numDeletedLinks, container.NumLinks(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteLinks(-1, 0)
 	test.ContainsError(customerr.InvalidValue, err, t)
@@ -1560,43 +1642,46 @@ func directedGraphDeleteLinksPntrHelper(
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteLinks method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteLinksPntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphDeleteLinksPntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[2]int{0, 1},
 		3,
 		t,
 	)
 	directedGraphDeleteLinksPntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[2]int{1, 0},
 		1,
@@ -1605,84 +1690,91 @@ func DynDirectedGraphDeleteLinksPntr(
 }
 
 func directedGraphDeleteVertexHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteVertices []int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory,t)
 	for i := 0; i < len(deleteVertices); i++ {
 		test.Nil(container.DeleteVertex(deleteVertices[i]), t)
 	}
 	for i := 0; i < len(deleteVertices); i++ {
 		test.False(container.ContainsVertex(deleteVertices[i]), t)
 	}
-	test.Eq(numEdges, container.NumEdges(), t)
-	test.Eq(numVertices-len(deleteVertices), container.NumVertices(), t)
-	test.Eq(len(links)-numDeletedLinks, container.NumLinks(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
+	test.Eq(
+		construction.numVertices-len(deleteVertices),
+		container.NumVertices(),
+		t,
+	)
+	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteVertex(-1)
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteVertex method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteVertex(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphDeleteVertexHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{0},
 		6,
 		t,
 	)
 	directedGraphDeleteVertexHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{1},
 		5,
 		t,
 	)
 	directedGraphDeleteVertexHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{1, 2},
 		7,
@@ -1691,85 +1783,92 @@ func DynDirectedGraphDeleteVertex(
 }
 
 func directedGraphDeleteVertexPntrHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteVertices []int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory, t)
 	for i := 0; i < len(deleteVertices); i++ {
 		test.Nil(container.DeleteVertexPntr(&deleteVertices[i]), t)
 	}
 	for i := 0; i < len(deleteVertices); i++ {
 		test.False(container.ContainsVertex(deleteVertices[i]), t)
 	}
-	test.Eq(numEdges, container.NumEdges(), t)
-	test.Eq(numVertices-len(deleteVertices), container.NumVertices(), t)
-	test.Eq(len(links)-numDeletedLinks, container.NumLinks(), t)
+	test.Eq(construction.numEdges, container.NumEdges(), t)
+	test.Eq(
+		construction.numVertices-len(deleteVertices),
+		container.NumVertices(),
+		t,
+	)
+	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	tmp := -1
 	err := container.DeleteVertexPntr(&tmp)
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteVertexPntr method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteVertexPntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphDeleteVertexPntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{0},
 		6,
 		t,
 	)
 	directedGraphDeleteVertexPntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{1},
 		5,
 		t,
 	)
 	directedGraphDeleteVertexPntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{1, 2},
 		7,
@@ -1778,84 +1877,87 @@ func DynDirectedGraphDeleteVertexPntr(
 }
 
 func directedGraphDeleteEdgeHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteEdges []int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory, t)
 	for i := 0; i < len(deleteEdges); i++ {
 		test.Nil(container.DeleteEdge(deleteEdges[i]), t)
 	}
 	for i := 0; i < len(deleteEdges); i++ {
 		test.False(container.ContainsEdge(deleteEdges[i]), t)
 	}
-	test.Eq(numEdges-len(deleteEdges), container.NumEdges(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(len(links)-numDeletedLinks, container.NumLinks(), t)
+	test.Eq(construction.numEdges-len(deleteEdges), container.NumEdges(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteEdge(-1)
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteEdge method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteEdge(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphDeleteEdgeHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{0},
 		2,
 		t,
 	)
 	directedGraphDeleteEdgeHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{2},
 		1,
 		t,
 	)
 	directedGraphDeleteEdgeHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{1, 2},
 		3,
@@ -1864,85 +1966,88 @@ func DynDirectedGraphDeleteEdge(
 }
 
 func directedGraphDeleteEdgePntrHelper(
-	container dynamicContainers.DirectedGraph[int, int],
-	numVertices int,
-	numEdges int,
-	links [][3]int,
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	construction graphConstruction,
 	deleteEdges []int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
-	directedGraphMakeGraph(container, numVertices, numEdges, links, t)
+	container:=construction.makeGraph(factory, t)
 	for i := 0; i < len(deleteEdges); i++ {
 		test.Nil(container.DeleteEdgePntr(&deleteEdges[i]), t)
 	}
 	for i := 0; i < len(deleteEdges); i++ {
 		test.False(container.ContainsEdge(deleteEdges[i]), t)
 	}
-	test.Eq(numEdges-len(deleteEdges), container.NumEdges(), t)
-	test.Eq(numVertices, container.NumVertices(), t)
-	test.Eq(len(links)-numDeletedLinks, container.NumLinks(), t)
+	test.Eq(construction.numEdges-len(deleteEdges), container.NumEdges(), t)
+	test.Eq(construction.numVertices, container.NumVertices(), t)
+	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	tmp := -1
 	err := container.DeleteEdgePntr(&tmp)
 	test.ContainsError(customerr.InvalidValue, err, t)
 	test.ContainsError(containerTypes.KeyError, err, t)
 }
-
 // Tests the DeleteEdgePntr method functionality of a dynamic directed graph.
 func DynDirectedGraphDeleteEdgePntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
 	directedGraphDeleteEdgePntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{0},
 		2,
 		t,
 	)
 	directedGraphDeleteEdgePntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{2},
 		1,
 		t,
 	)
 	directedGraphDeleteEdgePntrHelper(
-		factory(0),
-		3,
-		5,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 1, 1},
-			[3]int{0, 1, 2},
-			[3]int{0, 2, 3},
-			[3]int{0, 2, 4},
-			[3]int{1, 0, 0},
-			[3]int{1, 2, 1},
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 1, 1},
+				[3]int{0, 1, 2},
+				[3]int{0, 2, 3},
+				[3]int{0, 2, 4},
+				[3]int{1, 0, 0},
+				[3]int{1, 2, 1},
+			},
 		},
 		[]int{1, 2},
 		3,
@@ -1955,18 +2060,20 @@ func DynDirectedGraphClear(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	links := [][3]int{
-		// from, to, e
-		[3]int{0, 1, 0},
-		[3]int{0, 1, 1},
-		[3]int{0, 1, 2},
-		[3]int{0, 2, 3},
-		[3]int{0, 2, 4},
-		[3]int{1, 0, 0},
-		[3]int{1, 2, 1},
-	}
-	container := factory(0)
-	directedGraphMakeGraph(container, 5, 5, links, t)
+	container:=(&graphConstruction{
+		vertices: iter.Range[int](0,5,1),
+		edges: iter.Range[int](0,5,1),
+		links: [][3]int{
+			// from, to, e
+			[3]int{0, 1, 0},
+			[3]int{0, 1, 1},
+			[3]int{0, 1, 2},
+			[3]int{0, 2, 3},
+			[3]int{0, 2, 4},
+			[3]int{1, 0, 0},
+			[3]int{1, 2, 1},
+		},
+	}).makeGraph(factory, t)
 	container.Clear()
 	test.Eq(0, container.NumLinks(), t)
 	test.Eq(0, container.NumVertices(), t)
@@ -1980,15 +2087,15 @@ func DynDirectedGraphClear(
 
 func directedGraphKeyedEqHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	links1 [][3]int,
-	links2 [][3]int,
+	g1 graphConstruction,
+	g2 graphConstruction,
 	expResult bool,
 	t *testing.T,
 ) {
-	container1:=factory(0)
-	container2:=factory(0)
-	directedGraphMakeGraph(container1, len(links1), len(links1), links1,t)
-	directedGraphMakeGraph(container2, len(links2), len(links2), links2,t)
+	container1:=g1.makeGraph(factory, t)
+	container2:=g2.makeGraph(factory, t)
+	test.Eq(expResult, container1.KeyedEq(container2), t)
+	test.Eq(expResult, container2.KeyedEq(container1), t)
 }
 // Tests the KeyedEq method functionality of a dynamic directed graph.
 func DynDirectedGraphKeyedEq(
@@ -1997,103 +2104,1012 @@ func DynDirectedGraphKeyedEq(
 ) {
 	directedGraphKeyedEqHelper(
 		factory,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 0},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
 		},
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 0},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
 		},
 		true,
 		t,
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 0},
-			[3]int{2, 1, 0},
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+				[3]int{2, 1, 0},
+			},
 		},
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 0},
-		},
-		false,
-		t,
-	)
-	directedGraphKeyedEqHelper(
-		factory,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 1},
-		},
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 0},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
 		},
 		false,
 		t,
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 1, 0},
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 1},
+			},
 		},
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 0},
-		},
-		false,
-		t,
-	)
-	directedGraphKeyedEqHelper(
-		factory,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 0, 0},
-			[3]int{1, 0, 0},
-		},
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{1, 0, 0},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
 		},
 		false,
 		t,
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{1, 2, 0},
-			[3]int{1, 3, 2},
-			[3]int{1, 0, 4},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 1, 0},
+			},
 		},
-		[][3]int{
-			// from, to, e
-			[3]int{0, 1, 0},
-			[3]int{0, 2, 1},
-			[3]int{0, 3, 2},
-			[3]int{1, 2, 0},
-			[3]int{1, 3, 2},
-			[3]int{1, 0, 4},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 0, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,4,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{1, 2, 0},
+				[3]int{1, 3, 2},
+				[3]int{1, 0, 4},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,4,1),
+			edges: iter.Range[int](0,5,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{0, 2, 1},
+				[3]int{0, 3, 2},
+				[3]int{1, 2, 0},
+				[3]int{1, 3, 2},
+				[3]int{1, 0, 4},
+			},
+		},
+		true,
+		t,
+	)
+	directedGraphKeyedEqHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.SliceElems[int]([]int{0,1,5}),
+			edges: iter.SliceElems[int]([]int{0,5}),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
 		},
 		false,
 		t,
 	)
 }
 
-// TODO - test graph intersection
+func directedGraphIntersectionHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	g1 graphConstruction,
+	g2 graphConstruction,
+	expG graphConstruction,
+	t *testing.T,
+) {
+	container1:=g1.makeGraph(factory, t)
+	container2:=g2.makeGraph(factory, t)
+	container3:=expG.makeGraph(factory, t)
+	container4:=factory(0)
+	container4.Intersection(container1, container2)
+	test.True(container3.KeyedEq(container4),t)
+
+	container5:=factory(0)
+	container5.Intersection(container2, container1)
+	test.True(container3.KeyedEq(container5),t)
+}
+// Tests the Intersection method functionality of a dynamic directed graph.
+func DynDirectedGraphIntersection(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	directedGraphIntersectionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.SliceElems[int]([]int{0,1}),
+			edges: iter.SliceElems[int]([]int{0}),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		t,
+	)
+	directedGraphIntersectionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 0},
+			},
+		},
+		t,
+	)
+	directedGraphIntersectionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.NoElem[int](),
+			edges: iter.NoElem[int](),
+			links: [][3]int{},
+		},
+		t,
+	)
+	directedGraphIntersectionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,5,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 2, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.NoElem[int](),
+			edges: iter.NoElem[int](),
+			links: [][3]int{},
+		},
+		t,
+	)
+}
+
+func directedGraphUnionHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	g1 graphConstruction,
+	g2 graphConstruction,
+	expG graphConstruction,
+	t *testing.T,
+) {
+	container1:=g1.makeGraph(factory, t)
+	container2:=g2.makeGraph(factory, t)
+	container3:=expG.makeGraph(factory, t)
+	container4:=factory(0)
+	container4.Union(container1, container2)
+	test.True(container3.KeyedEq(container4),t)
+
+	container5:=factory(0)
+	container5.Union(container2, container1)
+	test.True(container3.KeyedEq(container5),t)
+}
+// Tests the Union method functionality of a dynamic directed graph.
+func DynDirectedGraphUnion(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	directedGraphUnionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.SliceElems[int]([]int{0,1}),
+			edges: iter.SliceElems[int]([]int{0}),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		t,
+	)
+	directedGraphUnionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,4,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		t,
+	)
+	directedGraphUnionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,4,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		t,
+	)
+	directedGraphUnionHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,5,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 2, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 2, 0},
+			},
+		},
+		t,
+	)
+}
+
+func directedGraphDifferenceHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	g1 graphConstruction,
+	g2 graphConstruction,
+	expG graphConstruction,
+	t *testing.T,
+) {
+	container1:=g1.makeGraph(factory, t)
+	container2:=g2.makeGraph(factory, t)
+	container3:=expG.makeGraph(factory, t)
+	container4:=factory(0)
+	container4.Difference(container1, container2)
+	test.True(container3.KeyedEq(container4),t)
+}
+// Tests the Difference method functionality of a dynamic directed graph.
+func DynDirectedGraphDifference(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	directedGraphDifferenceHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.NoElem[int](),
+			edges: iter.NoElem[int](),
+			links: [][3]int{},
+		},
+		t,
+	)
+	directedGraphDifferenceHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		t,
+	)
+	directedGraphDifferenceHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		t,
+	)
+	directedGraphDifferenceHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,5,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 2, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		t,
+	)
+	directedGraphDifferenceHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 0, 0},
+				
+				[3]int{0,2,1},
+				[3]int{0,3,1},
+				[3]int{1,3,1},
+				[3]int{1,4,1},
+				[3]int{2,4,1},
+				[3]int{2,0,1},
+				[3]int{3,0,1},
+				[3]int{3,1,1},
+				[3]int{4,1,1},
+				[3]int{4,2,1},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](1,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0,2,1},
+				[3]int{0,3,1},
+				[3]int{1,3,1},
+				[3]int{1,4,1},
+				[3]int{2,4,1},
+				[3]int{2,0,1},
+				[3]int{3,0,1},
+				[3]int{3,1,1},
+				[3]int{4,1,1},
+				[3]int{4,2,1},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 0, 0},
+			},
+		},
+		t,
+	)
+}
+
+func directedGraphIsSupersetHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	g1 graphConstruction,
+	g2 graphConstruction,
+	expRes bool,
+	t *testing.T,
+) {
+	container1:=g1.makeGraph(factory, t)
+	container2:=g2.makeGraph(factory, t)
+	test.Eq(expRes, container1.IsSuperset(container2),t)
+	if container1.KeyedEq(container2) {
+		test.Eq(expRes, container2.IsSuperset(container1),t)
+	}
+}
+// Tests the IsSuperset method functionality of a dynamic directed graph.
+func DynDirectedGraphIsSuperset(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	directedGraphIsSupersetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		true,
+		t,
+	)
+	directedGraphIsSupersetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphIsSupersetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphIsSupersetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,5,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 2, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphIsSupersetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 0, 0},
+				
+				[3]int{0,2,1},
+				[3]int{0,3,1},
+				[3]int{1,3,1},
+				[3]int{1,4,1},
+				[3]int{2,4,1},
+				[3]int{2,0,1},
+				[3]int{3,0,1},
+				[3]int{3,1,1},
+				[3]int{4,1,1},
+				[3]int{4,2,1},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](1,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0,2,1},
+				[3]int{0,3,1},
+				[3]int{1,3,1},
+				[3]int{1,4,1},
+				[3]int{2,4,1},
+				[3]int{2,0,1},
+				[3]int{3,0,1},
+				[3]int{3,1,1},
+				[3]int{4,1,1},
+				[3]int{4,2,1},
+			},
+		},
+		true,
+		t,
+	)
+}
+
+func directedGraphIsSubsetHelper(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	g1 graphConstruction,
+	g2 graphConstruction,
+	expRes bool,
+	t *testing.T,
+) {
+	container1:=g1.makeGraph(factory, t)
+	container2:=g2.makeGraph(factory, t)
+	test.Eq(expRes, container1.IsSubset(container2),t)
+	if container1.KeyedEq(container2) {
+		test.Eq(expRes, container2.IsSubset(container1),t)
+	}
+}
+// Tests the IsSuperset method functionality of a dynamic directed graph.
+func DynDirectedGraphIsSubset(
+	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
+	t *testing.T,
+) {
+	directedGraphIsSubsetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,2,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 0, 0},
+			},
+		},
+		true,
+		t,
+	)
+	directedGraphIsSubsetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphIsSubsetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,4,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{1, 2, 1},
+				[3]int{2, 3, 0},
+				[3]int{3, 1, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphIsSubsetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,3,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 0, 0},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](1,5,1),
+			edges: iter.Range[int](0,1,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 2, 0},
+			},
+		},
+		false,
+		t,
+	)
+	directedGraphIsSubsetHelper(
+		factory,
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](1,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0,2,1},
+				[3]int{0,3,1},
+				[3]int{1,3,1},
+				[3]int{1,4,1},
+				[3]int{2,4,1},
+				[3]int{2,0,1},
+				[3]int{3,0,1},
+				[3]int{3,1,1},
+				[3]int{4,1,1},
+				[3]int{4,2,1},
+			},
+		},
+		graphConstruction{
+			vertices: iter.Range[int](0,5,1),
+			edges: iter.Range[int](0,2,1),
+			links: [][3]int{
+				// from, to, e
+				[3]int{0, 1, 0},
+				[3]int{1, 2, 0},
+				[3]int{2, 3, 0},
+				[3]int{3, 4, 0},
+				[3]int{4, 0, 0},
+				
+				[3]int{0,2,1},
+				[3]int{0,3,1},
+				[3]int{1,3,1},
+				[3]int{1,4,1},
+				[3]int{2,4,1},
+				[3]int{2,0,1},
+				[3]int{3,0,1},
+				[3]int{3,1,1},
+				[3]int{4,1,1},
+				[3]int{4,2,1},
+			},
+		},
+		true,
+		t,
+	)
+}

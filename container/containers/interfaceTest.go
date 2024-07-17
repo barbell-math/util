@@ -231,6 +231,9 @@ func hasViableSignature(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet)
 	if len(fn.Type.Params.List) != 2 {
 		return false, "Did not have two parameters."
 	}
+	if fn.Type.Results!=nil && len(fn.Type.Results.List)>0 {
+		return false, "Specified a return value when none was expected."
+	}
 	if ok, info := viableFirstParam(fn, srcFile, fSet); !ok {
 		return false, fmt.Sprintf("First Param error: %s", info)
 	}

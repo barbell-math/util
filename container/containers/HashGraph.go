@@ -485,26 +485,26 @@ func (g *SyncedHashGraph[V, E, VI, EI]) ContainsLinkPntr(from *V, to *V, e *E) b
 // Description: Returns the number of outgoing edges from the supplied vertex
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V, E, VI, EI]) NumOutEdges(v V) int {
-	return g.NumOutEdgesPntr(&v)
+func (g *HashGraph[V, E, VI, EI]) NumOutLinks(v V) int {
+	return g.NumOutLinksPntr(&v)
 }
 
 // Description: Places a read lock on the underlying hash graph and then calls
-// the underlying hash graph [HashGraph.NumOutEdgesPntr] method.
+// the underlying hash graph [HashGraph.NumOutLinksPntr] method.
 //
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V, E, VI, EI]) NumOutEdges(v V) int {
+func (g *SyncedHashGraph[V, E, VI, EI]) NumOutLinks(v V) int {
 	g.RLock()
 	defer g.RUnlock()
-	return g.HashGraph.NumOutEdgesPntr(&v)
+	return g.HashGraph.NumOutLinksPntr(&v)
 }
 
 // Description: Returns the number of outgoing edges from the supplied vertex
 //
 // Time Complexity: O(1)
-func (g *HashGraph[V, E, VI, EI]) NumOutEdgesPntr(v *V) int {
+func (g *HashGraph[V, E, VI, EI]) NumOutLinksPntr(v *V) int {
 	vw := widgets.Widget[V, VI]{}
 	vHash := vertexHash(vw.Hash(v))
 
@@ -518,15 +518,15 @@ func (g *HashGraph[V, E, VI, EI]) NumOutEdgesPntr(v *V) int {
 }
 
 // Description: Places a read lock on the underlying hash graph and then calls
-// the underlying hash graph [HashGraph.NumOutEdgesPntr] method.
+// the underlying hash graph [HashGraph.NumOutLinksPntr] method.
 //
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (g *SyncedHashGraph[V, E, VI, EI]) NumOutEdgesPntr(v *V) int {
+func (g *SyncedHashGraph[V, E, VI, EI]) NumOutLinksPntr(v *V) int {
 	g.RLock()
 	defer g.RUnlock()
-	return g.HashGraph.NumOutEdgesPntr(v)
+	return g.HashGraph.NumOutLinksPntr(v)
 }
 
 // Description: Returns an iterator that supplies all of the outgoing edges from
@@ -1251,10 +1251,15 @@ func (g *SyncedHashGraph[V, E, VI, EI]) Clear() {
 // method of the supplied VI and EI widgets.
 //
 // Time Complexity: Dependent on the time complexity of the implementation of
-// the ContainsLink method on other. In big-O it might look something like this,
-// O(n*O(other.ContainsLink))), where n is the number of links in this graph
-// and O(other.ContainsLink) represents the time complexity of the ContainsLink
-// method on other.
+// the methods on other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
+// where:
+//  - n is the number of links in this graph
+//  - m is the number of vertices in this graph
+//  - p is the number of edges in this graph
+//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *HashGraph[V, E, VI, EI]) KeyedEq(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
@@ -1264,27 +1269,27 @@ func (g *HashGraph[V, E, VI, EI]) KeyedEq(
 		return false
 	}
 
-	containsOp := func(from vertexHash, gLink graphLink) bool {
-		if other.IsAddressable() {
-			tmpFrom := g.vertices[from]
-			tmpTo := g.vertices[gLink.B]
-			tmpE := g.edges[gLink.A]
-			return other.ContainsLinkPntr(&tmpFrom, &tmpTo, &tmpE)
-		} else {
-			return other.ContainsLink(
-				g.vertices[from],
-				g.vertices[gLink.B],
-				g.edges[gLink.A],
-			)
+	for _,v:=range(g.vertices) {
+		if !other.ContainsVertexPntr(&v) {
+			return false
+		}
+	}
+	for _,e:=range(g.edges) {
+		if !other.ContainsEdgePntr(&e) {
+			return false
 		}
 	}
 
 	for from, gNode := range g.graph {
-		if len(gNode) != other.NumOutEdges(g.vertices[from]) {
+		if len(gNode) != other.NumOutLinks(g.vertices[from]) {
 			return false
 		}
 		for _, gLink := range gNode {
-			if !containsOp(from, gLink) {
+			if !other.ContainsLink(
+				g.vertices[from],
+				g.vertices[gLink.B],
+				g.edges[gLink.A],
+			) {
 				return false
 			}
 		}
@@ -1300,10 +1305,15 @@ func (g *HashGraph[V, E, VI, EI]) KeyedEq(
 // Lock Type: Read on this hash graph, read on other
 //
 // Time Complexity: Dependent on the time complexity of the implementation of
-// the ContainsLink method on other. In big-O it might look something like this,
-// O(n*O(other.ContainsLink))), where n is the number of links in this graph
-// and O(other.ContainsLink) represents the time complexity of the ContainsLink
-// method on other.
+// the methods on other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
+// where:
+//  - n is the number of links in this graph
+//  - m is the number of vertices in this graph
+//  - p is the number of edges in this graph
+//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *SyncedHashGraph[V, E, VI, EI]) KeyedEq(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
@@ -1327,8 +1337,8 @@ func (g *HashGraph[V, E, VI, EI]) UnorderedEq(
 //
 // Time Complexity: Dependent on the time complexity of the implementation of
 // the ContainsLinkPntr method on other. In big-O it might look something like
-// this, O(n*O(other.ContainsLinkPntr))), where n is the number of links in this
-// graph and O(other.ContainsLinkPntr) represents the time complexity of the
+// this, O(n*O(other.ContainsLinkPntr))), where n is the number of links in r
+// and O(other.ContainsLinkPntr) represents the time complexity of the
 // ContainsLinkPntr method on other.
 func (g *HashGraph[V, E, VI, EI]) Intersection(
 	l containerTypes.GraphComparisonsConstraint[V, E],
@@ -1376,8 +1386,8 @@ func (g *HashGraph[V, E, VI, EI]) Intersection(
 //
 // Time Complexity: Dependent on the time complexity of the implementation of
 // the ContainsLinkPntr method on other. In big-O it might look something like
-// this, O(n*O(other.ContainsLinkPntr))), where n is the number of links in this
-// graph and O(other.ContainsLinkPntr) represents the time complexity of the
+// this, O(n*O(other.ContainsLinkPntr))), where n is the number of links in r
+// and O(other.ContainsLinkPntr) represents the time complexity of the
 // ContainsLinkPntr method on other.
 func (g *SyncedHashGraph[V, E, VI, EI]) Intersection(
 	l containerTypes.GraphComparisonsConstraint[V,E],
@@ -1392,25 +1402,326 @@ func (g *SyncedHashGraph[V, E, VI, EI]) Intersection(
 	g.HashGraph.Intersection(l,r)
 }
 
+// Description: Takes the union of l and r and puts the result in this
+// graph. All values from this graph will be cleared before storing the new
+// result. Vertices and edges are compared using the supplied VI and EI widgets.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLinkPntr method on other. In big-O it might look something like
+// this, O((n+m)*O(other.ContainsLinkPntr))), where n is the number of links in
+// r and m is the number of links in l. O(other.ContainsLinkPntr) represents the
+// time complexity of the ContainsLinkPntr method on other.
 func (g *HashGraph[V, E, VI, EI]) Union(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
+	newG,err:=NewHashGraph[V,E,VI,EI](r.NumVertices()/2, r.NumEdges()/2)
+	if err!=nil {
+		panic(fmt.Sprintf("An error occurred making a new hash graph: %s",err))
+	}
+	opTemplate:= func(fromV *V) func(
+		index int,
+		toVAndE basic.Pair[*E, *V],
+	) (iter.IteratorFeedback, error) {
+		return func(
+			index int,
+			toVAndE basic.Pair[*E, *V],
+		) (iter.IteratorFeedback, error) {
+			newG.AddEdges(*toVAndE.A)
+			newG.AddVertices(*fromV, *toVAndE.B)
+			newG.LinkPntr(fromV, toVAndE.B, toVAndE.A)
+			return iter.Continue, nil
+		}
+	}
+	// This implementation chooses to optimize the case where a link is not
+	// created in the graph. It does this by using pointers to values whenever
+	// possible. Note that in the case when a link must be made that values
+	// will be copied from out of scope, which might entail the GC.
+	addressableSafeVerticesIter[V,E](r).ForEach(
+		func(index int, fromV *V) (iter.IteratorFeedback, error) {
+			op:=opTemplate(fromV)
+			addressableSafeOutVerticesAndEdgesIter[V,E](r,*fromV).ForEach(op)
+			return iter.Continue, nil
+		},
+	)
+	addressableSafeVerticesIter[V,E](l).ForEach(
+		func(index int, fromV *V) (iter.IteratorFeedback, error) {
+			op:=opTemplate(fromV)
+			addressableSafeOutVerticesAndEdgesIter[V,E](l,*fromV).ForEach(op)
+			return iter.Continue, nil
+		},
+	)
+	g.Clear()
+	*g=newG
 }
+
+// Description: Places a write lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.Union] method. Attempts to place
+// a read lock on l and r but whether or not that happens is implementation
+// dependent.
+//
+// Lock Type: Write on this vector, read on l and r
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLinkPntr method on other. In big-O it might look something like
+// this, O((n+m)*O(other.ContainsLinkPntr))), where n is the number of links in
+// r and m is the number of links in l. O(other.ContainsLinkPntr) represents the
+// time complexity of the ContainsLinkPntr method on other.
+func (g *SyncedHashGraph[V, E, VI, EI])Union(
+	l containerTypes.GraphComparisonsConstraint[V, E],
+	r containerTypes.GraphComparisonsConstraint[V, E],
+) {
+	g.Lock()
+	l.RLock()
+	r.RLock()
+	defer g.Unlock()
+	defer l.RUnlock()
+	defer r.RUnlock()
+	g.HashGraph.Union(l,r)
+}
+
+// Description: Takes the difference  of l and r and puts the result in this
+// graph. All values from this graph will be cleared before storing the new
+// result. Vertices and edges are compared using the supplied VI and EI widgets.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLinkPntr method on other. In big-O it might look something like
+// this, O((n+m)*O(other.ContainsLinkPntr))), where n is the number of links in
+// r and m is the number of links in l. O(other.ContainsLinkPntr) represents the
+// time complexity of the ContainsLinkPntr method on other.
 func (g *HashGraph[V, E, VI, EI]) Difference(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
+	newG,err:=NewHashGraph[V,E,VI,EI](r.NumVertices()/2, r.NumEdges()/2)
+	if err!=nil {
+		panic(fmt.Sprintf("An error occurred making a new hash graph: %s",err))
+	}
+	opTemplate:= func(fromV *V) func(
+		index int,
+		toVAndE basic.Pair[*E, *V],
+	) (iter.IteratorFeedback, error) {
+		return func(
+			index int,
+			toVAndE basic.Pair[*E, *V],
+		) (iter.IteratorFeedback, error) {
+			if r.ContainsLinkPntr(fromV,toVAndE.B,toVAndE.A) {
+				return iter.Continue, nil
+			}
+			newG.AddEdges(*toVAndE.A)
+			newG.AddVertices(*fromV, *toVAndE.B)
+			newG.LinkPntr(fromV, toVAndE.B, toVAndE.A)
+			return iter.Continue, nil
+		}
+	}
+	// This implementation chooses to optimize the case where a link is not
+	// created in the graph. It does this by using pointers to values whenever
+	// possible. Note that in the case when a link must be made that values
+	// will be copied from out of scope, which might entail the GC.
+	addressableSafeVerticesIter[V,E](l).ForEach(
+		func(index int, fromV *V) (iter.IteratorFeedback, error) {
+			op:=opTemplate(fromV)
+			addressableSafeOutVerticesAndEdgesIter[V,E](l,*fromV).ForEach(op)
+			return iter.Continue, nil
+		},
+	)
+	g.Clear()
+	*g=newG
 }
+
+// Description: Places a write lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.Difference] method. Attempts to place
+// a read lock on l and r but whether or not that happens is implementation
+// dependent.
+//
+// Lock Type: Write on this vector, read on l and r
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the ContainsLinkPntr method on other. In big-O it might look something like
+// this, O((n+m)*O(other.ContainsLinkPntr))), where n is the number of links in
+// r and m is the number of links in l. O(other.ContainsLinkPntr) represents the
+// time complexity of the ContainsLinkPntr method on other.
+func (g *SyncedHashGraph[V, E, VI, EI])Difference(
+	l containerTypes.GraphComparisonsConstraint[V, E],
+	r containerTypes.GraphComparisonsConstraint[V, E],
+) {
+	g.Lock()
+	r.RLock()
+	l.RLock()
+	defer g.Unlock()
+	defer r.RUnlock()
+	defer l.RUnlock()
+	g.HashGraph.Difference(l,r)
+}
+
+// Description: Returns true if this graph is a superset of other. In order for 
+// this graph to be a superset of other, it must have all of others vertices,
+// edges, and links. It may have other vertices, edges, or links that are not in
+// other. All of the corresponding vertices and edges must be equal as defined
+// by the Eq method of the supplied VI and EI widgets.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the methods on other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
+// where:
+//  - n is the number of links in this graph
+//  - m is the number of vertices in this graph
+//  - p is the number of edges in this graph
+//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *HashGraph[V, E, VI, EI]) IsSuperset(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
-	return false
+	if (g.NumVertices()<other.NumVertices() ||
+		g.NumEdges()<other.NumEdges() ||
+		g.NumLinks()<other.NumLinks()) {
+		return false
+	}
+
+	rv:=true
+	addressableSafeVerticesIter[V,E](other).ForEach(
+		func(index int, fromV *V) (iter.IteratorFeedback, error) {
+			if rv=g.ContainsVertexPntr(fromV); !rv {
+				return iter.Break, nil
+			}
+			return iter.Continue, nil
+		},
+	)
+	if !rv {
+		return false
+	}
+
+	addressableSafeEdgesIter[V,E](other).ForEach(
+		func(index int, fromV *E) (iter.IteratorFeedback, error) {
+			if rv=g.ContainsEdgePntr(fromV); !rv {
+				return iter.Break, nil
+			}
+			return iter.Continue, nil
+		},
+	)
+	if !rv {
+		return false
+	}
+
+	addressableSafeVerticesIter[V,E](other).ForEach(
+		func(index int, fromV *V) (iter.IteratorFeedback, error) {
+			addressableSafeOutVerticesAndEdgesIter[V,E](other,*fromV).ForEach(
+				func(index int, val basic.Pair[*E, *V]) (iter.IteratorFeedback, error) {
+					if rv=g.ContainsLinkPntr(fromV, val.B, val.A); !rv {
+						return iter.Break, nil
+					}
+					return iter.Continue, nil
+				},
+			)
+			return iter.Continue, nil
+		},
+	)
+	return rv
 }
+
+// Description: Places a read lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.IsSuperSet] method. Attempts to place a
+// read lock on other but whether or not that happens is implementation
+// dependent.
+//
+// Lock Type: Read on this hash graph, read on other
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the methods in other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
+// where:
+//  - n is the number of links in this graph
+//  - m is the number of vertices in this graph
+//  - p is the number of edges in this graph
+//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+func (g *SyncedHashGraph[V, E, VI, EI])IsSuperSet(
+	other containerTypes.GraphComparisonsConstraint[V, E],
+) bool {
+	g.RLock()
+	other.RLock()
+	defer g.RUnlock()
+	defer other.RUnlock()
+	return g.HashGraph.IsSuperset(other)
+}
+
+// Description: Returns true if this graph is a subset of other. In order for 
+// this graph to be a subset of other, other must have all of this graphs
+// vertices, edges, and links. Other may have other vertices, edges, or links
+// that are not in this graph. All of the corresponding vertices and edges must
+// be equal as defined by the Eq method of the supplied VI and EI widgets.
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the methods on other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
+// where:
+//  - n is the number of links in this graph
+//  - m is the number of vertices in this graph
+//  - p is the number of edges in this graph
+//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *HashGraph[V, E, VI, EI]) IsSubset(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
-	return false
+	if (g.NumVertices()>other.NumVertices() ||
+		g.NumEdges()>other.NumEdges() ||
+		g.NumLinks()>other.NumLinks()) {
+		return false
+	}
+
+	for _, v:=range(g.vertices) {
+		if !other.ContainsVertexPntr(&v) {
+			return false
+		}
+	}
+	for _, e:=range(g.edges) {
+		if !other.ContainsEdgePntr(&e) {
+			return false
+		}
+	}
+
+	for vHash, gNode:=range(g.graph) {
+		for _, gLink:=range(gNode) {
+			if !other.ContainsLink(
+				g.vertices[vHash],
+				g.vertices[gLink.B],
+				g.edges[gLink.A],
+			) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// Description: Places a read lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.IsSubset] method. Attempts to place a
+// read lock on other but whether or not that happens is implementation
+// dependent.
+//
+// Lock Type: Read on this hash graph, read on other
+//
+// Time Complexity: Dependent on the time complexity of the implementation of
+// the methods in other. In big-O it might look something like this,
+// O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
+// where:
+//  - n is the number of links in this graph
+//  - m is the number of vertices in this graph
+//  - p is the number of edges in this graph
+//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+func (g *SyncedHashGraph[V, E, VI, EI])IsSubset(
+	other containerTypes.GraphComparisonsConstraint[V, E],
+) bool {
+	g.RLock()
+	other.RLock()
+	defer g.RUnlock()
+	defer other.RUnlock()
+	return g.HashGraph.IsSubset(other)
 }
 
 func (_ *HashGraph[V, E, VI, EI]) Eq(

@@ -14,6 +14,11 @@ type ReadDirectedGraph[V any, E any] interface {
 		V,
 		E,
 	]
+	containerTypes.KeyedComparisons[
+		containerTypes.GraphComparisonsConstraint[V, E],
+		V,
+		E,
+	]
 	containerTypes.ReadDirectedGraphOps[V, E]
 }
 
@@ -23,6 +28,11 @@ type ReadUndirectedGraph[V any, E any] interface {
 	containerTypes.Addressable
 	containerTypes.ReadGraphOps[V, E]
 	containerTypes.Comparisons[
+		containerTypes.GraphComparisonsConstraint[V, E],
+		V,
+		E,
+	]
+	containerTypes.KeyedComparisons[
 		containerTypes.GraphComparisonsConstraint[V, E],
 		V,
 		E,
