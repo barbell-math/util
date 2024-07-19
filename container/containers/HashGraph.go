@@ -12,8 +12,8 @@ import (
 )
 
 type (
-	edgeHash              hash.Hash
-	vertexHash            hash.Hash
+	edgeHash HashSetHash
+	vertexHash HashSetHash
 	graphLink             basic.Pair[edgeHash, vertexHash]
 	internalHashGraphImpl map[vertexHash]Vector[graphLink, *graphLink]
 
@@ -36,6 +36,8 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		numLinks int
+		// edges HookedHashSet[E,EI]
+		// vertices HookedHashSet[V,VI]
 		edges    map[edgeHash]E
 		vertices map[vertexHash]V
 		graph    internalHashGraphImpl
@@ -66,7 +68,7 @@ func (_ *graphLink) Lt(l *graphLink, r *graphLink) bool {
 		hw.Lt((*hash.Hash)(&l.B), (*hash.Hash)(&r.B)))
 }
 func (_ *graphLink) Hash(other *graphLink) hash.Hash {
-	return ((hash.Hash)(other.A)).Combine((hash.Hash)(other.B))
+	return (hash.Hash(other.A)).Combine(hash.Hash(other.B))
 }
 func (_ *graphLink) Zero(other *graphLink) {
 	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
@@ -81,7 +83,7 @@ func (_ *vertexOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
 	return hw.Lt((*hash.Hash)(&l.B), (*hash.Hash)(&r.B))
 }
 func (_ *vertexOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
-	return (hash.Hash)(other.B)
+	return hash.Hash(other.B)
 }
 func (_ *vertexOnlyGraphLinkWidget) Zero(other *graphLink) {
 	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
@@ -96,7 +98,7 @@ func (_ *edgeOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
 	return hw.Lt((*hash.Hash)(&l.A), (*hash.Hash)(&r.A))
 }
 func (_ *edgeOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
-	return (hash.Hash)(other.A)
+	return hash.Hash(other.A)
 }
 func (_ *edgeOnlyGraphLinkWidget) Zero(other *graphLink) {
 	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
@@ -151,6 +153,15 @@ func NewSyncedHashGraph[
 		RWMutex:   &sync.RWMutex{},
 		HashGraph: rv,
 	}, err
+}
+
+// Converts the supplied graph to a synchronized graph. Beware: The original
+// non-synced map will remain useable.
+func (g *HashGraph[V, E, VI, EI]) ToSynced() SyncedHashGraph[V,E,VI,EI] {
+	return SyncedHashGraph[V,E,VI,EI]{
+		RWMutex: &sync.RWMutex{},
+		HashGraph: *g,
+	}
 }
 
 // A empty pass through function that performs no action. Needed for the
@@ -908,17 +919,17 @@ func (g *HashGraph[V, E, VI, EI]) LinkPntr(from *V, to *V, e *E) error {
 		return getEdgeError[E](e)
 	}
 
-	gl := graphLink{eHash, toHash}
+	gl:=graphLink{eHash, toHash}
 	gNode, _ := g.graph[fromHash]
 	if gNode.Contains(gl) {
 		return nil
 	}
 
 	g.numLinks++
-	gNode.Append(graphLink{eHash, toHash})
+	gNode.Append(gl)
 	g.graph[fromHash] = gNode
-	if gNode, ok := g.graph[toHash]; !ok {
-		g.graph[toHash] = gNode
+	if _, ok := g.graph[toHash]; !ok {
+		g.graph[toHash] = Vector[graphLink, *graphLink]{}
 	}
 	return nil
 }
@@ -1324,11 +1335,11 @@ func (g *SyncedHashGraph[V, E, VI, EI]) KeyedEq(
 	return g.HashGraph.KeyedEq(other)
 }
 
-// Isomorphic equality
+// TODO: Isomorphic equality
 func (g *HashGraph[V, E, VI, EI]) UnorderedEq(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
-	return false
+	panic("AAHHHHHH")
 }
 
 // Description: Takes the intersection of l and r and puts the result in this
@@ -1767,8 +1778,8 @@ func (_ *SyncedHashGraph[V, E, VI, EI]) Lt(
 // A function that returns a hash of a hash graph. To do this all of the
 // individual hashes that are produced from the elements of the hash graph are
 // combined in a way that maintains identity, making it so the hash will
-// represent the same equality operation that [HashMap.KeyedEq] and
-// [HashMap.Eq] provide.
+// represent the same equality operation that [HashGraph.KeyedEq] and
+// [HashGraph.Eq] provide.
 func (_ *HashGraph[V, E, VI, EI]) Hash(
 	other *HashGraph[V, E, VI, EI],
 ) hash.Hash {
@@ -1792,7 +1803,7 @@ func (_ *HashGraph[V, E, VI, EI]) Hash(
 }
 
 // Places a read lock on the underlying hash graph of other and then calls others
-// underlying hash maps [HashMap.Hash] method.
+// underlying hash maps [HashGraph.Hash] method.
 func (_ *SyncedHashGraph[V, E, VI, EI])Hash(
 	other *SyncedHashGraph[V,E,VI,EI],
 ) hash.Hash {

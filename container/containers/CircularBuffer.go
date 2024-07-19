@@ -1075,6 +1075,30 @@ func (c *SyncedCircularBuffer[T, U]) Pop(val T) int {
 	return c.CircularBuffer.popSequentialImpl(&val, containerTypes.PopAll)
 }
 
+// Description: PopPntr will remove all occurrences of val in the circular
+// buffer. All equality comparisons are performed by the generic U widget type
+// that the circular buffer was initialized with.
+//
+// Time Complexity: O(n)
+func (c *CircularBuffer[T, U]) PopPntr(val *T) int {
+	return c.popSequentialImpl(val, containerTypes.PopAll)
+}
+
+// Description: Places a write lock on the underlying circular buffer and then
+// calls the underlying circular buffers [CircularBuffer.PopPntr] implementation
+// method. The [CircularBuffer.PopPntr] method is not called directly to avoid
+// copying the value twice, which could be expensive with a large type for the
+// T generic or a large number of values.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (c *SyncedCircularBuffer[T, U]) PopPntr(val *T) int {
+	c.Lock()
+	defer c.Unlock()
+	return c.CircularBuffer.popSequentialImpl(val, containerTypes.PopAll)
+}
+
 // Description: PopSequential will remove the first num occurrences of val in
 // the circular buffer. All equality comparisons are performed by the generic U
 // widget type that the circular buffer was initialized with. If num is <=0 then

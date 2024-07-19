@@ -10,7 +10,6 @@ type ReadSet[V any] interface {
 	containerTypes.ReadOps[V]
 	containerTypes.Comparisons[
 		containerTypes.ComparisonsOtherConstraint[V],
-		uint64,
 		V,
 	]
 	containerTypes.StaticCapacity
@@ -23,6 +22,10 @@ type WriteSet[V any] interface {
 	containerTypes.Length
 	containerTypes.WriteUniqueOps[uint64, V]
 	containerTypes.DeleteOps[uint64, V]
+	containerTypes.SetOperations[
+		containerTypes.ComparisonsOtherConstraint[V],
+		V,
+	]
 }
 
 // An interface that represents a set with no rectrictions on reading or

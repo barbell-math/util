@@ -810,6 +810,71 @@ func StaticVectorInterfacePop(
 	}
 }
 
+func staticVectorPopPntrHelper(
+	factory func(capacity int) staticContainers.Vector[int],
+	l int,
+	t *testing.T,
+) {
+	permutation := func(expCap int, container staticContainers.Vector[int]) {
+		// fmt.Println("Init:   ",v)
+		tmp:=-1
+		n := container.PopPntr(&tmp)
+		cntr := 0
+		expLength := 0
+		for i := 0; i < l; i++ {
+			if i%4 != 0 {
+				v, err := container.Get(i - cntr)
+				test.Nil(err, t)
+				test.Eq(i, v, t)
+				expLength++
+			} else {
+				cntr++
+			}
+		}
+		test.Eq(expCap, container.Capacity(), t)
+		test.Eq(expLength, container.Length(), t)
+		test.Eq(cntr, n, t)
+	}
+	// fmt.Println("Permutation: l: ",l," num: ",num)
+	container := factory(l)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(l, container)
+	container = factory(l + 1)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(l+1, container)
+	container = factory(l + 10)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	permutation(l+10, container)
+}
+
+// Tests the Pop method functionality of a static vector.
+func StaticVectorInterfacePopPntr(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	for i := 0; i < 13; i++ {
+		staticVectorPopPntrHelper(factory, i, t)
+	}
+}
+
 // Tests the Delete method functionality of a static vector.
 func StaticVectorInterfaceDelete(
 	factory func(capacity int) staticContainers.Vector[int],

@@ -75,7 +75,7 @@ func NewSyncedHashMap[
 	}, err
 }
 
-// Converts the supplied map to a syncronized map. Beware: The original
+// Converts the supplied map to a synchronized map. Beware: The original
 // non-synced map will remain useable.
 func (m *HashMap[K, V, KI, VI]) ToSynced() SyncedHashMap[K, V, KI, VI] {
 	return SyncedHashMap[K, V, KI, VI]{
@@ -350,10 +350,9 @@ func (m *SyncedHashMap[K, V, KI, VI]) Emplace(vals ...basic.Pair[K, V]) error {
 	return m.HashMap.Emplace(vals...)
 }
 
-// Description: Pop will remove the first num occurrences of val in the map.
-// All equality comparisons are performed by the generic VI widget type that the
-// map was initialized with. If num is <=0 then no values will be poped and
-// the map will not change.
+// Description: Pop will remove all occurrences of val in the map. All equality
+// comparisons are performed by the generic VI widget type that the map was
+// initialized with.
 //
 // Time Complexity: O(1)
 func (m *HashMap[K, V, KI, VI]) Pop(v V) int {
@@ -372,6 +371,29 @@ func (m *SyncedHashMap[K, V, KI, VI]) Pop(v V) int {
 	m.Lock()
 	defer m.Unlock()
 	return m.HashMap.popImpl(&v)
+}
+
+// Description: PopPntr will remove all occurrences of val in the map. All 
+// equality comparisons are performed by the generic VI widget type that the map
+// was initialized with.
+//
+// Time Complexity: O(1)
+func (m *HashMap[K, V, KI, VI]) PopPntr(v *V) int {
+	return m.popImpl(v)
+}
+
+// Description: Places a write lock on the underlying map and then calls the
+// underlying map [Map.PopPntr] implementation method. The [HashMap.Pop] method
+// is not called directly to avoid copying the v argument twice, which could be
+// expensive with a large type for the T generic.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(1)
+func (m *SyncedHashMap[K, V, KI, VI]) PopPntr(v *V) int {
+	m.Lock()
+	defer m.Unlock()
+	return m.HashMap.popImpl(v)
 }
 
 func (m *HashMap[K, V, KI, VI]) popImpl(v *V) int {

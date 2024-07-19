@@ -9,8 +9,13 @@ import (
 	"github.com/barbell-math/util/container/containerTypes"
 )
 
+//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=HashSetHash -baseType=hash.Hash -baseTypeWidget=widgets.BuiltinHash -widgetPackage=github.com/barbell-math/util/algo/widgets
+
 type (
-	internalHashSetImpl[T any] map[hash.Hash]T
+	HashSetHash hash.Hash
+	OldHashSetHash HashSetHash
+	NewHashSetHash HashSetHash
+	internalHashSetImpl[T any] map[HashSetHash]T
 
 	// A type to represent a set that dynamically grows as elements are added.
 	// The set will maintain uniqueness and is internally implemented with a
@@ -133,7 +138,7 @@ func (h *SyncedHashSet[T, U]) Length() int {
 //
 // Time Complexity: O(n)
 func (h *HashSet[T, U]) Vals() iter.Iter[T] {
-	return iter.MapVals[hash.Hash, T](h.internalHashSetImpl)
+	return iter.MapVals[HashSetHash, T](h.internalHashSetImpl)
 }
 
 // Description: Modifies the iterator chain returned by the unerlying
@@ -197,16 +202,17 @@ func (h *HashSet[T, U]) ContainsPntr(v *T) bool {
 func (h *SyncedHashSet[T, U]) ContainsPntr(v *T) bool {
 	h.RLock()
 	defer h.RUnlock()
-	return h.HashSet.ContainsPntr(v)
+	_,rv:=h.HashSet.getHashPosition(v)
+	return rv
 }
 
-func (h *HashSet[T, U]) getHashPosition(v *T) (hash.Hash, bool) {
+func (h *HashSet[T, U]) getHashPosition(v *T) (HashSetHash, bool) {
 	w := widgets.Widget[T, U]{}
-	for i := w.Hash(v); ; i++ {
+	for i := HashSetHash(w.Hash(v)); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; found && w.Eq(v, &iterV) {
 			return i, true
 		} else if !found {
-			return hash.Hash(0), false
+			return HashSetHash(0), false
 		}
 	}
 }
@@ -245,7 +251,7 @@ func (h *SyncedHashSet[T, U]) AppendUnique(vals ...T) error {
 
 func (h *HashSet[T, U]) appendOp(v *T) {
 	w := widgets.Widget[T, U]{}
-	for i := w.Hash(v); ; i++ {
+	for i := HashSetHash(w.Hash(v)); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; !found {
 			h.internalHashSetImpl[i] = *v
 			break
@@ -255,32 +261,33 @@ func (h *HashSet[T, U]) appendOp(v *T) {
 	}
 }
 
-// Description: Pop will remove the first num occurrences of val in the hash set.
+// Description: Pop will remove all occurrences of val in the hash set.
 // All equality comparisons are performed by the generic U widget type that the
-// hash set was initialized with. If num is <=0 then no values will be poped and
-// the hash set will not change.
+// hash set was initialized with.
 //
-// Time Complexity: O(m), where m=num
+// Time Complexity: O(1)
 func (h *HashSet[T, U]) Pop(v T) int {
-	return h.popImpl(&v)
+	return h.PopPntr(&v)
 }
 
 // Description: Places a write lock on the underlying hash set and then calls
-// the underlying hash sets [hash set.Pop] implementation method. The
-// [HashSet.Pop] method is not called directly to avoid copying the vals varargs
-// twice, which could be expensive with a large type for the T generic or a
-// large number of values.
+// the underlying hash sets [hash set.PopPntr] method.
 //
 // Lock Type: Write
 //
-// Time Complexity: O(m), where m=num
+// Time Complexity: O(1)
 func (h *SyncedHashSet[T, U]) Pop(v T) int {
 	h.Lock()
 	defer h.Unlock()
-	return h.HashSet.popImpl(&v)
+	return h.HashSet.PopPntr(&v)
 }
 
-func (h *HashSet[T, U]) popImpl(v *T) int {
+// Description: PopPntr will remove all occurrences of val in the hash set. All
+// equality comparisons are performed by the generic U widget type that the hash
+// set was initialized with.
+//
+// Time Complexity: O(1)
+func (h *HashSet[T, U])PopPntr(v *T) int {
 	w := widgets.Widget[T, U]{}
 	if i, cont := h.getHashPosition(v); cont {
 		delete(h.internalHashSetImpl, i)
@@ -290,7 +297,7 @@ func (h *HashSet[T, U]) popImpl(v *T) int {
 				// If the hash of iterV is > the curPos then do not move it, it
 				// is already in the correct position, but continue on this
 				// collision chain to check for other values that could move.
-				if w.Hash(&iterV) > curPos {
+				if HashSetHash(w.Hash(&iterV)) > curPos {
 					continue
 				}
 				h.internalHashSetImpl[curPos] = h.internalHashSetImpl[j]
@@ -303,6 +310,50 @@ func (h *HashSet[T, U]) popImpl(v *T) int {
 		return 1
 	}
 	return 0
+}
+
+// Returns a map that tells you how the values changes indexes. The keys of the
+// map are the original indexes and the values are the new indexes. For example,
+// the map: {4: 1, 5: 4, 6: 5} would mean that the value that was at index 4 is
+// now at index 1, the value that was at index 5 is now at index 4, and the
+// value at index 6 is now at index 5.
+func (h *HashSet[T, U])getHashesAffectedByPop(
+	v *T,
+) (map[OldHashSetHash]NewHashSetHash, bool) {
+	w := widgets.Widget[T, U]{}
+	rv:=map[OldHashSetHash]NewHashSetHash{}
+
+	if i, cont := h.getHashPosition(v); cont {
+		curPos := i
+		for j := i + 1; ; j++ {
+			if iterV, found := h.internalHashSetImpl[j]; found {
+				// If the hash of iterV is > the curPos then do not move it, it
+				// is already in the correct position, but continue on this
+				// collision chain to check for other values that could move.
+				if HashSetHash(w.Hash(&iterV)) > curPos {
+					continue
+				}
+				rv[OldHashSetHash(j)]=NewHashSetHash(curPos)
+				curPos = j
+			} else {
+				break
+			}
+		}
+		return rv, true
+	}
+	return rv, false
+}
+
+// Description: Places a write lock on the underlying hash set and then calls
+// the underlying hash sets [HashSet.PopPntr] method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(1)
+func (h *SyncedHashSet[T, U])PopPntr(v *T) int {
+	h.Lock()
+	defer h.Unlock()
+	return h.HashSet.PopPntr(v)
 }
 
 // Description: Clears all values from the hash set. Equivalent to making a new

@@ -11,7 +11,7 @@ import (
 	"github.com/barbell-math/util/test"
 )
 
-type graphConstruction struct {
+type directedGraphConstruction struct {
 	vertices iter.Iter[int]
 	edges iter.Iter[int]
 	links [][3]int
@@ -19,7 +19,7 @@ type graphConstruction struct {
 	numEdges int
 }
 
-func (g *graphConstruction)makeGraph(
+func (g *directedGraphConstruction)makeGraph(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) dynamicContainers.DirectedGraph[int, int] {
@@ -37,15 +37,11 @@ func (g *graphConstruction)makeGraph(
 		return iter.Continue, nil
 	})
 	for i := 0; i < len(g.links); i++ {
-		test.Nil(rv.Link( g.links[i][0], g.links[i][1], g.links[i][2],), t)
+		test.Nil(rv.Link( g.links[i][0], g.links[i][1], g.links[i][2]), t)
 	}
 	for i := 0; i < len(g.links); i++ {
 		test.True(
-			rv.ContainsLink(
-				g.links[i][0],
-				g.links[i][1],
-				g.links[i][2],
-			),
+			rv.ContainsLink(g.links[i][0], g.links[i][1], g.links[i][2]),
 			t,
 		)
 	}
@@ -55,9 +51,9 @@ func (g *graphConstruction)makeGraph(
 	return rv
 }
 
-func graphReadInterface[T any, U any](c dynamicContainers.ReadDirectedGraph[T, U])   {}
-func graphWriteInterface[T any, U any](c dynamicContainers.WriteDirectedGraph[T, U]) {}
-func graphInterface[T any, U any](c dynamicContainers.DirectedGraph[T, U])           {}
+func directedGraphReadInterface[T any, U any](c dynamicContainers.ReadDirectedGraph[T, U])   {}
+func directedGraphWriteInterface[T any, U any](c dynamicContainers.WriteDirectedGraph[T, U]) {}
+func directedGraphInterface[T any, U any](c dynamicContainers.DirectedGraph[T, U])           {}
 
 // Tests that the value supplied by the factory implements the
 // [containerTypes.RWSyncable] interface.
@@ -95,7 +91,7 @@ func ReadDynDirectedGraphInterface[V any, E any](
 	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
-	graphReadInterface[V, E](factory(0))
+	directedGraphReadInterface[V, E](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
@@ -104,7 +100,7 @@ func WriteDynDirectedGraphInterface[V any, E any](
 	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
-	graphWriteInterface[V, E](factory(0))
+	directedGraphWriteInterface[V, E](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
@@ -113,7 +109,7 @@ func DynDirectedGraphInterfaceInterface[V any, E any](
 	factory func(capacity int) dynamicContainers.DirectedGraph[V, E],
 	t *testing.T,
 ) {
-	graphInterface[V, E](factory(0))
+	directedGraphInterface[V, E](factory(0))
 }
 
 // Tests that the value supplied by the factory does not implement the
@@ -133,7 +129,7 @@ func DynDirectedGraphInterfaceStaticCapacityInterface[V any, E any](
 	)
 }
 
-func graphContainsEdgeHelper(
+func directedGraphContainsEdgeHelper(
 	g dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -152,13 +148,13 @@ func DynDirectedGraphInterfaceContainsEdge(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	graphContainsEdgeHelper(factory(0), 0, t)
-	graphContainsEdgeHelper(factory(0), 1, t)
-	graphContainsEdgeHelper(factory(0), 2, t)
-	graphContainsEdgeHelper(factory(0), 5, t)
+	directedGraphContainsEdgeHelper(factory(0), 0, t)
+	directedGraphContainsEdgeHelper(factory(0), 1, t)
+	directedGraphContainsEdgeHelper(factory(0), 2, t)
+	directedGraphContainsEdgeHelper(factory(0), 5, t)
 }
 
-func graphContainsEdgePntrHelper(
+func directedGraphContainsEdgePntrHelper(
 	g dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -178,13 +174,13 @@ func DynDirectedGraphInterfaceContainsEdgePntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	graphContainsEdgePntrHelper(factory(0), 0, t)
-	graphContainsEdgePntrHelper(factory(0), 1, t)
-	graphContainsEdgePntrHelper(factory(0), 2, t)
-	graphContainsEdgePntrHelper(factory(0), 5, t)
+	directedGraphContainsEdgePntrHelper(factory(0), 0, t)
+	directedGraphContainsEdgePntrHelper(factory(0), 1, t)
+	directedGraphContainsEdgePntrHelper(factory(0), 2, t)
+	directedGraphContainsEdgePntrHelper(factory(0), 5, t)
 }
 
-func graphContainsVertexHelper(
+func directedGraphContainsVertexHelper(
 	g dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -203,13 +199,13 @@ func DynDirectedGraphInterfaceContainsVertex(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	graphContainsVertexHelper(factory(0), 0, t)
-	graphContainsVertexHelper(factory(0), 1, t)
-	graphContainsVertexHelper(factory(0), 2, t)
-	graphContainsVertexHelper(factory(0), 5, t)
+	directedGraphContainsVertexHelper(factory(0), 0, t)
+	directedGraphContainsVertexHelper(factory(0), 1, t)
+	directedGraphContainsVertexHelper(factory(0), 2, t)
+	directedGraphContainsVertexHelper(factory(0), 5, t)
 }
 
-func graphContainsVertexPntrHelper(
+func directedGraphContainsVertexPntrHelper(
 	g dynamicContainers.DirectedGraph[int, int],
 	l int,
 	t *testing.T,
@@ -229,10 +225,10 @@ func DynDirectedGraphInterfaceContainsVertexPntr(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	graphContainsVertexPntrHelper(factory(0), 0, t)
-	graphContainsVertexPntrHelper(factory(0), 1, t)
-	graphContainsVertexPntrHelper(factory(0), 2, t)
-	graphContainsVertexPntrHelper(factory(0), 5, t)
+	directedGraphContainsVertexPntrHelper(factory(0), 0, t)
+	directedGraphContainsVertexPntrHelper(factory(0), 1, t)
+	directedGraphContainsVertexPntrHelper(factory(0), 2, t)
+	directedGraphContainsVertexPntrHelper(factory(0), 5, t)
 }
 
 func directedGraphEdgesHelper(
@@ -285,7 +281,7 @@ func directedGraphEdgePntrsHelper(
 }
 
 // Tests the EdgePntrs method functionality of a dynamic directed graph.
-func DynMapInterfaceEdgePntrs(
+func DynDirectedGraphInterfaceEdgePntrs(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
@@ -369,7 +365,7 @@ func DynDirectedGraphInterfaceVerticePntrs(
 
 func directedGraphLinkHelper(
 	factory func (capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	t *testing.T,
 ) {
 	container:=construction.makeGraph(factory, t)
@@ -406,7 +402,7 @@ func DynDirectedGraphLink(
 ) {
 	directedGraphLinkHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,4,1),
 			links: [][3]int{
@@ -421,7 +417,7 @@ func DynDirectedGraphLink(
 	)
 	directedGraphLinkHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -444,7 +440,7 @@ func DynDirectedGraphLink(
 
 func directedGraphLinkPntrHelper(
 	factory func (capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	t *testing.T,
 ) {
 	container:=construction.makeGraph(factory,t)
@@ -483,7 +479,7 @@ func DynDirectedGraphLinkPntr(
 ) {
 	directedGraphLinkPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,4,1),
 			links: [][3]int{
@@ -498,7 +494,7 @@ func DynDirectedGraphLinkPntr(
 	)
 	directedGraphLinkPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -521,7 +517,7 @@ func DynDirectedGraphLinkPntr(
 
 func directedGraphNumOutLinksHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
@@ -539,7 +535,7 @@ func DynDirectedGraphNumOutLinks(
 ) {
 	directedGraphNumOutLinksHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,6,1),
 			edges: iter.Range[int](0,4,1),
 			links: [][3]int{
@@ -563,7 +559,7 @@ func DynDirectedGraphNumOutLinks(
 	)
 	directedGraphNumOutLinksHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -595,7 +591,7 @@ func DynDirectedGraphNumOutLinks(
 
 func directedGraphNumOutLinksPntrHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
@@ -614,7 +610,7 @@ func DynDirectedGraphNumOutLinksPntr(
 ) {
 	directedGraphNumOutLinksPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,6,1),
 			edges: iter.Range[int](0,4,1),
 			links: [][3]int{
@@ -638,7 +634,7 @@ func DynDirectedGraphNumOutLinksPntr(
 	)
 	directedGraphNumOutLinksPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -670,7 +666,7 @@ func DynDirectedGraphNumOutLinksPntr(
 
 func directedGraphOutEdgesHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
@@ -693,7 +689,7 @@ func DynDirectedGraphOutEdges(
 ) {
 	directedGraphOutEdgesHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,6,1),
 			edges: iter.Range[int](0,4,1),
 			links: [][3]int{
@@ -717,7 +713,7 @@ func DynDirectedGraphOutEdges(
 	)
 	directedGraphOutEdgesHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -749,7 +745,7 @@ func DynDirectedGraphOutEdges(
 
 func directedGraphOutEdgePntrsHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outEdges map[int][]int,
 	t *testing.T,
 ) {
@@ -776,7 +772,7 @@ func DynDirectedGraphOutEdgePntrs(
 	if container.IsAddressable() {
 		directedGraphOutEdgesHelper(
 			factory,
-			graphConstruction{
+			directedGraphConstruction{
 				vertices: iter.Range[int](0,6,1),
 				edges: iter.Range[int](0,4,1),
 				links: [][3]int{
@@ -800,7 +796,7 @@ func DynDirectedGraphOutEdgePntrs(
 		)
 		directedGraphOutEdgesHelper(
 			factory,
-			graphConstruction{
+			directedGraphConstruction{
 				vertices: iter.Range[int](0,5,1),
 				edges: iter.Range[int](0,5,1),
 				links: [][3]int{
@@ -836,7 +832,7 @@ func DynDirectedGraphOutEdgePntrs(
 
 func directedGraphOutVerticesHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
@@ -859,7 +855,7 @@ func DynDirectedGraphOutVertices(
 ) {
 	directedGraphOutVerticesHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,6,1),
 			edges: iter.Range[int](0,4,1),
 			links: [][3]int{
@@ -883,7 +879,7 @@ func DynDirectedGraphOutVertices(
 	)
 	directedGraphOutVerticesHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -915,7 +911,7 @@ func DynDirectedGraphOutVertices(
 
 func directedGraphOutVerticePntrsHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outVertices map[int][]int,
 	t *testing.T,
 ) {
@@ -943,7 +939,7 @@ func DynDirectedGraphOutVerticePntrs(
 	if container.IsAddressable() {
 		directedGraphOutVerticePntrsHelper(
 			factory,
-			graphConstruction{
+			directedGraphConstruction{
 				vertices: iter.Range[int](0,6,1),
 				edges: iter.Range[int](0,4,1),
 				links: [][3]int{
@@ -967,7 +963,7 @@ func DynDirectedGraphOutVerticePntrs(
 		)
 		directedGraphOutVerticePntrsHelper(
 			factory,
-			graphConstruction{
+			directedGraphConstruction{
 				vertices: iter.Range[int](0,5,1),
 				edges: iter.Range[int](0,5,1),
 				links: [][3]int{
@@ -1003,7 +999,7 @@ func DynDirectedGraphOutVerticePntrs(
 
 func directedGraphOutEdgesAndVerticesHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outEdges map[int][]int,
 	outVertices map[int][]int,
 	t *testing.T,
@@ -1043,7 +1039,7 @@ func DynDirectedGraphOutEdgesAndVertices(
 ) {
 	directedGraphOutEdgesAndVerticesHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,6,1),
 			edges: iter.Range[int](0,4,1),
 			links: [][3]int{
@@ -1076,7 +1072,7 @@ func DynDirectedGraphOutEdgesAndVertices(
 	)
 	directedGraphOutEdgesAndVerticesHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1117,7 +1113,7 @@ func DynDirectedGraphOutEdgesAndVertices(
 
 func directedGraphOutEdgesAndVerticePntrsHelper(
 	factory func(capacuty int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	outEdges map[int][]int,
 	outVertices map[int][]int,
 	t *testing.T,
@@ -1161,7 +1157,7 @@ func DynDirectedGraphOutEdgesAndVerticePntrs(
 	if container.IsAddressable() {
 		directedGraphOutEdgesAndVerticePntrsHelper(
 			factory,
-			graphConstruction{
+			directedGraphConstruction{
 				vertices: iter.Range[int](0,6,1),
 				edges: iter.Range[int](0,4,1),
 				links: [][3]int{
@@ -1194,7 +1190,7 @@ func DynDirectedGraphOutEdgesAndVerticePntrs(
 		)
 		directedGraphOutEdgesAndVerticePntrsHelper(
 			factory,
-			graphConstruction{
+			directedGraphConstruction{
 				vertices: iter.Range[int](0,5,1),
 				edges: iter.Range[int](0,5,1),
 				links: [][3]int{
@@ -1239,7 +1235,7 @@ func DynDirectedGraphOutEdgesAndVerticePntrs(
 
 func directedGraphEdgesBetweenHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	structure map[int]map[int][]int,
 	t *testing.T,
 ) {
@@ -1274,7 +1270,7 @@ func DynDirectedGraphEdgesBetween(
 ) {
 	directedGraphEdgesBetweenHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1309,7 +1305,7 @@ func DynDirectedGraphEdgesBetween(
 
 func directedGraphEdgesBetweenPntrHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	structure map[int]map[int][]int,
 	t *testing.T,
 ) {
@@ -1356,7 +1352,7 @@ func DynDirectedGraphEdgesBetweenPntr(
 	if container.IsAddressable() {
 		directedGraphEdgesBetweenPntrHelper(
 			factory,
-			graphConstruction{
+			directedGraphConstruction{
 				vertices: iter.Range[int](0,3,1),
 				edges: iter.Range[int](0,5,1),
 				links: [][3]int{
@@ -1395,7 +1391,7 @@ func DynDirectedGraphEdgesBetweenPntr(
 
 func directedGraphDeleteLinkHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteLinks [][3]int,
 	t *testing.T,
 ) {
@@ -1443,7 +1439,7 @@ func DynDirectedGraphDeleteLink(
 ) {
 	directedGraphDeleteLinkHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1468,7 +1464,7 @@ func DynDirectedGraphDeleteLink(
 
 func directedGraphDeleteLinkPntrHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteLinks [][3]int,
 	t *testing.T,
 ) {
@@ -1518,7 +1514,7 @@ func DynDirectedGraphDeleteLinkPntr(
 ) {
 	directedGraphDeleteLinkPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1543,7 +1539,7 @@ func DynDirectedGraphDeleteLinkPntr(
 
 func directedGraphDeleteLinksHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteLinks [2]int,
 	numDeletedLinks int,
 	t *testing.T,
@@ -1575,7 +1571,7 @@ func DynDirectedGraphDeleteLinks(
 ) {
 	directedGraphDeleteLinksHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1595,7 +1591,7 @@ func DynDirectedGraphDeleteLinks(
 	)
 	directedGraphDeleteLinksHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1617,7 +1613,7 @@ func DynDirectedGraphDeleteLinks(
 
 func directedGraphDeleteLinksPntrHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteLinks [2]int,
 	numDeletedLinks int,
 	t *testing.T,
@@ -1649,7 +1645,7 @@ func DynDirectedGraphDeleteLinksPntr(
 ) {
 	directedGraphDeleteLinksPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1669,7 +1665,7 @@ func DynDirectedGraphDeleteLinksPntr(
 	)
 	directedGraphDeleteLinksPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1691,7 +1687,7 @@ func DynDirectedGraphDeleteLinksPntr(
 
 func directedGraphDeleteVertexHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteVertices []int,
 	numDeletedLinks int,
 	t *testing.T,
@@ -1722,7 +1718,7 @@ func DynDirectedGraphDeleteVertex(
 ) {
 	directedGraphDeleteVertexHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1742,7 +1738,7 @@ func DynDirectedGraphDeleteVertex(
 	)
 	directedGraphDeleteVertexHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1762,7 +1758,7 @@ func DynDirectedGraphDeleteVertex(
 	)
 	directedGraphDeleteVertexHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1784,7 +1780,7 @@ func DynDirectedGraphDeleteVertex(
 
 func directedGraphDeleteVertexPntrHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteVertices []int,
 	numDeletedLinks int,
 	t *testing.T,
@@ -1816,7 +1812,7 @@ func DynDirectedGraphDeleteVertexPntr(
 ) {
 	directedGraphDeleteVertexPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1836,7 +1832,7 @@ func DynDirectedGraphDeleteVertexPntr(
 	)
 	directedGraphDeleteVertexPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1856,7 +1852,7 @@ func DynDirectedGraphDeleteVertexPntr(
 	)
 	directedGraphDeleteVertexPntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1878,7 +1874,7 @@ func DynDirectedGraphDeleteVertexPntr(
 
 func directedGraphDeleteEdgeHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteEdges []int,
 	numDeletedLinks int,
 	t *testing.T,
@@ -1905,7 +1901,7 @@ func DynDirectedGraphDeleteEdge(
 ) {
 	directedGraphDeleteEdgeHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1925,7 +1921,7 @@ func DynDirectedGraphDeleteEdge(
 	)
 	directedGraphDeleteEdgeHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1945,7 +1941,7 @@ func DynDirectedGraphDeleteEdge(
 	)
 	directedGraphDeleteEdgeHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -1967,7 +1963,7 @@ func DynDirectedGraphDeleteEdge(
 
 func directedGraphDeleteEdgePntrHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	construction graphConstruction,
+	construction directedGraphConstruction,
 	deleteEdges []int,
 	numDeletedLinks int,
 	t *testing.T,
@@ -1995,7 +1991,7 @@ func DynDirectedGraphDeleteEdgePntr(
 ) {
 	directedGraphDeleteEdgePntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -2015,7 +2011,7 @@ func DynDirectedGraphDeleteEdgePntr(
 	)
 	directedGraphDeleteEdgePntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -2035,7 +2031,7 @@ func DynDirectedGraphDeleteEdgePntr(
 	)
 	directedGraphDeleteEdgePntrHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -2060,7 +2056,7 @@ func DynDirectedGraphClear(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	t *testing.T,
 ) {
-	container:=(&graphConstruction{
+	container:=(&directedGraphConstruction{
 		vertices: iter.Range[int](0,5,1),
 		edges: iter.Range[int](0,5,1),
 		links: [][3]int{
@@ -2087,8 +2083,8 @@ func DynDirectedGraphClear(
 
 func directedGraphKeyedEqHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	g1 graphConstruction,
-	g2 graphConstruction,
+	g1 directedGraphConstruction,
+	g2 directedGraphConstruction,
 	expResult bool,
 	t *testing.T,
 ) {
@@ -2104,7 +2100,7 @@ func DynDirectedGraphKeyedEq(
 ) {
 	directedGraphKeyedEqHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2113,7 +2109,7 @@ func DynDirectedGraphKeyedEq(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2127,7 +2123,7 @@ func DynDirectedGraphKeyedEq(
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2137,7 +2133,7 @@ func DynDirectedGraphKeyedEq(
 				[3]int{2, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2151,7 +2147,7 @@ func DynDirectedGraphKeyedEq(
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2160,7 +2156,7 @@ func DynDirectedGraphKeyedEq(
 				[3]int{1, 0, 1},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2174,7 +2170,7 @@ func DynDirectedGraphKeyedEq(
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2183,7 +2179,7 @@ func DynDirectedGraphKeyedEq(
 				[3]int{1, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2197,7 +2193,7 @@ func DynDirectedGraphKeyedEq(
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2206,7 +2202,7 @@ func DynDirectedGraphKeyedEq(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2220,7 +2216,7 @@ func DynDirectedGraphKeyedEq(
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,4,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -2233,7 +2229,7 @@ func DynDirectedGraphKeyedEq(
 				[3]int{1, 0, 4},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,4,1),
 			edges: iter.Range[int](0,5,1),
 			links: [][3]int{
@@ -2251,7 +2247,7 @@ func DynDirectedGraphKeyedEq(
 	)
 	directedGraphKeyedEqHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.SliceElems[int]([]int{0,1,5}),
 			edges: iter.SliceElems[int]([]int{0,5}),
 			links: [][3]int{
@@ -2260,7 +2256,7 @@ func DynDirectedGraphKeyedEq(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2276,9 +2272,9 @@ func DynDirectedGraphKeyedEq(
 
 func directedGraphIntersectionHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	g1 graphConstruction,
-	g2 graphConstruction,
-	expG graphConstruction,
+	g1 directedGraphConstruction,
+	g2 directedGraphConstruction,
+	expG directedGraphConstruction,
 	t *testing.T,
 ) {
 	container1:=g1.makeGraph(factory, t)
@@ -2299,7 +2295,7 @@ func DynDirectedGraphIntersection(
 ) {
 	directedGraphIntersectionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2308,7 +2304,7 @@ func DynDirectedGraphIntersection(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2317,7 +2313,7 @@ func DynDirectedGraphIntersection(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.SliceElems[int]([]int{0,1}),
 			edges: iter.SliceElems[int]([]int{0}),
 			links: [][3]int{
@@ -2330,7 +2326,7 @@ func DynDirectedGraphIntersection(
 	)
 	directedGraphIntersectionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2340,7 +2336,7 @@ func DynDirectedGraphIntersection(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2350,7 +2346,7 @@ func DynDirectedGraphIntersection(
 				[3]int{3, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2362,7 +2358,7 @@ func DynDirectedGraphIntersection(
 	)
 	directedGraphIntersectionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2372,7 +2368,7 @@ func DynDirectedGraphIntersection(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2382,7 +2378,7 @@ func DynDirectedGraphIntersection(
 				[3]int{3, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.NoElem[int](),
 			edges: iter.NoElem[int](),
 			links: [][3]int{},
@@ -2391,7 +2387,7 @@ func DynDirectedGraphIntersection(
 	)
 	directedGraphIntersectionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2401,7 +2397,7 @@ func DynDirectedGraphIntersection(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,5,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2411,7 +2407,7 @@ func DynDirectedGraphIntersection(
 				[3]int{4, 2, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.NoElem[int](),
 			edges: iter.NoElem[int](),
 			links: [][3]int{},
@@ -2422,9 +2418,9 @@ func DynDirectedGraphIntersection(
 
 func directedGraphUnionHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	g1 graphConstruction,
-	g2 graphConstruction,
-	expG graphConstruction,
+	g1 directedGraphConstruction,
+	g2 directedGraphConstruction,
+	expG directedGraphConstruction,
 	t *testing.T,
 ) {
 	container1:=g1.makeGraph(factory, t)
@@ -2445,7 +2441,7 @@ func DynDirectedGraphUnion(
 ) {
 	directedGraphUnionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2454,7 +2450,7 @@ func DynDirectedGraphUnion(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2463,7 +2459,7 @@ func DynDirectedGraphUnion(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.SliceElems[int]([]int{0,1}),
 			edges: iter.SliceElems[int]([]int{0}),
 			links: [][3]int{
@@ -2476,7 +2472,7 @@ func DynDirectedGraphUnion(
 	)
 	directedGraphUnionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2486,7 +2482,7 @@ func DynDirectedGraphUnion(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2496,7 +2492,7 @@ func DynDirectedGraphUnion(
 				[3]int{3, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,4,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2512,7 +2508,7 @@ func DynDirectedGraphUnion(
 	)
 	directedGraphUnionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2522,7 +2518,7 @@ func DynDirectedGraphUnion(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2532,7 +2528,7 @@ func DynDirectedGraphUnion(
 				[3]int{3, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,4,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2548,7 +2544,7 @@ func DynDirectedGraphUnion(
 	)
 	directedGraphUnionHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2558,7 +2554,7 @@ func DynDirectedGraphUnion(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,5,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2568,7 +2564,7 @@ func DynDirectedGraphUnion(
 				[3]int{4, 2, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2586,9 +2582,9 @@ func DynDirectedGraphUnion(
 
 func directedGraphDifferenceHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	g1 graphConstruction,
-	g2 graphConstruction,
-	expG graphConstruction,
+	g1 directedGraphConstruction,
+	g2 directedGraphConstruction,
+	expG directedGraphConstruction,
 	t *testing.T,
 ) {
 	container1:=g1.makeGraph(factory, t)
@@ -2605,7 +2601,7 @@ func DynDirectedGraphDifference(
 ) {
 	directedGraphDifferenceHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2614,7 +2610,7 @@ func DynDirectedGraphDifference(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2623,7 +2619,7 @@ func DynDirectedGraphDifference(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.NoElem[int](),
 			edges: iter.NoElem[int](),
 			links: [][3]int{},
@@ -2632,7 +2628,7 @@ func DynDirectedGraphDifference(
 	)
 	directedGraphDifferenceHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2642,7 +2638,7 @@ func DynDirectedGraphDifference(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2652,7 +2648,7 @@ func DynDirectedGraphDifference(
 				[3]int{3, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2665,7 +2661,7 @@ func DynDirectedGraphDifference(
 	)
 	directedGraphDifferenceHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2675,7 +2671,7 @@ func DynDirectedGraphDifference(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2685,7 +2681,7 @@ func DynDirectedGraphDifference(
 				[3]int{3, 1, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2698,7 +2694,7 @@ func DynDirectedGraphDifference(
 	)
 	directedGraphDifferenceHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2708,7 +2704,7 @@ func DynDirectedGraphDifference(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,5,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2718,7 +2714,7 @@ func DynDirectedGraphDifference(
 				[3]int{4, 2, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2731,7 +2727,7 @@ func DynDirectedGraphDifference(
 	)
 	directedGraphDifferenceHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2754,7 +2750,7 @@ func DynDirectedGraphDifference(
 				[3]int{4,2,1},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](1,2,1),
 			links: [][3]int{
@@ -2771,7 +2767,7 @@ func DynDirectedGraphDifference(
 				[3]int{4,2,1},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2788,8 +2784,8 @@ func DynDirectedGraphDifference(
 
 func directedGraphIsSupersetHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	g1 graphConstruction,
-	g2 graphConstruction,
+	g1 directedGraphConstruction,
+	g2 directedGraphConstruction,
 	expRes bool,
 	t *testing.T,
 ) {
@@ -2807,7 +2803,7 @@ func DynDirectedGraphIsSuperset(
 ) {
 	directedGraphIsSupersetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2816,7 +2812,7 @@ func DynDirectedGraphIsSuperset(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2830,7 +2826,7 @@ func DynDirectedGraphIsSuperset(
 	)
 	directedGraphIsSupersetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2840,7 +2836,7 @@ func DynDirectedGraphIsSuperset(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2855,7 +2851,7 @@ func DynDirectedGraphIsSuperset(
 	)
 	directedGraphIsSupersetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2865,7 +2861,7 @@ func DynDirectedGraphIsSuperset(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2880,7 +2876,7 @@ func DynDirectedGraphIsSuperset(
 	)
 	directedGraphIsSupersetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2890,7 +2886,7 @@ func DynDirectedGraphIsSuperset(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,5,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2905,7 +2901,7 @@ func DynDirectedGraphIsSuperset(
 	)
 	directedGraphIsSupersetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -2928,7 +2924,7 @@ func DynDirectedGraphIsSuperset(
 				[3]int{4,2,1},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](1,2,1),
 			links: [][3]int{
@@ -2952,8 +2948,8 @@ func DynDirectedGraphIsSuperset(
 
 func directedGraphIsSubsetHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
-	g1 graphConstruction,
-	g2 graphConstruction,
+	g1 directedGraphConstruction,
+	g2 directedGraphConstruction,
 	expRes bool,
 	t *testing.T,
 ) {
@@ -2971,7 +2967,7 @@ func DynDirectedGraphIsSubset(
 ) {
 	directedGraphIsSubsetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2980,7 +2976,7 @@ func DynDirectedGraphIsSubset(
 				[3]int{1, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,2,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -2994,7 +2990,7 @@ func DynDirectedGraphIsSubset(
 	)
 	directedGraphIsSubsetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -3004,7 +3000,7 @@ func DynDirectedGraphIsSubset(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -3019,7 +3015,7 @@ func DynDirectedGraphIsSubset(
 	)
 	directedGraphIsSubsetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -3029,7 +3025,7 @@ func DynDirectedGraphIsSubset(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,4,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{
@@ -3044,7 +3040,7 @@ func DynDirectedGraphIsSubset(
 	)
 	directedGraphIsSubsetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,3,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -3054,7 +3050,7 @@ func DynDirectedGraphIsSubset(
 				[3]int{2, 0, 0},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](1,5,1),
 			edges: iter.Range[int](0,1,1),
 			links: [][3]int{
@@ -3069,7 +3065,7 @@ func DynDirectedGraphIsSubset(
 	)
 	directedGraphIsSubsetHelper(
 		factory,
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](1,2,1),
 			links: [][3]int{
@@ -3086,7 +3082,7 @@ func DynDirectedGraphIsSubset(
 				[3]int{4,2,1},
 			},
 		},
-		graphConstruction{
+		directedGraphConstruction{
 			vertices: iter.Range[int](0,5,1),
 			edges: iter.Range[int](0,2,1),
 			links: [][3]int{

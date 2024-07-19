@@ -9,7 +9,7 @@ import "github.com/barbell-math/util/algo/hash"
 type (
 	// The interface that defines what it means to be a widget. This interface
 	// is used by the containers in the [containers] package when performing
-	// certian operations. Implementations of this interface are expected to
+	// certain operations. Implementations of this interface are expected to
 	// hold no state as the methods shown below will not be called in any
 	// predetermined order.
 	WidgetInterface[T any] interface {
@@ -20,14 +20,14 @@ type (
 		// Returns a hash value that represent the currently wrapped value.
 		Hash(v *T) hash.Hash
 		// Zero's the supplied value. Equivalent to a destructor except Go does
-		// not have manual memory management so this is mainly just to prenent
+		// not have manual memory management so this is mainly just to prevent
 		// things like dangling pointers.
 		Zero(v *T)
 	}
 
 	// The interface that defines what it means to be a widget that can do
-	// baic arithmitic. This interface is used by the containers in the
-	// [container] package when performing certian operations. Implementations
+	// basic arithmetic. This interface is used by the containers in the
+	// [container] package when performing certain operations. Implementations
 	// of this interface are expected to hold no state as the methods will not
 	// be called in any predetermined order.
 	ArithWidgetInterface[T any] interface {
@@ -39,20 +39,20 @@ type (
 		UnitVal() T
 		// Negates the value that is supplied to it.
 		Neg(v *T)
-		// Adds l and r and places the results in res. No uniqueness guarintees
+		// Adds l and r and places the results in res. No uniqueness guarantees
 		// are placed on res, l, and r. They may all be the same value. The
 		// implementation of this interface needs to recognize this.
 		Add(res *T, l *T, r *T)
 		// Subtracts l and r and places the results in res. No uniqueness
-		// guarintees are placed on res, l, and r. They may all be the same
+		// guarantees are placed on res, l, and r. They may all be the same
 		// value. The implementation of this interface needs to recognize this.
 		Sub(res *T, l *T, r *T)
 		// Multiplies l and r and places the results in res. No uniqueness
-		// guarintees are placed on res, l, and r. They may all be the same
+		// guarantees are placed on res, l, and r. They may all be the same
 		// value. The implementation of this interface needs to recognize this.
 		Mul(res *T, l *T, r *T)
 		// Divides l and r and places the results in res. No uniqueness
-		// guarintees are placed on res, l, and r. They may all be the same
+		// guarantees are placed on res, l, and r. They may all be the same
 		// value. The implementation of this interface needs to recognize this.
 		Div(res *T, l *T, r *T)
 	}

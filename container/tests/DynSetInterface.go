@@ -301,6 +301,24 @@ func DynSetInterfacePop(
 	}
 }
 
+// Tests the PopPntr method functionality of a dynamic set.
+func DynSetInterfacePopPntr(
+	factory func(capacity int) dynamicContainers.Set[int],
+	t *testing.T,
+) {
+	container := factory(0)
+	test.Eq(0, container.Length(), t)
+	for i := 0; i < 5; i++ {
+		container.AppendUnique(i)
+	}
+	for i := 0; i < 5; i++ {
+		test.True(container.Contains(i), t)
+		container.PopPntr(&i)
+		test.False(container.Contains(i), t)
+		test.Eq(4-i, container.Length(), t)
+	}
+}
+
 // Tests the UnorderedEq method functionality of a dynamic set.
 func DynSetInterfaceUnorderedEq(
 	factory func(capacity int) dynamicContainers.Set[int],

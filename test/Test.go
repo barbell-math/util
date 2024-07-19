@@ -207,3 +207,38 @@ func SlicesMatchUnordered[T any](actual []T, generated []T, t *testing.T) {
 		)
 	}
 }
+
+func MapsMatch[K comparable, V any](
+	actual map[K]V,
+	generated map[K]V,
+	t *testing.T,
+) {
+	_, f, line, _ := runtime.Caller(1)
+	if len(actual) != len(generated) {
+		FormatError(
+			len(actual),
+			len(generated),
+			"Maps do not match in length.",
+			f, line, t,
+		)
+	}
+	for k,v:=range(generated) {
+		actualV,ok:=actual[k]
+		if !ok {
+			FormatError(
+				true,
+				ok,
+				fmt.Sprintf("A key was not found | Key: %v",k),
+				f, line, t,
+			)
+		}
+		if any(actualV)!=any(v) {
+			FormatError(
+				actualV,
+				v,
+				"The values stored in the map did not match.",
+				f, line, t,
+			)
+		}
+	}
+}

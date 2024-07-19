@@ -354,6 +354,51 @@ func DynMapInterfacePop(
 	}
 }
 
+func mapPopPntrHelper(
+	factory func(capacity int) dynamicContainers.Map[int, int],
+	l int,
+	t *testing.T,
+) {
+	// fmt.Println("Permutation: l: ",l," num: ",num)
+	container := factory(0)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Emplace(basic.Pair[int, int]{i, -1})
+		} else {
+			container.Emplace(basic.Pair[int, int]{i, i})
+		}
+	}
+	// fmt.Println("Init:   ",container)
+	tmp:=-1
+	n := container.PopPntr(&tmp)
+	// fmt.Println("After pop: ",container)
+	cntr := 0
+	expLength := 0
+	for i := 0; i < l; i++ {
+		if i%4 != 0 {
+			expLength++
+			// fmt.Println("Getting ",i)
+			iterV, found := container.Get(i)
+			test.Nil(found, t)
+			test.Eq(i, iterV, t)
+		} else {
+			cntr++
+		}
+	}
+	test.Eq(cntr, n, t)
+	test.Eq(expLength, container.Length(), t)
+}
+
+// Tests the PopPntr method functionality of a dynamic map.
+func DynMapInterfacePopPntr(
+	factory func(capacity int) dynamicContainers.Map[int, int],
+	t *testing.T,
+) {
+	for i := 0; i < 13; i++ {
+		mapPopPntrHelper(factory, i, t)
+	}
+}
+
 // Tests the Delete method functionality of a dynamic map.
 func DynMapInterfaceDelete(
 	factory func(capacity int) dynamicContainers.Map[int, int],

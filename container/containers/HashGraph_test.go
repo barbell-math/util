@@ -9,42 +9,36 @@ import (
 
 //go:generate go run interfaceTest.go -type=HashGraph -category=dynamic -interface=DirectedGraph -genericDecl=[int,int] -factory=generateHashGraph
 //go:generate go run interfaceTest.go -type=SyncedHashGraph -category=dynamic -interface=DirectedGraph -genericDecl=[int,int] -factory=generateSyncedHashGraph
-// //go:generate go run interfaceTest.go -type=HashGraph -category=dynamic -interface=UndirectedGraph -genericDecl=[int,int] -factory=generateHashGraph
-// //go:generate go run interfaceTest.go -type=SyncedHashGraph -category=dynamic -interface=UndirectedGraph -genericDecl=[int,int] -factory=generateSyncedHashGraph
 
 func generateHashGraph(
 	capacity int,
 ) HashGraph[int, int, widgets.BuiltinInt, widgets.BuiltinInt] {
-	v, _ := NewHashGraph[int, int, widgets.BuiltinInt, widgets.BuiltinInt](
-		capacity,
-		capacity,
-	)
+	v, _ := NewHashGraph[
+		int, int,
+		widgets.BuiltinInt, widgets.BuiltinInt,
+	](capacity, capacity)
 	return v
 }
 
 func generateSyncedHashGraph(
 	capacity int,
 ) SyncedHashGraph[int, int, widgets.BuiltinInt, widgets.BuiltinInt] {
-	v, _ := NewSyncedHashGraph[int, int, widgets.BuiltinInt, widgets.BuiltinInt](
-		capacity,
-		capacity,
-	)
+	v, _ := NewSyncedHashGraph[
+		int, int,
+		widgets.BuiltinInt, widgets.BuiltinInt,
+	]( capacity, capacity)
 	return v
 }
 
 func TestHashGraphEq(t *testing.T) {
 	g1,err:=NewHashGraph[
-		string,
-		int,
-		widgets.BuiltinString,
-		widgets.BuiltinInt,
+		string, int,
+		widgets.BuiltinString, widgets.BuiltinInt,
 	](0,0)
 	test.Nil(err,t)
 	g2,err:=NewHashGraph[
-		string,
-		int,
-		widgets.BuiltinString,
-		widgets.BuiltinInt,
+		string, int,
+		widgets.BuiltinString, widgets.BuiltinInt,
 	](0,0)
 	test.Nil(err,t)
 
@@ -73,10 +67,8 @@ func TestHashGraphEq(t *testing.T) {
 
 func TestHashGraphLt(t *testing.T) {
 	g,err:=NewHashGraph[
-		string,
-		int,
-		widgets.BuiltinString,
-		widgets.BuiltinInt,
+		string, int,
+		widgets.BuiltinString, widgets.BuiltinInt,
 	](0,0)
 	test.Nil(err,t)
 	test.Panics(
@@ -89,17 +81,13 @@ func TestHashGraphLt(t *testing.T) {
 
 func TestHashGraphHash(t *testing.T){
 	g1,err:=NewHashGraph[
-		string,
-		int,
-		widgets.BuiltinString,
-		widgets.BuiltinInt,
+		string, int,
+		widgets.BuiltinString, widgets.BuiltinInt,
 	](0,0)
 	test.Nil(err,t)
 	g2,err:=NewHashGraph[
-		string,
-		int,
-		widgets.BuiltinString,
-		widgets.BuiltinInt,
+		string, int,
+		widgets.BuiltinString, widgets.BuiltinInt,
 	](0,0)
 	test.Nil(err,t)
 
@@ -132,10 +120,8 @@ func TestHashGraphHash(t *testing.T){
 
 func TestHashGraphZero(t *testing.T) {
 	g1,err:=NewHashGraph[
-		string,
-		int,
-		widgets.BuiltinString,
-		widgets.BuiltinInt,
+		string, int,
+		widgets.BuiltinString, widgets.BuiltinInt,
 	](0,0)
 	test.Nil(err,t)
 

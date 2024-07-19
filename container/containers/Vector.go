@@ -518,6 +518,29 @@ func (v *SyncedVector[T, U]) Pop(val T) int {
 	return v.Vector.popSequentialImpl(&val, containerTypes.PopAll)
 }
 
+// Description: PopPntr will remove all occurrences of val in the vector. All
+// equality comparisons are performed by the generic U widget type that the
+// vector was initialized with.
+//
+// Time Complexity: O(n)
+func (v *Vector[T, U])PopPntr(val *T) int {
+	v.Lock()
+	defer v.Unlock()
+	return v.popSequentialImpl(val,containerTypes.PopAll)
+}
+
+// Description: Places a write lock on the underlying vector and then calls the
+// underlying vectors [Vector.PopPntr] implementation method.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])PopPntr(val *T) int {
+	v.Lock()
+	defer v.Unlock()
+	return v.Vector.popSequentialImpl(val,containerTypes.PopAll)
+}
+
 // Description: PopSequential will remove the first num occurrences of val in
 // the vector. All equality comparisons are performed by the generic U widget
 // type that the vector was initialized with. If num is <=0 then no values will
@@ -1164,7 +1187,7 @@ func (v *SyncedVector[T, U]) Intersection(
 // possible union sizes before reallocating. This means that there should be at
 // most 1 reallocation beyond this initial allocation, and that additional
 // allocation should only occur when the length of the union is greater than the
-// average length of the minumum and maximum possible union sizes. This logic is
+// average length of the minimum and maximum possible union sizes. This logic is
 // predicated on the fact that unions will likely be much smaller than the
 // original vectors.
 //

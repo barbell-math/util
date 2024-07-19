@@ -11,7 +11,6 @@ type ReadDirectedGraph[V any, E any] interface {
 	containerTypes.ReadGraphOps[V, E]
 	containerTypes.Comparisons[
 		containerTypes.GraphComparisonsConstraint[V, E],
-		V,
 		E,
 	]
 	containerTypes.KeyedComparisons[
@@ -19,25 +18,6 @@ type ReadDirectedGraph[V any, E any] interface {
 		V,
 		E,
 	]
-	containerTypes.ReadDirectedGraphOps[V, E]
-}
-
-// An interface that only allows read operations in an undirected graph.
-type ReadUndirectedGraph[V any, E any] interface {
-	containerTypes.RWSyncable
-	containerTypes.Addressable
-	containerTypes.ReadGraphOps[V, E]
-	containerTypes.Comparisons[
-		containerTypes.GraphComparisonsConstraint[V, E],
-		V,
-		E,
-	]
-	containerTypes.KeyedComparisons[
-		containerTypes.GraphComparisonsConstraint[V, E],
-		V,
-		E,
-	]
-	containerTypes.ReadUndirectedGraphOps[V, E]
 }
 
 // An interface that only allows write operations on a directed graph.
@@ -45,31 +25,17 @@ type WriteDirectedGraph[V any, E any] interface {
 	containerTypes.RWSyncable
 	containerTypes.Clear
 	containerTypes.WriteGraphOps[V, E]
-	containerTypes.WriteDirectedGraphOps[V, E]
 	containerTypes.DeleteGraphOps[V, E]
 	containerTypes.DeleteDirectedGraphOps[V, E]
-}
-
-// An interface that only allows write operations on an undirected graph.
-type WriteUndirectedGraph[V any, E any] interface {
-	containerTypes.RWSyncable
-	containerTypes.Clear
-	containerTypes.WriteGraphOps[V, E]
-	containerTypes.WriteUndirectedGraphOps[V, E]
-	containerTypes.DeleteGraphOps[V, E]
-	containerTypes.DeleteUndirectedGraphOps[V, E]
+	containerTypes.SetOperations[
+		containerTypes.GraphComparisonsConstraint[V, E],
+		V,
+	]
 }
 
 // An interface that represents a directed graph with no restrictions on reading
 // or writing.
 type DirectedGraph[V any, E any] interface {
 	ReadDirectedGraph[V, E]
-	WriteDirectedGraph[V, E]
-}
-
-// An interface that represents an undirected graph with no restrictions on
-// reading or writing.
-type UndirectedGraph[V any, E any] interface {
-	ReadUndirectedGraph[V, E]
 	WriteDirectedGraph[V, E]
 }

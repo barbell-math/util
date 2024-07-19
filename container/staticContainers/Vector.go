@@ -12,7 +12,6 @@ type ReadVector[V any] interface {
 	containerTypes.ReadKeyedOps[int, V]
 	containerTypes.Comparisons[
 		containerTypes.ComparisonsOtherConstraint[V],
-		int,
 		V,
 	]
 	containerTypes.KeyedComparisons[
@@ -37,6 +36,10 @@ type WriteVector[V any] interface {
 	containerTypes.DeleteKeyedOps[int, V]
 	containerTypes.DeleteSequentialOps[int, V]
 	containerTypes.DeleteKeyedSequentialOps[int, V]
+	containerTypes.SetOperations[
+		containerTypes.ComparisonsOtherConstraint[V],
+		V,
+	]
 }
 
 // An interface that represents a vector with no restrictions on reading or

@@ -72,18 +72,6 @@ type LastElemWrite[V any] interface {
 type WriteGraphOps[V any, E any] interface {
 	AddEdges(e ...E) error
 	AddVertices(v ...V) error
-}
-
-// An interface that enforces implementaiton of write-only, undirected, graph
-// structure operations.
-type WriteUndirectedGraphOps[V any, E any] interface {
-	LinkUndirected(from V, to V, e E) error
-	LinkUndirectedPntr(from *V, to *V, e *E) error
-}
-
-// An interface that enforces implementaiton of write-only, directed, graph
-// structure operations.
-type WriteDirectedGraphOps[V any, E any] interface {
 	Link(from V, to V, e E) error
 	LinkPntr(from *V, to *V, e *E) error
 }

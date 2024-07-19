@@ -1,8 +1,10 @@
 package containers
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/test"
 )
@@ -69,4 +71,109 @@ func TestHashSetZero(t *testing.T) {
 	s1.AppendUnique(0, 1, 2, 3, 4)
 	s1.Zero(&s1)
 	test.Eq(0, s1.Length(), t)
+}
+
+func getHashesAffectedByPopHelper(
+	setVals iter.Iter[int],
+	popVal int,
+	initialMap map[HashSetHash]int,
+	res map[OldHashSetHash]NewHashSetHash,
+	t *testing.T,
+) {
+	s1,_:=NewHashSet[int, badBuiltinInt2](0)
+	setVals.ForEach(func(index, val int) (iter.IteratorFeedback, error) {
+		s1.AppendUnique(val)
+		return iter.Continue, nil
+	})
+	test.MapsMatch[HashSetHash,int](initialMap, s1.internalHashSetImpl, t)
+	vals,ok:=s1.getHashesAffectedByPop(&popVal)
+	test.True(ok,t)
+	fmt.Println(popVal)
+	fmt.Println(s1.internalHashSetImpl)
+	s1.Pop(popVal)
+	fmt.Println(s1.internalHashSetImpl)
+	fmt.Println(vals)
+	test.MapsMatch[OldHashSetHash, NewHashSetHash](res,vals,t)
+}
+func TestGetHashesAffectedByPop(t *testing.T) {
+	initialMap:=map[HashSetHash]int{}
+	for i:=0; i<8; i++ {
+		initialMap[HashSetHash(i)]=i
+	}
+	for i:=0; i<4; i++ {
+		getHashesAffectedByPopHelper(
+			iter.Range[int](0,8,1),
+			i,
+			initialMap,
+			map[OldHashSetHash]NewHashSetHash{
+				4: NewHashSetHash(i),
+				5: 4,
+				6: 5,
+				7: 6,
+			},
+			t,
+		)
+	}
+	for i:=4; i<8; i++ {
+		expRes:=map[OldHashSetHash]NewHashSetHash{}
+		for j:=i; j<7; j++ {
+			expRes[OldHashSetHash(j+1)]=NewHashSetHash(j)
+		}
+		getHashesAffectedByPopHelper(
+			iter.Range[int](0,8,1),
+			i,
+			initialMap,
+			expRes,
+			t,
+		)
+	}
+	getHashesAffectedByPopHelper(
+		iter.SliceElems[int]([]int{0,2,3,4,5,6,7}),
+		4,
+		map[HashSetHash]int{
+			0: 0,
+			1: 4,
+			2: 2,
+			3: 3,
+			4: 5,
+			5: 6,
+			6: 7,
+		},
+		map[OldHashSetHash]NewHashSetHash{
+			4: 1,
+			5: 4,
+			6: 5,
+		},
+		t,
+	)
+	getHashesAffectedByPopHelper(
+		iter.SliceElems[int]([]int{0,1,2,5,6,7}),
+		0,
+		map[HashSetHash]int{
+			0: 0,
+			1: 1,
+			2: 2,
+			3: 5,
+			4: 6,
+			5: 7,
+		},
+		map[OldHashSetHash]NewHashSetHash{},
+		t,
+	)
+	getHashesAffectedByPopHelper(
+		iter.SliceElems[int]([]int{0,4,8,7,11}),
+		0,
+		map[HashSetHash]int{
+			0: 0,
+			1: 4,
+			2: 8,
+			3: 7,
+			4: 11,
+		},
+		map[OldHashSetHash]NewHashSetHash{
+			1: 0,
+			2: 1,
+		},
+		t,
+	)
 }

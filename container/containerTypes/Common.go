@@ -43,13 +43,18 @@ type StaticCapacity interface {
 	Full() bool
 }
 
-// An interface that defines what value-only comparisons can be performed on a
+// An interface that defines what set-wise operations can be performed on a 
 // container.
-type Comparisons[RI any, K any, V any] interface {
-	UnorderedEq(other RI) bool
+type SetOperations[RI any, V any] interface {
 	Intersection(l RI, r RI)
 	Union(l RI, r RI)
 	Difference(l RI, r RI)
+}
+
+// An interface that defines what value-only comparisons can be performed on a
+// container.
+type Comparisons[RI any, V any] interface {
+	UnorderedEq(other RI) bool
 	IsSuperset(other RI) bool
 	IsSubset(other RI) bool
 }

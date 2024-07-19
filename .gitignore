@@ -1,2 +1,5 @@
 *.vim
 *.exe
+
+# Do not include any generated code
+TypeAliasPassThroughWidget_*_to_*.go

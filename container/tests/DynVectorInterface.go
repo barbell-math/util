@@ -665,6 +665,56 @@ func DynVectorInterfacePop(
 	}
 }
 
+func dynVectorPopPntrHelper(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	l int,
+	t *testing.T,
+) {
+	// fmt.Println("Permutation: l: ",l," num: ",num)
+	container := factory(0)
+	for i := 0; i < l; i++ {
+		if i%4 == 0 {
+			container.Append(-1)
+		} else {
+			container.Append(i)
+		}
+	}
+	// fmt.Println("Init:   ",v)
+	tmp:=-1
+	n := container.PopPntr(&tmp)
+	exp := factory(0)
+	cntr := 0
+	for i := 0; i < l; i++ {
+		if i%4 != 0 {
+			exp.Append(i)
+		} else {
+			cntr++
+		}
+	}
+	test.Eq(exp.Length(), container.Length(), t)
+	test.Eq(cntr, n, t)
+	// fmt.Println("EXP:    ",exp)
+	// fmt.Println("Final:  ",v)
+	for i := 0; i < container.Length(); i++ {
+		iterV, found := container.Get(i)
+		expIterV, foundExp := exp.Get(i)
+		test.Nil(found, t)
+		test.Nil(foundExp, t)
+		test.Eq(expIterV, iterV, t)
+	}
+}
+
+// Tests the PopPntr method functionality of a dynamic vector.
+func DynVectorInterfacePopPntr(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	for i := 0; i < 13; i++ {
+		dynVectorPopPntrHelper(factory, i, t)
+	}
+}
+
+
 // Tests the Delete method functionality of a dynamic vector.
 func DynVectorInterfaceDelete(
 	factory func(capacity int) dynamicContainers.Vector[int],

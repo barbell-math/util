@@ -3,6 +3,7 @@ package containerTypes
 // An interface that enforces implementation of delete-only, value-only, operations.
 type DeleteOps[K any, V any] interface {
 	Pop(v V) int
+	PopPntr(v *V) int
 }
 
 // An interface that enforces implementation of delete-only, value-only,
@@ -47,13 +48,4 @@ type DeleteDirectedGraphOps[V any, E any] interface {
 	DeleteLinkPntr(from *V, to *V, e *E) error
 	DeleteLinks(from V, to V) error
 	DeleteLinksPntr(from *V, to *V) error
-}
-
-// An interface that enforces implementaiton of delete-only, undirected, graph
-// structure, operations.
-type DeleteUndirectedGraphOps[V any, E any] interface {
-	DeleteUndirectedLink(from V, to V, e E) error
-	DeleteUndirectedLinkPntr(from *V, to *V, e *E) error
-	DeleteUndirectedLinks(from V, to V) error
-	DeleteUndirectedLinksPntr(from *V, to *V) error
 }

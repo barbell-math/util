@@ -53,11 +53,11 @@ func main() {
 	VALS.CapType = fmt.Sprintf("%s%s", strings.ToUpper(VALS.CapType)[:1], VALS.CapType[1:])
 
 	if VALS.ShowInfo {
-		fmt.Println("Making widget for type ", VALS.Type, " using the below options.")
+		fmt.Println("Making widget for type", VALS.Type, "using the below options.")
 		fmt.Println("Recieved the following values:")
-		fmt.Println("  Package: ", VALS.Package)
-		fmt.Println("  Type: ", VALS.Type)
-		fmt.Println("  CapType: ", VALS.CapType)
+		fmt.Println("\tPackage: ", VALS.Package)
+		fmt.Println("\tType: ", VALS.Type)
+		fmt.Println("\tCapType: ", VALS.CapType)
 	}
 
 	fName := fmt.Sprintf("Builtin%s.go", VALS.CapType)
