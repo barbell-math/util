@@ -11,6 +11,9 @@ import (
 	"github.com/barbell-math/util/container/containerTypes"
 )
 
+//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=edgeHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
+//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=vertexHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
+
 type (
 	edgeHash HashSetHash
 	vertexHash HashSetHash
@@ -58,50 +61,42 @@ type (
 )
 
 func (_ *graphLink) Eq(l *graphLink, r *graphLink) bool {
-	hw := widgets.BuiltinHash{}
-	return (hw.Eq((*hash.Hash)(&l.A), (*hash.Hash)(&r.A)) &&
-		hw.Eq((*hash.Hash)(&l.B), (*hash.Hash)(&r.B)))
+	return l.A.Eq(&l.A, &r.A) && l.B.Eq(&l.B,&r.B)
 }
 func (_ *graphLink) Lt(l *graphLink, r *graphLink) bool {
-	hw := widgets.BuiltinHash{}
-	return (hw.Lt((*hash.Hash)(&l.A), (*hash.Hash)(&r.A)) &&
-		hw.Lt((*hash.Hash)(&l.B), (*hash.Hash)(&r.B)))
+	return l.A.Lt(&l.A, &r.A) && l.B.Lt(&l.B,&r.B)
 }
 func (_ *graphLink) Hash(other *graphLink) hash.Hash {
-	return (hash.Hash(other.A)).Combine(hash.Hash(other.B))
+	return other.A.Hash(&other.A).Combine(other.B.Hash(&other.B))
 }
 func (_ *graphLink) Zero(other *graphLink) {
-	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
+	*other = graphLink{}
 }
 
 func (_ *vertexOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
-	hw := widgets.BuiltinHash{}
-	return hw.Eq((*hash.Hash)(&l.B), (*hash.Hash)(&r.B))
+	return l.B.Eq(&l.B,&r.B)
 }
 func (_ *vertexOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
-	hw := widgets.BuiltinHash{}
-	return hw.Lt((*hash.Hash)(&l.B), (*hash.Hash)(&r.B))
+	return l.B.Lt(&l.B,&r.B)
 }
 func (_ *vertexOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
-	return hash.Hash(other.B)
+	return other.B.Hash(&other.B)
 }
 func (_ *vertexOnlyGraphLinkWidget) Zero(other *graphLink) {
-	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
+	*other = graphLink{}
 }
 
 func (_ *edgeOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
-	hw := widgets.BuiltinHash{}
-	return hw.Eq((*hash.Hash)(&l.A), (*hash.Hash)(&r.A))
+	return l.A.Eq(&l.A,&r.A)
 }
 func (_ *edgeOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
-	hw := widgets.BuiltinHash{}
-	return hw.Lt((*hash.Hash)(&l.A), (*hash.Hash)(&r.A))
+	return l.A.Lt(&l.A,&r.A)
 }
 func (_ *edgeOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
-	return hash.Hash(other.A)
+	return other.A.Hash(&other.A)
 }
 func (_ *edgeOnlyGraphLinkWidget) Zero(other *graphLink) {
-	*other = graphLink{A: edgeHash(0), B: vertexHash(0)}
+	*other = graphLink{}
 }
 
 // Creates a new hash graph initialized with enough memory to hold the specified
@@ -120,6 +115,21 @@ func NewHashGraph[
 	if numEdges < 0 {
 		return HashGraph[V, E, VI, EI]{}, getSizeError(numEdges)
 	}
+
+	// rv:=HashGraph[V,E,VI,EI]{}
+	// em,err:=NewHookedHashSet[E,EI](&rv,numEdges)
+	// if err!=nil {
+	// 	return HashGraph[V, E, VI, EI]{}, err
+	// }
+	// vm,err:=NewHookedHashSet[V,VI](&rv,numVertices)
+	// if err!=nil {
+	// 	return HashGraph[V, E, VI, EI]{}, err
+	// }
+	// rv.edges=em
+	// rv.vertices=vm
+	// rv.graph=make(internalHashGraphImpl, numVertices)
+	// return rv
+
 	em := make(map[edgeHash]E, numEdges)
 	vm := make(map[vertexHash]V, numVertices)
 	g := make(internalHashGraphImpl, numVertices)
@@ -162,6 +172,15 @@ func (g *HashGraph[V, E, VI, EI]) ToSynced() SyncedHashGraph[V,E,VI,EI] {
 		RWMutex: &sync.RWMutex{},
 		HashGraph: *g,
 	}
+}
+
+func (g *HashGraph[V, E, VI, EI])addOp(hashLoc HashSetHash) {
+}
+func (g *HashGraph[V, E, VI, EI])deleteOp(
+	updatedHashes map[OldHashSetHash]NewHashSetHash,
+) {
+}
+func (g *HashGraph[V, E, VI, EI])clearOp() {
 }
 
 // A empty pass through function that performs no action. Needed for the

@@ -37,6 +37,20 @@ func NewHookedHashSet[T any, U widgets.WidgetInterface[T]](
 	}, nil
 }
 
+func NewSyncedHookedHashSet[T any, U widgets.WidgetInterface[T]](
+	hooks HashSetHooks,
+	size int,
+) (SyncedHookedHashSet[T,U],error) {
+	hs,err:=NewSyncedHashSet[T,U](size)
+	if err!=nil {
+		return SyncedHookedHashSet[T, U]{}, err
+	}
+	return SyncedHookedHashSet[T, U]{
+		SyncedHashSet: hs,
+		hooks: hooks,
+	}, nil
+}
+
 func (h *HookedHashSet[T, U])GetFromHash(internalHash HashSetHash) (T,error) {
 	if v,ok:=h.HashSet.internalHashSetImpl[internalHash]; ok {
 		return v,nil
@@ -47,7 +61,7 @@ func (h *HookedHashSet[T, U])GetFromHash(internalHash HashSetHash) (T,error) {
 
 func (h *HookedHashSet[T, U])AppendUnique(vals ...T) error {
 	for _,v:=range(vals) {
-		h.AppendUnique(v)
+		h.HashSet.AppendUnique(v)
 		if vHash,ok:=h.getHashPosition(&v); ok {
 			h.hooks.addOp(vHash)
 		}

@@ -52,8 +52,8 @@ func main() {
 	}
 	VALS.CapType = fmt.Sprintf("%s%s", strings.ToUpper(VALS.CapType)[:1], VALS.CapType[1:])
 
+	fmt.Println("Making widget for type %-30s\n", VALS.Type)
 	if VALS.ShowInfo {
-		fmt.Println("Making widget for type", VALS.Type, "using the below options.")
 		fmt.Println("Recieved the following values:")
 		fmt.Println("\tPackage: ", VALS.Package)
 		fmt.Println("\tType: ", VALS.Type)
