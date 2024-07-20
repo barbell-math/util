@@ -101,12 +101,16 @@ func TestWrapAroundIntGetProperIndex(t *testing.T) {
 //go:generate go run interfaceTest.go -type=CircularBuffer -category=static -interface=Queue -genericDecl=[int] -factory=generateCircularBuffer
 //go:generate go run interfaceTest.go -type=SyncedCircularBuffer -category=static -interface=Queue -genericDecl=[int] -factory=generateSyncedCircularBuffer
 
-func generateCircularBuffer(capacity int) CircularBuffer[int, widgets.BuiltinInt] {
+func generateCircularBuffer(
+	capacity int,
+) CircularBuffer[int, widgets.BuiltinInt] {
 	c, _ := NewCircularBuffer[int, widgets.BuiltinInt](capacity)
 	return c
 }
 
-func generateSyncedCircularBuffer(capacity int) SyncedCircularBuffer[int, widgets.BuiltinInt] {
+func generateSyncedCircularBuffer(
+	capacity int,
+) SyncedCircularBuffer[int, widgets.BuiltinInt] {
 	c, _ := NewSyncedCircularBuffer[int, widgets.BuiltinInt](capacity)
 	return c
 }

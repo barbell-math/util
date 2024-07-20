@@ -4,6 +4,7 @@ package containers
 import (
 	"fmt"
 
+	"github.com/barbell-math/util/algo/hash"
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
@@ -83,10 +84,22 @@ func getSizeError(size int) error {
 }
 
 func getKeyError[K any](k *K) error {
-	return customerr.Wrap(
+	return customerr.WrapValueList(
 		containerTypes.KeyError,
-		"The supplied key (%v) was not found in the container.",
-		*k,
+		"The supplied key was not found in the container.",
+		[]customerr.WrapListVal{
+			{ItemName: "Key", Item: *k},
+		},
+	)
+}
+
+func getValueError[V any](v *V) error {
+	return customerr.WrapValueList(
+		containerTypes.ValueError,
+		"The supplied value was not found in the container.",
+		[]customerr.WrapListVal{
+			{ItemName: "Value", Item: *v},
+		},
 	)
 }
 
@@ -100,11 +113,7 @@ func getFullError(maxSize int) error {
 
 func getIndexOutOfBoundsError(idx int, upper int, lower int) error {
 	return customerr.AppendError(
-		customerr.Wrap(
-			containerTypes.KeyError,
-			"The supplied key (%d) was not found in the container.",
-			idx,
-		),
+		getKeyError[int](&idx),
 		customerr.Wrap(
 			customerr.ValOutsideRange,
 			"Index must be >=%d and < %d. Supplied idx: %d",
@@ -114,10 +123,12 @@ func getIndexOutOfBoundsError(idx int, upper int, lower int) error {
 }
 
 func getDuplicateValueError[T any](v T) error {
-	return customerr.Wrap(
+	return customerr.WrapValueList(
 		containerTypes.Duplicate,
-		"The supplied value (%v) is already in the container.",
-		v,
+		"The supplied value is already in the container.",
+		[]customerr.WrapListVal{
+			{ItemName: "Value", Item: v},
+		},
 	)
 }
 
@@ -130,21 +141,59 @@ func getStartEndIndexError(start int, end int) error {
 }
 
 func getVertexError[V any](v *V) error {
-	return customerr.AppendError(
-		customerr.Wrap(
-			customerr.InvalidValue,
-			"The supplied vertex was not found.",
-		),
-		getKeyError[V](v),
+	return customerr.WrapValueList(
+		containerTypes.ValueError,
+		"The supplied vertex was not found in the container.",
+		[]customerr.WrapListVal{
+			{ItemName: "Vertex", Item: *v},
+		},
 	)
 }
 
 func getEdgeError[E any](e *E) error {
+	return customerr.WrapValueList(
+		containerTypes.ValueError,
+		"The supplied edge was not found in the container.",
+		[]customerr.WrapListVal{
+			{ItemName: "Edge", Item: *e},
+		},
+	)
+}
+
+func getUpdateViolationHashError[T any](
+	orig *T,
+	updated *T,
+	origHash hash.Hash,
+	newHash hash.Hash,
+) error {
 	return customerr.AppendError(
-		customerr.Wrap(
+		containerTypes.UpdateViolation,
+		customerr.WrapValueList(
 			customerr.InvalidValue,
-			"The supplied edge was not found.",
+			"Updating the original value changed it's hash value.",
+			[]customerr.WrapListVal{
+				{ItemName: "Orig Value", Item: *orig},
+				{ItemName: "New Value ", Item: *updated},
+				{ItemName: "Orig Hash ", Item: origHash},
+				{ItemName: "New Hash  ", Item: newHash},
+			},
 		),
-		getKeyError[E](e),
+	)
+}
+
+func getUpdateViolationEqError[T any](
+	orig *T,
+	updated *T,
+) error {
+	return customerr.AppendError(
+		containerTypes.UpdateViolation,
+		customerr.WrapValueList(
+			customerr.InvalidValue,
+			"Updating the original value changed it's identity.",
+			[]customerr.WrapListVal{
+				{ItemName: "Orig Value", Item: *orig},
+				{ItemName: "New Value ", Item: *updated},
+			},
+		),
 	)
 }

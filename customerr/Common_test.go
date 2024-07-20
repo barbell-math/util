@@ -31,6 +31,20 @@ func TestWrap(t *testing.T) {
 	test.Eq(fmt.Sprintf("%s\n  |- 100", ValOutsideRange.Error()), e.Error(), t)
 }
 
+func TestWrapValueList(t *testing.T) {
+	e:=WrapValueList(ValOutsideRange, "Val outside range", []WrapListVal{
+		{ItemName: "value", Item: 10},
+	})
+	test.Eq(
+		fmt.Sprintf(
+			"%s\n  |- Description: Val outside range\n  |- value (int): 10",
+			ValOutsideRange.Error(),
+		),
+		e.Error(),
+		t,
+	)
+}
+
 func TestUnwrap(t *testing.T) {
 	e := Wrap(ValOutsideRange, "%d", 100)
 	test.Eq(ValOutsideRange, Unwrap(e), t)

@@ -21,7 +21,7 @@ type (
 	// array as operations are performed making it so no allocations are ever
 	// performed beyond the initial creation of the underlying array.
 	CircularBuffer[T any, U widgets.WidgetInterface[T]] struct {
-		// By definiing the struct this way this vector will have very similar
+		// By definiing the struct this way this circular buffer will have very similar
 		// behavior to a slice, where this is struct acts as a header that
 		// points to the actual data.
 
@@ -423,7 +423,7 @@ func (c *CircularBuffer[T, U]) PeekBack() (T, error) {
 // Description: Places a read lock on the underlying circular buffer and then
 // attempts to return the value at index len(v)-1 if one is present. Exhibits
 // the same behavior as the [circular buffer.PeekBack] method. The underlying
-// [Vector.PeekBack] method is not called to avoid copying the value twice,
+// [circular buffer.PeekBack] method is not called to avoid copying the value twice,
 // which could be inefficient with a large type for the T generic.
 //
 // Lock Type: Read
@@ -721,6 +721,75 @@ func (c *CircularBuffer[T, U]) AppendUnique(vals ...T) error {
 	return rv
 }
 
+// Description: updates the supplied value in the underlying circular buffer set,
+// assuming that it is present in the circular buffer already. The hash must not
+// change from the update and the updated value must compare equal to the
+// original value. If these rules are broken then an update violation error will
+// be returned. This method is useful when you are storing struct values and
+// want to update a field that is not utilized when calculating the hash and is
+// also ignored when comparing for equality. This assumes congruency is present
+// between the hash and equality methods defined in the U widget. If the value
+// is not found then a key error will be returned.
+//
+// Time Complexity: O(n)
+func (c *CircularBuffer[T, U])UpdateUnique(
+	orig T,
+	updateOp func(orig *T),
+) error {
+	return c.updateUniqueOp(&orig, updateOp)
+}
+
+// Description: Places a write lock on the underlying circular buffer and then
+// calls the underlying circular buffers [CircularBuffer.UpdateUnique]
+// implementation method. The [CircularBuffer.UpdateUnique] method is not called
+// directly to avoid copying the supplied value, which could be expensive with a
+// large type for the T generic.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (c *SyncedCircularBuffer[T, U])UpdateUnique(
+	orig T, 
+	updateOp func(orig *T),
+) error {
+	c.Lock()
+	defer c.Unlock()
+	return c.updateUniqueOp(&orig,updateOp)
+}
+
+func (c *CircularBuffer[T, U])updateUniqueOp(
+	orig *T,
+	updateOp func(orig *T),
+) error {
+	idx:=-1
+	found:=false
+	w := widgets.Widget[T, U]{}
+	for i := 0; i < c.numElems && !found; i++ {
+		if found=w.Eq(
+			orig,
+			&c.vals[c.start.GetProperIndex(i, len(c.vals))],
+		); found {
+			idx=i
+		}
+	}
+	if !found {
+		return getValueError[T](orig)
+	}
+	updateOp(orig)
+	newHash:=w.Hash(orig)
+	oldHash:=w.Hash(&c.vals[idx])
+	if newHash!=oldHash {
+		return getUpdateViolationHashError[T](
+			&c.vals[idx], orig, hash.Hash(oldHash), hash.Hash(newHash),
+		)
+	}
+	if !w.Eq(&c.vals[idx],orig) {
+		return getUpdateViolationEqError[T](&c.vals[idx], orig)
+	}
+	c.vals[idx]=*orig
+	return nil
+}
+
 // Description: Places a write lock on the underlying circular buffer and then
 // calls the underlying circular buffer [CircularBuffer.AppendUnique]
 // implementaion method. The [CircularBuffer.AppendUnique] method is not called
@@ -878,7 +947,7 @@ func (c *CircularBuffer[T, U]) insertSequentialMoveBack(idx int, v []T, maxVals 
 }
 
 // Description: Returns and removes the element at the front of the circular
-// buffer. Returns an error if the vector has no elements.
+// buffer. Returns an error if the circular buffer has no elements.
 //
 // Time Complexity: O(n)
 func (c *CircularBuffer[T, U]) PopFront() (T, error) {
@@ -915,7 +984,7 @@ func (c *CircularBuffer[T, U]) popFrontImpl(rv *T) error {
 }
 
 // Description: Returns and removes the element at the back of the circular
-// buffer. Returns an error if the vector has no elements.
+// buffer. Returns an error if the circular buffer has no elements.
 //
 // Time Complexity: O(1)
 func (c *CircularBuffer[T, U]) PopBack() (T, error) {
@@ -1608,7 +1677,7 @@ func (_ *SyncedCircularBuffer[T, U]) Eq(
 }
 
 // A function that implements the [algo.widget.WidgetInterface] less than
-// operation on circular buffers. The l and r vectors will be compared
+// operation on circular buffers. The l and r circular buffers will be compared
 // lexographically.
 func (_ *CircularBuffer[T, U]) Lt(
 	l *CircularBuffer[T, U],
@@ -1635,7 +1704,7 @@ func (_ *CircularBuffer[T, U]) Lt(
 }
 
 // A function that implements the [algo.widget.WidgetInterface] less than
-// operation on circular buffers. The l and r vectors will be compared
+// operation on circular buffers. The l and r circular buffers will be compared
 // lexographically. Read locks are placed on l and r before calling the
 // underlying circular buffers [CircularBuffer.Lt] method.
 func (_ *SyncedCircularBuffer[T, U]) Lt(

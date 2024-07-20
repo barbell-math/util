@@ -420,6 +420,57 @@ func (v *Vector[T, U]) AppendUnique(vals ...T) error {
 	return nil
 }
 
+// Description: updates the supplied value in the underlying hash set, assuming
+// that it is present in the hash set already. The hash must not change from the
+// update and the updated value must compare equal to the original value. If
+// these rules are broken then an update violation error will be returned. This 
+// method is useful when you are storing struct values and want to update a 
+// field that is not utilized when calculating the hash and is also ignored
+// when comparing for equality. This assumes congruency is present between the
+// hash and equality methods defined in the U widget. If the value is not found
+// then a key error will be returned.
+//
+// Time Complexity: O(n)
+func (v *Vector[T, U])UpdateUnique(orig T, updateOp func(orig *T)) error {
+	return v.updateUniqueOp(&orig,updateOp)
+}
+
+// Description: Places a write lock on the underlying hash set and then calls
+// the underlying hash sets [HashSet.UpdateUnique] implementation method. The
+// [HashSet.UpdateUnique] method is not called directly to avoid copying the
+// supplied value, which could be expensive with a large type for the T generic.
+//
+// Lock Type: Write
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U])UpdateUnique(orig T, updateOp func(orig *T)) error {
+	v.Lock()
+	defer v.Unlock()
+	return v.Vector.updateUniqueOp(&orig,updateOp)
+}
+
+func (v *Vector[T, U])updateUniqueOp(orig *T, updateOp func(orig *T)) error {
+	w:=widgets.Widget[T,U]{}
+	// TODO - KeyOfPntr and friends
+	idx,found:=v.KeyOf(*orig)
+	if !found {
+		return getValueError[T](orig)
+	}
+	updateOp(orig)
+	newHash:=w.Hash(orig)
+	oldHash:=w.Hash(&(*v)[idx])
+	if newHash!=oldHash {
+		return getUpdateViolationHashError[T](
+			&(*v)[idx], orig, hash.Hash(oldHash), hash.Hash(newHash),
+		)
+	}
+	if !w.Eq(&(*v)[idx],orig) {
+		return getUpdateViolationEqError[T](&(*v)[idx], orig)
+	}
+	(*v)[idx]=*orig
+	return nil
+}
+
 // Description: Places a write lock on the underlying vector and then calls the
 // underlying vectors [Vector.AppendUnique] implementaion method. The
 // [Vector.AppendUnique] method is not called directly to avoid copying the vals

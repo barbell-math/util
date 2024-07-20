@@ -24,10 +24,14 @@ type (
 		flags nfaFlag
 	}
 	alphabetRange[A any, AI widgets.WidgetInterface[A]] containers.HashSet[A,AI]
-	NFA[A any, AI widgets.WidgetInterface[A]] containers.HashGraph[
-		nfaNode, alphabetRange[A,AI],
-		*nfaNode, *alphabetRange[A,AI],
-	]
+	NFA[A any, AI widgets.WidgetInterface[A]] struct {
+		graph containers.HashGraph[
+			nfaNode, alphabetRange[A,AI],
+			*nfaNode, *alphabetRange[A,AI],
+		]
+		source nfaNode
+		sink nfaNode
+	}
 )
 
 const (
@@ -58,18 +62,23 @@ func NewNFA[A any, AI widgets.WidgetInterface[A]]() NFA[A,AI] {
 		nfaNode, alphabetRange[A,AI],
 		*nfaNode, *alphabetRange[A,AI],
 	](0,0)
-	return NFA[A,AI](rv)
+	return NFA[A,AI]{
+		graph: rv,
+		source: nfaNode{id: 0},
+		sink: nfaNode{id: 0},
+	}
 }
 
 func (n NFA[A,AI]) initNFA() {
-	n.Clear()
+	n.graph.Clear()
 	// for k, _ := range n {
 	// 	delete(n, k)
 	// }
-	n.AddVertices(nfaNode{
+	n.graph.AddVertices(nfaNode{
 		id: nfaID(0),
 		flags: nfaSource | nfaSink,
 	})
+	n.sink=nfaNode{id: 0}
 	// n[nfaStart] = nfaNode{
 	// 	flags:       nfaSource | nfaSink,
 	// 	transitions: []basic.Pair[byte, nfaID]{},
@@ -77,7 +86,8 @@ func (n NFA[A,AI]) initNFA() {
 }
 
 func (n NFA[A, AI]) AppendTransition(c byte) {
-	if len(n) == 0 {
+	if n.graph.NumVertices()==0 {
+	// if len(n) == 0 {
 		n.initNFA()
 	}
 	n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {

@@ -895,6 +895,17 @@ func (g *SyncedHashGraph[V, E, VI, EI]) AddEdges(e ...E) error {
 	return g.HashGraph.AddEdges(e...)
 }
 
+func (g *internalHashGraphImpl[V, E, VI, EI])SetEdges(e ...E) error {
+	// g.edges.Set(e...)
+	// for _,iterE:=range(e) {
+	// 	iterEHash,ok:=g.getEdgeHash(&iterE)
+	// 	if !ok {
+	// 		return getKeyError[E](&iterE)
+	// 	}
+	// }
+	return nil
+}
+
 // Description: Adds a vertex to the graph, if it does not already exist
 // according to the hash and equals method on the vertex widget interface. Non-
 // unique vertices will not be added. This function will never return an error.
@@ -916,6 +927,10 @@ func (g *SyncedHashGraph[V, E, VI, EI]) AddVertices(v ...V) error {
 	g.Lock()
 	defer g.Unlock()
 	return g.HashGraph.AddVertices(v...)
+}
+
+func (g *internalHashGraphImpl[V, E, VI, EI]) SetVertices(v ...V) error {
+	return nil
 }
 
 // Description: Adds a link between an existing edge and vertices in the graph.

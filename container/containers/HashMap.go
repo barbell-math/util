@@ -292,6 +292,8 @@ func (m *HashMap[K, V, KI, VI]) Set(kvPairs ...basic.Pair[K, V]) error {
 // method is not called directly to avoid copying the vals varargs twice, which
 // could be expensive with a large types for the K or V generics or a large
 // number of values.
+// Note that the key will be updated as well. It will only be updated if the key
+// can still be found in the map using the KI widgets Eq and Hash functions.
 //
 // Lock Type: Write
 //

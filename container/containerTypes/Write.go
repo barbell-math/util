@@ -6,6 +6,7 @@ import "github.com/barbell-math/util/container/basic"
 // valued, operations.
 type WriteUniqueOps[K any, V any] interface {
 	AppendUnique(vals ...V) error
+	UpdateUnique(orig V, updateOp func(orig *V)) error
 }
 
 // An interface that enforces implementation of write-only, key/value, unique
@@ -72,6 +73,8 @@ type LastElemWrite[V any] interface {
 type WriteGraphOps[V any, E any] interface {
 	AddEdges(e ...E) error
 	AddVertices(v ...V) error
+	SetEdges(e ...E) error
+	SetVertices(v ...V) error
 	Link(from V, to V, e E) error
 	LinkPntr(from *V, to *V, e *E) error
 }

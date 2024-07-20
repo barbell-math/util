@@ -3,6 +3,14 @@ package customerr
 import (
 	"errors"
 	"fmt"
+	"strings"
+)
+
+type (
+	WrapListVal struct {
+		ItemName string
+		Item any
+	}
 )
 
 // Will continue to call the provided operation functions (ops) in the order
@@ -40,6 +48,41 @@ func Wrap(origErr error, fmtStr string, vals ...any) error {
 	fmtStrWithErr := fmt.Sprintf("%%w\n  |- %s", fmtStr)
 	args := []interface{}{origErr}
 	return fmt.Errorf(fmtStrWithErr, append(args, vals...)...)
+}
+
+// Wraps an error with a predetermined format, as shown below,
+//
+//  <original error>
+//    |- <description>
+//    |- value1 name (value1 type): value1
+//    |- value2 name (value2 type): value2
+//
+// This allows for consistent error formatting.
+func WrapValueList(
+	origErr error,
+	description string,
+	valsList []WrapListVal,
+) error {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("%%w\n  |- Description: %s", description))
+	if len(valsList)>0 {
+		sb.WriteByte('\n')
+	}
+	for i,v:=range(valsList) {
+		sb.WriteString(fmt.Sprintf("  |- %s (%T): %+v",v.ItemName,v.Item,v.Item))
+		if i+1<len(valsList) {
+			sb.WriteByte('\n')
+		}
+	}
+	// cntr:=0
+	// for s,v:=range(valsList) {
+	// 	sb.WriteString(fmt.Sprintf("  |- %s (%T): %+v",s,v,v))
+	// 	cntr++
+	// 	if cntr<len(valsList) {
+	// 		sb.WriteByte('\n')
+	// 	}
+	// }
+	return fmt.Errorf(sb.String(), origErr)
 }
 
 // Unwraps an error. A simple helper function to provide a clean error interface

@@ -7,7 +7,6 @@ import (
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
-	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )
 
@@ -385,14 +384,11 @@ func directedGraphLinkHelper(
 	test.Eq(construction.numEdges, container.NumEdges(), t)
 
 	err := container.Link(-1, 0, 0)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 	err = container.Link(0, -1, 0)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 	err = container.Link(0, 0, -1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the Link method functionality of a dynamic directed graph.
@@ -462,14 +458,11 @@ func directedGraphLinkPntrHelper(
 	tmp1 := -1
 	tmp2 := 0
 	err := container.LinkPntr(&tmp1, &tmp2, &tmp2)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 	err = container.LinkPntr(&tmp2, &tmp1, &tmp2)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 	err = container.LinkPntr(&tmp2, &tmp2, &tmp1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the LinkPntr method functionality of a dynamic directed graph.
@@ -681,8 +674,7 @@ func directedGraphOutEdgesHelper(
 	}
 
 	err := container.OutEdges(-1).Consume()
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the OutEdges method functionality of a dynamic directed graph.
@@ -763,8 +755,7 @@ func directedGraphOutEdgePntrsHelper(
 	}
 
 	err := container.OutEdges(-1).Consume()
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the OutEdgePntrs method functionality of a dynamic directed graph.
@@ -849,8 +840,7 @@ func directedGraphOutVerticesHelper(
 	}
 
 	err := container.OutVertices(-1).Consume()
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the OutVertices method functionality of a dynamic directed graph.
@@ -932,8 +922,7 @@ func directedGraphOutVerticePntrsHelper(
 
 	tmp := -1
 	err := container.OutVerticePntrs(&tmp).Consume()
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the OutVerticePntrs method functionality of a dynamic directed graph.
@@ -1035,8 +1024,7 @@ func directedGraphOutEdgesAndVerticesHelper(
 		test.SlicesMatchUnordered[int](outVertices[i], iterOutVertices, t)
 	}
 	err := container.OutVertices(-1).Consume()
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the OutEdgesAndVertices method functionality of a dynamic directed graph.
@@ -1152,8 +1140,7 @@ func directedGraphOutEdgesAndVerticePntrsHelper(
 	}
 
 	err := container.OutVertices(-1).Consume()
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the OutEdgesAndVerticePntrs method functionality of a dynamic directed graph.
@@ -1258,18 +1245,15 @@ func directedGraphEdgesBetweenHelper(
 
 	res, err := container.EdgesBetween(0, -1).Collect()
 	test.SlicesMatchUnordered[int]([]int{}, res, t)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	res, err = container.EdgesBetween(-1, 0).Collect()
 	test.SlicesMatchUnordered[int]([]int{}, res, t)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	res, err = container.EdgesBetween(-1, -1).Collect()
 	test.SlicesMatchUnordered[int]([]int{}, res, t)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the EdgesBetween method functionality of a dynamic directed graph.
@@ -1335,22 +1319,19 @@ func directedGraphEdgesBetweenPntrHelper(
 		container.EdgesBetweenPntr(&tmp1, &tmp2),
 	).Collect()
 	test.SlicesMatchUnordered[int]([]int{}, res, t)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	res, err = iter.PntrToVal[int](
 		container.EdgesBetweenPntr(&tmp2, &tmp1),
 	).Collect()
 	test.SlicesMatchUnordered[int]([]int{}, res, t)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	res, err = iter.PntrToVal[int](
 		container.EdgesBetweenPntr(&tmp2, &tmp2),
 	).Collect()
 	test.SlicesMatchUnordered[int]([]int{}, res, t)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the EdgesBetweenPntr method functionality of a dynamic directed graph.
@@ -1431,16 +1412,13 @@ func directedGraphDeleteLinkHelper(
 	test.Eq(len(construction.links)-len(deleteLinks), container.NumLinks(), t)
 
 	err := container.DeleteLink(-1, 0, 0)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	err = container.DeleteLink(0, -1, 0)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	err = container.DeleteLink(0, 0, -1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteLink method functionality of a dynamic directed graph.
@@ -1507,16 +1485,13 @@ func directedGraphDeleteLinkPntrHelper(
 	tmp1 := 0
 	tmp2 := -1
 	err := container.DeleteLinkPntr(&tmp2, &tmp1, &tmp1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	err = container.DeleteLinkPntr(&tmp1, &tmp2, &tmp1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	err = container.DeleteLinkPntr(&tmp1, &tmp1, &tmp2)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteLinkPntr method functionality of a dynamic directed graph.
@@ -1569,12 +1544,10 @@ func directedGraphDeleteLinksHelper(
 	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteLinks(-1, 0)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	err = container.DeleteLinks(0, -1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteLinks method functionality of a dynamic directed graph.
@@ -1644,12 +1617,10 @@ func directedGraphDeleteLinksPntrHelper(
 	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteLinks(-1, 0)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 
 	err = container.DeleteLinks(0, -1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteLinks method functionality of a dynamic directed graph.
@@ -1722,8 +1693,7 @@ func directedGraphDeleteVertexHelper(
 	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteVertex(-1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteVertex method functionality of a dynamic directed graph.
@@ -1817,8 +1787,7 @@ func directedGraphDeleteVertexPntrHelper(
 
 	tmp := -1
 	err := container.DeleteVertexPntr(&tmp)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteVertexPntr method functionality of a dynamic directed graph.
@@ -1907,8 +1876,7 @@ func directedGraphDeleteEdgeHelper(
 	test.Eq(len(construction.links)-numDeletedLinks, container.NumLinks(), t)
 
 	err := container.DeleteEdge(-1)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteEdge method functionality of a dynamic directed graph.
@@ -1998,8 +1966,7 @@ func directedGraphDeleteEdgePntrHelper(
 
 	tmp := -1
 	err := container.DeleteEdgePntr(&tmp)
-	test.ContainsError(customerr.InvalidValue, err, t)
-	test.ContainsError(containerTypes.KeyError, err, t)
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the DeleteEdgePntr method functionality of a dynamic directed graph.

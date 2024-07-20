@@ -6,6 +6,7 @@ import (
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/staticContainers"
+	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )
 
@@ -318,6 +319,35 @@ func StaticSetInterfaceAppendUnique(
 	}
 	test.ContainsError(containerTypes.Full, container.AppendUnique(-1), t)
 	test.ContainsError(containerTypes.Full, container.AppendUnique(6), t)
+}
+
+// Tests the UpdateUnique method functionality of a static set.
+func StaticSetInterfaceUpdateUnique(
+	factory func(capacity int) staticContainers.Set[int],
+	t *testing.T,
+) {
+	container := factory(5)
+	test.Eq(0, container.Length(), t)
+	for i := 0; i < 5; i++ {
+		err := container.AppendUnique(i)
+		test.Nil(err, t)
+	}
+	for i := 0; i < 5; i++ {
+		test.True(container.Contains(i), t)
+	}
+	for i:=0; i<5; i++ {
+		err:=container.UpdateUnique(i, func(orig *int) {})
+		test.Nil(err,t)
+		test.True(container.Contains(i),t)
+		test.Eq(5,container.Length(),t)
+	}
+	for i:=0; i<5; i++ {
+		err:=container.UpdateUnique(i, func(orig *int) {*orig=*orig+1})
+		test.ContainsError(containerTypes.UpdateViolation, err, t)
+		test.ContainsError(customerr.InvalidValue, err, t)
+	}
+	err:=container.UpdateUnique(6, func(orig *int) {})
+	test.ContainsError(containerTypes.ValueError, err, t)
 }
 
 // Tests the Pop method functionality of a static set.
