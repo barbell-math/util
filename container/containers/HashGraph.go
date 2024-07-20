@@ -37,7 +37,6 @@ type (
 		graph    graphImpl
 	}
 
-	// TODO - try to combine these two structs
 	hashGraphEdges[
 		V any,
 		E any,
