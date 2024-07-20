@@ -869,61 +869,6 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) EdgesBetweenPntr(from *V, to *V) i
 	panic(getNonAddressablePanicText("hash graph"))
 }
 
-// TODO - probably delete
-// func (g *internalHashGraphImpl[V, E, VI, EI])Links() iter.Iter[struct{from V; to V; e E}] {
-// 	type tmpHash struct {
-// 		from vertexHash
-// 		to vertexHash
-// 		e edgeHash
-// 	}
-// 	prevIndex:=-1
-// 	return iter.Map[tmpHash, struct {from, to V; e E}](
-// 		iter.Map[vertexHash, tmpHash](
-// 			iter.MapKeys[vertexHash](g.graph),
-// 			func(index int, val vertexHash,) (tmpHash, error) {
-// 				return struct{from vertexHash; to vertexHash; e edgeHash}{
-// 					from: val,
-// 				}, nil
-// 			},
-// 		).Next(
-// 			func(
-// 				index int,
-// 				val tmpHash,
-// 				status iter.IteratorFeedback,
-// 			) (
-// 				iter.IteratorFeedback,
-// 				tmpHash,
-// 				error,
-// 			) {
-// 				if status==iter.Break {
-// 					return iter.Break, tmpHash{}, nil
-// 				}
-// 				if prevIndex<len(g.graph[val.from]) {
-// 					prevIndex++
-// 					return iter.Continue, tmpHash{
-// 						from: val.from,
-// 						to: g.graph[val.from][prevIndex].B,
-// 						e: g.graph[val.from][prevIndex].A,
-// 					}, nil
-// 				}
-// 				prevIndex=-1
-// 				return iter.Iterate, tmpHash{}, nil
-// 			},
-// 		),
-// 		func(index int, val tmpHash) (struct{from V; to V; e E}, error) {
-// 			return struct{from V; to V; e E}{
-// 				from: g.vertices[val.from],
-// 				to: g.vertices[val.to],
-// 				e: g.edges[val.e],
-// 			}, nil
-// 		},
-// 	)
-// }
-//
-// func (g *internalHashGraphImpl[V, E, VI, EI])LinkPntrs() iter.Iter[struct{from *V; to *V; e *E}] {
-// 	return iter.NoElem[struct{from *V; to *V; e *E}]()
-// }
-
 // Description: Adds edges to the graph without connecting them to any vertices.
 // Duplicate edges will be ignored. This method will never return an error.
 //
