@@ -15,10 +15,10 @@ import (
 //go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=vertexHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
 
 type (
-	edgeHash HashSetHash
+	edgeHash   HashSetHash
 	vertexHash HashSetHash
-	graphLink             basic.Pair[edgeHash, vertexHash]
-	graphImpl map[vertexHash]Vector[graphLink, *graphLink]
+	graphLink  basic.Pair[edgeHash, vertexHash]
+	graphImpl  map[vertexHash]Vector[graphLink, *graphLink]
 
 	// This is used when only the vertex part of a graph edge is pertinent
 	vertexOnlyGraphLinkWidget graphLink
@@ -32,8 +32,8 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		numLinks int
-		edges hashGraphEdges[V,E,VI,EI]
-		vertices hashGraphVertices[V,E,VI,EI]
+		edges    hashGraphEdges[V, E, VI, EI]
+		vertices hashGraphVertices[V, E, VI, EI]
 		graph    graphImpl
 	}
 
@@ -43,8 +43,8 @@ type (
 		VI widgets.WidgetInterface[V],
 		EI widgets.WidgetInterface[E],
 	] struct {
-		HookedHashSet[E,EI]
-		internalHashGraphImpl *internalHashGraphImpl[V,E,VI,EI]
+		HookedHashSet[E, EI]
+		internalHashGraphImpl *internalHashGraphImpl[V, E, VI, EI]
 	}
 
 	hashGraphVertices[
@@ -53,8 +53,8 @@ type (
 		VI widgets.WidgetInterface[V],
 		EI widgets.WidgetInterface[E],
 	] struct {
-		HookedHashSet[V,VI]
-		internalHashGraphImpl *internalHashGraphImpl[V,E,VI,EI]
+		HookedHashSet[V, VI]
+		internalHashGraphImpl *internalHashGraphImpl[V, E, VI, EI]
 	}
 
 	// A type to represent an arbitrary graph with the specified vertex and edge
@@ -68,7 +68,7 @@ type (
 		VI widgets.WidgetInterface[V],
 		EI widgets.WidgetInterface[E],
 	] struct {
-		*internalHashGraphImpl[V,E,VI,EI]
+		*internalHashGraphImpl[V, E, VI, EI]
 	}
 
 	// A synchronized version of HashGraph. All operations will be wrapped in
@@ -86,10 +86,10 @@ type (
 )
 
 func (_ *graphLink) Eq(l *graphLink, r *graphLink) bool {
-	return l.A.Eq(&l.A, &r.A) && l.B.Eq(&l.B,&r.B)
+	return l.A.Eq(&l.A, &r.A) && l.B.Eq(&l.B, &r.B)
 }
 func (_ *graphLink) Lt(l *graphLink, r *graphLink) bool {
-	return l.A.Lt(&l.A, &r.A) && l.B.Lt(&l.B,&r.B)
+	return l.A.Lt(&l.A, &r.A) && l.B.Lt(&l.B, &r.B)
 }
 func (_ *graphLink) Hash(other *graphLink) hash.Hash {
 	return other.A.Hash(&other.A).Combine(other.B.Hash(&other.B))
@@ -99,10 +99,10 @@ func (_ *graphLink) Zero(other *graphLink) {
 }
 
 func (_ *vertexOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
-	return l.B.Eq(&l.B,&r.B)
+	return l.B.Eq(&l.B, &r.B)
 }
 func (_ *vertexOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
-	return l.B.Lt(&l.B,&r.B)
+	return l.B.Lt(&l.B, &r.B)
 }
 func (_ *vertexOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return other.B.Hash(&other.B)
@@ -112,10 +112,10 @@ func (_ *vertexOnlyGraphLinkWidget) Zero(other *graphLink) {
 }
 
 func (_ *edgeOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
-	return l.A.Eq(&l.A,&r.A)
+	return l.A.Eq(&l.A, &r.A)
 }
 func (_ *edgeOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
-	return l.A.Lt(&l.A,&r.A)
+	return l.A.Lt(&l.A, &r.A)
 }
 func (_ *edgeOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return other.A.Hash(&other.A)
@@ -124,44 +124,44 @@ func (_ *edgeOnlyGraphLinkWidget) Zero(other *graphLink) {
 	*other = graphLink{}
 }
 
-func (_ *hashGraphEdges[V,E,VI,EI])addOp(hashLoc HashSetHash) {
+func (_ *hashGraphEdges[V, E, VI, EI]) addOp(hashLoc HashSetHash) {
 	// intentional noop - hashes are not affected by adding values
 }
-func (h *hashGraphEdges[V,E,VI,EI])deleteOp(
+func (h *hashGraphEdges[V, E, VI, EI]) deleteOp(
 	deletedHash HashSetHash,
 	updatedHashes map[OldHashSetHash]NewHashSetHash,
 ) {
 	for iterHash, gNode := range h.internalHashGraphImpl.graph {
-		idx, offset:=0, 0
-		for i,gLink:=range(gNode) {
-			if gLink.A==edgeHash(deletedHash) {
+		idx, offset := 0, 0
+		for i, gLink := range gNode {
+			if gLink.A == edgeHash(deletedHash) {
 				offset++
 				continue
 			}
-			if newHash,ok:=updatedHashes[OldHashSetHash(gLink.A)]; ok {
-				gLink.A=edgeHash(newHash)
+			if newHash, ok := updatedHashes[OldHashSetHash(gLink.A)]; ok {
+				gLink.A = edgeHash(newHash)
 			}
-			gNode[i]=gLink
-			gNode[idx]=gNode[idx+offset]
+			gNode[i] = gLink
+			gNode[idx] = gNode[idx+offset]
 			idx++
 		}
-		gNode.DeleteSequential(idx,gNode.Length())
-		h.internalHashGraphImpl.numLinks-=offset
+		gNode.DeleteSequential(idx, gNode.Length())
+		h.internalHashGraphImpl.numLinks -= offset
 		if len(gNode) == 0 {
 			delete(h.internalHashGraphImpl.graph, iterHash)
 		} else {
-			h.internalHashGraphImpl.graph[iterHash]=gNode
+			h.internalHashGraphImpl.graph[iterHash] = gNode
 		}
 	}
 }
-func (_ *hashGraphEdges[V,E,VI,EI])clearOp() {
+func (_ *hashGraphEdges[V, E, VI, EI]) clearOp() {
 	// intentional noop - no hashes to update after clear
 }
 
-func (_ *hashGraphVertices[V,E,VI,EI])addOp(hashLoc HashSetHash) {
+func (_ *hashGraphVertices[V, E, VI, EI]) addOp(hashLoc HashSetHash) {
 	// intentional noop - hashes are not affected by adding values
 }
-func (h *hashGraphVertices[V,E,VI,EI])deleteOp(
+func (h *hashGraphVertices[V, E, VI, EI]) deleteOp(
 	deletedHash HashSetHash,
 	updatedHashes map[OldHashSetHash]NewHashSetHash,
 ) {
@@ -172,29 +172,29 @@ func (h *hashGraphVertices[V,E,VI,EI])deleteOp(
 	}
 
 	for iterHash, gNode := range h.internalHashGraphImpl.graph {
-		idx, offset:=0, 0
-		for i,gLink:=range(gNode) {
-			if gLink.B==vertexHash(deletedHash) {
+		idx, offset := 0, 0
+		for i, gLink := range gNode {
+			if gLink.B == vertexHash(deletedHash) {
 				offset++
 				continue
 			}
-			if newHash,ok:=updatedHashes[OldHashSetHash(gLink.B)]; ok {
-				gLink.B=vertexHash(newHash)
+			if newHash, ok := updatedHashes[OldHashSetHash(gLink.B)]; ok {
+				gLink.B = vertexHash(newHash)
 			}
-			gNode[i]=gLink
-			gNode[idx]=gNode[idx+offset]
+			gNode[i] = gLink
+			gNode[idx] = gNode[idx+offset]
 			idx++
 		}
-		gNode.DeleteSequential(idx,gNode.Length())
-		h.internalHashGraphImpl.numLinks-=offset
+		gNode.DeleteSequential(idx, gNode.Length())
+		h.internalHashGraphImpl.numLinks -= offset
 		if len(gNode) == 0 {
 			delete(h.internalHashGraphImpl.graph, iterHash)
 		} else {
-			h.internalHashGraphImpl.graph[iterHash]=gNode
+			h.internalHashGraphImpl.graph[iterHash] = gNode
 		}
 	}
 }
-func (_ *hashGraphVertices[V,E,VI,EI])clearOp() {
+func (_ *hashGraphVertices[V, E, VI, EI]) clearOp() {
 	// intentional noop - no hashes to update after clear
 }
 
@@ -215,26 +215,26 @@ func NewHashGraph[
 		return HashGraph[V, E, VI, EI]{}, getSizeError(numEdges)
 	}
 
-	gd:=new(internalHashGraphImpl[V,E,VI,EI])
+	gd := new(internalHashGraphImpl[V, E, VI, EI])
 
-	em,err:=NewHookedHashSet[E,EI](&gd.edges,numEdges)
-	if err!=nil {
+	em, err := NewHookedHashSet[E, EI](&gd.edges, numEdges)
+	if err != nil {
 		return HashGraph[V, E, VI, EI]{}, err
 	}
-	vm,err:=NewHookedHashSet[V,VI](&gd.vertices,numVertices)
-	if err!=nil {
+	vm, err := NewHookedHashSet[V, VI](&gd.vertices, numVertices)
+	if err != nil {
 		return HashGraph[V, E, VI, EI]{}, err
 	}
-	gd.edges=hashGraphEdges[V,E,VI,EI]{
-		HookedHashSet: em,
+	gd.edges = hashGraphEdges[V, E, VI, EI]{
+		HookedHashSet:         em,
 		internalHashGraphImpl: gd,
 	}
-	gd.vertices=hashGraphVertices[V,E,VI,EI]{
-		HookedHashSet: vm,
+	gd.vertices = hashGraphVertices[V, E, VI, EI]{
+		HookedHashSet:         vm,
 		internalHashGraphImpl: gd,
 	}
-	gd.graph=make(graphImpl, numVertices)
-	return HashGraph[V, E, VI, EI]{ internalHashGraphImpl: gd }, nil
+	gd.graph = make(graphImpl, numVertices)
+	return HashGraph[V, E, VI, EI]{internalHashGraphImpl: gd}, nil
 }
 
 // Creates a new hash graph initialized with enough memory to hold the specified
@@ -263,9 +263,9 @@ func NewSyncedHashGraph[
 
 // Converts the supplied graph to a synchronized graph. Beware: The original
 // non-synced map will remain useable.
-func (g *internalHashGraphImpl[V, E, VI, EI]) ToSynced() SyncedHashGraph[V,E,VI,EI] {
-	return SyncedHashGraph[V,E,VI,EI]{
-		RWMutex: &sync.RWMutex{},
+func (g *internalHashGraphImpl[V, E, VI, EI]) ToSynced() SyncedHashGraph[V, E, VI, EI] {
+	return SyncedHashGraph[V, E, VI, EI]{
+		RWMutex:   &sync.RWMutex{},
 		HashGraph: HashGraph[V, E, VI, EI]{internalHashGraphImpl: g},
 	}
 }
@@ -540,19 +540,19 @@ func (g *SyncedHashGraph[V, E, VI, EI]) ContainsLink(from V, to V, e E) bool {
 	return g.HashGraph.ContainsLinkPntr(&from, &to, &e)
 }
 
-func (g *internalHashGraphImpl[V, E, VI, EI])getVertexHash(v *V) (vertexHash, bool) {
-	if tmp,ok:=g.vertices.GetHashPosition(v); ok {
-		return vertexHash(tmp),true
+func (g *internalHashGraphImpl[V, E, VI, EI]) getVertexHash(v *V) (vertexHash, bool) {
+	if tmp, ok := g.vertices.GetHashPosition(v); ok {
+		return vertexHash(tmp), true
 	} else {
-		return 0,false
+		return 0, false
 	}
 }
 
-func (g *internalHashGraphImpl[V, E, VI, EI])getEdgeHash(e *E) (edgeHash, bool) {
-	if tmp,ok:=g.edges.GetHashPosition(e); ok {
-		return edgeHash(tmp),true
+func (g *internalHashGraphImpl[V, E, VI, EI]) getEdgeHash(e *E) (edgeHash, bool) {
+	if tmp, ok := g.edges.GetHashPosition(e); ok {
+		return edgeHash(tmp), true
 	} else {
-		return 0,false
+		return 0, false
 	}
 }
 
@@ -564,13 +564,13 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) ContainsLinkPntr(from *V, to *V, e
 	var eHash edgeHash
 	var toHash vertexHash
 	var fromHash vertexHash
-	if fromHash,ok=g.getVertexHash(from); !ok {
+	if fromHash, ok = g.getVertexHash(from); !ok {
 		return false
 	}
-	if toHash,ok=g.getVertexHash(to); !ok {
+	if toHash, ok = g.getVertexHash(to); !ok {
 		return false
 	}
-	if eHash,ok=g.getEdgeHash(e); !ok {
+	if eHash, ok = g.getEdgeHash(e); !ok {
 		return false
 	}
 
@@ -622,7 +622,7 @@ func (g *SyncedHashGraph[V, E, VI, EI]) NumOutLinks(v V) int {
 func (g *internalHashGraphImpl[V, E, VI, EI]) NumOutLinksPntr(v *V) int {
 	var ok bool
 	var vHash vertexHash
-	if vHash,ok=g.getVertexHash(v); !ok {
+	if vHash, ok = g.getVertexHash(v); !ok {
 		return 0
 	}
 	if _, ok := g.graph[vHash]; !ok {
@@ -677,7 +677,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) outEdgesImpl(v *V) iter.Iter[E] {
 	var ok bool
 	var vHash vertexHash
 
-	if vHash,ok=g.getVertexHash(v); !ok {
+	if vHash, ok = g.getVertexHash(v); !ok {
 		var tmp E
 		return iter.ValElem[E](tmp, getVertexError[V](v), 1)
 	}
@@ -727,7 +727,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) OutVerticePntrs(v *V) iter.Iter[*V
 func (g *internalHashGraphImpl[V, E, VI, EI]) outVerticesImpl(v *V) iter.Iter[V] {
 	var ok bool
 	var vHash vertexHash
-	if vHash,ok=g.getVertexHash(v); !ok {
+	if vHash, ok = g.getVertexHash(v); !ok {
 		var tmp V
 		return iter.ValElem[V](tmp, getVertexError[V](v), 1)
 	}
@@ -777,7 +777,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) outEdgesAndVerticesImpl(
 ) iter.Iter[basic.Pair[E, V]] {
 	var ok bool
 	var vHash vertexHash
-	if vHash,ok=g.getVertexHash(v); !ok {
+	if vHash, ok = g.getVertexHash(v); !ok {
 		var tmp basic.Pair[E, V]
 		return iter.ValElem[basic.Pair[E, V]](
 			tmp,
@@ -793,9 +793,9 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) outEdgesAndVerticesImpl(
 	return iter.Map[graphLink, basic.Pair[E, V]](
 		iter.SliceElems[graphLink](g.graph[vHash]),
 		func(index int, val graphLink) (basic.Pair[E, V], error) {
-			rv:=basic.Pair[E,V]{}
-			rv.A,_=g.edges.GetFromHash(HashSetHash(val.A))
-			rv.B,_=g.vertices.GetFromHash(HashSetHash(val.B))
+			rv := basic.Pair[E, V]{}
+			rv.A, _ = g.edges.GetFromHash(HashSetHash(val.A))
+			rv.B, _ = g.vertices.GetFromHash(HashSetHash(val.B))
 			return rv, nil
 		},
 	)
@@ -839,11 +839,11 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) edgesBetweenImpl(from *V, to *V) i
 	var ok bool
 	var fromHash vertexHash
 	var toHash vertexHash
-	if fromHash,ok=g.getVertexHash(from); !ok {
+	if fromHash, ok = g.getVertexHash(from); !ok {
 		var tmp E
 		return iter.ValElem[E](tmp, getVertexError[V](from), 1)
 	}
-	if toHash,ok=g.getVertexHash(to); !ok {
+	if toHash, ok = g.getVertexHash(to); !ok {
 		var tmp E
 		return iter.ValElem[E](tmp, getVertexError[V](to), 1)
 	}
@@ -949,17 +949,17 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) LinkPntr(from *V, to *V, e *E) err
 	var eHash edgeHash
 	var toHash vertexHash
 	var fromHash vertexHash
-	if fromHash,ok=g.getVertexHash(from); !ok {
+	if fromHash, ok = g.getVertexHash(from); !ok {
 		return getVertexError[V](from)
 	}
-	if toHash,ok=g.getVertexHash(to); !ok {
+	if toHash, ok = g.getVertexHash(to); !ok {
 		return getVertexError[V](to)
 	}
-	if eHash,ok=g.getEdgeHash(e); !ok {
+	if eHash, ok = g.getEdgeHash(e); !ok {
 		return getEdgeError[E](e)
 	}
 
-	gl:=graphLink{eHash, toHash}
+	gl := graphLink{eHash, toHash}
 	gNode, _ := g.graph[fromHash]
 	if gNode.Contains(gl) {
 		return nil
@@ -1119,13 +1119,13 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) DeleteLinkPntr(from *V, to *V, e *
 	var eHash edgeHash
 	var toHash vertexHash
 	var fromHash vertexHash
-	if fromHash,ok=g.getVertexHash(from); !ok {
+	if fromHash, ok = g.getVertexHash(from); !ok {
 		return getVertexError[V](from)
 	}
-	if toHash,ok=g.getVertexHash(to); !ok {
+	if toHash, ok = g.getVertexHash(to); !ok {
 		return getVertexError[V](to)
 	}
-	if eHash,ok=g.getEdgeHash(e); !ok {
+	if eHash, ok = g.getEdgeHash(e); !ok {
 		return getEdgeError[E](e)
 	}
 
@@ -1188,12 +1188,12 @@ func (g *SyncedHashGraph[V, E, VI, EI]) DeleteLinks(from V, to V) error {
 // Time Complexity: O(n), where n=num of outgoing edges on the from vertex
 func (g *internalHashGraphImpl[V, E, VI, EI]) DeleteLinksPntr(from *V, to *V) error {
 	var ok bool
-var toHash vertexHash
+	var toHash vertexHash
 	var fromHash vertexHash
-	if fromHash,ok=g.getVertexHash(from); !ok {
+	if fromHash, ok = g.getVertexHash(from); !ok {
 		return getVertexError[V](from)
 	}
-	if toHash,ok=g.getVertexHash(to); !ok {
+	if toHash, ok = g.getVertexHash(to); !ok {
 		return getVertexError[V](to)
 	}
 
@@ -1253,12 +1253,12 @@ func (g *SyncedHashGraph[V, E, VI, EI]) Clear() {
 // the methods on other. In big-O it might look something like this,
 // O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
 // where:
-//  - n is the number of links in this graph
-//  - m is the number of vertices in this graph
-//  - p is the number of edges in this graph
-//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
-//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
-//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+//   - n is the number of links in this graph
+//   - m is the number of vertices in this graph
+//   - p is the number of edges in this graph
+//   - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//   - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//   - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *internalHashGraphImpl[V, E, VI, EI]) KeyedEq(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
@@ -1268,13 +1268,13 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) KeyedEq(
 		return false
 	}
 
-	rv:=true
+	rv := true
 	g.vertices.Vals().ForEach(
 		func(index int, val V) (iter.IteratorFeedback, error) {
-			if rv=other.ContainsVertexPntr(&val); !rv {
-				return iter.Break,nil
+			if rv = other.ContainsVertexPntr(&val); !rv {
+				return iter.Break, nil
 			}
-			return iter.Continue,nil
+			return iter.Continue, nil
 		},
 	)
 	if !rv {
@@ -1283,10 +1283,10 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) KeyedEq(
 
 	g.edges.Vals().ForEach(
 		func(index int, val E) (iter.IteratorFeedback, error) {
-			if rv=other.ContainsEdgePntr(&val); !rv {
-				return iter.Break,nil
+			if rv = other.ContainsEdgePntr(&val); !rv {
+				return iter.Break, nil
 			}
-			return iter.Continue,nil
+			return iter.Continue, nil
 		},
 	)
 	if !rv {
@@ -1294,14 +1294,14 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) KeyedEq(
 	}
 
 	for from, gNode := range g.graph {
-		fromVertex,_:=g.vertices.GetFromHash(HashSetHash(from))
+		fromVertex, _ := g.vertices.GetFromHash(HashSetHash(from))
 		if len(gNode) != other.NumOutLinks(fromVertex) {
 			return false
 		}
 		for _, gLink := range gNode {
-			toVertex,_:=g.vertices.GetFromHash(HashSetHash(gLink.B))
-			e,_:=g.edges.GetFromHash(HashSetHash(gLink.A))
-			if !other.ContainsLink(fromVertex,toVertex,e) {
+			toVertex, _ := g.vertices.GetFromHash(HashSetHash(gLink.B))
+			e, _ := g.edges.GetFromHash(HashSetHash(gLink.A))
+			if !other.ContainsLink(fromVertex, toVertex, e) {
 				return false
 			}
 		}
@@ -1320,12 +1320,12 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) KeyedEq(
 // the methods on other. In big-O it might look something like this,
 // O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
 // where:
-//  - n is the number of links in this graph
-//  - m is the number of vertices in this graph
-//  - p is the number of edges in this graph
-//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
-//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
-//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+//   - n is the number of links in this graph
+//   - m is the number of vertices in this graph
+//   - p is the number of edges in this graph
+//   - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//   - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//   - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *SyncedHashGraph[V, E, VI, EI]) KeyedEq(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
@@ -1356,20 +1356,20 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Intersection(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
-	newG,err:=NewHashGraph[V,E,VI,EI](r.NumVertices()/2, r.NumEdges()/2)
-	if err!=nil {
-		panic(fmt.Sprintf("An error occurred making a new hash graph: %s",err))
+	newG, err := NewHashGraph[V, E, VI, EI](r.NumVertices()/2, r.NumEdges()/2)
+	if err != nil {
+		panic(fmt.Sprintf("An error occurred making a new hash graph: %s", err))
 	}
 	// This implementation chooses to optimize the case where a link is not
 	// created in the graph. It does this by using pointers to values whenever
 	// possible. Note that in the case when a link must be made that values
 	// will be copied from out of scope, which might entail the GC.
-	addressableSafeVerticesIter[V,E](r).ForEach(
+	addressableSafeVerticesIter[V, E](r).ForEach(
 		func(index int, fromV *V) (iter.IteratorFeedback, error) {
 			if !l.ContainsVertexPntr(fromV) {
 				return iter.Continue, nil
 			}
-			addressableSafeOutVerticesAndEdgesIter[V,E](r,*fromV).ForEach(
+			addressableSafeOutVerticesAndEdgesIter[V, E](r, *fromV).ForEach(
 				func(
 					index int,
 					toVAndE basic.Pair[*E, *V],
@@ -1386,7 +1386,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Intersection(
 		},
 	)
 	g.Clear()
-	*g=*newG.internalHashGraphImpl
+	*g = *newG.internalHashGraphImpl
 }
 
 // Description: Places a write lock on the underlying hash graph and then calls
@@ -1402,8 +1402,8 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Intersection(
 // and O(other.ContainsLinkPntr) represents the time complexity of the
 // ContainsLinkPntr method on other.
 func (g *SyncedHashGraph[V, E, VI, EI]) Intersection(
-	l containerTypes.GraphComparisonsConstraint[V,E],
-	r containerTypes.GraphComparisonsConstraint[V,E],
+	l containerTypes.GraphComparisonsConstraint[V, E],
+	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
 	g.Lock()
 	l.RLock()
@@ -1411,7 +1411,7 @@ func (g *SyncedHashGraph[V, E, VI, EI]) Intersection(
 	defer g.Unlock()
 	defer l.RUnlock()
 	defer r.RUnlock()
-	g.HashGraph.Intersection(l,r)
+	g.HashGraph.Intersection(l, r)
 }
 
 // Description: Takes the union of l and r and puts the result in this
@@ -1427,11 +1427,11 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Union(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
-	newG,err:=NewHashGraph[V,E,VI,EI](r.NumVertices()/2, r.NumEdges()/2)
-	if err!=nil {
-		panic(fmt.Sprintf("An error occurred making a new hash graph: %s",err))
+	newG, err := NewHashGraph[V, E, VI, EI](r.NumVertices()/2, r.NumEdges()/2)
+	if err != nil {
+		panic(fmt.Sprintf("An error occurred making a new hash graph: %s", err))
 	}
-	opTemplate:= func(fromV *V) func(
+	opTemplate := func(fromV *V) func(
 		index int,
 		toVAndE basic.Pair[*E, *V],
 	) (iter.IteratorFeedback, error) {
@@ -1449,22 +1449,22 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Union(
 	// created in the graph. It does this by using pointers to values whenever
 	// possible. Note that in the case when a link must be made that values
 	// will be copied from out of scope, which might entail the GC.
-	addressableSafeVerticesIter[V,E](r).ForEach(
+	addressableSafeVerticesIter[V, E](r).ForEach(
 		func(index int, fromV *V) (iter.IteratorFeedback, error) {
-			op:=opTemplate(fromV)
-			addressableSafeOutVerticesAndEdgesIter[V,E](r,*fromV).ForEach(op)
+			op := opTemplate(fromV)
+			addressableSafeOutVerticesAndEdgesIter[V, E](r, *fromV).ForEach(op)
 			return iter.Continue, nil
 		},
 	)
-	addressableSafeVerticesIter[V,E](l).ForEach(
+	addressableSafeVerticesIter[V, E](l).ForEach(
 		func(index int, fromV *V) (iter.IteratorFeedback, error) {
-			op:=opTemplate(fromV)
-			addressableSafeOutVerticesAndEdgesIter[V,E](l,*fromV).ForEach(op)
+			op := opTemplate(fromV)
+			addressableSafeOutVerticesAndEdgesIter[V, E](l, *fromV).ForEach(op)
 			return iter.Continue, nil
 		},
 	)
 	g.Clear()
-	*g=*newG.internalHashGraphImpl
+	*g = *newG.internalHashGraphImpl
 }
 
 // Description: Places a write lock on the underlying hash graph and then calls
@@ -1479,7 +1479,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Union(
 // this, O((n+m)*O(other.ContainsLinkPntr))), where n is the number of links in
 // r and m is the number of links in l. O(other.ContainsLinkPntr) represents the
 // time complexity of the ContainsLinkPntr method on other.
-func (g *SyncedHashGraph[V, E, VI, EI])Union(
+func (g *SyncedHashGraph[V, E, VI, EI]) Union(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
@@ -1489,7 +1489,7 @@ func (g *SyncedHashGraph[V, E, VI, EI])Union(
 	defer g.Unlock()
 	defer l.RUnlock()
 	defer r.RUnlock()
-	g.HashGraph.Union(l,r)
+	g.HashGraph.Union(l, r)
 }
 
 // Description: Takes the difference  of l and r and puts the result in this
@@ -1505,11 +1505,11 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Difference(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
-	newG,err:=NewHashGraph[V,E,VI,EI](r.NumVertices()/2, r.NumEdges()/2)
-	if err!=nil {
-		panic(fmt.Sprintf("An error occurred making a new hash graph: %s",err))
+	newG, err := NewHashGraph[V, E, VI, EI](r.NumVertices()/2, r.NumEdges()/2)
+	if err != nil {
+		panic(fmt.Sprintf("An error occurred making a new hash graph: %s", err))
 	}
-	opTemplate:= func(fromV *V) func(
+	opTemplate := func(fromV *V) func(
 		index int,
 		toVAndE basic.Pair[*E, *V],
 	) (iter.IteratorFeedback, error) {
@@ -1517,7 +1517,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Difference(
 			index int,
 			toVAndE basic.Pair[*E, *V],
 		) (iter.IteratorFeedback, error) {
-			if r.ContainsLinkPntr(fromV,toVAndE.B,toVAndE.A) {
+			if r.ContainsLinkPntr(fromV, toVAndE.B, toVAndE.A) {
 				return iter.Continue, nil
 			}
 			newG.AddEdges(*toVAndE.A)
@@ -1530,15 +1530,15 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Difference(
 	// created in the graph. It does this by using pointers to values whenever
 	// possible. Note that in the case when a link must be made that values
 	// will be copied from out of scope, which might entail the GC.
-	addressableSafeVerticesIter[V,E](l).ForEach(
+	addressableSafeVerticesIter[V, E](l).ForEach(
 		func(index int, fromV *V) (iter.IteratorFeedback, error) {
-			op:=opTemplate(fromV)
-			addressableSafeOutVerticesAndEdgesIter[V,E](l,*fromV).ForEach(op)
+			op := opTemplate(fromV)
+			addressableSafeOutVerticesAndEdgesIter[V, E](l, *fromV).ForEach(op)
 			return iter.Continue, nil
 		},
 	)
 	g.Clear()
-	*g=*newG.internalHashGraphImpl
+	*g = *newG.internalHashGraphImpl
 }
 
 // Description: Places a write lock on the underlying hash graph and then calls
@@ -1553,7 +1553,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) Difference(
 // this, O((n+m)*O(other.ContainsLinkPntr))), where n is the number of links in
 // r and m is the number of links in l. O(other.ContainsLinkPntr) represents the
 // time complexity of the ContainsLinkPntr method on other.
-func (g *SyncedHashGraph[V, E, VI, EI])Difference(
+func (g *SyncedHashGraph[V, E, VI, EI]) Difference(
 	l containerTypes.GraphComparisonsConstraint[V, E],
 	r containerTypes.GraphComparisonsConstraint[V, E],
 ) {
@@ -1563,10 +1563,10 @@ func (g *SyncedHashGraph[V, E, VI, EI])Difference(
 	defer g.Unlock()
 	defer r.RUnlock()
 	defer l.RUnlock()
-	g.HashGraph.Difference(l,r)
+	g.HashGraph.Difference(l, r)
 }
 
-// Description: Returns true if this graph is a superset of other. In order for 
+// Description: Returns true if this graph is a superset of other. In order for
 // this graph to be a superset of other, it must have all of others vertices,
 // edges, and links. It may have other vertices, edges, or links that are not in
 // other. All of the corresponding vertices and edges must be equal as defined
@@ -1576,25 +1576,25 @@ func (g *SyncedHashGraph[V, E, VI, EI])Difference(
 // the methods on other. In big-O it might look something like this,
 // O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
 // where:
-//  - n is the number of links in this graph
-//  - m is the number of vertices in this graph
-//  - p is the number of edges in this graph
-//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
-//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
-//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+//   - n is the number of links in this graph
+//   - m is the number of vertices in this graph
+//   - p is the number of edges in this graph
+//   - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//   - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//   - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *internalHashGraphImpl[V, E, VI, EI]) IsSuperset(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
-	if (g.NumVertices()<other.NumVertices() ||
-		g.NumEdges()<other.NumEdges() ||
-		g.NumLinks()<other.NumLinks()) {
+	if g.NumVertices() < other.NumVertices() ||
+		g.NumEdges() < other.NumEdges() ||
+		g.NumLinks() < other.NumLinks() {
 		return false
 	}
 
-	rv:=true
-	addressableSafeVerticesIter[V,E](other).ForEach(
+	rv := true
+	addressableSafeVerticesIter[V, E](other).ForEach(
 		func(index int, fromV *V) (iter.IteratorFeedback, error) {
-			if rv=g.ContainsVertexPntr(fromV); !rv {
+			if rv = g.ContainsVertexPntr(fromV); !rv {
 				return iter.Break, nil
 			}
 			return iter.Continue, nil
@@ -1604,9 +1604,9 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) IsSuperset(
 		return false
 	}
 
-	addressableSafeEdgesIter[V,E](other).ForEach(
+	addressableSafeEdgesIter[V, E](other).ForEach(
 		func(index int, fromV *E) (iter.IteratorFeedback, error) {
-			if rv=g.ContainsEdgePntr(fromV); !rv {
+			if rv = g.ContainsEdgePntr(fromV); !rv {
 				return iter.Break, nil
 			}
 			return iter.Continue, nil
@@ -1616,11 +1616,11 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) IsSuperset(
 		return false
 	}
 
-	addressableSafeVerticesIter[V,E](other).ForEach(
+	addressableSafeVerticesIter[V, E](other).ForEach(
 		func(index int, fromV *V) (iter.IteratorFeedback, error) {
-			addressableSafeOutVerticesAndEdgesIter[V,E](other,*fromV).ForEach(
+			addressableSafeOutVerticesAndEdgesIter[V, E](other, *fromV).ForEach(
 				func(index int, val basic.Pair[*E, *V]) (iter.IteratorFeedback, error) {
-					if rv=g.ContainsLinkPntr(fromV, val.B, val.A); !rv {
+					if rv = g.ContainsLinkPntr(fromV, val.B, val.A); !rv {
 						return iter.Break, nil
 					}
 					return iter.Continue, nil
@@ -1643,13 +1643,13 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) IsSuperset(
 // the methods in other. In big-O it might look something like this,
 // O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
 // where:
-//  - n is the number of links in this graph
-//  - m is the number of vertices in this graph
-//  - p is the number of edges in this graph
-//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
-//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
-//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
-func (g *SyncedHashGraph[V, E, VI, EI])IsSuperSet(
+//   - n is the number of links in this graph
+//   - m is the number of vertices in this graph
+//   - p is the number of edges in this graph
+//   - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//   - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//   - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+func (g *SyncedHashGraph[V, E, VI, EI]) IsSuperSet(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
 	g.RLock()
@@ -1659,7 +1659,7 @@ func (g *SyncedHashGraph[V, E, VI, EI])IsSuperSet(
 	return g.HashGraph.IsSuperset(other)
 }
 
-// Description: Returns true if this graph is a subset of other. In order for 
+// Description: Returns true if this graph is a subset of other. In order for
 // this graph to be a subset of other, other must have all of this graphs
 // vertices, edges, and links. Other may have other vertices, edges, or links
 // that are not in this graph. All of the corresponding vertices and edges must
@@ -1669,28 +1669,28 @@ func (g *SyncedHashGraph[V, E, VI, EI])IsSuperSet(
 // the methods on other. In big-O it might look something like this,
 // O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
 // where:
-//  - n is the number of links in this graph
-//  - m is the number of vertices in this graph
-//  - p is the number of edges in this graph
-//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
-//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
-//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+//   - n is the number of links in this graph
+//   - m is the number of vertices in this graph
+//   - p is the number of edges in this graph
+//   - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//   - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//   - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
 func (g *internalHashGraphImpl[V, E, VI, EI]) IsSubset(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
-	if (g.NumVertices()>other.NumVertices() ||
-		g.NumEdges()>other.NumEdges() ||
-		g.NumLinks()>other.NumLinks()) {
+	if g.NumVertices() > other.NumVertices() ||
+		g.NumEdges() > other.NumEdges() ||
+		g.NumLinks() > other.NumLinks() {
 		return false
 	}
 
-	rv:=true
+	rv := true
 	g.vertices.Vals().ForEach(
 		func(index int, val V) (iter.IteratorFeedback, error) {
-			if rv=other.ContainsVertexPntr(&val); !rv {
-				return iter.Break,nil
+			if rv = other.ContainsVertexPntr(&val); !rv {
+				return iter.Break, nil
 			}
-			return iter.Continue,nil
+			return iter.Continue, nil
 		},
 	)
 	if !rv {
@@ -1699,22 +1699,22 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) IsSubset(
 
 	g.edges.Vals().ForEach(
 		func(index int, val E) (iter.IteratorFeedback, error) {
-			if rv=other.ContainsEdgePntr(&val); !rv {
-				return iter.Break,nil
+			if rv = other.ContainsEdgePntr(&val); !rv {
+				return iter.Break, nil
 			}
-			return iter.Continue,nil
+			return iter.Continue, nil
 		},
 	)
 	if !rv {
 		return false
 	}
 
-	for vHash, gNode:=range(g.graph) {
-		for _, gLink:=range(gNode) {
-			fromVertex,_:=g.vertices.GetFromHash(HashSetHash(vHash))
-			toVertex,_:=g.vertices.GetFromHash(HashSetHash(gLink.B))
-			e,_:=g.edges.GetFromHash(HashSetHash(gLink.A))
-			if !other.ContainsLink(fromVertex,toVertex,e) {
+	for vHash, gNode := range g.graph {
+		for _, gLink := range gNode {
+			fromVertex, _ := g.vertices.GetFromHash(HashSetHash(vHash))
+			toVertex, _ := g.vertices.GetFromHash(HashSetHash(gLink.B))
+			e, _ := g.edges.GetFromHash(HashSetHash(gLink.A))
+			if !other.ContainsLink(fromVertex, toVertex, e) {
 				return false
 			}
 		}
@@ -1733,13 +1733,13 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) IsSubset(
 // the methods in other. In big-O it might look something like this,
 // O(n*O(other.ContainsLink) + m*O(other.ContainsVertexPntr) + p*O(other.ContainsEdgePntr))
 // where:
-//  - n is the number of links in this graph
-//  - m is the number of vertices in this graph
-//  - p is the number of edges in this graph
-//  - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
-//  - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
-//  - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
-func (g *SyncedHashGraph[V, E, VI, EI])IsSubset(
+//   - n is the number of links in this graph
+//   - m is the number of vertices in this graph
+//   - p is the number of edges in this graph
+//   - O(other.ContainsLink) represents the time complexity of the ContainsLink method on other
+//   - O(other.ContainsVertexPntr) represents the time complexity of the ContainsVertexPntr method on other
+//   - O(other.ContainsEdgePntr) represents the time complexity of the ContainsEdgePntr method on other
+func (g *SyncedHashGraph[V, E, VI, EI]) IsSubset(
 	other containerTypes.GraphComparisonsConstraint[V, E],
 ) bool {
 	g.RLock()
@@ -1762,7 +1762,7 @@ func (_ *HashGraph[V, E, VI, EI]) Eq(
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Internally this is equivalent to [SyncedHashGraph.KeyedEq].
 // Returns true if l==r, false otherwise.
-func (_ *SyncedHashGraph[V, E, VI, EI])Eq(
+func (_ *SyncedHashGraph[V, E, VI, EI]) Eq(
 	l *SyncedHashGraph[V, E, VI, EI],
 	r *SyncedHashGraph[V, E, VI, EI],
 ) bool {
@@ -1799,17 +1799,17 @@ func (_ *HashGraph[V, E, VI, EI]) Hash(
 ) hash.Hash {
 	cntr := 0
 	var rv hash.Hash
-	for vHash, gNode:=range(other.graph) {
-		for _,gLink:=range(gNode) {
-			iterH:=(hash.Hash(vHash)).Combine(
+	for vHash, gNode := range other.graph {
+		for _, gLink := range gNode {
+			iterH := (hash.Hash(vHash)).Combine(
 				hash.Hash(gLink.B),
 				hash.Hash(gLink.A),
 			)
-			if cntr ==0 {
-				rv=iterH
+			if cntr == 0 {
+				rv = iterH
 				cntr++
 			} else {
-				rv=rv.CombineUnordered(iterH)
+				rv = rv.CombineUnordered(iterH)
 			}
 		}
 	}
@@ -1818,8 +1818,8 @@ func (_ *HashGraph[V, E, VI, EI]) Hash(
 
 // Places a read lock on the underlying hash graph of other and then calls others
 // underlying hash maps [HashGraph.Hash] method.
-func (_ *SyncedHashGraph[V, E, VI, EI])Hash(
-	other *SyncedHashGraph[V,E,VI,EI],
+func (_ *SyncedHashGraph[V, E, VI, EI]) Hash(
+	other *SyncedHashGraph[V, E, VI, EI],
 ) hash.Hash {
 	other.RLock()
 	defer other.RUnlock()

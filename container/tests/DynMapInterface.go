@@ -369,7 +369,7 @@ func mapPopPntrHelper(
 		}
 	}
 	// fmt.Println("Init:   ",container)
-	tmp:=-1
+	tmp := -1
 	n := container.PopPntr(&tmp)
 	// fmt.Println("After pop: ",container)
 	cntr := 0

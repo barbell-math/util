@@ -80,26 +80,26 @@ func popAndGetAffectedHashesHelper(
 	res map[OldHashSetHash]NewHashSetHash,
 	t *testing.T,
 ) {
-	s1,_:=NewHashSet[int, badBuiltinInt2](0)
+	s1, _ := NewHashSet[int, badBuiltinInt2](0)
 	setVals.ForEach(func(index, val int) (iter.IteratorFeedback, error) {
 		s1.AppendUnique(val)
 		return iter.Continue, nil
 	})
-	test.MapsMatch[HashSetHash,int](initialMap, s1.internalHashSetImpl, t)
-	deletedHash, vals,num:=s1.popAndGetAffectedHashes(&popVal)
+	test.MapsMatch[HashSetHash, int](initialMap, s1.internalHashSetImpl, t)
+	deletedHash, vals, num := s1.popAndGetAffectedHashes(&popVal)
 	test.Eq(popHash, deletedHash, t)
-	test.Eq(1,num,t)
+	test.Eq(1, num, t)
 	s1.Pop(popVal)
-	test.MapsMatch[OldHashSetHash, NewHashSetHash](res,vals,t)
+	test.MapsMatch[OldHashSetHash, NewHashSetHash](res, vals, t)
 }
 func TestGetHashesAffectedByPop(t *testing.T) {
-	initialMap:=map[HashSetHash]int{}
-	for i:=0; i<8; i++ {
-		initialMap[HashSetHash(i)]=i
+	initialMap := map[HashSetHash]int{}
+	for i := 0; i < 8; i++ {
+		initialMap[HashSetHash(i)] = i
 	}
-	for i:=0; i<4; i++ {
+	for i := 0; i < 4; i++ {
 		popAndGetAffectedHashesHelper(
-			iter.Range[int](0,8,1),
+			iter.Range[int](0, 8, 1),
 			i,
 			HashSetHash(i),
 			initialMap,
@@ -112,13 +112,13 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 			t,
 		)
 	}
-	for i:=4; i<8; i++ {
-		expRes:=map[OldHashSetHash]NewHashSetHash{}
-		for j:=i; j<7; j++ {
-			expRes[OldHashSetHash(j+1)]=NewHashSetHash(j)
+	for i := 4; i < 8; i++ {
+		expRes := map[OldHashSetHash]NewHashSetHash{}
+		for j := i; j < 7; j++ {
+			expRes[OldHashSetHash(j+1)] = NewHashSetHash(j)
 		}
 		popAndGetAffectedHashesHelper(
-			iter.Range[int](0,8,1),
+			iter.Range[int](0, 8, 1),
 			i,
 			HashSetHash(i),
 			initialMap,
@@ -127,7 +127,7 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 		)
 	}
 	popAndGetAffectedHashesHelper(
-		iter.SliceElems[int]([]int{0,2,3,4,5,6,7}),
+		iter.SliceElems[int]([]int{0, 2, 3, 4, 5, 6, 7}),
 		4,
 		1,
 		map[HashSetHash]int{
@@ -147,7 +147,7 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 		t,
 	)
 	popAndGetAffectedHashesHelper(
-		iter.SliceElems[int]([]int{0,1,2,5,6,7}),
+		iter.SliceElems[int]([]int{0, 1, 2, 5, 6, 7}),
 		0,
 		0,
 		map[HashSetHash]int{
@@ -162,7 +162,7 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 		t,
 	)
 	popAndGetAffectedHashesHelper(
-		iter.SliceElems[int]([]int{0,4,8,7,11}),
+		iter.SliceElems[int]([]int{0, 4, 8, 7, 11}),
 		0,
 		0,
 		map[HashSetHash]int{

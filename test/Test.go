@@ -7,7 +7,14 @@ import (
 	"testing"
 )
 
-func FormatError(expected any, got any, base string, file string, line int, t *testing.T) {
+func FormatError(
+	expected any,
+	got any,
+	base string,
+	file string,
+	line int,
+	t *testing.T,
+) {
 	t.Fatal(fmt.Sprintf(
 		"Error | File %s: Line %d: %s\nExpected: '%v'\nGot     : '%v'",
 		file, line, base, expected, got,
@@ -222,17 +229,17 @@ func MapsMatch[K comparable, V any](
 			f, line, t,
 		)
 	}
-	for k,v:=range(generated) {
-		actualV,ok:=actual[k]
+	for k, v := range generated {
+		actualV, ok := actual[k]
 		if !ok {
 			FormatError(
 				true,
 				ok,
-				fmt.Sprintf("A key was not found | Key: %v",k),
+				fmt.Sprintf("A key was not found | Key: %v", k),
 				f, line, t,
 			)
 		}
-		if any(actualV)!=any(v) {
+		if any(actualV) != any(v) {
 			FormatError(
 				actualV,
 				v,

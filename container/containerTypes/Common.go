@@ -43,7 +43,7 @@ type StaticCapacity interface {
 	Full() bool
 }
 
-// An interface that defines what set-wise operations can be performed on a 
+// An interface that defines what set-wise operations can be performed on a
 // container.
 type SetOperations[RI any, V any] interface {
 	Intersection(l RI, r RI)

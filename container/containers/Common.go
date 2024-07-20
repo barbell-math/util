@@ -63,10 +63,10 @@ func addressableSafeOutVerticesAndEdgesIter[V any, E any](
 	if other.IsAddressable() {
 		return other.OutEdgesAndVerticePntrs(&fromV)
 	}
-	return iter.Map[basic.Pair[E,V], basic.Pair[*E,*V]](
+	return iter.Map[basic.Pair[E, V], basic.Pair[*E, *V]](
 		other.OutEdgesAndVertices(fromV),
 		func(index int, val basic.Pair[E, V]) (basic.Pair[*E, *V], error) {
-			return basic.Pair[*E,*V]{A: &val.A, B: &val.B}, nil
+			return basic.Pair[*E, *V]{A: &val.A, B: &val.B}, nil
 		},
 	)
 }

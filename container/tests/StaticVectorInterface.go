@@ -817,7 +817,7 @@ func staticVectorPopPntrHelper(
 ) {
 	permutation := func(expCap int, container staticContainers.Vector[int]) {
 		// fmt.Println("Init:   ",v)
-		tmp:=-1
+		tmp := -1
 		n := container.PopPntr(&tmp)
 		cntr := 0
 		expLength := 0

@@ -12,9 +12,9 @@ import (
 //go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=HashSetHash -baseType=hash.Hash -baseTypeWidget=widgets.BuiltinHash -widgetPackage=github.com/barbell-math/util/algo/widgets
 
 type (
-	HashSetHash hash.Hash
-	OldHashSetHash HashSetHash
-	NewHashSetHash HashSetHash
+	HashSetHash                hash.Hash
+	OldHashSetHash             HashSetHash
+	NewHashSetHash             HashSetHash
 	internalHashSetImpl[T any] map[HashSetHash]T
 
 	// A type to represent a set that dynamically grows as elements are added.
@@ -202,7 +202,7 @@ func (h *HashSet[T, U]) ContainsPntr(v *T) bool {
 func (h *SyncedHashSet[T, U]) ContainsPntr(v *T) bool {
 	h.RLock()
 	defer h.RUnlock()
-	_,rv:=h.HashSet.getHashPosition(v)
+	_, rv := h.HashSet.getHashPosition(v)
 	return rv
 }
 
@@ -287,7 +287,7 @@ func (h *SyncedHashSet[T, U]) Pop(v T) int {
 // set was initialized with.
 //
 // Time Complexity: O(1)
-func (h *HashSet[T, U])PopPntr(v *T) int {
+func (h *HashSet[T, U]) PopPntr(v *T) int {
 	w := widgets.Widget[T, U]{}
 	if i, cont := h.getHashPosition(v); cont {
 		delete(h.internalHashSetImpl, i)
@@ -317,15 +317,15 @@ func (h *HashSet[T, U])PopPntr(v *T) int {
 // the map: {4: 1, 5: 4, 6: 5} would mean that the value that was at index 4 is
 // now at index 1, the value that was at index 5 is now at index 4, and the
 // value at index 6 is now at index 5.
-func (h *HashSet[T, U])popAndGetAffectedHashes(
+func (h *HashSet[T, U]) popAndGetAffectedHashes(
 	v *T,
 ) (HashSetHash, map[OldHashSetHash]NewHashSetHash, int) {
 	var deletedHash HashSetHash
 	w := widgets.Widget[T, U]{}
-	rv:=map[OldHashSetHash]NewHashSetHash{}
+	rv := map[OldHashSetHash]NewHashSetHash{}
 	if i, cont := h.getHashPosition(v); cont {
-		deletedHash=i
-		delete(h.internalHashSetImpl,i)
+		deletedHash = i
+		delete(h.internalHashSetImpl, i)
 		curPos := i
 		for j := i + 1; ; j++ {
 			if iterV, found := h.internalHashSetImpl[j]; found {
@@ -337,7 +337,7 @@ func (h *HashSet[T, U])popAndGetAffectedHashes(
 				}
 				h.internalHashSetImpl[curPos] = h.internalHashSetImpl[j]
 				delete(h.internalHashSetImpl, j)
-				rv[OldHashSetHash(j)]=NewHashSetHash(curPos)
+				rv[OldHashSetHash(j)] = NewHashSetHash(curPos)
 				curPos = j
 			} else {
 				break
@@ -354,7 +354,7 @@ func (h *HashSet[T, U])popAndGetAffectedHashes(
 // Lock Type: Write
 //
 // Time Complexity: O(1)
-func (h *SyncedHashSet[T, U])PopPntr(v *T) int {
+func (h *SyncedHashSet[T, U]) PopPntr(v *T) int {
 	h.Lock()
 	defer h.Unlock()
 	return h.HashSet.PopPntr(v)

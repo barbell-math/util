@@ -10,12 +10,12 @@ import (
 )
 
 type Values struct {
-	Package  string
-	AliasType string
-	BaseType     string
+	Package        string
+	AliasType      string
+	BaseType       string
 	BaseTypeWidget string
-	WidgetPackage string
-	ShowInfo bool
+	WidgetPackage  string
+	ShowInfo       bool
 }
 
 var VALS Values
@@ -26,7 +26,6 @@ var REQUIRED_ARGS []string = []string{
 	"baseTypeWidget",
 	"widgetPackage",
 }
-
 
 func main() {
 	setupFlags()
@@ -41,7 +40,6 @@ func main() {
 		fmt.Println("\tBase Type: ", VALS.BaseType)
 		fmt.Println("\tBase Type Widget: ", VALS.BaseTypeWidget)
 	}
-
 
 	fName := fmt.Sprintf("TypeAliasPassThroughWidget_%s_to_%s.go", VALS.AliasType, VALS.BaseType)
 	f, err := os.Create(fName)
@@ -58,23 +56,23 @@ func main() {
 			"// This is meant to be used with the containers from the [containers] package.\n" +
 			"// Returns true if both {{ .AliasType }}'s are equal. Uses the Eq operator provided by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }})Eq(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n"+
-			"	return tmp.Eq((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n"+
+			"	var tmp {{ .BaseTypeWidget }}\n" +
+			"	return tmp.Eq((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
 			"}\n\n" +
 			"// Returns true if a is less than r. Uses the Lt operator provided by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }})Lt(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n"+
-			"	return tmp.Lt((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n"+
+			"	var tmp {{ .BaseTypeWidget }}\n" +
+			"	return tmp.Lt((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
 			"}\n\n" +
 			"// Provides a hash function for the value that it is wrapping. The value that is returned will be supplied by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }})Hash(other *{{ .AliasType }}) hash.Hash {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n"+
-			"	return tmp.Hash((*{{ .BaseType }})(other))\n"+
+			"	var tmp {{ .BaseTypeWidget }}\n" +
+			"	return tmp.Hash((*{{ .BaseType }})(other))\n" +
 			"}\n\n" +
 			"// Zeros the supplied value. The operation that is performed will be determined by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }})Zero(other *{{ .AliasType }}) {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n"+
-			"	tmp.Zero((*{{ .BaseType }})(other))\n"+
+			"	var tmp {{ .BaseTypeWidget }}\n" +
+			"	tmp.Zero((*{{ .BaseType }})(other))\n" +
 			"}\n",
 	)
 	if err != nil {
@@ -133,9 +131,9 @@ func checkRequiredArgs() {
 
 func generateImports() string {
 	commonImport := "import \"github.com/barbell-math/util/algo/hash\"\n"
-	if VALS.WidgetPackage!="." {
+	if VALS.WidgetPackage != "." {
 
-		commonImport=commonImport+"import \"{{ .WidgetPackage }}\"\n"
+		commonImport = commonImport + "import \"{{ .WidgetPackage }}\"\n"
 	}
 	return commonImport
 }

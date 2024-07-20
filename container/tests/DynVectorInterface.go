@@ -680,7 +680,7 @@ func dynVectorPopPntrHelper(
 		}
 	}
 	// fmt.Println("Init:   ",v)
-	tmp:=-1
+	tmp := -1
 	n := container.PopPntr(&tmp)
 	exp := factory(0)
 	cntr := 0
@@ -713,7 +713,6 @@ func DynVectorInterfacePopPntr(
 		dynVectorPopPntrHelper(factory, i, t)
 	}
 }
-
 
 // Tests the Delete method functionality of a dynamic vector.
 func DynVectorInterfaceDelete(

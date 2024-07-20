@@ -523,10 +523,10 @@ func (v *SyncedVector[T, U]) Pop(val T) int {
 // vector was initialized with.
 //
 // Time Complexity: O(n)
-func (v *Vector[T, U])PopPntr(val *T) int {
+func (v *Vector[T, U]) PopPntr(val *T) int {
 	v.Lock()
 	defer v.Unlock()
-	return v.popSequentialImpl(val,containerTypes.PopAll)
+	return v.popSequentialImpl(val, containerTypes.PopAll)
 }
 
 // Description: Places a write lock on the underlying vector and then calls the
@@ -535,10 +535,10 @@ func (v *Vector[T, U])PopPntr(val *T) int {
 // Lock Type: Write
 //
 // Time Complexity: O(n)
-func (v *SyncedVector[T, U])PopPntr(val *T) int {
+func (v *SyncedVector[T, U]) PopPntr(val *T) int {
 	v.Lock()
 	defer v.Unlock()
-	return v.Vector.popSequentialImpl(val,containerTypes.PopAll)
+	return v.Vector.popSequentialImpl(val, containerTypes.PopAll)
 }
 
 // Description: PopSequential will remove the first num occurrences of val in

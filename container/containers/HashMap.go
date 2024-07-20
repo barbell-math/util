@@ -373,7 +373,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) Pop(v V) int {
 	return m.HashMap.popImpl(&v)
 }
 
-// Description: PopPntr will remove all occurrences of val in the map. All 
+// Description: PopPntr will remove all occurrences of val in the map. All
 // equality comparisons are performed by the generic VI widget type that the map
 // was initialized with.
 //

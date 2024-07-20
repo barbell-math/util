@@ -18,13 +18,13 @@ type (
 	// NFA map[nfaID]nfaNode
 
 	nfaNode struct {
-		id nfaID
+		id    nfaID
 		flags nfaFlag
 	}
 
 	NFA[A any, AW widgets.WidgetInterface[A]] containers.HashGraph[
-		nfaNode, containers.HashSet[A,AW],
-		*nfaNode, *containers.HashSet[A,AW],
+		nfaNode, containers.HashSet[A, AW],
+		*nfaNode, *containers.HashSet[A, AW],
 	]
 )
 
@@ -34,29 +34,29 @@ const (
 	nfaSink
 )
 
-func (_ *nfaNode)Eq(l *nfaNode, r *nfaNode) bool {
-	return l.id==r.id
+func (_ *nfaNode) Eq(l *nfaNode, r *nfaNode) bool {
+	return l.id == r.id
 }
-func (_ *nfaNode)Lt(l *nfaNode, r *nfaNode) bool {
-	return l.id<r.id
+func (_ *nfaNode) Lt(l *nfaNode, r *nfaNode) bool {
+	return l.id < r.id
 }
-func (_ *nfaNode)Hash(other *nfaNode) hash.Hash {
+func (_ *nfaNode) Hash(other *nfaNode) hash.Hash {
 	return hash.Hash(other.id)
 }
-func (_ *nfaNode)Zero(other *nfaNode) {
-	*other=nfaNode{}
+func (_ *nfaNode) Zero(other *nfaNode) {
+	*other = nfaNode{}
 }
 
 // func (n *nfaNode) addTransition(c byte, id nfaID) {
 // 	n.transitions = append(n.transitions, basic.Pair[byte, nfaID]{c, id})
 // }
-// 
+//
 // func NewNFA() NFA {
 // 	rv := NFA{}
 // 	rv.initNFA()
 // 	return rv
 // }
-// 
+//
 // func (n NFA) initNFA() {
 // 	for k, _ := range n {
 // 		delete(n, k)
@@ -66,7 +66,7 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 		transitions: []basic.Pair[byte, nfaID]{},
 // 	}
 // }
-// 
+//
 // func (n NFA) AppendTransition(c byte) {
 // 	if len(n) == 0 {
 // 		n.initNFA()
@@ -81,7 +81,7 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 		transitions: []basic.Pair[byte, nfaID]{},
 // 	})
 // }
-// 
+//
 // func (n NFA) AppendNFA(other NFA) {
 // 	// Other is nothing more than a just inited NFA, nothing to add
 // 	if len(other) <= 1 || other.nfaSink() <= 0 {
@@ -97,7 +97,7 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 		node.flags &= ^nfaSink
 // 		return nil
 // 	})
-// 
+//
 // 	oldNFASize := n.nfaSink()
 // 	for i := nfaStart + 1; i <= other.nfaSink(); i++ {
 // 		iterNode := other[i]
@@ -108,7 +108,7 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 		n.addNode(iterNode)
 // 	}
 // }
-// 
+//
 // func (n NFA) ApplyKleene() {
 // 	if len(n) == 0 {
 // 		n.initNFA()
@@ -141,7 +141,7 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 		})
 // 	}
 // }
-// 
+//
 // func (n NFA) AddBranch(other NFA) {
 // 	// Other is nothing more than a just inited NFA, nothing to add
 // 	if len(other) <= 1 || other.nfaSink() <= 0 {
@@ -163,7 +163,7 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 		node.addTransition(lambdaChar, n.nfaSink()+other.nfaSink()+1)
 // 		return nil
 // 	})
-// 
+//
 // 	oldNFASize := n.nfaSink()
 // 	for i := nfaStart + 1; i < other.nfaSink(); i++ {
 // 		iterNode := other[i]
@@ -173,7 +173,7 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 		}
 // 		n.addNode(iterNode)
 // 	}
-// 
+//
 // 	otherEndNode := other[other.nfaSink()]
 // 	for j := 0; j < len(otherEndNode.transitions); j++ {
 // 		otherEndNode.transitions[j].B += oldNFASize
@@ -181,17 +181,17 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 	otherEndNode.flags &= ^(nfaSource | nfaSink)
 // 	otherEndNode.addTransition(lambdaChar, n.nfaSink()+2)
 // 	n.addNode(otherEndNode)
-// 
+//
 // 	n.addNode(nfaNode{
 // 		flags:       nfaSink,
 // 		transitions: []basic.Pair[byte, nfaID]{},
 // 	})
 // }
-// 
+//
 // func (n NFA) addNode(node nfaNode) {
 // 	n[n.nfaSink()+1] = node
 // }
-// 
+//
 // func (n NFA) changeAndSave(id nfaID, op func(node *nfaNode) error) error {
 // 	node := n[id]
 // 	if err := op(&node); err == nil {
@@ -201,11 +201,11 @@ func (_ *nfaNode)Zero(other *nfaNode) {
 // 	}
 // 	return nil
 // }
-// 
+//
 // func (n NFA) nfaSink() nfaID {
 // 	return nfaID(len(n)) - 1
 // }
-// 
+//
 // func (n NFA) clearAndCopy(other NFA) {
 // 	for k, _ := range n {
 // 		delete(n, k)
