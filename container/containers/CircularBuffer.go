@@ -567,19 +567,16 @@ func (c *SyncedCircularBuffer[T, U]) ContainsPntr(val *T) bool {
 // supplied value in the circular buffer. If the value is not found then the
 // returned index will be -1 and the boolean flag will be set to false. If the
 // value is found then the boolean flag will be set to true. All equality
-// comparisons are performed by the generic U widget type that the circular buffer was
-// initialized with.
+// comparisons are performed by the generic U widget type that the circular
+// buffer was initialized with.
 //
 // Time Complexity: O(n) (linear search)
 func (c *CircularBuffer[T, U]) KeyOf(val T) (int, bool) {
-	return c.keyOfImpl(&val)
+	return c.KeyOfPntr(&val)
 }
 
 // Description: Places a read lock on the underlying circular buffer and then
-// calls the underlying circular buffers [CircularBuffer.KeyOf] implemenation
-// method. The [CircularBuffer.KeyOf] method is not called directly to avoid
-// copying the val variable twice, which could be expensive with a large type
-// for the T generic.
+// calls the underlying circular buffers [CircularBuffer.KeyOfPntr] method.
 //
 // Lock Type: Read
 //
@@ -587,10 +584,18 @@ func (c *CircularBuffer[T, U]) KeyOf(val T) (int, bool) {
 func (c *SyncedCircularBuffer[T, U]) KeyOf(val T) (int, bool) {
 	c.RLock()
 	defer c.RUnlock()
-	return c.CircularBuffer.keyOfImpl(&val)
+	return c.CircularBuffer.KeyOfPntr(&val)
 }
 
-func (c *CircularBuffer[T, U]) keyOfImpl(val *T) (int, bool) {
+// Description: KeyOfPntr will return the index of the first occurrence of the
+// supplied value in the circular buffer. If the value is not found then the
+// returned index will be -1 and the boolean flag will be set to false. If the
+// value is found then the boolean flag will be set to true. All equality
+// comparisons are performed by the generic U widget type that the circular 
+// buffer was initialized with.
+//
+// Time Complexity: O(n) (linear search)
+func (c *CircularBuffer[T, U]) KeyOfPntr(val *T) (int, bool) {
 	w := widgets.Widget[T, U]{}
 	for i := 0; i < c.numElems; i++ {
 		if w.Eq(val, &c.vals[c.start.GetProperIndex(i, len(c.vals))]) {
@@ -598,6 +603,18 @@ func (c *CircularBuffer[T, U]) keyOfImpl(val *T) (int, bool) {
 		}
 	}
 	return -1, false
+}
+
+// Description: Places a read lock on the underlying circular buffer and then
+// calls the underlying circular buffers [CircularBuffer.KeyOfPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (c *SyncedCircularBuffer[T, U]) KeyOfPntr(val *T) (int, bool) {
+	c.RLock()
+	defer c.RUnlock()
+	return c.CircularBuffer.KeyOfPntr(val)
 }
 
 // Description: Sets the values at the specified indexes. Returns an error if

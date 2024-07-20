@@ -18,6 +18,7 @@ type ReadKeyedOps[K any, V any] interface {
 	Get(k K) (V, error)
 	GetPntr(k K) (*V, error)
 	KeyOf(v V) (K, bool)
+	KeyOfPntr(v *V) (K, bool)
 	Keys() iter.Iter[K]
 }
 

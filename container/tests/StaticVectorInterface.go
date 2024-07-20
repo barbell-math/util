@@ -370,6 +370,42 @@ func StaticVectorInterfaceKeyOf(
 	staticVectorKeyOfHelper(factory(10), 5, t)
 }
 
+func staticVectorKeyOfPntrHelper(
+	v staticContainers.Vector[int],
+	l int,
+	t *testing.T,
+) {
+	for i := 0; i < l; i++ {
+		v.Append(i)
+	}
+	for i := 0; i < l; i++ {
+		k, found := v.KeyOfPntr(&i)
+		test.Eq(i, k, t)
+		test.True(found, t)
+	}
+	tmp:=-1
+	_, found := v.KeyOfPntr(&tmp)
+	test.False(found, t)
+	_, found = v.KeyOfPntr(&l)
+	test.False(found, t)
+	test.False(v.Contains(l), t)
+}
+
+// Tests the KeyOfPntr method functionality of a static vector.
+func StaticVectorInterfaceKeyOfPntr(
+	factory func(capacity int) staticContainers.Vector[int],
+	t *testing.T,
+) {
+	staticVectorKeyOfPntrHelper(factory(0), 0, t)
+	staticVectorKeyOfPntrHelper(factory(10), 0, t)
+	staticVectorKeyOfPntrHelper(factory(1), 1, t)
+	staticVectorKeyOfPntrHelper(factory(10), 1, t)
+	staticVectorKeyOfPntrHelper(factory(2), 2, t)
+	staticVectorKeyOfPntrHelper(factory(10), 2, t)
+	staticVectorKeyOfPntrHelper(factory(5), 5, t)
+	staticVectorKeyOfPntrHelper(factory(10), 5, t)
+}
+
 func staticVectorSetHelper(
 	factory func(capacity int) staticContainers.Vector[int],
 	l int,

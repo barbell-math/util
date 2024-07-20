@@ -290,7 +290,7 @@ func (v *SyncedVector[T, U]) ContainsPntr(val *T) bool {
 //
 // Time Complexity: O(n) (linear search)
 func (v *Vector[T, U]) KeyOf(val T) (int, bool) {
-	return v.keyOfImpl(&val)
+	return v.KeyOfPntr(&val)
 }
 
 // Description: Places a read lock on the underlying vector and then calls the
@@ -304,10 +304,17 @@ func (v *Vector[T, U]) KeyOf(val T) (int, bool) {
 func (v *SyncedVector[T, U]) KeyOf(val T) (int, bool) {
 	v.RLock()
 	defer v.RUnlock()
-	return v.Vector.keyOfImpl(&val)
+	return v.Vector.KeyOfPntr(&val)
 }
 
-func (v *Vector[T, U]) keyOfImpl(val *T) (int, bool) {
+// Description: KeyOfPntr will return the index of the first occurrence of the
+// supplied value in the vector. If the value is not found then the returned
+// index will be -1 and the boolean flag will be set to false. If the value is
+// found then the boolean flag will be set to true. All equality comparisons are
+// performed by the generic U widget type that the vector was initialized with.
+//
+// Time Complexity: O(n) (linear search)
+func (v *Vector[T, U]) KeyOfPntr(val *T) (int, bool) {
 	rv := -1
 	found := false
 	w := widgets.Widget[T, U]{}
@@ -317,6 +324,18 @@ func (v *Vector[T, U]) keyOfImpl(val *T) (int, bool) {
 		}
 	}
 	return rv, found
+}
+
+// Description: Places a read lock on the underlying vector and then calls the
+// underlying vectors [Vector.KeyOfPntr] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (v *SyncedVector[T, U]) KeyOfPntr(val *T) (int, bool) {
+	v.RLock()
+	defer v.RUnlock()
+	return v.Vector.KeyOfPntr(val)
 }
 
 // Description: Sets the values at the specified indexes. Returns an error if
@@ -420,24 +439,24 @@ func (v *Vector[T, U]) AppendUnique(vals ...T) error {
 	return nil
 }
 
-// Description: updates the supplied value in the underlying hash set, assuming
-// that it is present in the hash set already. The hash must not change from the
-// update and the updated value must compare equal to the original value. If
-// these rules are broken then an update violation error will be returned. This 
-// method is useful when you are storing struct values and want to update a 
-// field that is not utilized when calculating the hash and is also ignored
-// when comparing for equality. This assumes congruency is present between the
-// hash and equality methods defined in the U widget. If the value is not found
-// then a key error will be returned.
+// Description: updates the supplied value in the underlying vector set,
+// assuming that it is present in the vector already. The hash must not change
+// from the update and the updated value must compare equal to the original 
+// value. If these rules are broken then an update violation error will be 
+// returned. This method is useful when you are storing struct values and want
+// to update a field that is not utilized when calculating the hash and is also
+// ignored when comparing for equality. This assumes congruency is present
+// between the hash and equality methods defined in the U widget. If the value
+// is not found then a key error will be returned.
 //
 // Time Complexity: O(n)
 func (v *Vector[T, U])UpdateUnique(orig T, updateOp func(orig *T)) error {
 	return v.updateUniqueOp(&orig,updateOp)
 }
 
-// Description: Places a write lock on the underlying hash set and then calls
-// the underlying hash sets [HashSet.UpdateUnique] implementation method. The
-// [HashSet.UpdateUnique] method is not called directly to avoid copying the
+// Description: Places a write lock on the underlying vector and then calls
+// the underlying vectors [Vector.UpdateUnique] implementation method. The
+// [Vector.UpdateUnique] method is not called directly to avoid copying the
 // supplied value, which could be expensive with a large type for the T generic.
 //
 // Lock Type: Write
@@ -451,8 +470,7 @@ func (v *SyncedVector[T, U])UpdateUnique(orig T, updateOp func(orig *T)) error {
 
 func (v *Vector[T, U])updateUniqueOp(orig *T, updateOp func(orig *T)) error {
 	w:=widgets.Widget[T,U]{}
-	// TODO - KeyOfPntr and friends
-	idx,found:=v.KeyOf(*orig)
+	idx,found:=v.KeyOfPntr(orig)
 	if !found {
 		return getValueError[T](orig)
 	}

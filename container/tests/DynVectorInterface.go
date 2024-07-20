@@ -349,6 +349,37 @@ func DynVectorInterfaceKeyOf(
 	dynVectorKeyOfHelper(factory(0), 5, t)
 }
 
+func dynVectorKeyOfPntrHelper(
+	v dynamicContainers.Vector[int],
+	l int,
+	t *testing.T,
+) {
+	for i := 0; i < l; i++ {
+		v.Append(i)
+	}
+	for i := 0; i < l; i++ {
+		k, found := v.KeyOfPntr(&i)
+		test.Eq(i, k, t)
+		test.True(found, t)
+	}
+	tmp:=-1
+	_, found := v.KeyOfPntr(&tmp)
+	test.False(found, t)
+	_, found = v.KeyOfPntr(&tmp)
+	test.False(v.Contains(l), t)
+}
+
+// Tests the KeyOfPntr method functionality of a dynamic vector.
+func DynVectorInterfaceKeyOfPntr(
+	factory func(capacity int) dynamicContainers.Vector[int],
+	t *testing.T,
+) {
+	dynVectorKeyOfPntrHelper(factory(0), 0, t)
+	dynVectorKeyOfPntrHelper(factory(0), 1, t)
+	dynVectorKeyOfPntrHelper(factory(0), 2, t)
+	dynVectorKeyOfPntrHelper(factory(0), 5, t)
+}
+
 // Tests the Set method functionality of a dynamic vector.
 func DynVectorInterfaceSet(
 	factory func(capacity int) dynamicContainers.Vector[int],

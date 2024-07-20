@@ -310,6 +310,37 @@ func DynMapInterfaceKeyOf(
 	mapKeyOfHelper(factory(0), 5, t)
 }
 
+func mapKeyOfPntrHelper(
+	v dynamicContainers.Map[int, int],
+	l int,
+	t *testing.T,
+) {
+	for i := 0; i < l; i++ {
+		v.Emplace(basic.Pair[int, int]{i, i})
+	}
+	for i := 0; i < l; i++ {
+		k, found := v.KeyOfPntr(&i)
+		test.Eq(i, k, t)
+		test.True(found, t)
+	}
+	tmp:=-1
+	_, found := v.KeyOfPntr(&tmp)
+	test.False(found, t)
+	_, found = v.KeyOfPntr(&tmp)
+	test.False(v.Contains(l), t)
+}
+
+// Tests the KeyOfPntr method functionality of a dynamic map.
+func DynMapInterfaceKeyOfPntr(
+	factory func(capacity int) dynamicContainers.Map[int, int],
+	t *testing.T,
+) {
+	mapKeyOfPntrHelper(factory(0), 0, t)
+	mapKeyOfPntrHelper(factory(0), 1, t)
+	mapKeyOfPntrHelper(factory(0), 2, t)
+	mapKeyOfPntrHelper(factory(0), 5, t)
+}
+
 func mapPopHelper(
 	factory func(capacity int) dynamicContainers.Map[int, int],
 	l int,

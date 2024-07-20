@@ -253,7 +253,7 @@ func (m *HashMap[K, V, KI, VI]) KeyOf(v V) (K, bool) {
 }
 
 // Description: Places a read lock on the underlying hash map and then calls the
-// underlying hash map [HashMap.KeyOf] implemenation method. The [HashMap.KeyOf]
+// underlying hash map [HashMap.KeyOf] implementation method. The [HashMap.KeyOf]
 // method is not called directly to avoid copying the val variable twice, which
 // could be expensive with a large type for the V generic.
 //
@@ -265,6 +265,32 @@ func (m *SyncedHashMap[K, V, KI, VI]) KeyOf(v V) (K, bool) {
 	defer m.RUnlock()
 	var tmp K
 	return tmp, m.keyOfImpl(&tmp, &v)
+}
+
+// Description: KeyOfPntr will return the key of the first occurrence of the
+// supplied value in the map. If the value is not found then the returned
+// key will be a zero initialized key value and the boolean flag will be set to
+// false. If the value is found then the boolean flag will be set to true. All
+// equality comparisons are performed by the generic VI widget type that the map
+// was initialized with.
+//
+// Time Complexity: O(n) (linear search)
+func (m *HashMap[K, V, KI, VI])KeyOfPntr(v *V) (K, bool) {
+	var tmp K
+	return tmp, m.keyOfImpl(&tmp, v)
+}
+
+// Description: Places a read lock on the underlying hash map and then calls the
+// underlying hash map [HashMap.KeyOfPntr] implementation method. The
+// [HashMap.KeyOfPntr] method is not called directly to avoid copying the val
+// variable twice, which could be expensive with a large type for the V generic.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n) (linear search)
+func (m *SyncedHashMap[K, V, KI, VI])KeyOfPntr(v *V) (K, bool) {
+	var tmp K
+	return tmp, m.HashMap.keyOfImpl(&tmp, v)
 }
 
 func (m *HashMap[K, V, KI, VI]) keyOfImpl(k *K, v *V) bool {
