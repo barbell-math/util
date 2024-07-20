@@ -20,9 +20,9 @@ type (
 	graphLink             basic.Pair[edgeHash, vertexHash]
 	graphImpl map[vertexHash]Vector[graphLink, *graphLink]
 
-	// This is used when only the vertex part of a graph edge is needed
+	// This is used when only the vertex part of a graph edge is pertinent
 	vertexOnlyGraphLinkWidget graphLink
-	// This is used when only the edge part of a graph edge is needed
+	// This is used when only the edge part of a graph edge is pertinent
 	edgeOnlyGraphLinkWidget graphLink
 
 	internalHashGraphImpl[
@@ -32,11 +32,12 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		numLinks int
-		graph    graphImpl
 		edges hashGraphEdges[V,E,VI,EI]
 		vertices hashGraphVertices[V,E,VI,EI]
+		graph    graphImpl
 	}
 
+	// TODO - try to combine these two structs
 	hashGraphEdges[
 		V any,
 		E any,
@@ -61,9 +62,7 @@ type (
 	// types. The graph will maintain a set of vertices that are connected by a
 	// set of edges. The type constraints on the generics define the logic for
 	// for how specific operations, such as equality comparisons, will be
-	// handled. The hash and equals methods defined in the widget types *must*
-	// be congruent as they are both used when creating the graph internally.
-	// The graph will grow as edges and vertices are added.
+	// handled. The graph will grow as edges and vertices are added.
 	HashGraph[
 		V any,
 		E any,
@@ -135,7 +134,7 @@ func (h *hashGraphEdges[V,E,VI,EI])deleteOp(
 ) {
 	for iterHash, gNode := range h.internalHashGraphImpl.graph {
 		idx, offset:=0, 0
-		for _,gLink:=range(gNode) {
+		for i,gLink:=range(gNode) {
 			if gLink.A==edgeHash(deletedHash) {
 				offset++
 				continue
@@ -143,6 +142,7 @@ func (h *hashGraphEdges[V,E,VI,EI])deleteOp(
 			if newHash,ok:=updatedHashes[OldHashSetHash(gLink.A)]; ok {
 				gLink.A=edgeHash(newHash)
 			}
+			gNode[i]=gLink
 			gNode[idx]=gNode[idx+offset]
 			idx++
 		}
@@ -174,7 +174,7 @@ func (h *hashGraphVertices[V,E,VI,EI])deleteOp(
 
 	for iterHash, gNode := range h.internalHashGraphImpl.graph {
 		idx, offset:=0, 0
-		for _,gLink:=range(gNode) {
+		for i,gLink:=range(gNode) {
 			if gLink.B==vertexHash(deletedHash) {
 				offset++
 				continue
@@ -182,6 +182,7 @@ func (h *hashGraphVertices[V,E,VI,EI])deleteOp(
 			if newHash,ok:=updatedHashes[OldHashSetHash(gLink.B)]; ok {
 				gLink.B=vertexHash(newHash)
 			}
+			gNode[i]=gLink
 			gNode[idx]=gNode[idx+offset]
 			idx++
 		}

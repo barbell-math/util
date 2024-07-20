@@ -12,10 +12,10 @@ import (
 
 func generateHashGraph(
 	capacity int,
-) HashGraph[int, int, widgets.BuiltinInt, widgets.BuiltinInt] {
+) HashGraph[int, int, badBuiltinInt, badBuiltinInt] {
 	v, _ := NewHashGraph[
 		int, int,
-		widgets.BuiltinInt, widgets.BuiltinInt,
+		badBuiltinInt, badBuiltinInt,
 	](capacity, capacity)
 	return v
 }
