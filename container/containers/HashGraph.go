@@ -68,6 +68,11 @@ type (
 		VI widgets.WidgetInterface[V],
 		EI widgets.WidgetInterface[E],
 	] struct {
+		// By making this struct nothing more than a pointer to the true
+		// graphImpl it makes it so that it will have the same behavior as a
+		// map. This is important for consistency.
+		// See: https://stackoverflow.com/a/53680008/8317099
+
 		*internalHashGraphImpl[V, E, VI, EI]
 	}
 

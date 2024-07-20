@@ -119,7 +119,7 @@ func ReadStaticDequeInterface[V any](
 	factory func(capacity int) staticContainers.Deque[V],
 	t *testing.T,
 ) {
-	dynDequeReadInterface[V](factory(0))
+	staticDequeReadInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
@@ -128,7 +128,7 @@ func WriteStaticDequeInterface[V any](
 	factory func(capacity int) staticContainers.Deque[V],
 	t *testing.T,
 ) {
-	dynDequeWriteInterface[V](factory(0))
+	staticDequeWriteInterface[V](factory(0))
 }
 
 // Tests that the value supplied by the factory implements the
@@ -137,7 +137,7 @@ func StaticDequeInterfaceInterface[V any](
 	factory func(capacity int) staticContainers.Deque[V],
 	t *testing.T,
 ) {
-	dynDequeInterface[V](factory(0))
+	staticDequeInterface[V](factory(0))
 }
 
 // Tests the Clear method functionality of a static Deque.

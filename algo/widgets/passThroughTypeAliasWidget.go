@@ -34,14 +34,46 @@ func main() {
 
 	fmt.Printf("Making pass through type alias widget for type %-30s\n", VALS.AliasType)
 	if VALS.ShowInfo {
-		fmt.Println("Recieved the following values:")
+		fmt.Println("Received the following values:")
 		fmt.Println("\tPackage: ", VALS.Package)
 		fmt.Println("\tAlias Type: ", VALS.AliasType)
 		fmt.Println("\tBase Type: ", VALS.BaseType)
 		fmt.Println("\tBase Type Widget: ", VALS.BaseTypeWidget)
 	}
 
-	fName := fmt.Sprintf("TypeAliasPassThroughWidget_%s_to_%s.go", VALS.AliasType, VALS.BaseType)
+	fileNameBaseType:=[]byte(VALS.BaseType)
+	fileNameAliasType:=[]byte(VALS.AliasType)
+	bannedChars:=map[byte]struct{}{
+		'[': struct{}{},
+		']': struct{}{},
+		'{': struct{}{},
+		'}': struct{}{},
+		':': struct{}{},
+		';': struct{}{},
+		'<': struct{}{},
+		'>': struct{}{},
+		',': struct{}{},
+		'.': struct{}{},
+		'/': struct{}{},
+		'\\': struct{}{},
+		'|': struct{}{},
+	}
+	for i,c:=range(fileNameBaseType) {
+		if _,ok:=bannedChars[c]; ok {
+			fileNameBaseType[i]='-'
+		}
+	}
+	for i,c:=range(fileNameAliasType) {
+		if _,ok:=bannedChars[c]; ok {
+			fileNameAliasType[i]='-'
+		}
+	}
+
+	fName := fmt.Sprintf(
+		"TypeAliasPassThroughWidget_%s_to_%s.go",
+		fileNameAliasType,
+		fileNameBaseType,
+	)
 	f, err := os.Create(fName)
 	if err != nil {
 		fmt.Println("ERROR | Could not open ", fName, " to write to it.")
@@ -135,5 +167,5 @@ func generateImports() string {
 
 		commonImport = commonImport + "import \"{{ .WidgetPackage }}\"\n"
 	}
-	return commonImport
+	return commonImport+"\n"
 }

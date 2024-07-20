@@ -1,8 +1,0 @@
-*
-!.gitignore
-!Common.go
-!Pntr.go
-!NilWidget.go
-!widgetInterfaceImpl.go
-!passThroughTypeAliasWidget.go
-!*_test.go

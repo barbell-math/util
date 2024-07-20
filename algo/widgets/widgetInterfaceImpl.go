@@ -54,7 +54,7 @@ func main() {
 
 	fmt.Println("Making widget for type %-30s\n", VALS.Type)
 	if VALS.ShowInfo {
-		fmt.Println("Recieved the following values:")
+		fmt.Println("Received the following values:")
 		fmt.Println("\tPackage: ", VALS.Package)
 		fmt.Println("\tType: ", VALS.Type)
 		fmt.Println("\tCapType: ", VALS.CapType)

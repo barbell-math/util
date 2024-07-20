@@ -423,16 +423,16 @@ func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
 				continue
 			}
 			// If the value is eq to the value we are deleting then also skip it
-			// because deleting it and then re-creating it does not guarintee
+			// because deleting it and then re-creating it does not guarantee
 			// it will be iterated on later.
 			// Scenario 1: The value is the last value of the collision chain
-			//   The value will be orphaned an unaccessable using the standard
+			//   The value will be orphaned and inaccessible using the standard
 			//   Get method but will be deleted by a future iteration of the
 			//   popImpl function. If it were moved this 're-iteration' would
-			//	 not be guarinteed.
+			//	 not be guaranteed.
 			// Scenario 2: The value is in the middle of a collision chain. in
 			//   this case the hole that is created will be filled by an
-			//   appripriate value later in the collision chain.
+			//   appropriate value later in the collision chain.
 			if vw.Eq(v, &iterV.B) {
 				continue
 			}

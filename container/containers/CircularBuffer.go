@@ -21,6 +21,10 @@ type (
 	// array as operations are performed making it so no allocations are ever
 	// performed beyond the initial creation of the underlying array.
 	CircularBuffer[T any, U widgets.WidgetInterface[T]] struct {
+		// By definiing the struct this way this vector will have very similar
+		// behavior to a slice, where this is struct acts as a header that
+		// points to the actual data.
+
 		vals     []T
 		numElems int
 		start    wrapingIndex
