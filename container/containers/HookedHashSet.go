@@ -8,7 +8,10 @@ import (
 type (
 	HashSetHooks interface {
 		addOp(hashLoc HashSetHash)
-		deleteOp(updatedHashes map[OldHashSetHash]NewHashSetHash)
+		deleteOp(
+			deletedHash HashSetHash,
+			updatedHashes map[OldHashSetHash]NewHashSetHash,
+		)
 		clearOp()
 	}
 
@@ -51,6 +54,10 @@ func NewSyncedHookedHashSet[T any, U widgets.WidgetInterface[T]](
 	}, nil
 }
 
+func (h *HookedHashSet[T, U])GetHashPosition(v *T) (HashSetHash,bool) {
+	return h.getHashPosition(v)
+}
+
 func (h *HookedHashSet[T, U])GetFromHash(internalHash HashSetHash) (T,error) {
 	if v,ok:=h.HashSet.internalHashSetImpl[internalHash]; ok {
 		return v,nil
@@ -83,36 +90,41 @@ func (h *SyncedHookedHashSet[T, U])AppendUnique(vals ...T) error {
 	return nil
 }
 
+// TODO - combine delete op and hashes affected by pop
 func (h *HookedHashSet[T, U])Pop(v T) int {
-	if res,ok:=h.getHashesAffectedByPop(&v); ok {
-		h.hooks.deleteOp(res)
+	if deletedHash,affectedHashes,cnt:=h.HashSet.popAndGetAffectedHashes(&v); cnt>0 {
+		h.hooks.deleteOp(deletedHash,affectedHashes)
+		return cnt
 	}
-	return h.HashSet.Pop(v)
+	return 0
 }
 
 func (h *SyncedHookedHashSet[T, U])Pop(v T) int {
 	h.Lock()
 	defer h.Unlock()
-	if res,ok:=h.getHashesAffectedByPop(&v); ok {
-		h.hooks.deleteOp(res)
+	if deletedHash,affectedHashes,cnt:=h.SyncedHashSet.HashSet.popAndGetAffectedHashes(&v); cnt>0 {
+		h.hooks.deleteOp(deletedHash,affectedHashes)
+		return cnt
 	}
-	return h.SyncedHashSet.HashSet.Pop(v)
+	return 0
 }
 
 func (h *HookedHashSet[T, U])PopPntr(v *T) int {
-	if res,ok:=h.getHashesAffectedByPop(v); ok {
-		h.hooks.deleteOp(res)
+	if deletedHash,affectedHashes,cnt:=h.HashSet.popAndGetAffectedHashes(v); cnt>0 {
+		h.hooks.deleteOp(deletedHash,affectedHashes)
+		return cnt
 	}
-	return h.HashSet.PopPntr(v)
+	return 0
 }
 
 func (h *SyncedHookedHashSet[T, U])PopPntr(v *T) int {
 	h.Lock()
 	defer h.Unlock()
-	if res,ok:=h.getHashesAffectedByPop(v); ok {
-		h.hooks.deleteOp(res)
+	if deletedHash,affectedHashes,cnt:=h.SyncedHashSet.HashSet.popAndGetAffectedHashes(v); cnt>0 {
+		h.hooks.deleteOp(deletedHash,affectedHashes)
+		return cnt
 	}
-	return h.SyncedHashSet.HashSet.PopPntr(v)
+	return 0
 }
 
 func (h *HookedHashSet[T, U])Clear() {

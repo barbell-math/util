@@ -1,7 +1,6 @@
 package containers
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/barbell-math/util/algo/iter"
@@ -73,9 +72,10 @@ func TestHashSetZero(t *testing.T) {
 	test.Eq(0, s1.Length(), t)
 }
 
-func getHashesAffectedByPopHelper(
+func popAndGetAffectedHashesHelper(
 	setVals iter.Iter[int],
 	popVal int,
+	popHash HashSetHash,
 	initialMap map[HashSetHash]int,
 	res map[OldHashSetHash]NewHashSetHash,
 	t *testing.T,
@@ -86,13 +86,10 @@ func getHashesAffectedByPopHelper(
 		return iter.Continue, nil
 	})
 	test.MapsMatch[HashSetHash,int](initialMap, s1.internalHashSetImpl, t)
-	vals,ok:=s1.getHashesAffectedByPop(&popVal)
-	test.True(ok,t)
-	fmt.Println(popVal)
-	fmt.Println(s1.internalHashSetImpl)
+	deletedHash, vals,num:=s1.popAndGetAffectedHashes(&popVal)
+	test.Eq(popHash, deletedHash, t)
+	test.Eq(1,num,t)
 	s1.Pop(popVal)
-	fmt.Println(s1.internalHashSetImpl)
-	fmt.Println(vals)
 	test.MapsMatch[OldHashSetHash, NewHashSetHash](res,vals,t)
 }
 func TestGetHashesAffectedByPop(t *testing.T) {
@@ -101,9 +98,10 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 		initialMap[HashSetHash(i)]=i
 	}
 	for i:=0; i<4; i++ {
-		getHashesAffectedByPopHelper(
+		popAndGetAffectedHashesHelper(
 			iter.Range[int](0,8,1),
 			i,
+			HashSetHash(i),
 			initialMap,
 			map[OldHashSetHash]NewHashSetHash{
 				4: NewHashSetHash(i),
@@ -119,17 +117,19 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 		for j:=i; j<7; j++ {
 			expRes[OldHashSetHash(j+1)]=NewHashSetHash(j)
 		}
-		getHashesAffectedByPopHelper(
+		popAndGetAffectedHashesHelper(
 			iter.Range[int](0,8,1),
 			i,
+			HashSetHash(i),
 			initialMap,
 			expRes,
 			t,
 		)
 	}
-	getHashesAffectedByPopHelper(
+	popAndGetAffectedHashesHelper(
 		iter.SliceElems[int]([]int{0,2,3,4,5,6,7}),
 		4,
+		1,
 		map[HashSetHash]int{
 			0: 0,
 			1: 4,
@@ -146,8 +146,9 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 		},
 		t,
 	)
-	getHashesAffectedByPopHelper(
+	popAndGetAffectedHashesHelper(
 		iter.SliceElems[int]([]int{0,1,2,5,6,7}),
+		0,
 		0,
 		map[HashSetHash]int{
 			0: 0,
@@ -160,8 +161,9 @@ func TestGetHashesAffectedByPop(t *testing.T) {
 		map[OldHashSetHash]NewHashSetHash{},
 		t,
 	)
-	getHashesAffectedByPopHelper(
+	popAndGetAffectedHashesHelper(
 		iter.SliceElems[int]([]int{0,4,8,7,11}),
+		0,
 		0,
 		map[HashSetHash]int{
 			0: 0,

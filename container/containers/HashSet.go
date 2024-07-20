@@ -317,13 +317,15 @@ func (h *HashSet[T, U])PopPntr(v *T) int {
 // the map: {4: 1, 5: 4, 6: 5} would mean that the value that was at index 4 is
 // now at index 1, the value that was at index 5 is now at index 4, and the
 // value at index 6 is now at index 5.
-func (h *HashSet[T, U])getHashesAffectedByPop(
+func (h *HashSet[T, U])popAndGetAffectedHashes(
 	v *T,
-) (map[OldHashSetHash]NewHashSetHash, bool) {
+) (HashSetHash, map[OldHashSetHash]NewHashSetHash, int) {
+	var deletedHash HashSetHash
 	w := widgets.Widget[T, U]{}
 	rv:=map[OldHashSetHash]NewHashSetHash{}
-
 	if i, cont := h.getHashPosition(v); cont {
+		deletedHash=i
+		delete(h.internalHashSetImpl,i)
 		curPos := i
 		for j := i + 1; ; j++ {
 			if iterV, found := h.internalHashSetImpl[j]; found {
@@ -333,15 +335,17 @@ func (h *HashSet[T, U])getHashesAffectedByPop(
 				if HashSetHash(w.Hash(&iterV)) > curPos {
 					continue
 				}
+				h.internalHashSetImpl[curPos] = h.internalHashSetImpl[j]
+				delete(h.internalHashSetImpl, j)
 				rv[OldHashSetHash(j)]=NewHashSetHash(curPos)
 				curPos = j
 			} else {
 				break
 			}
 		}
-		return rv, true
+		return deletedHash, rv, 1
 	}
-	return rv, false
+	return deletedHash, rv, 0
 }
 
 // Description: Places a write lock on the underlying hash set and then calls

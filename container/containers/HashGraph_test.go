@@ -136,7 +136,7 @@ func TestHashGraphZero(t *testing.T) {
 	test.Eq(0, g1.NumVertices(), t)
 	test.Eq(0, g1.NumEdges(), t)
 	test.Eq(0, g1.NumLinks(), t)
-	test.Eq(0, len(g1.vertices), t)
-	test.Eq(0, len(g1.edges), t)
+	test.Eq(0, g1.vertices.Length(), t)
+	test.Eq(0, g1.edges.Length(), t)
 	test.Eq(0, len(g1.graph), t)
 }

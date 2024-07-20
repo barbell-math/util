@@ -1688,20 +1688,20 @@ func DynDirectedGraphDeleteLinksPntr(
 func directedGraphDeleteVertexHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	construction directedGraphConstruction,
-	deleteVertices []int,
+	deletedVertices []int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
 	container:=construction.makeGraph(factory,t)
-	for i := 0; i < len(deleteVertices); i++ {
-		test.Nil(container.DeleteVertex(deleteVertices[i]), t)
+	for i := 0; i < len(deletedVertices); i++ {
+		test.Nil(container.DeleteVertex(deletedVertices[i]), t)
 	}
-	for i := 0; i < len(deleteVertices); i++ {
-		test.False(container.ContainsVertex(deleteVertices[i]), t)
+	for i := 0; i < len(deletedVertices); i++ {
+		test.False(container.ContainsVertex(deletedVertices[i]), t)
 	}
 	test.Eq(construction.numEdges, container.NumEdges(), t)
 	test.Eq(
-		construction.numVertices-len(deleteVertices),
+		construction.numVertices-len(deletedVertices),
 		container.NumVertices(),
 		t,
 	)
@@ -1781,20 +1781,20 @@ func DynDirectedGraphDeleteVertex(
 func directedGraphDeleteVertexPntrHelper(
 	factory func(capacity int) dynamicContainers.DirectedGraph[int, int],
 	construction directedGraphConstruction,
-	deleteVertices []int,
+	deletedVertices []int,
 	numDeletedLinks int,
 	t *testing.T,
 ) {
 	container:=construction.makeGraph(factory, t)
-	for i := 0; i < len(deleteVertices); i++ {
-		test.Nil(container.DeleteVertexPntr(&deleteVertices[i]), t)
+	for i := 0; i < len(deletedVertices); i++ {
+		test.Nil(container.DeleteVertexPntr(&deletedVertices[i]), t)
 	}
-	for i := 0; i < len(deleteVertices); i++ {
-		test.False(container.ContainsVertex(deleteVertices[i]), t)
+	for i := 0; i < len(deletedVertices); i++ {
+		test.False(container.ContainsVertex(deletedVertices[i]), t)
 	}
 	test.Eq(construction.numEdges, container.NumEdges(), t)
 	test.Eq(
-		construction.numVertices-len(deleteVertices),
+		construction.numVertices-len(deletedVertices),
 		container.NumVertices(),
 		t,
 	)

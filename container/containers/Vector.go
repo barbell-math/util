@@ -623,7 +623,7 @@ func (v *SyncedVector[T, U]) Delete(idx int) error {
 }
 
 // Description: Deletes the values in the index range [start,end). Returns an
-// error if the start index is < 0, the end index is >= the length of the
+// error if the start index is < 0, the end index is > the length of the
 // vector, or the end index is < the start index.
 //
 // Time Complexity: O(n)
@@ -631,7 +631,7 @@ func (v *Vector[T, U]) DeleteSequential(start int, end int) error {
 	if start < 0 {
 		return getIndexOutOfBoundsError(start, 0, len(*v))
 	}
-	if end >= len(*v) {
+	if end > len(*v) {
 		return getIndexOutOfBoundsError(end, 0, len(*v))
 	}
 	if end <= start {

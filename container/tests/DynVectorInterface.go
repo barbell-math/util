@@ -781,7 +781,7 @@ func DynVectorInterfaceDeleteSequential(
 	err := container.DeleteSequential(-1, 3)
 	test.ContainsError(customerr.ValOutsideRange, err, t)
 	test.Eq(4, container.Length(), t)
-	err = container.DeleteSequential(0, 4)
+	err = container.DeleteSequential(0, 5)
 	test.ContainsError(customerr.ValOutsideRange, err, t)
 	test.Eq(4, container.Length(), t)
 	err = container.DeleteSequential(2, 1)
