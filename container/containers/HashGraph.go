@@ -13,6 +13,7 @@ import (
 
 //go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=edgeHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
 //go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=vertexHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
+//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=graphLink "-baseType=basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]" "-baseTypeWidget=basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]" -widgetPackage=github.com/barbell-math/util/container/basic
 
 type (
 	edgeHash   HashSetHash
@@ -57,11 +58,12 @@ type (
 		internalHashGraphImpl *internalHashGraphImpl[V, E, VI, EI]
 	}
 
-	// A type to represent an arbitrary graph with the specified vertex and edge
-	// types. The graph will maintain a set of vertices that are connected by a
-	// set of edges. The type constraints on the generics define the logic for
-	// for how specific operations, such as equality comparisons, will be
-	// handled. The graph will grow as edges and vertices are added.
+	// A type to represent an arbitrary directed graph with the specified vertex
+	// and edge types. The graph will maintain a set of vertices and edges that
+	// are linked together to make a graph. The type constraints on the generics
+	// define the logic for for how specific operations, such as equality
+	// comparisons, will be handled. The graph will grow as edges and vertices
+	// are added.
 	HashGraph[
 		V any,
 		E any,
@@ -89,19 +91,6 @@ type (
 		HashGraph[V, E, VI, EI]
 	}
 )
-
-func (_ *graphLink) Eq(l *graphLink, r *graphLink) bool {
-	return l.A.Eq(&l.A, &r.A) && l.B.Eq(&l.B, &r.B)
-}
-func (_ *graphLink) Lt(l *graphLink, r *graphLink) bool {
-	return l.A.Lt(&l.A, &r.A) && l.B.Lt(&l.B, &r.B)
-}
-func (_ *graphLink) Hash(other *graphLink) hash.Hash {
-	return other.A.Hash(&other.A).Combine(other.B.Hash(&other.B))
-}
-func (_ *graphLink) Zero(other *graphLink) {
-	*other = graphLink{}
-}
 
 func (_ *vertexOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
 	return l.B.Eq(&l.B, &r.B)

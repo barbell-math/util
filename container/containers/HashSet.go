@@ -68,9 +68,9 @@ func NewSyncedHashSet[T any, U widgets.WidgetInterface[T]](
 // values will be ignored.
 func HashSetValInit[T any, U widgets.WidgetInterface[T]](
 	vals ...T,
-) HashSet[T,U] {
-	rv,_:=NewHashSet[T,U](len(vals))
-	for _,v:=range(vals) {
+) HashSet[T, U] {
+	rv, _ := NewHashSet[T, U](len(vals))
+	for _, v := range vals {
 		rv.AppendUnique(v)
 	}
 	return rv
@@ -80,9 +80,9 @@ func HashSetValInit[T any, U widgets.WidgetInterface[T]](
 // Duplicated values will be ignored.
 func SyncedHashSetValInit[T any, U widgets.WidgetInterface[T]](
 	vals ...T,
-) SyncedHashSet[T,U] {
-	rv,_:=NewSyncedHashSet[T,U](len(vals))
-	for _,v:=range(vals) {
+) SyncedHashSet[T, U] {
+	rv, _ := NewSyncedHashSet[T, U](len(vals))
+	for _, v := range vals {
 		rv.AppendUnique(v)
 	}
 	return rv
@@ -288,8 +288,8 @@ func (h *HashSet[T, U]) appendOp(v *T) {
 // Description: updates the supplied value in the underlying hash set, assuming
 // that it is present in the hash set already. The hash must not change from the
 // update and the updated value must compare equal to the original value. If
-// these rules are broken then an update violation error will be returned. This 
-// method is useful when you are storing struct values and want to update a 
+// these rules are broken then an update violation error will be returned. This
+// method is useful when you are storing struct values and want to update a
 // field that is not utilized when calculating the hash and is also ignored
 // when comparing for equality. This assumes congruency is present between the
 // hash and equality methods defined in the U widget. If the value is not found
@@ -297,7 +297,7 @@ func (h *HashSet[T, U]) appendOp(v *T) {
 //
 // Time Complexity: O(1)
 func (h *HashSet[T, U]) UpdateUnique(orig T, updateOp func(orig *T)) error {
-	return h.updateOp(&orig,updateOp)
+	return h.updateOp(&orig, updateOp)
 }
 
 // Description: Places a write lock on the underlying hash set and then calls
@@ -308,34 +308,34 @@ func (h *HashSet[T, U]) UpdateUnique(orig T, updateOp func(orig *T)) error {
 // Lock Type: Write
 //
 // Time Complexity: O(1)
-func (h *SyncedHashSet[T, U])UpdateUnique(
+func (h *SyncedHashSet[T, U]) UpdateUnique(
 	orig T,
 	updateOp func(orig *T),
 ) error {
 	h.Lock()
 	defer h.Unlock()
-	return h.HashSet.updateOp(&orig,updateOp)
+	return h.HashSet.updateOp(&orig, updateOp)
 }
 
-func (h *HashSet[T, U])updateOp(orig *T, updateOp func(orig *T)) error {
-	w:=widgets.Widget[T,U]{}
+func (h *HashSet[T, U]) updateOp(orig *T, updateOp func(orig *T)) error {
+	w := widgets.Widget[T, U]{}
 	for i := HashSetHash(w.Hash(orig)); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; !found {
 			return getValueError[T](orig)
 		} else if w.Eq(orig, &iterV) {
 			updateOp(orig)
-			oldValue:=h.internalHashSetImpl[i]
-			newHash:=w.Hash(orig)
-			oldHash:=w.Hash(&oldValue)
-			if newHash!=oldHash {
+			oldValue := h.internalHashSetImpl[i]
+			newHash := w.Hash(orig)
+			oldHash := w.Hash(&oldValue)
+			if newHash != oldHash {
 				return getUpdateViolationHashError[T](
 					&oldValue, orig, hash.Hash(oldHash), hash.Hash(newHash),
 				)
 			}
-			if !w.Eq(&oldValue,orig) {
+			if !w.Eq(&oldValue, orig) {
 				return getUpdateViolationEqError[T](&oldValue, orig)
 			}
-			h.internalHashSetImpl[i]=*orig
+			h.internalHashSetImpl[i] = *orig
 			return nil
 		}
 	}

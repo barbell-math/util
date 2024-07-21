@@ -169,8 +169,8 @@ func MapElems[K comparable, V any](
 		if i < len(m) && f != Break {
 			cont <- true
 			v := factory()
-			v.A=<-c
-			v.B=m[v.A]
+			v.A = <-c
+			v.B = m[v.A]
 			return v, nil, true
 		}
 		if f == Break {
@@ -297,8 +297,8 @@ func Zip[T any, U any](
 			return basic.Pair[T, U]{}, err2, false
 		}
 		p := factory()
-		p.A=iVal1
-		p.B=iVal2
+		p.A = iVal1
+		p.B = iVal2
 		return p, nil, (cont1 && cont2)
 	}
 }

@@ -335,18 +335,18 @@ func StaticSetInterfaceUpdateUnique(
 	for i := 0; i < 5; i++ {
 		test.True(container.Contains(i), t)
 	}
-	for i:=0; i<5; i++ {
-		err:=container.UpdateUnique(i, func(orig *int) {})
-		test.Nil(err,t)
-		test.True(container.Contains(i),t)
-		test.Eq(5,container.Length(),t)
+	for i := 0; i < 5; i++ {
+		err := container.UpdateUnique(i, func(orig *int) {})
+		test.Nil(err, t)
+		test.True(container.Contains(i), t)
+		test.Eq(5, container.Length(), t)
 	}
-	for i:=0; i<5; i++ {
-		err:=container.UpdateUnique(i, func(orig *int) {*orig=*orig+1})
+	for i := 0; i < 5; i++ {
+		err := container.UpdateUnique(i, func(orig *int) { *orig = *orig + 1 })
 		test.ContainsError(containerTypes.UpdateViolation, err, t)
 		test.ContainsError(customerr.InvalidValue, err, t)
 	}
-	err:=container.UpdateUnique(6, func(orig *int) {})
+	err := container.UpdateUnique(6, func(orig *int) {})
 	test.ContainsError(containerTypes.ValueError, err, t)
 }
 

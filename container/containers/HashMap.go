@@ -83,9 +83,9 @@ func HashMapValInit[
 	V any,
 	KI widgets.WidgetInterface[K],
 	VI widgets.WidgetInterface[V],
-](vals []basic.Pair[K,V]) HashMap[K,V,KI,VI] {
-	rv,_:=NewHashMap[K,V,KI,VI](len(vals))
-	for _,v:=range(vals) {
+](vals []basic.Pair[K, V]) HashMap[K, V, KI, VI] {
+	rv, _ := NewHashMap[K, V, KI, VI](len(vals))
+	for _, v := range vals {
 		rv.Emplace(v)
 	}
 	return rv
@@ -99,9 +99,9 @@ func SyncedHashMapValInit[
 	V any,
 	KI widgets.WidgetInterface[K],
 	VI widgets.WidgetInterface[V],
-](vals []basic.Pair[K,V]) SyncedHashMap[K,V,KI,VI] {
-	rv,_:=NewSyncedHashMap[K,V,KI,VI](len(vals))
-	for _,v:=range(vals) {
+](vals []basic.Pair[K, V]) SyncedHashMap[K, V, KI, VI] {
+	rv, _ := NewSyncedHashMap[K, V, KI, VI](len(vals))
+	for _, v := range vals {
 		rv.Emplace(v)
 	}
 	return rv
@@ -307,7 +307,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) KeyOf(v V) (K, bool) {
 // was initialized with.
 //
 // Time Complexity: O(n) (linear search)
-func (m *HashMap[K, V, KI, VI])KeyOfPntr(v *V) (K, bool) {
+func (m *HashMap[K, V, KI, VI]) KeyOfPntr(v *V) (K, bool) {
 	var tmp K
 	return tmp, m.keyOfImpl(&tmp, v)
 }
@@ -320,7 +320,7 @@ func (m *HashMap[K, V, KI, VI])KeyOfPntr(v *V) (K, bool) {
 // Lock Type: Read
 //
 // Time Complexity: O(n) (linear search)
-func (m *SyncedHashMap[K, V, KI, VI])KeyOfPntr(v *V) (K, bool) {
+func (m *SyncedHashMap[K, V, KI, VI]) KeyOfPntr(v *V) (K, bool) {
 	var tmp K
 	return tmp, m.HashMap.keyOfImpl(&tmp, v)
 }

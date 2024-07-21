@@ -362,7 +362,7 @@ func dynVectorKeyOfPntrHelper(
 		test.Eq(i, k, t)
 		test.True(found, t)
 	}
-	tmp:=-1
+	tmp := -1
 	_, found := v.KeyOfPntr(&tmp)
 	test.False(found, t)
 	_, found = v.KeyOfPntr(&tmp)

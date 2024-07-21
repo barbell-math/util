@@ -32,7 +32,7 @@ func TestWrap(t *testing.T) {
 }
 
 func TestWrapValueList(t *testing.T) {
-	e:=WrapValueList(ValOutsideRange, "Val outside range", []WrapListVal{
+	e := WrapValueList(ValOutsideRange, "Val outside range", []WrapListVal{
 		{ItemName: "value", Item: 10},
 	})
 	test.Eq(

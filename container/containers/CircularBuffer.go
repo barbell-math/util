@@ -94,8 +94,8 @@ func NewSyncedCircularBuffer[T any, U widgets.WidgetInterface[T]](
 // circular buffer will have len(vals) capacity.
 func CirularBufferValInit[T any, U widgets.WidgetInterface[T]](
 	vals ...T,
-) CircularBuffer[T,U] {
-	rv,_:=NewCircularBuffer[T,U](len(vals))
+) CircularBuffer[T, U] {
+	rv, _ := NewCircularBuffer[T, U](len(vals))
 	copy(rv.vals, vals)
 	return rv
 }
@@ -104,8 +104,8 @@ func CirularBufferValInit[T any, U widgets.WidgetInterface[T]](
 // values. The circular buffer will have len(vals) capacity.
 func SyncedCirularBufferValInit[T any, U widgets.WidgetInterface[T]](
 	vals ...T,
-) SyncedCircularBuffer[T,U] {
-	rv,_:=NewSyncedCircularBuffer[T,U](len(vals))
+) SyncedCircularBuffer[T, U] {
+	rv, _ := NewSyncedCircularBuffer[T, U](len(vals))
 	copy(rv.CircularBuffer.vals, vals)
 	return rv
 }
@@ -611,7 +611,7 @@ func (c *SyncedCircularBuffer[T, U]) KeyOf(val T) (int, bool) {
 // supplied value in the circular buffer. If the value is not found then the
 // returned index will be -1 and the boolean flag will be set to false. If the
 // value is found then the boolean flag will be set to true. All equality
-// comparisons are performed by the generic U widget type that the circular 
+// comparisons are performed by the generic U widget type that the circular
 // buffer was initialized with.
 //
 // Time Complexity: O(n) (linear search)
@@ -769,7 +769,7 @@ func (c *CircularBuffer[T, U]) AppendUnique(vals ...T) error {
 // is not found then a key error will be returned.
 //
 // Time Complexity: O(n)
-func (c *CircularBuffer[T, U])UpdateUnique(
+func (c *CircularBuffer[T, U]) UpdateUnique(
 	orig T,
 	updateOp func(orig *T),
 ) error {
@@ -785,45 +785,45 @@ func (c *CircularBuffer[T, U])UpdateUnique(
 // Lock Type: Write
 //
 // Time Complexity: O(n)
-func (c *SyncedCircularBuffer[T, U])UpdateUnique(
-	orig T, 
+func (c *SyncedCircularBuffer[T, U]) UpdateUnique(
+	orig T,
 	updateOp func(orig *T),
 ) error {
 	c.Lock()
 	defer c.Unlock()
-	return c.updateUniqueOp(&orig,updateOp)
+	return c.updateUniqueOp(&orig, updateOp)
 }
 
-func (c *CircularBuffer[T, U])updateUniqueOp(
+func (c *CircularBuffer[T, U]) updateUniqueOp(
 	orig *T,
 	updateOp func(orig *T),
 ) error {
-	idx:=-1
-	found:=false
+	idx := -1
+	found := false
 	w := widgets.Widget[T, U]{}
 	for i := 0; i < c.numElems && !found; i++ {
-		if found=w.Eq(
+		if found = w.Eq(
 			orig,
 			&c.vals[c.start.GetProperIndex(i, len(c.vals))],
 		); found {
-			idx=i
+			idx = i
 		}
 	}
 	if !found {
 		return getValueError[T](orig)
 	}
 	updateOp(orig)
-	newHash:=w.Hash(orig)
-	oldHash:=w.Hash(&c.vals[idx])
-	if newHash!=oldHash {
+	newHash := w.Hash(orig)
+	oldHash := w.Hash(&c.vals[idx])
+	if newHash != oldHash {
 		return getUpdateViolationHashError[T](
 			&c.vals[idx], orig, hash.Hash(oldHash), hash.Hash(newHash),
 		)
 	}
-	if !w.Eq(&c.vals[idx],orig) {
+	if !w.Eq(&c.vals[idx], orig) {
 		return getUpdateViolationEqError[T](&c.vals[idx], orig)
 	}
-	c.vals[idx]=*orig
+	c.vals[idx] = *orig
 	return nil
 }
 

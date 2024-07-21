@@ -8,7 +8,7 @@ import (
 	"github.com/barbell-math/util/container/containers"
 )
 
-//go:generate  ../../bin/passThroughTypeAliasWidget -package=lexer -aliasType=alphabetRange[A,AI] -baseType=containers.HashSet[A,AI] -baseTypeWidget=containers.HashSet[A,AI] -widgetPackage=github.com/barbell-math/util/container/containers
+//go:generate  ../../bin/passThroughTypeAliasWidget -package=lexer "-aliasType=alphabetRange[A, AI]" "-baseType=containers.HashSet[A, AI]" "-baseTypeWidget=containers.HashSet[A, AI]" -widgetPackage=github.com/barbell-math/util/container/containers
 
 type (
 	nfaID   int

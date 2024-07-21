@@ -52,7 +52,7 @@ func main() {
 	}
 	VALS.CapType = fmt.Sprintf("%s%s", strings.ToUpper(VALS.CapType)[:1], VALS.CapType[1:])
 
-	fmt.Println("Making widget for type %-30s\n", VALS.Type)
+	fmt.Printf("Making builtin widget | Type: %-30s\n", VALS.Type)
 	if VALS.ShowInfo {
 		fmt.Println("Received the following values:")
 		fmt.Println("\tPackage: ", VALS.Package)
@@ -76,17 +76,19 @@ func main() {
 			"// This is meant to be used with the containers from the [containers] package.\n" +
 			"type Builtin{{ .CapType }} struct{}\n\n" +
 			"// Returns true if both {{ .Type }}'s are equal. Uses the standard == operator internally.\n" +
-			"func (a Builtin{{ .CapType }})Eq(l *{{ .Type }}, r *{{ .Type }}) bool {\n" +
-			"    return *l==*r\n" +
+			"func (a Builtin{{ .CapType }}) Eq(l *{{ .Type }}, r *{{ .Type }}) bool {\n" +
+				"\treturn *l == *r\n" +
 			"}\n\n" +
 			"// Returns true if a is less than r. Uses the standard < operator internally.\n" +
-			"func (a Builtin{{ .CapType }})Lt(l *{{ .Type }}, r *{{ .Type }}) bool {\n" +
-			"    return *l<*r\n" +
+			"func (a Builtin{{ .CapType }}) Lt(l *{{ .Type }}, r *{{ .Type }}) bool {\n" +
+				"\treturn *l < *r\n" +
 			"}\n\n" +
 			"// Provides a hash function for the value that it is wrapping.\n" +
 			generateHashFunction() +
+			"\n"+
 			"// Zeros the supplied value.\n" +
 			generateZeroFunction() +
+			"\n" +
 			generateArithFuncs(),
 	)
 	if err != nil {
@@ -105,7 +107,7 @@ func main() {
 }
 
 func setupFlags() {
-	flag.StringVar(&VALS.Package, "package", "", "The packge to put the files in.")
+	flag.StringVar(&VALS.Package, "package", "", "The package to put the files in.")
 	flag.StringVar(&VALS.Type, "type", "", "The underlying type to generate the widget for.")
 	flag.BoolVar(&VALS.ShowInfo, "info", false, "Print debug information.")
 }
@@ -193,26 +195,26 @@ func generateHashFunction() string {
 	case "uint64":
 		fallthrough
 	case "hash.Hash":
-		return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n" +
-			"    return hash.Hash(*v)\n" +
-			"}\n\n"
+		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
+				"\treturn hash.Hash(*v)\n" +
+			"}\n"
 	case "float32":
 		fallthrough
 	case "float64":
-		return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n" +
-			"    panic(\"Floats are not hashable!\")\n" +
-			"}\n\n"
+		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
+				"\tpanic(\"Floats are not hashable!\")\n" +
+			"}\n"
 	case "string":
-		return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n" +
-			"    return hash.Hash(maphash.String(RANDOM_SEED_{{ .Type }},*(v)))\n" +
-			"}\n\n"
+		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
+				"\treturn hash.Hash(maphash.String(RANDOM_SEED_{{ .Type }},*(v)))\n" +
+			"}\n"
 	default:
-		return "func (a Builtin{{ .CapType }})Hash(v *{{ .Type }}) hash.Hash {\n" +
-			"    // this will fail compilation (on purpose!)\n" +
-			"    // the supplied type was not hashable!\n" +
-			"    panic(\"Supplied type was not hashable!\")\n" +
-			"    return hash.Hash(-1)\n" +
-			"}\n\n"
+		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
+				"\t// this will fail compilation (on purpose!)\n" +
+				"\t// the supplied type was not hashable!\n" +
+				"\tpanic(\"Supplied type was not hashable!\")\n" +
+				"\treturn hash.Hash(-1)\n" +
+			"}\n"
 	}
 }
 
@@ -245,20 +247,20 @@ func generateZeroFunction() string {
 	case "float64":
 		fallthrough
 	case "hash.Hash":
-		return "func (a Builtin{{ .CapType }})Zero(v *{{ .Type }}) {\n" +
-			"    *v={{ .Type }}(0)\n" +
-			"}\n\n"
+		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
+				"\t*v = {{ .Type }}(0)\n" +
+			"}\n"
 	case "string":
-		return "func (a Builtin{{ .CapType }})Zero(v *{{ .Type }}) {\n" +
-			"    *v=\"\"\n" +
-			"}\n\n"
+		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
+				"\t *v= \"\"\n" +
+			"}\n"
 	default:
-		return "func (a Builtin{{ .CapType }})Zero(v *{{ .Type }}) {\n" +
-			"    // this will fail compilation (on purpose!)\n" +
-			"    // the supplied type was not found in the zero table!\n" +
-			"	panic(\"The supplied type does not have a zeor value.\")\n" +
-			"    return int(-1)\n" +
-			"}\n\n"
+		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
+				"\t// this will fail compilation (on purpose!)\n" +
+				"\t// the supplied type was not found in the zero table!\n" +
+				"\tpanic(\"The supplied type does not have a zeor value.\")\n" +
+				"\treturn int(-1)\n" +
+			"}\n"
 	}
 }
 
@@ -291,29 +293,29 @@ func generateArithFuncs() string {
 	case "float64":
 		fallthrough
 	case "hash.Hash":
-		return "func (a Builtin{{ .CapType }})ZeroVal() {{ .Type }} {\n" +
-			"    return {{ .Type }}(0)\n" +
+		return "func (a Builtin{{ .CapType }}) ZeroVal() {{ .Type }} {\n" +
+				"\treturn {{ .Type }}(0)\n" +
 			"}\n\n" +
-			"func (a Builtin{{ .CapType }})UnitVal() {{ .Type }} {\n" +
-			"    return {{ .Type }}(1)\n" +
+			"func (a Builtin{{ .CapType }}) UnitVal() {{ .Type }} {\n" +
+				"\treturn {{ .Type }}(1)\n" +
 			"}\n\n" +
-			"func (a Builtin{{ .CapType }})Neg(v *{{ .Type }}) {\n" +
-			"    *v=-(*v)\n" +
+			"func (a Builtin{{ .CapType }}) Neg(v *{{ .Type }}) {\n" +
+				"\t*v = -(*v)\n" +
 			"}\n\n" +
-			"func (a Builtin{{ .CapType }})Add(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-			"    *res=*l+*r\n" +
+			"func (a Builtin{{ .CapType }}) Add(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
+				"\t*res = *l + *r\n" +
 			"}\n\n" +
-			"func (a Builtin{{ .CapType }})Sub(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-			"    *res=*l-*r\n" +
+			"func (a Builtin{{ .CapType }}) Sub(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
+				"\t*res = *l - *r\n" +
 			"}\n\n" +
-			"func (a Builtin{{ .CapType }})Mul(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-			"    *res=*l**r\n" +
+			"func (a Builtin{{ .CapType }}) Mul(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
+				"\t*res = *l * *r\n" +
 			"}\n\n" +
-			"func (a Builtin{{ .CapType }})Div(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-			"    *res=*l/ *r\n" +
-			"}\n\n"
+			"func (a Builtin{{ .CapType }}) Div(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
+				"\t*res = *l / *r\n" +
+			"}\n"
 	case "string":
-		return "// A string is not an arithmitic aware widget. Strings are only base widgets.\n\n"
+		return "// A string is not an arithmetic aware widget. Strings are only base widgets.\n\n"
 	default:
 		return ""
 	}

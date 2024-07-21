@@ -66,16 +66,16 @@ func NewSyncedVector[T any, U widgets.WidgetInterface[T]](
 }
 
 // Creates a new vector and populates it with the supplied values.
-func VectorValInit[T any, U widgets.WidgetInterface[T]](vals ...T) Vector[T,U] {
-	return Vector[T,U](vals)
+func VectorValInit[T any, U widgets.WidgetInterface[T]](vals ...T) Vector[T, U] {
+	return Vector[T, U](vals)
 }
 
 // Creates a new synced vector and populates it with the supplied values.
 func SyncedVectorValInit[T any, U widgets.WidgetInterface[T]](
 	vals ...T,
-) SyncedVector[T,U] {
+) SyncedVector[T, U] {
 	return SyncedVector[T, U]{
-		Vector: vals,
+		Vector:  vals,
 		RWMutex: &sync.RWMutex{},
 	}
 }
@@ -456,8 +456,8 @@ func (v *Vector[T, U]) AppendUnique(vals ...T) error {
 
 // Description: updates the supplied value in the underlying vector set,
 // assuming that it is present in the vector already. The hash must not change
-// from the update and the updated value must compare equal to the original 
-// value. If these rules are broken then an update violation error will be 
+// from the update and the updated value must compare equal to the original
+// value. If these rules are broken then an update violation error will be
 // returned. This method is useful when you are storing struct values and want
 // to update a field that is not utilized when calculating the hash and is also
 // ignored when comparing for equality. This assumes congruency is present
@@ -465,8 +465,8 @@ func (v *Vector[T, U]) AppendUnique(vals ...T) error {
 // is not found then a key error will be returned.
 //
 // Time Complexity: O(n)
-func (v *Vector[T, U])UpdateUnique(orig T, updateOp func(orig *T)) error {
-	return v.updateUniqueOp(&orig,updateOp)
+func (v *Vector[T, U]) UpdateUnique(orig T, updateOp func(orig *T)) error {
+	return v.updateUniqueOp(&orig, updateOp)
 }
 
 // Description: Places a write lock on the underlying vector and then calls
@@ -477,30 +477,30 @@ func (v *Vector[T, U])UpdateUnique(orig T, updateOp func(orig *T)) error {
 // Lock Type: Write
 //
 // Time Complexity: O(n)
-func (v *SyncedVector[T, U])UpdateUnique(orig T, updateOp func(orig *T)) error {
+func (v *SyncedVector[T, U]) UpdateUnique(orig T, updateOp func(orig *T)) error {
 	v.Lock()
 	defer v.Unlock()
-	return v.Vector.updateUniqueOp(&orig,updateOp)
+	return v.Vector.updateUniqueOp(&orig, updateOp)
 }
 
-func (v *Vector[T, U])updateUniqueOp(orig *T, updateOp func(orig *T)) error {
-	w:=widgets.Widget[T,U]{}
-	idx,found:=v.KeyOfPntr(orig)
+func (v *Vector[T, U]) updateUniqueOp(orig *T, updateOp func(orig *T)) error {
+	w := widgets.Widget[T, U]{}
+	idx, found := v.KeyOfPntr(orig)
 	if !found {
 		return getValueError[T](orig)
 	}
 	updateOp(orig)
-	newHash:=w.Hash(orig)
-	oldHash:=w.Hash(&(*v)[idx])
-	if newHash!=oldHash {
+	newHash := w.Hash(orig)
+	oldHash := w.Hash(&(*v)[idx])
+	if newHash != oldHash {
 		return getUpdateViolationHashError[T](
 			&(*v)[idx], orig, hash.Hash(oldHash), hash.Hash(newHash),
 		)
 	}
-	if !w.Eq(&(*v)[idx],orig) {
+	if !w.Eq(&(*v)[idx], orig) {
 		return getUpdateViolationEqError[T](&(*v)[idx], orig)
 	}
-	(*v)[idx]=*orig
+	(*v)[idx] = *orig
 	return nil
 }
 

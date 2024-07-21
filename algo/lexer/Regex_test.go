@@ -105,7 +105,7 @@ func TestSpecialCharEncoding(t *testing.T) {
 // 	test.Nil(err, t)
 // 	test.Nil(tokens.Stop(), t)
 // 	test.Eq("map[0:{2 [{97 1}]} 1:{4 []}]", fmt.Sprint(nfa), t)
-// 
+//
 // 	r = Regex("abc")
 // 	tokens = r.toTokenStream()
 // 	nfa, _, err = r.buildNFA(0, tokens, 0)
@@ -117,7 +117,7 @@ func TestSpecialCharEncoding(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestRegexToNFASingleSpecialChar(t *testing.T) {
 // 	r := Regex("a*")
 // 	tokens := r.toTokenStream()
@@ -129,7 +129,7 @@ func TestSpecialCharEncoding(t *testing.T) {
 // 		fmt.Sprint(nfa),
 // 		t,
 // 	)
-// 
+//
 // 	r = Regex("a|b")
 // 	tokens = r.toTokenStream()
 // 	nfa, _, err = r.buildNFA(0, tokens, 0)
@@ -140,7 +140,7 @@ func TestSpecialCharEncoding(t *testing.T) {
 // 		fmt.Sprint(nfa),
 // 		t,
 // 	)
-// 
+//
 // 	r = Regex("(a)")
 // 	tokens = r.toTokenStream()
 // 	nfa, _, err = r.buildNFA(0, tokens, 0)
@@ -148,14 +148,14 @@ func TestSpecialCharEncoding(t *testing.T) {
 // 	test.Nil(tokens.Stop(), t)
 // 	test.Eq("map[0:{2 [{97 1}]} 1:{4 []}]", fmt.Sprint(nfa), t)
 // }
-// 
+//
 // func TestRegexInbalancedParens(t *testing.T) {
 // 	r := Regex("(a")
 // 	dfa, err := r.Compile()
 // 	test.ContainsError(RegexSyntaxError, err, t)
 // 	test.ContainsError(RegexInbalancedParens, err, t)
 // 	test.Eq("map[]", fmt.Sprint(dfa), t)
-// 
+//
 // 	r = Regex("a)")
 // 	dfa, err = r.Compile()
 // 	test.ContainsError(RegexSyntaxError, err, t)

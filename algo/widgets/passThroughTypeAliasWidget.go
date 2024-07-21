@@ -32,7 +32,12 @@ func main() {
 	parseArgs()
 	checkRequiredArgs()
 
-	fmt.Printf("Making pass through type alias widget for type %-30s\n", VALS.AliasType)
+	fmt.Printf(
+		"Making pass through type alias widget | Alias Type: %-30s | Base Type: %-40s | Base Type Widget: %-40s\n",
+		VALS.AliasType,
+		VALS.BaseType,
+		VALS.BaseTypeWidget,
+	)
 	if VALS.ShowInfo {
 		fmt.Println("Received the following values:")
 		fmt.Println("\tPackage: ", VALS.Package)
@@ -41,31 +46,36 @@ func main() {
 		fmt.Println("\tBase Type Widget: ", VALS.BaseTypeWidget)
 	}
 
-	fileNameBaseType:=[]byte(VALS.BaseType)
-	fileNameAliasType:=[]byte(VALS.AliasType)
-	bannedChars:=map[byte]struct{}{
-		'[': struct{}{},
-		']': struct{}{},
-		'{': struct{}{},
-		'}': struct{}{},
-		':': struct{}{},
-		';': struct{}{},
-		'<': struct{}{},
-		'>': struct{}{},
-		',': struct{}{},
-		'.': struct{}{},
-		'/': struct{}{},
+	fileNameBaseType := []byte(VALS.BaseType)
+	fileNameAliasType := []byte(VALS.AliasType)
+	bannedChars := map[byte]struct{}{
+		'[':  struct{}{},
+		']':  struct{}{},
+		'{':  struct{}{},
+		'}':  struct{}{},
+		':':  struct{}{},
+		';':  struct{}{},
+		'<':  struct{}{},
+		'>':  struct{}{},
+		',':  struct{}{},
+		'.':  struct{}{},
+		'/':  struct{}{},
 		'\\': struct{}{},
-		'|': struct{}{},
+		'|':  struct{}{},
+		'*':  struct{}{},
+		'?':  struct{}{},
+		'%':  struct{}{},
+		'"':  struct{}{},
+		' ':  struct{}{},
 	}
-	for i,c:=range(fileNameBaseType) {
-		if _,ok:=bannedChars[c]; ok {
-			fileNameBaseType[i]='-'
+	for i, c := range fileNameBaseType {
+		if _, ok := bannedChars[c]; ok {
+			fileNameBaseType[i] = '_'
 		}
 	}
-	for i,c:=range(fileNameAliasType) {
-		if _,ok:=bannedChars[c]; ok {
-			fileNameAliasType[i]='-'
+	for i, c := range fileNameAliasType {
+		if _, ok := bannedChars[c]; ok {
+			fileNameAliasType[i] = '_'
 		}
 	}
 
@@ -87,24 +97,24 @@ func main() {
 			"// A pass through widget to represent the aliased type {{ .AliasType }}\n" +
 			"// This is meant to be used with the containers from the [containers] package.\n" +
 			"// Returns true if both {{ .AliasType }}'s are equal. Uses the Eq operator provided by the {{ .BaseTypeWidget }} widget internally.\n" +
-			"func (_ *{{ .AliasType }})Eq(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n" +
-			"	return tmp.Eq((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
+			"func (_ *{{ .AliasType }}) Eq(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
+				"\tvar tmp {{ .BaseTypeWidget }}\n" +
+				"\treturn tmp.Eq((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
 			"}\n\n" +
 			"// Returns true if a is less than r. Uses the Lt operator provided by the {{ .BaseTypeWidget }} widget internally.\n" +
-			"func (_ *{{ .AliasType }})Lt(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n" +
-			"	return tmp.Lt((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
+			"func (_ *{{ .AliasType }}) Lt(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
+				"\tvar tmp {{ .BaseTypeWidget }}\n" +
+				"\treturn tmp.Lt((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
 			"}\n\n" +
 			"// Provides a hash function for the value that it is wrapping. The value that is returned will be supplied by the {{ .BaseTypeWidget }} widget internally.\n" +
-			"func (_ *{{ .AliasType }})Hash(other *{{ .AliasType }}) hash.Hash {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n" +
-			"	return tmp.Hash((*{{ .BaseType }})(other))\n" +
+			"func (_ *{{ .AliasType }}) Hash(other *{{ .AliasType }}) hash.Hash {\n" +
+				"\tvar tmp {{ .BaseTypeWidget }}\n" +
+				"\treturn tmp.Hash((*{{ .BaseType }})(other))\n" +
 			"}\n\n" +
 			"// Zeros the supplied value. The operation that is performed will be determined by the {{ .BaseTypeWidget }} widget internally.\n" +
-			"func (_ *{{ .AliasType }})Zero(other *{{ .AliasType }}) {\n" +
-			"	var tmp {{ .BaseTypeWidget }}\n" +
-			"	tmp.Zero((*{{ .BaseType }})(other))\n" +
+			"func (_ *{{ .AliasType }}) Zero(other *{{ .AliasType }}) {\n" +
+				"\tvar tmp {{ .BaseTypeWidget }}\n" +
+				"\ttmp.Zero((*{{ .BaseType }})(other))\n" +
 			"}\n",
 	)
 	if err != nil {
@@ -129,14 +139,14 @@ func setupFlags() {
 	flag.StringVar(&VALS.AliasType, "aliasType", "", "The alias type to generate the widget for.")
 	flag.StringVar(&VALS.BaseType, "baseType", "", "The base type to generate the widget for.")
 	flag.StringVar(&VALS.BaseTypeWidget, "baseTypeWidget", "", "The base type widget to use when generating the new widget.")
-	flag.StringVar(&VALS.WidgetPackage, "widgetPackage", "", "The package the base type widget resides in.")
+	flag.StringVar(&VALS.WidgetPackage, "widgetPackage", "", "The package the base type widget resides in. If it is this package, put '.'")
 	flag.BoolVar(&VALS.ShowInfo, "info", false, "Print debug information.")
 }
 
 func parseArgs() {
 	if len(os.Args) < 6 {
 		fmt.Println("ERROR | Not enough arguments.")
-		fmt.Println("Recieved: ", os.Args[1:])
+		fmt.Println("Received: ", os.Args[1:])
 		flag.PrintDefaults()
 		fmt.Println("Re-run go generate after fixing the problem.")
 		os.Exit(1)
@@ -156,6 +166,13 @@ func checkRequiredArgs() {
 	if len(requiredCopy) > 0 {
 		fmt.Println("ERROR | Not all required flags were passed.")
 		fmt.Println("The following flags must be added: ", requiredCopy)
+
+		cntr:=0
+		fmt.Println("Received: ")
+		flag.Visit(func(f *flag.Flag) {
+			cntr++
+			fmt.Printf(" %d. %s: %+v\n",cntr,f.Name,f.Value)
+		})
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -167,5 +184,5 @@ func generateImports() string {
 
 		commonImport = commonImport + "import \"{{ .WidgetPackage }}\"\n"
 	}
-	return commonImport+"\n"
+	return commonImport + "\n"
 }
