@@ -27,7 +27,7 @@ jobs:
         go-version: ${{ matrix.go_version }}
 
     - name: Build Global Generator Programs
-      run: go build -o ./bin/ ./algo/widgets/passThroughTypeAliasWidget
+      run: go build -o ./bin/ ./algo/widgets/passThroughTypeAliasWidget.go
 
     - name: Generate
       run: go generate -v ./...
