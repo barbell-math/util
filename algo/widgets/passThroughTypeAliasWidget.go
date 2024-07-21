@@ -98,23 +98,23 @@ func main() {
 			"// This is meant to be used with the containers from the [containers] package.\n" +
 			"// Returns true if both {{ .AliasType }}'s are equal. Uses the Eq operator provided by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }}) Eq(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
-				"\tvar tmp {{ .BaseTypeWidget }}\n" +
-				"\treturn tmp.Eq((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
+			"\tvar tmp {{ .BaseTypeWidget }}\n" +
+			"\treturn tmp.Eq((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
 			"}\n\n" +
 			"// Returns true if a is less than r. Uses the Lt operator provided by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }}) Lt(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {\n" +
-				"\tvar tmp {{ .BaseTypeWidget }}\n" +
-				"\treturn tmp.Lt((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
+			"\tvar tmp {{ .BaseTypeWidget }}\n" +
+			"\treturn tmp.Lt((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))\n" +
 			"}\n\n" +
 			"// Provides a hash function for the value that it is wrapping. The value that is returned will be supplied by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }}) Hash(other *{{ .AliasType }}) hash.Hash {\n" +
-				"\tvar tmp {{ .BaseTypeWidget }}\n" +
-				"\treturn tmp.Hash((*{{ .BaseType }})(other))\n" +
+			"\tvar tmp {{ .BaseTypeWidget }}\n" +
+			"\treturn tmp.Hash((*{{ .BaseType }})(other))\n" +
 			"}\n\n" +
 			"// Zeros the supplied value. The operation that is performed will be determined by the {{ .BaseTypeWidget }} widget internally.\n" +
 			"func (_ *{{ .AliasType }}) Zero(other *{{ .AliasType }}) {\n" +
-				"\tvar tmp {{ .BaseTypeWidget }}\n" +
-				"\ttmp.Zero((*{{ .BaseType }})(other))\n" +
+			"\tvar tmp {{ .BaseTypeWidget }}\n" +
+			"\ttmp.Zero((*{{ .BaseType }})(other))\n" +
 			"}\n",
 	)
 	if err != nil {
@@ -167,11 +167,11 @@ func checkRequiredArgs() {
 		fmt.Println("ERROR | Not all required flags were passed.")
 		fmt.Println("The following flags must be added: ", requiredCopy)
 
-		cntr:=0
+		cntr := 0
 		fmt.Println("Received: ")
 		flag.Visit(func(f *flag.Flag) {
 			cntr++
-			fmt.Printf(" %d. %s: %+v\n",cntr,f.Name,f.Value)
+			fmt.Printf(" %d. %s: %+v\n", cntr, f.Name, f.Value)
 		})
 		flag.PrintDefaults()
 		os.Exit(1)

@@ -77,15 +77,15 @@ func main() {
 			"type Builtin{{ .CapType }} struct{}\n\n" +
 			"// Returns true if both {{ .Type }}'s are equal. Uses the standard == operator internally.\n" +
 			"func (a Builtin{{ .CapType }}) Eq(l *{{ .Type }}, r *{{ .Type }}) bool {\n" +
-				"\treturn *l == *r\n" +
+			"\treturn *l == *r\n" +
 			"}\n\n" +
 			"// Returns true if a is less than r. Uses the standard < operator internally.\n" +
 			"func (a Builtin{{ .CapType }}) Lt(l *{{ .Type }}, r *{{ .Type }}) bool {\n" +
-				"\treturn *l < *r\n" +
+			"\treturn *l < *r\n" +
 			"}\n\n" +
 			"// Provides a hash function for the value that it is wrapping.\n" +
 			generateHashFunction() +
-			"\n"+
+			"\n" +
 			"// Zeros the supplied value.\n" +
 			generateZeroFunction() +
 			"\n" +
@@ -147,7 +147,7 @@ func checkRequiredArgs() {
 	if !foundType {
 		fmt.Println("ERROR | The supplied type was not one of the types recognized by this tool.")
 		fmt.Println("The following types are recognized: ", VALID_TYPES)
-		fmt.Println("The following type was recieved: ", VALS.Type)
+		fmt.Println("The following type was received: ", VALS.Type)
 		os.Exit(1)
 	}
 }
@@ -165,7 +165,7 @@ func generateGlobals() string {
 		return "// The random seed will be different every time the program runs" +
 			"// meaning that between runs the hash values will not be consistent.\n" +
 			"// This was done for security purposes.\n" +
-			"var RANDOM_SEED_{{ .Type }} maphash.Seed=maphash.MakeSeed()\n\n"
+			"var RANDOM_SEED_{{ .Type }} maphash.Seed = maphash.MakeSeed()\n\n"
 	}
 	return ""
 }
@@ -196,24 +196,24 @@ func generateHashFunction() string {
 		fallthrough
 	case "hash.Hash":
 		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
-				"\treturn hash.Hash(*v)\n" +
+			"\treturn hash.Hash(*v)\n" +
 			"}\n"
 	case "float32":
 		fallthrough
 	case "float64":
 		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
-				"\tpanic(\"Floats are not hashable!\")\n" +
+			"\tpanic(\"Floats are not hashable!\")\n" +
 			"}\n"
 	case "string":
 		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
-				"\treturn hash.Hash(maphash.String(RANDOM_SEED_{{ .Type }},*(v)))\n" +
+			"\treturn hash.Hash(maphash.String(RANDOM_SEED_{{ .Type }}, *(v)))\n" +
 			"}\n"
 	default:
 		return "func (a Builtin{{ .CapType }}) Hash(v *{{ .Type }}) hash.Hash {\n" +
-				"\t// this will fail compilation (on purpose!)\n" +
-				"\t// the supplied type was not hashable!\n" +
-				"\tpanic(\"Supplied type was not hashable!\")\n" +
-				"\treturn hash.Hash(-1)\n" +
+			"\t// this will fail compilation (on purpose!)\n" +
+			"\t// the supplied type was not hashable!\n" +
+			"\tpanic(\"Supplied type was not hashable!\")\n" +
+			"\treturn hash.Hash(-1)\n" +
 			"}\n"
 	}
 }
@@ -248,18 +248,18 @@ func generateZeroFunction() string {
 		fallthrough
 	case "hash.Hash":
 		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
-				"\t*v = {{ .Type }}(0)\n" +
+			"\t*v = {{ .Type }}(0)\n" +
 			"}\n"
 	case "string":
 		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
-				"\t *v= \"\"\n" +
+			"\t *v = \"\"\n" +
 			"}\n"
 	default:
 		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
-				"\t// this will fail compilation (on purpose!)\n" +
-				"\t// the supplied type was not found in the zero table!\n" +
-				"\tpanic(\"The supplied type does not have a zeor value.\")\n" +
-				"\treturn int(-1)\n" +
+			"\t// this will fail compilation (on purpose!)\n" +
+			"\t// the supplied type was not found in the zero table!\n" +
+			"\tpanic(\"The supplied type does not have a zeor value.\")\n" +
+			"\treturn int(-1)\n" +
 			"}\n"
 	}
 }
@@ -294,25 +294,25 @@ func generateArithFuncs() string {
 		fallthrough
 	case "hash.Hash":
 		return "func (a Builtin{{ .CapType }}) ZeroVal() {{ .Type }} {\n" +
-				"\treturn {{ .Type }}(0)\n" +
+			"\treturn {{ .Type }}(0)\n" +
 			"}\n\n" +
 			"func (a Builtin{{ .CapType }}) UnitVal() {{ .Type }} {\n" +
-				"\treturn {{ .Type }}(1)\n" +
+			"\treturn {{ .Type }}(1)\n" +
 			"}\n\n" +
 			"func (a Builtin{{ .CapType }}) Neg(v *{{ .Type }}) {\n" +
-				"\t*v = -(*v)\n" +
+			"\t*v = -(*v)\n" +
 			"}\n\n" +
 			"func (a Builtin{{ .CapType }}) Add(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-				"\t*res = *l + *r\n" +
+			"\t*res = *l + *r\n" +
 			"}\n\n" +
 			"func (a Builtin{{ .CapType }}) Sub(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-				"\t*res = *l - *r\n" +
+			"\t*res = *l - *r\n" +
 			"}\n\n" +
 			"func (a Builtin{{ .CapType }}) Mul(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-				"\t*res = *l * *r\n" +
+			"\t*res = *l * *r\n" +
 			"}\n\n" +
 			"func (a Builtin{{ .CapType }}) Div(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type }}) {\n" +
-				"\t*res = *l / *r\n" +
+			"\t*res = *l / *r\n" +
 			"}\n"
 	case "string":
 		return "// A string is not an arithmetic aware widget. Strings are only base widgets.\n\n"

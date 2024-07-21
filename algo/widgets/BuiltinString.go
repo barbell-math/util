@@ -7,7 +7,7 @@ import "github.com/barbell-math/util/algo/hash"
 
 // The random seed will be different every time the program runs// meaning that between runs the hash values will not be consistent.
 // This was done for security purposes.
-var RANDOM_SEED_string maphash.Seed=maphash.MakeSeed()
+var RANDOM_SEED_string maphash.Seed = maphash.MakeSeed()
 
 // A widget to represent the built-in type string
 // This is meant to be used with the containers from the [containers] package.
@@ -25,13 +25,12 @@ func (a BuiltinString) Lt(l *string, r *string) bool {
 
 // Provides a hash function for the value that it is wrapping.
 func (a BuiltinString) Hash(v *string) hash.Hash {
-	return hash.Hash(maphash.String(RANDOM_SEED_string,*(v)))
+	return hash.Hash(maphash.String(RANDOM_SEED_string, *(v)))
 }
 
 // Zeros the supplied value.
 func (a BuiltinString) Zero(v *string) {
-	 *v= ""
+	*v = ""
 }
 
 // A string is not an arithmetic aware widget. Strings are only base widgets.
-

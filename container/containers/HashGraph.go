@@ -889,11 +889,11 @@ func (g *SyncedHashGraph[V, E, VI, EI]) AddEdges(e ...E) error {
 // according to the EI widget and produce the same hash as the original value.
 //
 // Time Complexity: O(1)
-func (g *internalHashGraphImpl[V, E, VI, EI])UpdateEdge(
+func (g *internalHashGraphImpl[V, E, VI, EI]) UpdateEdge(
 	e E,
 	updateOp func(e *E),
 ) error {
-	return g.edges.UpdateUnique(e,updateOp)
+	return g.edges.UpdateUnique(e, updateOp)
 }
 
 // Description: Adds a vertex to the graph, if it does not already exist
@@ -929,7 +929,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) UpdateVertex(
 	v V,
 	updateOp func(orig *V),
 ) error {
-	return g.vertices.UpdateUnique(v,updateOp)
+	return g.vertices.UpdateUnique(v, updateOp)
 }
 
 // Description: Adds a link between an existing edge and vertices in the graph.
