@@ -73,16 +73,18 @@ func TestLogIterationTime(t *testing.T) {
 		l.LogElems(),
 		&c,
 		false,
-	).ForEach(func(
-		index int,
-		q staticContainers.Vector[LogEntry[int]],
-	) (iter.IteratorFeedback, error) {
-		cntr++
-		f, _ := q.Get(0)
-		s, _ := q.Get(1)
-		test.True(f.Time.Before(s.Time), t)
-		return iter.Continue, nil
-	})
+	).ForEach(
+		func(
+			index int,
+			q staticContainers.Vector[LogEntry[int]],
+		) (iter.IteratorFeedback, error) {
+			cntr++
+			f, _ := q.Get(0)
+			s, _ := q.Get(1)
+			test.True(f.Time.Before(s.Time), t)
+			return iter.Continue, nil
+		},
+	)
 	test.Nil(err, t)
 	test.Eq(999, cntr, t)
 	l.Close()

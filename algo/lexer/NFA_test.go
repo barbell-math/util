@@ -14,12 +14,12 @@ import (
 )
 
 func verifyGraph[A any, AI widgets.WidgetInterface[A]](
-	nfaGraph dynamicContainers.ReadDirectedGraph[nfaNode, containers.HashSet[A,AI]],
-	expectedLinks []basic.Triple[nfaNode, containers.HashSet[A,AI], nfaNode],
+	nfaGraph dynamicContainers.ReadDirectedGraph[nfaNode, containers.HashSet[A, AI]],
+	expectedLinks []basic.Triple[nfaNode, containers.HashSet[A, AI], nfaNode],
 	t *testing.T,
 ) {
 	test.Eq(len(expectedLinks), nfaGraph.NumLinks(), t)
-	for _, v:=range(expectedLinks) {
+	for _, v := range expectedLinks {
 		fmt.Println(v)
 		test.True(nfaGraph.ContainsLinkPntr(&v.A, &v.C, &v.B), t)
 	}
@@ -30,10 +30,10 @@ func TestNFAAppendTransition(t *testing.T) {
 	n.AppendTransition('a')
 	// test.Eq("map[0:{2 [{97 1}]} 1:{4 []}]", fmt.Sprint(n), t)
 	verifyGraph[byte, widgets.BuiltinByte](n,
-		[]basic.Triple[nfaNode,containers.HashSet[byte,widgets.BuiltinByte],nfaNode]{
+		[]basic.Triple[nfaNode, containers.HashSet[byte, widgets.BuiltinByte], nfaNode]{
 			{
 				A: nfaNode{id: 0, flags: nfaSource},
-				B: containers.HashSetValInit[byte,widgets.BuiltinByte]('a'),
+				B: containers.HashSetValInit[byte, widgets.BuiltinByte]('a'),
 				C: nfaNode{id: 1, flags: nfaSink},
 			},
 		},
@@ -43,15 +43,15 @@ func TestNFAAppendTransition(t *testing.T) {
 	n.AppendTransition('b')
 	// "map[0:{2 [{97 1}]} 1:{0 [{98 2}]} 2:{4 []}]",
 	verifyGraph[byte, widgets.BuiltinByte](n,
-		[]basic.Triple[nfaNode,containers.HashSet[byte,widgets.BuiltinByte],nfaNode]{
+		[]basic.Triple[nfaNode, containers.HashSet[byte, widgets.BuiltinByte], nfaNode]{
 			{
 				A: nfaNode{id: 0, flags: nfaSource},
-				B: containers.HashSetValInit[byte,widgets.BuiltinByte]('a'),
+				B: containers.HashSetValInit[byte, widgets.BuiltinByte]('a'),
 				C: nfaNode{id: 1, flags: 0},
 			},
 			{
 				A: nfaNode{id: 1, flags: 0},
-				B: containers.HashSetValInit[byte,widgets.BuiltinByte]('b'),
+				B: containers.HashSetValInit[byte, widgets.BuiltinByte]('b'),
 				C: nfaNode{id: 2, flags: nfaSink},
 			},
 		},
@@ -88,41 +88,41 @@ func TestNFAAppendTransition(t *testing.T) {
 // 			t,
 // 		)
 // 	}
-// 
+//
 // 	n1 := NFA{}
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('c')
 // 	n2.AppendTransition('d')
 // 	op(n1, n2)
-// 
+//
 // 	n1 = NewNFA()
 // 	n2 = NewNFA()
 // 	n2.AppendTransition('c')
 // 	n2.AppendTransition('d')
 // 	op(n1, n2)
-// 
+//
 // 	n1 = NewNFA()
 // 	n1.AppendTransition('c')
 // 	n1.AppendTransition('d')
 // 	n2 = NFA{}
 // 	op(n1, n2)
-// 
+//
 // 	n1 = NewNFA()
 // 	n1.AppendTransition('c')
 // 	n1.AppendTransition('d')
 // 	n2 = NewNFA()
 // 	op(n1, n2)
 // }
-// 
+//
 // func TestNFAAppendNFA(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.AppendTransition('b')
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('c')
 // 	n2.AppendTransition('d')
-// 
+//
 // 	n1.AppendNFA(n2)
 // 	test.Eq(
 // 		"map["+
@@ -136,7 +136,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAApplyKleeneEmpty(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.ApplyKleene()
@@ -146,7 +146,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAApplyKleene(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
@@ -156,7 +156,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		fmt.Sprint(n1),
 // 		t,
 // 	)
-// 
+//
 // 	n1 = NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.AppendTransition('b')
@@ -173,7 +173,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAApplyKleeneMultipleTimes(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
@@ -185,7 +185,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAAddBranchEmpty(t *testing.T) {
 // 	op := func(n1 NFA, n2 NFA) {
 // 		n1.AddBranch(n2)
@@ -195,41 +195,41 @@ func TestNFAAppendTransition(t *testing.T) {
 // 			t,
 // 		)
 // 	}
-// 
+//
 // 	n1 := NFA{}
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('c')
 // 	n2.AppendTransition('d')
 // 	op(n1, n2)
-// 
+//
 // 	n1 = NewNFA()
 // 	n2 = NewNFA()
 // 	n2.AppendTransition('c')
 // 	n2.AppendTransition('d')
 // 	op(n1, n2)
-// 
+//
 // 	n1 = NewNFA()
 // 	n1.AppendTransition('c')
 // 	n1.AppendTransition('d')
 // 	n2 = NFA{}
 // 	op(n1, n2)
-// 
+//
 // 	n1 = NewNFA()
 // 	n1.AppendTransition('c')
 // 	n1.AppendTransition('d')
 // 	n2 = NewNFA()
 // 	op(n1, n2)
 // }
-// 
+//
 // func TestNFAAddBranch(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.AppendTransition('b')
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('c')
 // 	n2.AppendTransition('d')
-// 
+//
 // 	n1.AddBranch(n2)
 // 	test.Eq(
 // 		"map["+
@@ -244,17 +244,17 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAKleeneAndAppendNFA(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.ApplyKleene()
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('b')
 // 	n2.AppendTransition('c')
 // 	n2.ApplyKleene()
-// 
+//
 // 	n1.AppendNFA(n2)
 // 	test.Eq(
 // 		"map["+
@@ -271,15 +271,15 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFABranchWithKleenedNFA(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.ApplyKleene()
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('b')
-// 
+//
 // 	n1.AddBranch(n2)
 // 	test.Eq(
 // 		"map["+
@@ -293,15 +293,15 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		fmt.Sprint(n1),
 // 		t,
 // 	)
-// 
+//
 // 	n1 = NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.ApplyKleene()
-// 
+//
 // 	n2 = NewNFA()
 // 	n2.AppendTransition('b')
 // 	n2.ApplyKleene()
-// 
+//
 // 	n1.AddBranch(n2)
 // 	test.Eq(
 // 		"map["+
@@ -318,20 +318,20 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAAppendNFAWithBranches(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('b')
-// 
+//
 // 	n3 := NewNFA()
 // 	n3.AppendTransition('c')
-// 
+//
 // 	n1.AddBranch(n2)
 // 	n1.AppendNFA(n3)
-// 
+//
 // 	test.Eq(
 // 		"map["+
 // 			"0:{2 [{97 1} {98 2}]} "+
@@ -344,24 +344,24 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFANestedBranches(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('b')
-// 
+//
 // 	n3 := NewNFA()
 // 	n3.AppendTransition('c')
-// 
+//
 // 	n4 := NewNFA()
 // 	n4.AppendTransition('d')
-// 
+//
 // 	n1.AddBranch(n2)
 // 	n3.AddBranch(n4)
 // 	n1.AddBranch(n3)
-// 
+//
 // 	test.Eq(
 // 		"map["+
 // 			"0:{2 [{97 1} {98 2} {99 4} {100 5}]} "+
@@ -377,24 +377,24 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFANestedBranchesWithKleene(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.ApplyKleene()
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('b')
 // 	n2.ApplyKleene()
-// 
+//
 // 	n3 := NewNFA()
 // 	n3.AppendTransition('c')
 // 	n3.ApplyKleene()
-// 
+//
 // 	n4 := NewNFA()
 // 	n4.AppendTransition('d')
 // 	n4.ApplyKleene()
-// 
+//
 // 	n1.AddBranch(n2)
 // 	test.Eq(
 // 		"map["+
@@ -410,7 +410,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		fmt.Sprint(n1),
 // 		t,
 // 	)
-// 
+//
 // 	n3.AddBranch(n4)
 // 	test.Eq(
 // 		"map["+
@@ -426,7 +426,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		fmt.Sprint(n3),
 // 		t,
 // 	)
-// 
+//
 // 	n1.AddBranch(n3)
 // 	test.Eq(
 // 		"map["+
@@ -451,16 +451,16 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAWrapBranchesInKleene(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.ApplyKleene()
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('b')
 // 	n2.ApplyKleene()
-// 
+//
 // 	n1.AddBranch(n2)
 // 	test.Eq(
 // 		"map["+
@@ -476,7 +476,7 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		fmt.Sprint(n1),
 // 		t,
 // 	)
-// 
+//
 // 	n1.ApplyKleene()
 // 	test.Eq(
 // 		"map["+
@@ -495,26 +495,26 @@ func TestNFAAppendTransition(t *testing.T) {
 // 		t,
 // 	)
 // }
-// 
+//
 // func TestNFAAllParts(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')
 // 	n1.ApplyKleene()
 // 	n1.AppendTransition('b')
-// 
+//
 // 	n2 := NewNFA()
 // 	n2.AppendTransition('c')
 // 	n2.ApplyKleene()
-// 
+//
 // 	n1.AppendNFA(n2)
-// 
+//
 // 	n3 := NewNFA()
 // 	n3.AppendTransition('d')
-// 
+//
 // 	n1.AddBranch(n3)
 // 	n1.ApplyKleene()
 // 	n1.AppendTransition('e')
-// 
+//
 // 	test.Eq(
 // 		"map["+
 // 			"0:{2 [{128 10}]} "+

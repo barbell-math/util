@@ -26,6 +26,13 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
 
+    - name: Check Formatting
+      run: |
+        if read -r -n1 -d '' < <(go fmt ./...); then
+          echo "Command outputs something"
+        fi
+      shell: bash
+
     - name: Build Global Generator Programs
       run: go build -o ./bin/ ./algo/widgets/passThroughTypeAliasWidget.go
 

@@ -238,12 +238,15 @@ func toFileIterHelperNoNewline(numVals int, src string, t *testing.T) {
 	}
 	SliceElems(vals).ToWriter(f, false)
 	f.Close()
+
 	f, err = os.Open(src)
 	test.Nil(err, t)
 	w := bufio.NewScanner(f)
 	for i := 0; w.Scan(); i++ {
 		test.Eq(correctVal, w.Text(), t)
 	}
+	f.Close()
+
 	err = os.Remove(src)
 	test.Nil(err, t)
 }

@@ -19,13 +19,13 @@ type (
 	// NFA map[nfaID]nfaNode
 
 	nfaNode struct {
-		id nfaID
+		id    nfaID
 		flags nfaFlag
 	}
-	alphabetRange[A any, AI widgets.WidgetInterface[A]] containers.HashSet[A,AI]
-	NFA[A any, AI widgets.WidgetInterface[A]] containers.HashGraph[
-		nfaNode, containers.HashSet[A,AI],
-		*nfaNode, *containers.HashSet[A,AI],
+	alphabetRange[A any, AI widgets.WidgetInterface[A]] containers.HashSet[A, AI]
+	NFA[A any, AI widgets.WidgetInterface[A]]           containers.HashGraph[
+		nfaNode, containers.HashSet[A, AI],
+		*nfaNode, *containers.HashSet[A, AI],
 	]
 )
 
@@ -35,51 +35,50 @@ const (
 	nfaSink
 )
 
-func (_ *nfaNode)Eq(l *nfaNode, r *nfaNode) bool {
-	return l.id==r.id
+func (_ *nfaNode) Eq(l *nfaNode, r *nfaNode) bool {
+	return l.id == r.id
 }
-func (_ *nfaNode)Lt(l *nfaNode, r *nfaNode) bool {
-	return l.id<r.id
+func (_ *nfaNode) Lt(l *nfaNode, r *nfaNode) bool {
+	return l.id < r.id
 }
-func (_ *nfaNode)Hash(other *nfaNode) hash.Hash {
+func (_ *nfaNode) Hash(other *nfaNode) hash.Hash {
 	return hash.Hash(other.id)
 }
-func (_ *nfaNode)Zero(other *nfaNode) {
-	*other=nfaNode{}
+func (_ *nfaNode) Zero(other *nfaNode) {
+	*other = nfaNode{}
 }
 
-// func (n *nfaNode) addTransition(c byte, id nfaID) {
-// 	n.transitions = append(n.transitions, basic.Pair[byte, nfaID]{c, id})
-// }
-// 
-func NewNFA[A any, AI widgets.WidgetInterface[A]]() NFA[A,AI] {
-	rv,_:=containers.NewHashGraph[
-		nfaNode, containers.HashSet[A,AI],
-		*nfaNode, *containers.HashSet[A,AI],
-	](0,0)
+//	func (n *nfaNode) addTransition(c byte, id nfaID) {
+//		n.transitions = append(n.transitions, basic.Pair[byte, nfaID]{c, id})
+//	}
+func NewNFA[A any, AI widgets.WidgetInterface[A]]() NFA[A, AI] {
+	rv, _ := containers.NewHashGraph[
+		nfaNode, containers.HashSet[A, AI],
+		*nfaNode, *containers.HashSet[A, AI],
+	](0, 0)
 	return NFA[A, AI](rv)
 }
 
-func (n NFA[A,AI]) initNFA() {
-	lambdaEdge,_:=containers.NewHashSet[A,AI](0)
+func (n NFA[A, AI]) initNFA() {
+	lambdaEdge, _ := containers.NewHashSet[A, AI](0)
 	n.Clear()
 	n.AddVertices(nfaNode{
-		id: nfaID(0),
+		id:    nfaID(0),
 		flags: nfaSource | nfaSink,
 	})
 	n.AddEdges(lambdaEdge)
 }
 
 func (n NFA[A, AI]) AppendTransition(c A) {
-	if n.NumVertices()==0 {
+	if n.NumVertices() == 0 {
 		n.initNFA()
 	}
-	newNode:=nfaNode{
-		id: nfaID(n.NumVertices()),
+	newNode := nfaNode{
+		id:    nfaID(n.NumVertices()),
 		flags: nfaSink,
 	}
-	edge:=containers.HashSetValInit[A,AI](c)
-	sinkIdentifier:=nfaNode{id: nfaID(n.NumVertices())-1}
+	edge := containers.HashSetValInit[A, AI](c)
+	sinkIdentifier := nfaNode{id: nfaID(n.NumVertices()) - 1}
 
 	n.AddVertices(newNode)
 	n.AddEdges(edge)
@@ -104,7 +103,7 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 // 		node.flags &= ^nfaSink
 // 		return nil
 // 	})
-// 
+//
 // 	oldNFASize := n.nfaSink()
 // 	for i := nfaStart + 1; i <= other.nfaSink(); i++ {
 // 		iterNode := other[i]
@@ -115,7 +114,7 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 // 		n.addNode(iterNode)
 // 	}
 // }
-// 
+//
 // func (n NFA) ApplyKleene() {
 // 	if len(n) == 0 {
 // 		n.initNFA()
@@ -148,7 +147,7 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 // 		})
 // 	}
 // }
-// 
+//
 // func (n NFA) AddBranch(other NFA) {
 // 	// Other is nothing more than a just inited NFA, nothing to add
 // 	if len(other) <= 1 || other.nfaSink() <= 0 {
@@ -170,7 +169,7 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 // 		node.addTransition(lambdaChar, n.nfaSink()+other.nfaSink()+1)
 // 		return nil
 // 	})
-// 
+//
 // 	oldNFASize := n.nfaSink()
 // 	for i := nfaStart + 1; i < other.nfaSink(); i++ {
 // 		iterNode := other[i]
@@ -180,7 +179,7 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 // 		}
 // 		n.addNode(iterNode)
 // 	}
-// 
+//
 // 	otherEndNode := other[other.nfaSink()]
 // 	for j := 0; j < len(otherEndNode.transitions); j++ {
 // 		otherEndNode.transitions[j].B += oldNFASize
@@ -188,17 +187,17 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 // 	otherEndNode.flags &= ^(nfaSource | nfaSink)
 // 	otherEndNode.addTransition(lambdaChar, n.nfaSink()+2)
 // 	n.addNode(otherEndNode)
-// 
+//
 // 	n.addNode(nfaNode{
 // 		flags:       nfaSink,
 // 		transitions: []basic.Pair[byte, nfaID]{},
 // 	})
 // }
-// 
+//
 // func (n NFA) addNode(node nfaNode) {
 // 	n[n.nfaSink()+1] = node
 // }
-// 
+//
 // func (n NFA) changeAndSave(id nfaID, op func(node *nfaNode) error) error {
 // 	node := n[id]
 // 	if err := op(&node); err == nil {
@@ -208,11 +207,11 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 // 	}
 // 	return nil
 // }
-// 
+//
 // func (n NFA) nfaSink() nfaID {
 // 	return nfaID(len(n)) - 1
 // }
-// 
+//
 // func (n NFA) clearAndCopy(other NFA) {
 // 	for k, _ := range n {
 // 		delete(n, k)
