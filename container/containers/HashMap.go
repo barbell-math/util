@@ -75,6 +75,38 @@ func NewSyncedHashMap[
 	}, err
 }
 
+// Creates a new hash map and populates it with the supplied values. If there
+// are duplicated keys in the supplied slice the last key-value pair will be
+// what is in the returned map.
+func HashMapValInit[
+	K any,
+	V any,
+	KI widgets.WidgetInterface[K],
+	VI widgets.WidgetInterface[V],
+](vals []basic.Pair[K,V]) HashMap[K,V,KI,VI] {
+	rv,_:=NewHashMap[K,V,KI,VI](len(vals))
+	for _,v:=range(vals) {
+		rv.Emplace(v)
+	}
+	return rv
+}
+
+// Creates a new synced hash map and populates it with the supplied values. If
+// there are duplicated keys in the supplied slice the last key-value pair will
+// be what is in the returned map.
+func SyncedHashMapValInit[
+	K any,
+	V any,
+	KI widgets.WidgetInterface[K],
+	VI widgets.WidgetInterface[V],
+](vals []basic.Pair[K,V]) SyncedHashMap[K,V,KI,VI] {
+	rv,_:=NewSyncedHashMap[K,V,KI,VI](len(vals))
+	for _,v:=range(vals) {
+		rv.Emplace(v)
+	}
+	return rv
+}
+
 // Converts the supplied map to a synchronized map. Beware: The original
 // non-synced map will remain useable.
 func (m *HashMap[K, V, KI, VI]) ToSynced() SyncedHashMap[K, V, KI, VI] {

@@ -65,6 +65,21 @@ func NewSyncedVector[T any, U widgets.WidgetInterface[T]](
 	}, err
 }
 
+// Creates a new vector and populates it with the supplied values.
+func VectorValInit[T any, U widgets.WidgetInterface[T]](vals ...T) Vector[T,U] {
+	return Vector[T,U](vals)
+}
+
+// Creates a new synced vector and populates it with the supplied values.
+func SyncedVectorValInit[T any, U widgets.WidgetInterface[T]](
+	vals ...T,
+) SyncedVector[T,U] {
+	return SyncedVector[T, U]{
+		Vector: vals,
+		RWMutex: &sync.RWMutex{},
+	}
+}
+
 // Converts the supplied vector to a syncronized vector. Beware: The original
 // non-synced vector will remain useable.
 func (v *Vector[T, U]) ToSynced() SyncedVector[T, U] {

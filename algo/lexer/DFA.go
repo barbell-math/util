@@ -19,6 +19,6 @@ const (
 	dfaSink
 )
 
-func (d DFA) FromNFA(n NFA) error {
-	return nil
-}
+// func (d DFA) FromNFA(n NFA) error {
+// 	return nil
+// }

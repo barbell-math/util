@@ -64,6 +64,30 @@ func NewSyncedHashSet[T any, U widgets.WidgetInterface[T]](
 	}, err
 }
 
+// Creates a new hash set and populates it with the supplied values. Duplicated
+// values will be ignored.
+func HashSetValInit[T any, U widgets.WidgetInterface[T]](
+	vals ...T,
+) HashSet[T,U] {
+	rv,_:=NewHashSet[T,U](len(vals))
+	for _,v:=range(vals) {
+		rv.AppendUnique(v)
+	}
+	return rv
+}
+
+// Creates a new synced hash set and populates it with the supplied values.
+// Duplicated values will be ignored.
+func SyncedHashSetValInit[T any, U widgets.WidgetInterface[T]](
+	vals ...T,
+) SyncedHashSet[T,U] {
+	rv,_:=NewSyncedHashSet[T,U](len(vals))
+	for _,v:=range(vals) {
+		rv.AppendUnique(v)
+	}
+	return rv
+}
+
 // Converts the supplied hash set to a syncronized hash set. Beware: The original
 // non-synced hash set will remain useable.
 func (v *HashSet[T, U]) ToSynced() SyncedHashSet[T, U] {

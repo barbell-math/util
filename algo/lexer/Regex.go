@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"fmt"
+	// "fmt"
 
 	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/customerr"
@@ -12,15 +12,15 @@ type (
 )
 
 func (r *Regex) Compile() (DFA, error) {
-	tokens := r.toTokenStream()
-	nfa, _, err := r.buildNFA(0, tokens, 0)
-	err = customerr.AppendError(err, tokens.Stop())
-	if err != nil {
-		return DFA{}, err
-	}
-	fmt.Println(nfa)
-	// build NFA, catch errors in process
-	// transition NFA to DFA
+	// tokens := r.toTokenStream()
+	// nfa, _, err := r.buildNFA(0, tokens, 0)
+	// err = customerr.AppendError(err, tokens.Stop())
+	// if err != nil {
+	// 	return DFA{}, err
+	// }
+	// fmt.Println(nfa)
+	// // build NFA, catch errors in process
+	// // transition NFA to DFA
 	return DFA{}, nil
 }
 
@@ -71,45 +71,45 @@ func (r *Regex) toTokenStream() iter.Iter[byte] {
 	)
 }
 
-func (r *Regex) buildNFA(
-	lastChar byte,
-	tokens iter.Iter[byte],
-	curId nfaID,
-) (NFA, byte, error) {
-	curNFA := NewNFA()
-	val, err, cont := tokens.PullOne()
-	for ; err == nil && cont; val, err, cont = tokens.PullOne() {
-		if val == rParenChar {
-			if lastChar != lParenChar {
-				return NFA{}, 0, customerr.AppendError(
-					RegexSyntaxError,
-					RegexInbalancedParens,
-				)
-			}
-			return curNFA, rParenChar, nil
-		} else if val == starChar {
-			curNFA.ApplyKleene()
-		} else if val == barChar {
-			subNFA, _, err := r.buildNFA(val, tokens, curId)
-			if err != nil {
-				return NFA{}, 0, err
-			}
-			curNFA.AddBranch(subNFA)
-		} else if val == lParenChar {
-			subNFA, lastChar, err := r.buildNFA(val, tokens, curId)
-			if err != nil {
-				return NFA{}, 0, err
-			}
-			if lastChar != rParenChar {
-				return NFA{}, 0, customerr.AppendError(
-					RegexSyntaxError,
-					RegexInbalancedParens,
-				)
-			}
-			curNFA.AppendNFA(subNFA)
-		} else {
-			curNFA.AppendTransition(val)
-		}
-	}
-	return curNFA, 0, err
-}
+// func (r *Regex) buildNFA(
+// 	lastChar byte,
+// 	tokens iter.Iter[byte],
+// 	curId nfaID,
+// ) (NFA, byte, error) {
+// 	curNFA := NewNFA()
+// 	val, err, cont := tokens.PullOne()
+// 	for ; err == nil && cont; val, err, cont = tokens.PullOne() {
+// 		if val == rParenChar {
+// 			if lastChar != lParenChar {
+// 				return NFA{}, 0, customerr.AppendError(
+// 					RegexSyntaxError,
+// 					RegexInbalancedParens,
+// 				)
+// 			}
+// 			return curNFA, rParenChar, nil
+// 		} else if val == starChar {
+// 			curNFA.ApplyKleene()
+// 		} else if val == barChar {
+// 			subNFA, _, err := r.buildNFA(val, tokens, curId)
+// 			if err != nil {
+// 				return NFA{}, 0, err
+// 			}
+// 			curNFA.AddBranch(subNFA)
+// 		} else if val == lParenChar {
+// 			subNFA, lastChar, err := r.buildNFA(val, tokens, curId)
+// 			if err != nil {
+// 				return NFA{}, 0, err
+// 			}
+// 			if lastChar != rParenChar {
+// 				return NFA{}, 0, customerr.AppendError(
+// 					RegexSyntaxError,
+// 					RegexInbalancedParens,
+// 				)
+// 			}
+// 			curNFA.AppendNFA(subNFA)
+// 		} else {
+// 			curNFA.AppendTransition(val)
+// 		}
+// 	}
+// 	return curNFA, 0, err
+// }

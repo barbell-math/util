@@ -17,7 +17,7 @@ import (
 type (
 	edgeHash   HashSetHash
 	vertexHash HashSetHash
-	graphLink  basic.Pair[edgeHash, vertexHash]
+	graphLink  basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	graphImpl  map[vertexHash]Vector[graphLink, *graphLink]
 
 	// This is used when only the vertex part of a graph edge is pertinent
@@ -879,8 +879,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) EdgesBetweenPntr(from *V, to *V) i
 //
 // Time Complexity: O(n), where n=len(e)
 func (g *internalHashGraphImpl[V, E, VI, EI]) AddEdges(e ...E) error {
-	g.edges.AppendUnique(e...)
-	return nil
+	return g.edges.AppendUnique(e...)
 }
 
 // Description: Places a write lock on the underlying hash graph before calling
@@ -895,15 +894,17 @@ func (g *SyncedHashGraph[V, E, VI, EI]) AddEdges(e ...E) error {
 	return g.HashGraph.AddEdges(e...)
 }
 
-func (g *internalHashGraphImpl[V, E, VI, EI])SetEdges(e ...E) error {
-	// g.edges.Set(e...)
-	// for _,iterE:=range(e) {
-	// 	iterEHash,ok:=g.getEdgeHash(&iterE)
-	// 	if !ok {
-	// 		return getKeyError[E](&iterE)
-	// 	}
-	// }
-	return nil
+// Description: Updates the supplied edge using the supplied operation. All
+// uniqueness constraints that are imposed on a set are imposed here as well.
+// This means that the updated value must compare equal to the original value
+// according to the EI widget and produce the same hash as the original value.
+//
+// Time Complexity: O(1)
+func (g *internalHashGraphImpl[V, E, VI, EI])UpdateEdge(
+	e E,
+	updateOp func(e *E),
+) error {
+	return g.edges.UpdateUnique(e,updateOp)
 }
 
 // Description: Adds a vertex to the graph, if it does not already exist
@@ -929,8 +930,17 @@ func (g *SyncedHashGraph[V, E, VI, EI]) AddVertices(v ...V) error {
 	return g.HashGraph.AddVertices(v...)
 }
 
-func (g *internalHashGraphImpl[V, E, VI, EI]) SetVertices(v ...V) error {
-	return nil
+// Description: Updates the supplied vertex using the supplied operation. All
+// uniqueness constraints that are imposed on a set are imposed here as well.
+// This means that the updated value must compare equal to the original value
+// according to the VI widget and produce the same hash as the original value.
+//
+// Time Complexity: O(1)
+func (g *internalHashGraphImpl[V, E, VI, EI]) UpdateVertex(
+	v V,
+	updateOp func(orig *V),
+) error {
+	return g.vertices.UpdateUnique(v,updateOp)
 }
 
 // Description: Adds a link between an existing edge and vertices in the graph.

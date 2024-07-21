@@ -73,8 +73,8 @@ type LastElemWrite[V any] interface {
 type WriteGraphOps[V any, E any] interface {
 	AddEdges(e ...E) error
 	AddVertices(v ...V) error
-	SetEdges(e ...E) error
-	SetVertices(v ...V) error
+	UpdateEdge(orig E, updateOp func(orig *E)) error
+	UpdateVertex(orig V, updateOp func(orig *E)) error
 	Link(from V, to V, e E) error
 	LinkPntr(from *V, to *V, e *E) error
 }

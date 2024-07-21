@@ -12,14 +12,16 @@ import (
 // separate.
 
 func TestMapElemsStopEarly(t *testing.T) {
-	f := func() basic.Pair[string, int] { return basic.Pair[string, int]{} }
 	caseHit := false
 	for i := 0; i < 10; i++ {
 		cntr := 0
-		_, _, found := MapElems(map[string]int{"test": 1, "test2": 2, "test3": 3}, f).Find(
+		_, _, found := MapElems(
+			map[string]int{"test": 1, "test2": 2, "test3": 3},
+			basic.NewPair,
+		).Find(
 			func(val basic.Pair[string, int]) (bool, error) {
 				cntr += 1
-				return val.GetA() == "test2", nil
+				return val.A == "test2", nil
 			})
 		test.True(found, t)
 		caseHit = (caseHit || cntr < 3)
@@ -32,7 +34,7 @@ func mapElemsHelper[K comparable, V any](m map[K]V, t *testing.T) {
 	mIter := MapElems[K, V](m, f)
 	for i := 0; i < len(m); i++ {
 		mV, mErr, mBool := mIter(Continue)
-		test.Eq(mV.GetB(), m[mV.GetA()], t)
+		test.Eq(mV.B, m[mV.A], t)
 		test.Nil(mErr, t)
 		test.True(mBool, t)
 	}

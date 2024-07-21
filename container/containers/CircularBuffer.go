@@ -90,6 +90,26 @@ func NewSyncedCircularBuffer[T any, U widgets.WidgetInterface[T]](
 	}, err
 }
 
+// Creates a new circular buffer and populates it with the supplied values. The
+// circular buffer will have len(vals) capacity.
+func CirularBufferValInit[T any, U widgets.WidgetInterface[T]](
+	vals ...T,
+) CircularBuffer[T,U] {
+	rv,_:=NewCircularBuffer[T,U](len(vals))
+	copy(rv.vals, vals)
+	return rv
+}
+
+// Creates a new synced circular buffer and populates it with the supplied
+// values. The circular buffer will have len(vals) capacity.
+func SyncedCirularBufferValInit[T any, U widgets.WidgetInterface[T]](
+	vals ...T,
+) SyncedCircularBuffer[T,U] {
+	rv,_:=NewSyncedCircularBuffer[T,U](len(vals))
+	copy(rv.CircularBuffer.vals, vals)
+	return rv
+}
+
 // Converts the supplied map to a syncronized map. Beware: The original
 // non-synced circular buffer will remain useable.
 func (c *CircularBuffer[T, U]) ToSynced() SyncedCircularBuffer[T, U] {

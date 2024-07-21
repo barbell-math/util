@@ -31,9 +31,9 @@ func newStructHeaderMapping[R any](r *R, opts *options) (headerMapping[R], error
 		if strings.ToUpper(val.A[0:1])[0] != val.A[0] {
 			return iter.Continue, nil
 		}
-		desiredVal := val.GetA()
+		desiredVal := val.A
 		if opts.getFlag(useStructTags) {
-			if v, ok := val.GetB().Lookup(opts.structTagName); ok {
+			if v, ok := val.B.Lookup(opts.structTagName); ok {
 				desiredVal = v
 			}
 		}

@@ -47,8 +47,8 @@ func TestZipRightLessThanLeft(t *testing.T) {
 	test.Eq(2, len(vals), t)
 	test.Nil(err, t)
 	for i := 0; i < 2; i++ {
-		test.Eq(fmt.Sprintf("%d", i), vals[i].GetA(), t)
-		test.Eq(i, vals[i].GetB(), t)
+		test.Eq(fmt.Sprintf("%d", i), vals[i].A, t)
+		test.Eq(i, vals[i].B, t)
 	}
 }
 
@@ -61,8 +61,8 @@ func TestZipLeftLessThanRight(t *testing.T) {
 	test.Eq(2, len(vals), t)
 	test.Nil(err, t)
 	for i := 0; i < 2; i++ {
-		test.Eq(fmt.Sprintf("%d", i), vals[i].GetA(), t)
-		test.Eq(i, vals[i].GetB(), t)
+		test.Eq(fmt.Sprintf("%d", i), vals[i].A, t)
+		test.Eq(i, vals[i].B, t)
 	}
 }
 
@@ -75,7 +75,7 @@ func TestZipLeftEqualsRight(t *testing.T) {
 	test.Eq(3, len(vals), t)
 	test.Nil(err, t)
 	for i := 0; i < 3; i++ {
-		test.Eq(fmt.Sprintf("%d", i), vals[i].GetA(), t)
-		test.Eq(i, vals[i].GetB(), t)
+		test.Eq(fmt.Sprintf("%d", i), vals[i].A, t)
+		test.Eq(i, vals[i].B, t)
 	}
 }

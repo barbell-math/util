@@ -3,7 +3,8 @@ package lexer
 import (
 	"github.com/barbell-math/util/algo/hash"
 	"github.com/barbell-math/util/algo/widgets"
-	"github.com/barbell-math/util/container/basic"
+
+	// "github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containers"
 )
 
@@ -70,6 +71,7 @@ func NewNFA[A any, AI widgets.WidgetInterface[A]]() NFA[A,AI] {
 }
 
 func (n NFA[A,AI]) initNFA() {
+	lambdaEdge,_:=containers.NewHashSet[A,AI](0)
 	n.graph.Clear()
 	// for k, _ := range n {
 	// 	delete(n, k)
@@ -78,6 +80,7 @@ func (n NFA[A,AI]) initNFA() {
 		id: nfaID(0),
 		flags: nfaSource | nfaSink,
 	})
+	n.graph.AddEdges(alphabetRange[A, AI](lambdaEdge))
 	n.sink=nfaNode{id: 0}
 	// n[nfaStart] = nfaNode{
 	// 	flags:       nfaSource | nfaSink,
@@ -85,20 +88,33 @@ func (n NFA[A,AI]) initNFA() {
 	// }
 }
 
-func (n NFA[A, AI]) AppendTransition(c byte) {
+func (n NFA[A, AI]) AppendTransition(c A) {
 	if n.graph.NumVertices()==0 {
 	// if len(n) == 0 {
 		n.initNFA()
 	}
-	n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
-		node.flags &= ^nfaSink
-		node.addTransition(c, n.nfaSink()+1)
-		return nil
+	newNode:=nfaNode{
+		id: n.sink.id+1,
+		flags: nfaSink,
+	}
+	edge:=containers.HashSetValInit[A,AI](c)
+
+	n.graph.AddVertices(newNode)
+	n.graph.AddEdges(alphabetRange[A, AI](edge))
+	n.graph.UpdateVertex(n.sink, func(orig *nfaNode) {
+		orig.flags &= ^nfaSink
 	})
-	n.addNode(nfaNode{
-		flags:       nfaSink,
-		transitions: []basic.Pair[byte, nfaID]{},
-	})
+	n.graph.LinkPntr(&n.sink, &newNode, (*alphabetRange[A, AI])(&edge))
+	n.sink=newNode
+	// n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
+	// 	node.flags &= ^nfaSink
+	// 	node.addTransition(c, n.nfaSink()+1)
+	// 	return nil
+	// })
+	// n.addNode(nfaNode{
+	// 	flags:       nfaSink,
+	// 	transitions: []basic.Pair[byte, nfaID]{},
+	// })
 }
 
 // func (n NFA) AppendNFA(other NFA) {
