@@ -252,7 +252,7 @@ func generateZeroFunction() string {
 			"}\n"
 	case "string":
 		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
-			"\t *v = \"\"\n" +
+			"\t*v = \"\"\n" +
 			"}\n"
 	default:
 		return "func (a Builtin{{ .CapType }}) Zero(v *{{ .Type }}) {\n" +
@@ -315,7 +315,7 @@ func generateArithFuncs() string {
 			"\t*res = *l / *r\n" +
 			"}\n"
 	case "string":
-		return "// A string is not an arithmetic aware widget. Strings are only base widgets.\n\n"
+		return "// A string is not an arithmetic aware widget. Strings are only base widgets.\n"
 	default:
 		return ""
 	}
