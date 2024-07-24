@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	// "fmt"
 	"fmt"
 	"testing"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/test"
-	// "github.com/barbell-math/util/test"
 )
 
 func verifyGraph[A any, AI widgets.WidgetInterface[A]](
@@ -20,15 +18,25 @@ func verifyGraph[A any, AI widgets.WidgetInterface[A]](
 ) {
 	test.Eq(len(expectedLinks), nfaGraph.NumLinks(), t)
 	for _, v := range expectedLinks {
-		fmt.Println(v)
 		test.True(nfaGraph.ContainsLinkPntr(&v.A, &v.C, &v.B), t)
+
+		fullV := nfaNode{id: v.A.id}
+		fmt.Println(fullV)
+		test.Nil(nfaGraph.GetVertex(&fullV), t)
+		fmt.Println(fullV)
+		test.Eq(v.A.id, fullV.id, t)
+		test.Eq(v.A.flags, fullV.flags, t)
+
+		fullV = nfaNode{id: v.C.id}
+		test.Nil(nfaGraph.GetVertex(&fullV), t)
+		test.Eq(v.C.id, fullV.id, t)
+		test.Eq(v.C.flags, fullV.flags, t)
 	}
 }
 
 func TestNFAAppendTransition(t *testing.T) {
 	n := NewNFA[byte, widgets.BuiltinByte]()
 	n.AppendTransition('a')
-	// test.Eq("map[0:{2 [{97 1}]} 1:{4 []}]", fmt.Sprint(n), t)
 	verifyGraph[byte, widgets.BuiltinByte](n,
 		[]basic.Triple[nfaNode, containers.HashSet[byte, widgets.BuiltinByte], nfaNode]{
 			{
@@ -41,7 +49,6 @@ func TestNFAAppendTransition(t *testing.T) {
 	)
 
 	n.AppendTransition('b')
-	// "map[0:{2 [{97 1}]} 1:{0 [{98 2}]} 2:{4 []}]",
 	verifyGraph[byte, widgets.BuiltinByte](n,
 		[]basic.Triple[nfaNode, containers.HashSet[byte, widgets.BuiltinByte], nfaNode]{
 			{
@@ -58,25 +65,27 @@ func TestNFAAppendTransition(t *testing.T) {
 		t,
 	)
 
-	// n.AppendTransition('b')
-	// test.Eq(
-	// 	"map[0:{2 [{97 1}]} 1:{0 [{98 2}]} 2:{4 []}]",
-	// 	fmt.Sprint(n),
-	// 	t,
-	// )
-	// fmt.Println(n.graph)
-
-	// n.AppendTransition('c')
-	// test.Eq(
-	// 	"map["+
-	// 		"0:{2 [{97 1}]} "+
-	// 		"1:{0 [{98 2}]} "+
-	// 		"2:{0 [{99 3}]} "+
-	// 		"3:{4 []}"+
-	// 		"]",
-	// 	fmt.Sprint(n),
-	// 	t,
-	// )
+	n.AppendTransition('c')
+	verifyGraph[byte, widgets.BuiltinByte](n,
+		[]basic.Triple[nfaNode, containers.HashSet[byte, widgets.BuiltinByte], nfaNode]{
+			{
+				A: nfaNode{id: 0, flags: nfaSource},
+				B: containers.HashSetValInit[byte, widgets.BuiltinByte]('a'),
+				C: nfaNode{id: 1, flags: 0},
+			},
+			{
+				A: nfaNode{id: 1, flags: 0},
+				B: containers.HashSetValInit[byte, widgets.BuiltinByte]('b'),
+				C: nfaNode{id: 2, flags: 0},
+			},
+			{
+				A: nfaNode{id: 2, flags: 0},
+				B: containers.HashSetValInit[byte, widgets.BuiltinByte]('c'),
+				C: nfaNode{id: 3, flags: nfaSink},
+			},
+		},
+		t,
+	)
 }
 
 // func TestNFAAppendNFAEmpty(t *testing.T) {

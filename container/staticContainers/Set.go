@@ -8,6 +8,7 @@ type ReadSet[V any] interface {
 	containerTypes.Addressable
 	containerTypes.Length
 	containerTypes.ReadOps[V]
+	containerTypes.ReadUniqueOps[V]
 	containerTypes.Comparisons[
 		containerTypes.ComparisonsOtherConstraint[V],
 		V,

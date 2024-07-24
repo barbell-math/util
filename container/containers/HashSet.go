@@ -186,6 +186,35 @@ func (h *HashSet[T, U]) ValPntrs() iter.Iter[*T] {
 	panic(getNonAddressablePanicText("hash set"))
 }
 
+// Description: Populates the supplied value with the value that is in the
+// container. This is useful when storing structs and the structs identity as
+// defined by the U widget only depends on a subset of the structs fields. This
+// function allows for getting the entire value based on just the part of the
+// struct that defines it's identity. Returns a value error if the value is not
+// found in the set.
+//
+// Time complexity: O(1)
+func (h *HashSet[T, U]) GetUnique(v *T) error {
+	if hashPos, ok := h.getHashPosition(v); ok {
+		*v = h.internalHashSetImpl[hashPos]
+	} else {
+		return getValueError[T](v)
+	}
+	return nil
+}
+
+// Description: Places a read lock on the underlying hash set and then calls the
+// underlying hash sets [HashSet.GetUnique] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (h *SyncedHashSet[T, U]) GetUnique(v *T) error {
+	h.RLock()
+	defer h.RUnlock()
+	return h.HashSet.GetUnique(v)
+}
+
 // Description: Contains will return true if the supplied value is in the hash
 // set, false otherwise. All equality comparisons are performed by the generic U
 // widget type that the hash set was initialized with.
@@ -323,10 +352,11 @@ func (h *HashSet[T, U]) updateOp(orig *T, updateOp func(orig *T)) error {
 		if iterV, found := h.internalHashSetImpl[i]; !found {
 			return getValueError[T](orig)
 		} else if w.Eq(orig, &iterV) {
-			updateOp(orig)
 			oldValue := h.internalHashSetImpl[i]
-			newHash := w.Hash(orig)
 			oldHash := w.Hash(&oldValue)
+
+			updateOp(&oldValue)
+			newHash := w.Hash(&oldValue)
 			if newHash != oldHash {
 				return getUpdateViolationHashError[T](
 					&oldValue, orig, hash.Hash(oldHash), hash.Hash(newHash),
@@ -335,7 +365,7 @@ func (h *HashSet[T, U]) updateOp(orig *T, updateOp func(orig *T)) error {
 			if !w.Eq(&oldValue, orig) {
 				return getUpdateViolationEqError[T](&oldValue, orig)
 			}
-			h.internalHashSetImpl[i] = *orig
+			h.internalHashSetImpl[i] = oldValue
 			return nil
 		}
 	}

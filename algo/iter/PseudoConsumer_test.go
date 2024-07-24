@@ -205,7 +205,7 @@ func TestToChan(t *testing.T) {
 	toChanIterHelper(vals, t)
 }
 
-func toFileIterHelperWithNewline(numVals int, src string, t *testing.T) {
+func toWriterIterHelperWithNewline(numVals int, src string, t *testing.T) {
 	vals := make([]int, numVals)
 	for i, _ := range vals {
 		vals[i] = i
@@ -216,16 +216,19 @@ func toFileIterHelperWithNewline(numVals int, src string, t *testing.T) {
 	}
 	SliceElems(vals).ToWriter(f, true)
 	f.Close()
+
 	f, err = os.Open(src)
 	test.Nil(err, t)
 	w := bufio.NewScanner(f)
 	for i := 0; w.Scan(); i++ {
 		test.Eq(fmt.Sprintf("%d", i), w.Text(), t)
 	}
+	f.Close()
+
 	err = os.Remove(src)
 	test.Nil(err, t)
 }
-func toFileIterHelperNoNewline(numVals int, src string, t *testing.T) {
+func toWriterIterHelperNoNewline(numVals int, src string, t *testing.T) {
 	correctVal := ""
 	vals := make([]int, numVals)
 	for i, _ := range vals {
@@ -250,15 +253,15 @@ func toFileIterHelperNoNewline(numVals int, src string, t *testing.T) {
 	err = os.Remove(src)
 	test.Nil(err, t)
 }
-func TestToFile(t *testing.T) {
-	toFileIterHelperWithNewline(0, "emptyFileTest.txt", t)
-	toFileIterHelperWithNewline(1, "oneLineFileTest.txt", t)
-	toFileIterHelperWithNewline(5, "fiveLinesFileTest.txt", t)
-	toFileIterHelperWithNewline(10, "tenLinesFileTest.txt", t)
-	toFileIterHelperNoNewline(0, "emptyFileTest.txt", t)
-	toFileIterHelperNoNewline(1, "oneLineFileTest.txt", t)
-	toFileIterHelperNoNewline(5, "fiveLinesFileTest.txt", t)
-	toFileIterHelperNoNewline(10, "tenLinesFileTest.txt", t)
+func TestToWriter(t *testing.T) {
+	toWriterIterHelperWithNewline(0, "emptyFileTest.txt", t)
+	toWriterIterHelperWithNewline(1, "oneLineFileTest.txt", t)
+	toWriterIterHelperWithNewline(5, "fiveLinesFileTest.txt", t)
+	toWriterIterHelperWithNewline(10, "tenLinesFileTest.txt", t)
+	toWriterIterHelperNoNewline(0, "emptyFileTest.txt", t)
+	toWriterIterHelperNoNewline(1, "oneLineFileTest.txt", t)
+	toWriterIterHelperNoNewline(5, "fiveLinesFileTest.txt", t)
+	toWriterIterHelperNoNewline(10, "tenLinesFileTest.txt", t)
 }
 
 func TestReduce(t *testing.T) {

@@ -219,6 +219,26 @@ func DynSetInterfaceContainsPntr(
 	}
 }
 
+// Tests the GetUnique method functionality of a dynamic set.
+func DynSetInterfaceGetUnique(
+	factory func(capacity int) dynamicContainers.Set[int],
+	t *testing.T,
+) {
+	container := factory(0)
+	for i := 0; i < 5; i++ {
+		container.AppendUnique(i)
+	}
+	tmp := 0
+	for i := 0; i < 5; i++ {
+		tmp = i
+		test.True(container.Contains(i), t)
+		test.Nil(container.GetUnique(&tmp), t)
+		test.Eq(i, tmp, t)
+	}
+	tmp = -1
+	test.ContainsError(containerTypes.ValueError, container.GetUnique(&tmp), t)
+}
+
 // Tests the Contains method functionality of a dynamic set.
 func DynSetInterfaceContains(
 	factory func(capacity int) dynamicContainers.Set[int],

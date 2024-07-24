@@ -13,6 +13,11 @@ type ReadOps[V any] interface {
 	ContainsPntr(v *V) bool
 }
 
+// An interface that enforces implementation of read-only, value-only, operations.
+type ReadUniqueOps[V any] interface {
+	GetUnique(v *V) error
+}
+
 // An interface that enforces implementation of read-only, key/value, operations.
 type ReadKeyedOps[K any, V any] interface {
 	Get(k K) (V, error)
@@ -44,6 +49,8 @@ type ReadGraphOps[V any, E any] interface {
 	EdgePntrs() iter.Iter[*E]
 	Vertices() iter.Iter[V]
 	VerticePntrs() iter.Iter[*V]
+	GetEdge(e *E) error
+	GetVertex(v *V) error
 	ContainsEdge(e E) bool
 	ContainsEdgePntr(e *E) bool
 	ContainsVertex(v V) bool

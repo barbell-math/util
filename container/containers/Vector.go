@@ -250,6 +250,37 @@ func (v *SyncedVector[T, U]) GetPntr(idx int) (*T, error) {
 	return v.Vector.GetPntr(idx)
 }
 
+// Description: Populates the supplied value with the value that is in the
+// container. This is useful when storing structs and the structs identity as
+// defined by the U widget only depends on a subset of the structs fields. This
+// function allows for getting the entire value based on just the part of the
+// struct that defines it's identity. Returns a value error if the value is not
+// found in the vector.
+//
+// Time complexity: O(n)
+func (v *Vector[T, U]) GetUnique(val *T) error {
+	w := widgets.Widget[T, U]{}
+	for i := 0; i < len(*v); i++ {
+		if w.Eq(val, &(*v)[i]) {
+			*val = (*v)[i]
+			return nil
+		}
+	}
+	return getValueError[T](val)
+}
+
+// Description: Places a read lock on the underlying vector and then calls the
+// underlying vectors [Vector.GetUnique] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n)
+func (v *SyncedVector[T, U]) GetUnique(val *T) error {
+	v.RLock()
+	defer v.RUnlock()
+	return v.Vector.GetUnique(val)
+}
+
 // Description: Contains will return true if the supplied value is in the
 // vector, false otherwise. All equality comparisons are performed by the
 // generic U widget type that the vector was initialized with.

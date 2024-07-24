@@ -536,6 +536,38 @@ func (c *SyncedCircularBuffer[T, U]) GetPntr(idx int) (*T, error) {
 	return c.CircularBuffer.GetPntr(idx)
 }
 
+// Description: Populates the supplied value with the value that is in the
+// container. This is useful when storing structs and the structs identity as
+// defined by the U widget only depends on a subset of the structs fields. This
+// function allows for getting the entire value based on just the part of the
+// struct that defines it's identity. Returns a value error if the value is not
+// found in the circular buffer.
+//
+// Time complexity: O(n)
+func (c *CircularBuffer[T, U]) GetUnique(v *T) error {
+	w := widgets.Widget[T, U]{}
+	for i := 0; i < len(c.vals); i++ {
+		properIdx := c.start.GetProperIndex(i, len(c.vals))
+		if w.Eq(v, &c.vals[properIdx]) {
+			*v = c.vals[properIdx]
+			return nil
+		}
+	}
+	return getValueError[T](v)
+}
+
+// Description: Places a read lock on the underlying circular buffer and then
+// calls the underlying circular buffer [CircularBuffer.GetUnique] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(n)
+func (c *SyncedCircularBuffer[T, U]) GetUnique(v *T) error {
+	c.RLock()
+	defer c.RUnlock()
+	return c.CircularBuffer.GetUnique(v)
+}
+
 // Description: Contains will return true if the supplied value is in the
 // circular buffer, false otherwise. All equality comparisons are performed by
 // the generic U widget type that the circular buffer was initialized with.

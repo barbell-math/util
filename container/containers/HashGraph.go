@@ -33,9 +33,9 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		numLinks int
+		graph    graphImpl
 		edges    hashGraphEdges[V, E, VI, EI]
 		vertices hashGraphVertices[V, E, VI, EI]
-		graph    graphImpl
 	}
 
 	hashGraphEdges[
@@ -511,6 +511,54 @@ func (g *SyncedHashGraph[V, E, VI, EI]) ContainsEdgePntr(e *E) bool {
 	g.RLock()
 	defer g.RUnlock()
 	return g.edges.ContainsPntr(e)
+}
+
+// Description: Populates the supplied value with the vertex value that is in
+// the graph. This is useful when storing structs and the structs identity as
+// defined by the VI widget only depends on a subset of the structs fields. This
+// function allows for getting the entire value based on just the part of the
+// struct that defines it's identity. Returns a value error if the value is not
+// found in the graph.
+//
+// Time complexity: O(1)
+func (g *internalHashGraphImpl[V, E, VI, EI]) GetVertex(v *V) error {
+	return g.vertices.GetUnique(v)
+}
+
+// Description: Places a read lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.GetVertex] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (g *SyncedHashGraph[V, E, VI, EI]) GetVertex(v *V) error {
+	g.RLock()
+	defer g.RUnlock()
+	return g.vertices.GetUnique(v)
+}
+
+// Description: Populates the supplied value with the edge value that is in
+// the graph. This is useful when storing structs and the structs identity as
+// defined by the EI widget only depends on a subset of the structs fields. This
+// function allows for getting the entire value based on just the part of the
+// struct that defines it's identity. Returns a value error if the value is not
+// found in the graph.
+//
+// Time complexity: O(1)
+func (g *internalHashGraphImpl[V, E, VI, EI]) GetEdge(e *E) error {
+	return g.edges.GetUnique(e)
+}
+
+// Description: Places a read lock on the underlying hash graph and then calls
+// the underlying hash graph [HashGraph.GetEdge] method.
+//
+// Lock Type: Read
+//
+// Time Complexity: O(1)
+func (g *SyncedHashGraph[V, E, VI, EI]) GetEdge(e *E) error {
+	g.RLock()
+	defer g.RUnlock()
+	return g.edges.GetUnique(e)
 }
 
 // Description: Returns true if the supplied edge links the supplied vertices.
