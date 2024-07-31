@@ -1,8 +1,8 @@
 package containers
 
 import (
-	"github.com/barbell-math/util/algo/hash"
-	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/widgets"
 )
 
 type (

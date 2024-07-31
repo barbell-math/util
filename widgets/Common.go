@@ -4,7 +4,7 @@
 // Basically all of the code in this package is generated with go:generate comments.
 package widgets
 
-import "github.com/barbell-math/util/algo/hash"
+import "github.com/barbell-math/util/hash"
 
 type (
 	// The interface that defines what it means to be a widget. This interface

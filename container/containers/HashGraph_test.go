@@ -3,8 +3,8 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 //go:generate go run interfaceTest.go -type=HashGraph -category=dynamic -interface=DirectedGraph -genericDecl=[int,int] -factory=generateHashGraph
@@ -28,6 +28,20 @@ func generateSyncedHashGraph(
 		widgets.BuiltinInt, widgets.BuiltinInt,
 	](capacity, capacity)
 	return v
+}
+
+func TestHashGraphWidgetInterface(t *testing.T) {
+	var widget widgets.WidgetInterface[HashGraph[
+		string, string,
+		widgets.BuiltinString, widgets.BuiltinString,
+	]]
+
+	v, _ := NewHashGraph[
+		string, string,
+		widgets.BuiltinString, widgets.BuiltinString,
+	](0, 0)
+	widget = &v
+	_ = widget
 }
 
 func TestHashGraphEq(t *testing.T) {

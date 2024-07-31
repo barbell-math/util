@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/container/dynamicContainers"
@@ -21,9 +21,7 @@ func verifyGraph[A any, AI widgets.WidgetInterface[A]](
 		test.True(nfaGraph.ContainsLinkPntr(&v.A, &v.C, &v.B), t)
 
 		fullV := nfaNode{id: v.A.id}
-		fmt.Println(fullV)
 		test.Nil(nfaGraph.GetVertex(&fullV), t)
-		fmt.Println(fullV)
 		test.Eq(v.A.id, fullV.id, t)
 		test.Eq(v.A.flags, fullV.flags, t)
 
@@ -88,41 +86,38 @@ func TestNFAAppendTransition(t *testing.T) {
 	)
 }
 
-// func TestNFAAppendNFAEmpty(t *testing.T) {
-// 	op := func(n1 NFA, n2 NFA) {
-// 		n1.AppendNFA(n2)
-// 		test.Eq(
-// 			"map[0:{2 [{99 1}]} 1:{0 [{100 2}]} 2:{4 []}]",
-// 			fmt.Sprint(n1),
-// 			t,
-// 		)
-// 	}
-//
-// 	n1 := NFA{}
-// 	n2 := NewNFA()
-// 	n2.AppendTransition('c')
-// 	n2.AppendTransition('d')
-// 	op(n1, n2)
-//
-// 	n1 = NewNFA()
-// 	n2 = NewNFA()
-// 	n2.AppendTransition('c')
-// 	n2.AppendTransition('d')
-// 	op(n1, n2)
-//
-// 	n1 = NewNFA()
-// 	n1.AppendTransition('c')
-// 	n1.AppendTransition('d')
-// 	n2 = NFA{}
-// 	op(n1, n2)
-//
-// 	n1 = NewNFA()
-// 	n1.AppendTransition('c')
-// 	n1.AppendTransition('d')
-// 	n2 = NewNFA()
-// 	op(n1, n2)
-// }
-//
+func TestNFAAppendNFAEmpty(t *testing.T) {
+	op := func(
+		n1 NFA[byte, widgets.BuiltinByte],
+		n2 NFA[byte, widgets.BuiltinByte],
+	) {
+		n1.AppendNFA(n2)
+		test.Eq(
+			"map[0:{2 [{99 1}]} 1:{0 [{100 2}]} 2:{4 []}]",
+			fmt.Sprint(n1),
+			t,
+		)
+	}
+
+	n1 := NewNFA[byte, widgets.BuiltinByte]()
+	n2 := NewNFA[byte, widgets.BuiltinByte]()
+	n2.AppendTransition('c')
+	n2.AppendTransition('d')
+	op(n1, n2)
+
+	n1 = NewNFA[byte, widgets.BuiltinByte]()
+	n1.AppendTransition('c')
+	n1.AppendTransition('d')
+	n2 = NewNFA[byte, widgets.BuiltinByte]()
+	op(n1, n2)
+
+	n1 = NewNFA[byte, widgets.BuiltinByte]()
+	n1.AppendTransition('c')
+	n1.AppendTransition('d')
+	n2 = NewNFA[byte, widgets.BuiltinByte]()
+	op(n1, n2)
+}
+
 // func TestNFAAppendNFA(t *testing.T) {
 // 	n1 := NewNFA()
 // 	n1.AppendTransition('a')

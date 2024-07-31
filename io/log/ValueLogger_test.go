@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/iter"
+	"github.com/barbell-math/util/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/container/staticContainers"

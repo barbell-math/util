@@ -1,9 +1,9 @@
 package containers
 
 import (
-	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/container/staticContainers"
+	"github.com/barbell-math/util/iter"
 )
 
 // This function is a producer.

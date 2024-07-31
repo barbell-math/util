@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
 )

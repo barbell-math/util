@@ -3,7 +3,7 @@ package widgets
 // THIS FILE IS AUTO-GENERATED. DO NOT EDIT AND EXPECT CHANGES TO PERSIST.
 
 import "hash/maphash"
-import "github.com/barbell-math/util/algo/hash"
+import "github.com/barbell-math/util/hash"
 
 // The random seed will be different every time the program runs// meaning that between runs the hash values will not be consistent.
 // This was done for security purposes.

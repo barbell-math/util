@@ -2,7 +2,7 @@ package lexer
 
 // THIS FILE IS AUTO-GENERATED. DO NOT EDIT AND EXPECT CHANGES TO PERSIST.
 
-import "github.com/barbell-math/util/algo/hash"
+import "github.com/barbell-math/util/hash"
 import "github.com/barbell-math/util/container/containers"
 
 // A pass through widget to represent the aliased type alphabetRange[A, AI]

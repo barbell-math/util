@@ -179,7 +179,7 @@ func checkRequiredArgs() {
 }
 
 func generateImports() string {
-	commonImport := "import \"github.com/barbell-math/util/algo/hash\"\n"
+	commonImport := "import \"github.com/barbell-math/util/hash\"\n"
 	if VALS.WidgetPackage != "." {
 
 		commonImport = commonImport + "import \"{{ .WidgetPackage }}\"\n"

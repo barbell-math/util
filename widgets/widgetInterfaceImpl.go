@@ -153,7 +153,7 @@ func checkRequiredArgs() {
 }
 
 func generateImports() string {
-	commonImport := "import \"github.com/barbell-math/util/algo/hash\"\n\n"
+	commonImport := "import \"github.com/barbell-math/util/hash\"\n\n"
 	if VALS.Type == "string" {
 		return "import \"hash/maphash\"\n" + commonImport
 	}

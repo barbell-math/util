@@ -3,9 +3,9 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 //go:generate go run interfaceTest.go -type=HashMap -category=dynamic -interface=Map -genericDecl=[int,int] -factory=generateHashMap

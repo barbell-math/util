@@ -3,12 +3,12 @@ package containers
 import (
 	"sync"
 
-	"github.com/barbell-math/util/algo/hash"
-	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/iter"
+	"github.com/barbell-math/util/widgets"
 )
 
 type (
@@ -21,9 +21,9 @@ type (
 	// comparisons, will be handled.
 	Vector[T any, U widgets.WidgetInterface[T]] []T
 
-	// A synchronized version of Vector. All operations will be wrapped in the
-	// appropriate calls the embedded RWMutex. A pointer to a RWMutex is embedded
-	// rather than a value to avoid copying the lock value.
+	// A synchronized version of [Vector]. All operations will be wrapped in the
+	// appropriate calls to the embedded RWMutex. A pointer to a RWMutex is
+	// embedded rather than a value to avoid copying the lock value.
 	SyncedVector[T any, U widgets.WidgetInterface[T]] struct {
 		*sync.RWMutex
 		Vector[T, U]

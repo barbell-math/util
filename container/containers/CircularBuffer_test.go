@@ -3,10 +3,10 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 func TestWrapAroundIntAdd(t *testing.T) {

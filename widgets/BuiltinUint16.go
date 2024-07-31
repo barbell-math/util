@@ -2,7 +2,7 @@ package widgets
 
 // THIS FILE IS AUTO-GENERATED. DO NOT EDIT AND EXPECT CHANGES TO PERSIST.
 
-import "github.com/barbell-math/util/algo/hash"
+import "github.com/barbell-math/util/hash"
 
 // A widget to represent the built-in type uint16
 // This is meant to be used with the containers from the [containers] package.

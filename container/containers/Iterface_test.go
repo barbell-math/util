@@ -3,11 +3,11 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/staticContainers"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 func TestWindowEmpty(t *testing.T) {

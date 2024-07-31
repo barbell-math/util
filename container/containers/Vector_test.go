@@ -3,8 +3,8 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 //go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateVector
@@ -28,7 +28,10 @@ func generateSyncedVector(capacity int) SyncedVector[int, widgets.BuiltinInt] {
 	return v
 }
 
-func TestVectorTypeCasting(t *testing.T) {
+func ExampleVector_typeCasting() {
+	// Vectors can be type casted back and forth to regular slices. Note that
+	// when you do this you loose any type information provided by the widget
+	// interface.
 	v, _ := NewVector[string, widgets.BuiltinString](3)
 	s := []string(v)
 	_ = s

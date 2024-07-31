@@ -3,17 +3,23 @@ package containers
 import (
 	"fmt"
 	"sync"
+	"unsafe"
 
-	"github.com/barbell-math/util/algo/hash"
-	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
+	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/iter"
+	"github.com/barbell-math/util/widgets"
 )
 
 //go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=edgeHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
 //go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=vertexHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
 //go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=graphLink "-baseType=basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]" "-baseTypeWidget=basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]" -widgetPackage=github.com/barbell-math/util/container/basic
+
+const (
+	numLinksOffset  uintptr = unsafe.Sizeof(graphImpl{}) + unsafe.Sizeof(int(0))
+	graphImplOffset uintptr = unsafe.Sizeof(graphImpl{})
+)
 
 type (
 	edgeHash   HashSetHash
@@ -45,7 +51,6 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		HookedHashSet[E, EI]
-		internalHashGraphImpl *internalHashGraphImpl[V, E, VI, EI]
 	}
 
 	hashGraphVertices[
@@ -55,7 +60,6 @@ type (
 		EI widgets.WidgetInterface[E],
 	] struct {
 		HookedHashSet[V, VI]
-		internalHashGraphImpl *internalHashGraphImpl[V, E, VI, EI]
 	}
 
 	// A type to represent an arbitrary directed graph with the specified vertex
@@ -125,7 +129,14 @@ func (h *hashGraphEdges[V, E, VI, EI]) deleteOp(
 	deletedHash HashSetHash,
 	updatedHashes map[OldHashSetHash]NewHashSetHash,
 ) {
-	for iterHash, gNode := range h.internalHashGraphImpl.graph {
+	// These calculations depend on the ordering of the fields in the graph impl
+	// struct!
+	numLinksPntr := (*int)(unsafe.Pointer(
+		uintptr(unsafe.Pointer(h)) - numLinksOffset))
+	graphImpl := *(*graphImpl)(unsafe.Pointer(
+		uintptr(unsafe.Pointer(h)) - graphImplOffset))
+
+	for iterHash, gNode := range graphImpl {
 		idx, offset := 0, 0
 		for i, gLink := range gNode {
 			if gLink.A == edgeHash(deletedHash) {
@@ -140,11 +151,11 @@ func (h *hashGraphEdges[V, E, VI, EI]) deleteOp(
 			idx++
 		}
 		gNode.DeleteSequential(idx, gNode.Length())
-		h.internalHashGraphImpl.numLinks -= offset
+		*numLinksPntr -= offset
 		if len(gNode) == 0 {
-			delete(h.internalHashGraphImpl.graph, iterHash)
+			delete(graphImpl, iterHash)
 		} else {
-			h.internalHashGraphImpl.graph[iterHash] = gNode
+			graphImpl[iterHash] = gNode
 		}
 	}
 }
@@ -159,13 +170,26 @@ func (h *hashGraphVertices[V, E, VI, EI]) deleteOp(
 	deletedHash HashSetHash,
 	updatedHashes map[OldHashSetHash]NewHashSetHash,
 ) {
+	// These calculations depend on the ordering of the fields in the graph impl
+	// struct!
+	numLinksPntr := (*int)(unsafe.Pointer(
+		uintptr(unsafe.Pointer(h),
+	) - numLinksOffset - unsafe.Sizeof(
+		*(*HookedHashSet[E, EI])(nil),
+	)))
+	graphImpl := *(*graphImpl)(unsafe.Pointer(
+		uintptr(unsafe.Pointer(h),
+	) - graphImplOffset - unsafe.Sizeof(
+		*(*HookedHashSet[E, EI])(nil),
+	)))
+
 	// Remove the deleted hash from the graph if it is in the graph
-	if gNode, ok := h.internalHashGraphImpl.graph[vertexHash(deletedHash)]; ok {
-		h.internalHashGraphImpl.numLinks -= gNode.Length()
-		delete(h.internalHashGraphImpl.graph, vertexHash(deletedHash))
+	if gNode, ok := graphImpl[vertexHash(deletedHash)]; ok {
+		*numLinksPntr -= gNode.Length()
+		delete(graphImpl, vertexHash(deletedHash))
 	}
 
-	for iterHash, gNode := range h.internalHashGraphImpl.graph {
+	for iterHash, gNode := range graphImpl {
 		idx, offset := 0, 0
 		for i, gLink := range gNode {
 			if gLink.B == vertexHash(deletedHash) {
@@ -180,11 +204,11 @@ func (h *hashGraphVertices[V, E, VI, EI]) deleteOp(
 			idx++
 		}
 		gNode.DeleteSequential(idx, gNode.Length())
-		h.internalHashGraphImpl.numLinks -= offset
+		*numLinksPntr -= offset
 		if len(gNode) == 0 {
-			delete(h.internalHashGraphImpl.graph, iterHash)
+			delete(graphImpl, iterHash)
 		} else {
-			h.internalHashGraphImpl.graph[iterHash] = gNode
+			graphImpl[iterHash] = gNode
 		}
 	}
 }
@@ -220,12 +244,10 @@ func NewHashGraph[
 		return HashGraph[V, E, VI, EI]{}, err
 	}
 	gd.edges = hashGraphEdges[V, E, VI, EI]{
-		HookedHashSet:         em,
-		internalHashGraphImpl: gd,
+		HookedHashSet: em,
 	}
 	gd.vertices = hashGraphVertices[V, E, VI, EI]{
-		HookedHashSet:         vm,
-		internalHashGraphImpl: gd,
+		HookedHashSet: vm,
 	}
 	gd.graph = make(graphImpl, numVertices)
 	return HashGraph[V, E, VI, EI]{internalHashGraphImpl: gd}, nil

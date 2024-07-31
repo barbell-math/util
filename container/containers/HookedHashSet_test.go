@@ -3,8 +3,9 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 //go:generate go run interfaceTest.go -type=HookedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateHookedHashSet
@@ -50,6 +51,16 @@ func generateSyncedHookedHashSet(
 ) SyncedHookedHashSet[int, badBuiltinInt] {
 	v, _ := NewSyncedHookedHashSet[int, badBuiltinInt](&testSetHooks{}, capacity)
 	return v
+}
+
+func TestHookedHashSetWidgetInterface(t *testing.T) {
+	var widget widgets.WidgetInterface[HookedHashSet[
+		string, widgets.BuiltinString,
+	]]
+
+	v, _ := NewHookedHashSet[string, widgets.BuiltinString](&testSetHooks{}, 0)
+	widget = &v
+	_ = widget
 }
 
 func TestHookedHashSetHashOperation(t *testing.T) {

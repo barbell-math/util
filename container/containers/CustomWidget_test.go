@@ -3,9 +3,9 @@ package containers
 import (
 	"testing"
 
-	"github.com/barbell-math/util/algo/hash"
-	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/hash"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 type customWidget struct {

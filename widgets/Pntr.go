@@ -1,6 +1,6 @@
 package widgets
 
-import "github.com/barbell-math/util/algo/hash"
+import "github.com/barbell-math/util/hash"
 
 type (
 	Pntr[T any, I WidgetInterface[T]] struct {

@@ -2,7 +2,7 @@ package containers
 
 // THIS FILE IS AUTO-GENERATED. DO NOT EDIT AND EXPECT CHANGES TO PERSIST.
 
-import "github.com/barbell-math/util/algo/hash"
+import "github.com/barbell-math/util/hash"
 import "github.com/barbell-math/util/container/basic"
 
 // A pass through widget to represent the aliased type graphLink

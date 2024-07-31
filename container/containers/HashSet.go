@@ -3,13 +3,13 @@ package containers
 import (
 	"sync"
 
-	"github.com/barbell-math/util/algo/hash"
-	"github.com/barbell-math/util/algo/iter"
-	"github.com/barbell-math/util/algo/widgets"
 	"github.com/barbell-math/util/container/containerTypes"
+	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/iter"
+	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=HashSetHash -baseType=hash.Hash -baseTypeWidget=widgets.BuiltinHash -widgetPackage=github.com/barbell-math/util/algo/widgets
+//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=HashSetHash -baseType=hash.Hash -baseTypeWidget=widgets.BuiltinHash -widgetPackage=github.com/barbell-math/util/widgets
 
 type (
 	HashSetHash                hash.Hash

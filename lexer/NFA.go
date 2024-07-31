@@ -1,8 +1,8 @@
 package lexer
 
 import (
-	"github.com/barbell-math/util/algo/hash"
-	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/widgets"
 
 	// "github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containers"
@@ -88,33 +88,33 @@ func (n NFA[A, AI]) AppendTransition(c A) {
 	n.LinkPntr(&sinkIdentifier, &newNode, &edge)
 }
 
-// func (n NFA) AppendNFA(other NFA) {
-// 	// Other is nothing more than a just inited NFA, nothing to add
-// 	if len(other) <= 1 || other.nfaSink() <= 0 {
-// 		return
-// 	}
-// 	if len(n) == 0 {
-// 		n.initNFA()
-// 	}
-// 	n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
-// 		for _, v := range other[nfaStart].transitions {
-// 			node.addTransition(v.A, v.B+n.nfaSink())
-// 		}
-// 		node.flags &= ^nfaSink
-// 		return nil
-// 	})
-//
-// 	oldNFASize := n.nfaSink()
-// 	for i := nfaStart + 1; i <= other.nfaSink(); i++ {
-// 		iterNode := other[i]
-// 		iterNode.flags &= ^nfaSource
-// 		for j := 0; j < len(iterNode.transitions); j++ {
-// 			iterNode.transitions[j].B += oldNFASize
-// 		}
-// 		n.addNode(iterNode)
-// 	}
-// }
-//
+func (n NFA[A, AI]) AppendNFA(other NFA[A, AI]) {
+	// // Other is nothing more than a just inited NFA, nothing to add
+	// if len(other) <= 1 || other.nfaSink() <= 0 {
+	// 	return
+	// }
+	// if len(n) == 0 {
+	// 	n.initNFA()
+	// }
+	// n.changeAndSave(n.nfaSink(), func(node *nfaNode) error {
+	// 	for _, v := range other[nfaStart].transitions {
+	// 		node.addTransition(v.A, v.B+n.nfaSink())
+	// 	}
+	// 	node.flags &= ^nfaSink
+	// 	return nil
+	// })
+
+	// oldNFASize := n.nfaSink()
+	// for i := nfaStart + 1; i <= other.nfaSink(); i++ {
+	// 	iterNode := other[i]
+	// 	iterNode.flags &= ^nfaSource
+	// 	for j := 0; j < len(iterNode.transitions); j++ {
+	// 		iterNode.transitions[j].B += oldNFASize
+	// 	}
+	// 	n.addNode(iterNode)
+	// }
+}
+
 // func (n NFA) ApplyKleene() {
 // 	if len(n) == 0 {
 // 		n.initNFA()

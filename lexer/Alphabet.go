@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/barbell-math/util/algo/widgets"
+	"github.com/barbell-math/util/widgets"
 	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/container/dynamicContainers"
 )

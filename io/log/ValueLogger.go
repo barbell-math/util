@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/barbell-math/util/algo/iter"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/customerr"
 )
 

@@ -4,11 +4,11 @@ package containers
 import (
 	"fmt"
 
-	"github.com/barbell-math/util/algo/hash"
-	"github.com/barbell-math/util/algo/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/iter"
 )
 
 func addressableSafeGet[K any, V any](
