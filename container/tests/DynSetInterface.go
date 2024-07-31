@@ -3,10 +3,10 @@ package tests
 import (
 	"testing"
 
-	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/container/containerTypes"
 	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/test"
 )
 

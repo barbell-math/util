@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/barbell-math/util/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/container/dynamicContainers"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 func verifyGraph[A any, AI widgets.WidgetInterface[A]](

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/iter"
 )
 
 type (

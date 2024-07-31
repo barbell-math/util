@@ -3,9 +3,9 @@ package reflect
 import (
 	"reflect"
 
-	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/iter"
 )
 
 func getInaddressableMapError() error {

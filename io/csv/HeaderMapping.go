@@ -4,9 +4,9 @@ import (
 	stdReflect "reflect"
 	"strings"
 
-	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/reflect"
 )
 

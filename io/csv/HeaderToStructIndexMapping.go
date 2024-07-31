@@ -4,11 +4,11 @@ import (
 	"math"
 	"strings"
 
-	"github.com/barbell-math/util/iter"
-	"github.com/barbell-math/util/widgets"
 	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/reflect"
+	"github.com/barbell-math/util/widgets"
 )
 
 type (

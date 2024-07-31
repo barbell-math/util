@@ -3,8 +3,8 @@ package reflect
 import (
 	"reflect"
 
-	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/customerr"
+	"github.com/barbell-math/util/iter"
 )
 
 func getInaddressableIndexError(idx int) error {

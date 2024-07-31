@@ -1,8 +1,8 @@
 package containerTypes
 
 import (
-	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/container/basic"
+	"github.com/barbell-math/util/iter"
 )
 
 // An interface that enforces implementation of read-only, value-only, operations.

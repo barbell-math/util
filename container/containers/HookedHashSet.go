@@ -74,12 +74,12 @@ func NewSyncedHookedHashSet[T any, U widgets.WidgetInterface[T]](
 	}, nil
 }
 
-// Converts the supplied hooked hash set to a synchronized hash set. Beware: The 
+// Converts the supplied hooked hash set to a synchronized hash set. Beware: The
 // original non-synced hash set will remain useable.
-func (h *HookedHashSet[T, U])ToSynced() SyncedHookedHashSet[T,U] {
+func (h *HookedHashSet[T, U]) ToSynced() SyncedHookedHashSet[T, U] {
 	return SyncedHookedHashSet[T, U]{
 		SyncedHashSet: h.HashSet.ToSynced(),
-		hooks: h.hooks,
+		hooks:         h.hooks,
 	}
 }
 
@@ -98,7 +98,7 @@ func (h *HookedHashSet[T, U]) GetHashPosition(v *T) (HashSetHash, bool) {
 // Lock Type: Read
 //
 // Time Complexity: O(1)
-func (h *SyncedHookedHashSet[T, U])GetHashPosition(v *T) (HashSetHash, bool) {
+func (h *SyncedHookedHashSet[T, U]) GetHashPosition(v *T) (HashSetHash, bool) {
 	h.RLock()
 	h.RUnlock()
 	return h.SyncedHashSet.HashSet.getHashPosition(v)
@@ -125,7 +125,7 @@ func (h *HookedHashSet[T, U]) GetFromHash(internalHash HashSetHash) (T, error) {
 // Time Complexity: O(1)
 func (h *SyncedHookedHashSet[T, U]) GetFromHash(
 	internalHash HashSetHash,
-) (T,error) {
+) (T, error) {
 	if v, ok := h.SyncedHashSet.HashSet.internalHashSetImpl[internalHash]; ok {
 		return v, nil
 	}
@@ -252,36 +252,36 @@ func (h *SyncedHookedHashSet[T, U]) Clear() {
 
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Returns true if l==r, false otherwise.
-func (_ *HookedHashSet[T, U])Eq(
-	l *HookedHashSet[T,U],
-	r *HookedHashSet[T,U],
+func (_ *HookedHashSet[T, U]) Eq(
+	l *HookedHashSet[T, U],
+	r *HookedHashSet[T, U],
 ) bool {
 	return l.HashSet.Eq(&l.HashSet, &r.HashSet)
 }
 
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Returns true if l==r, false otherwise.
-func (_ *SyncedHookedHashSet[T, U])Eq(
-	l *SyncedHookedHashSet[T,U],
-	r *SyncedHookedHashSet[T,U],
+func (_ *SyncedHookedHashSet[T, U]) Eq(
+	l *SyncedHookedHashSet[T, U],
+	r *SyncedHookedHashSet[T, U],
 ) bool {
 	return l.HashSet.Eq(&l.HashSet, &r.HashSet)
 }
 
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Returns true if l<r, false otherwise.
-func (_ *HookedHashSet[T, U])Lt(
-	l *HookedHashSet[T,U],
-	r *HookedHashSet[T,U],
+func (_ *HookedHashSet[T, U]) Lt(
+	l *HookedHashSet[T, U],
+	r *HookedHashSet[T, U],
 ) bool {
 	return l.HashSet.Lt(&l.HashSet, &r.HashSet)
 }
 
 // An equality function that implements the [algo.widget.WidgetInterface]
 // interface. Returns true if l<r, false otherwise.
-func (_ *SyncedHookedHashSet[T, U])Lt(
-	l *SyncedHookedHashSet[T,U],
-	r *SyncedHookedHashSet[T,U],
+func (_ *SyncedHookedHashSet[T, U]) Lt(
+	l *SyncedHookedHashSet[T, U],
+	r *SyncedHookedHashSet[T, U],
 ) bool {
 	return l.HashSet.Lt(&l.HashSet, &r.HashSet)
 }
@@ -291,7 +291,7 @@ func (_ *SyncedHookedHashSet[T, U])Lt(
 // are produced from the elements of the set are combined in a way that
 // maintains identity, making it so the hash will represent the same equality
 // operation that [HookedHashSet.KeyedEq] and [HookedHashSet.Eq] provide.
-func (_ *HookedHashSet[T, U])Hash(other *HookedHashSet[T,U]) hash.Hash {
+func (_ *HookedHashSet[T, U]) Hash(other *HookedHashSet[T, U]) hash.Hash {
 	return other.HashSet.Hash(&other.HashSet)
 }
 
@@ -301,20 +301,20 @@ func (_ *HookedHashSet[T, U])Hash(other *HookedHashSet[T,U]) hash.Hash {
 // maintains identity, making it so the hash will represent the same equality
 // operation that [SyncedHookedHashSet.KeyedEq] and [SyncedHookedHashSet.Eq]
 // provide.
-func (_ *SyncedHookedHashSet[T, U])Hash(
-	other *SyncedHookedHashSet[T,U],
+func (_ *SyncedHookedHashSet[T, U]) Hash(
+	other *SyncedHookedHashSet[T, U],
 ) hash.Hash {
 	return other.HashSet.Hash(&other.HashSet)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [HookedHashSet.Clear].
-func (_ *HookedHashSet[T, U])Zero(other *HookedHashSet[T,U]) {
+func (_ *HookedHashSet[T, U]) Zero(other *HookedHashSet[T, U]) {
 	other.HashSet.Zero(&other.HashSet)
 }
 
 // An zero function that implements the [algo.widget.WidgetInterface] interface.
 // Internally this is equivalent to [HookedHashSet.Clear].
-func (_ *SyncedHookedHashSet[T, U])Zero(other *SyncedHookedHashSet[T,U]) {
+func (_ *SyncedHookedHashSet[T, U]) Zero(other *SyncedHookedHashSet[T, U]) {
 	other.HashSet.Zero(&other.HashSet)
 }

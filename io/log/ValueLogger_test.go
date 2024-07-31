@@ -6,12 +6,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/barbell-math/util/iter"
-	"github.com/barbell-math/util/widgets"
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/container/staticContainers"
+	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 func generateLog(l *ValueLogger[int], numLines int) {

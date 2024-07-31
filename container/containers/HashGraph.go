@@ -173,15 +173,13 @@ func (h *hashGraphVertices[V, E, VI, EI]) deleteOp(
 	// These calculations depend on the ordering of the fields in the graph impl
 	// struct!
 	numLinksPntr := (*int)(unsafe.Pointer(
-		uintptr(unsafe.Pointer(h),
-	) - numLinksOffset - unsafe.Sizeof(
-		*(*HookedHashSet[E, EI])(nil),
-	)))
+		uintptr(unsafe.Pointer(h)) - numLinksOffset - unsafe.Sizeof(
+			*(*HookedHashSet[E, EI])(nil),
+		)))
 	graphImpl := *(*graphImpl)(unsafe.Pointer(
-		uintptr(unsafe.Pointer(h),
-	) - graphImplOffset - unsafe.Sizeof(
-		*(*HookedHashSet[E, EI])(nil),
-	)))
+		uintptr(unsafe.Pointer(h)) - graphImplOffset - unsafe.Sizeof(
+			*(*HookedHashSet[E, EI])(nil),
+		)))
 
 	// Remove the deleted hash from the graph if it is in the graph
 	if gNode, ok := graphImpl[vertexHash(deletedHash)]; ok {
