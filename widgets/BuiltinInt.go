@@ -9,49 +9,49 @@ import "github.com/barbell-math/util/hash"
 type BuiltinInt struct{}
 
 // Returns true if both int's are equal. Uses the standard == operator internally.
-func (a BuiltinInt) Eq(l *int, r *int) bool {
+func (_ BuiltinInt) Eq(l *int, r *int) bool {
 	return *l == *r
 }
 
 // Returns true if a is less than r. Uses the standard < operator internally.
-func (a BuiltinInt) Lt(l *int, r *int) bool {
+func (_ BuiltinInt) Lt(l *int, r *int) bool {
 	return *l < *r
 }
 
 // Provides a hash function for the value that it is wrapping.
-func (a BuiltinInt) Hash(v *int) hash.Hash {
+func (_ BuiltinInt) Hash(v *int) hash.Hash {
 	return hash.Hash(*v)
 }
 
 // Zeros the supplied value.
-func (a BuiltinInt) Zero(v *int) {
+func (_ BuiltinInt) Zero(v *int) {
 	*v = int(0)
 }
 
-func (a BuiltinInt) ZeroVal() int {
+func (_ BuiltinInt) ZeroVal() int {
 	return int(0)
 }
 
-func (a BuiltinInt) UnitVal() int {
+func (_ BuiltinInt) UnitVal() int {
 	return int(1)
 }
 
-func (a BuiltinInt) Neg(v *int) {
+func (_ BuiltinInt) Neg(v *int) {
 	*v = -(*v)
 }
 
-func (a BuiltinInt) Add(res *int, l *int, r *int) {
+func (_ BuiltinInt) Add(res *int, l *int, r *int) {
 	*res = *l + *r
 }
 
-func (a BuiltinInt) Sub(res *int, l *int, r *int) {
+func (_ BuiltinInt) Sub(res *int, l *int, r *int) {
 	*res = *l - *r
 }
 
-func (a BuiltinInt) Mul(res *int, l *int, r *int) {
+func (_ BuiltinInt) Mul(res *int, l *int, r *int) {
 	*res = *l * *r
 }
 
-func (a BuiltinInt) Div(res *int, l *int, r *int) {
+func (_ BuiltinInt) Div(res *int, l *int, r *int) {
 	*res = *l / *r
 }

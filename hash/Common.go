@@ -1,3 +1,5 @@
+// This package defines a non-cryptographically secure hash type that is aimed
+// towards being used for applications like hash maps.
 package hash
 
 type (

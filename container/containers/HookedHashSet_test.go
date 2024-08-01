@@ -8,8 +8,8 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate go run interfaceTest.go -type=HookedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateHookedHashSet
-//go:generate go run interfaceTest.go -type=SyncedHookedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedHookedHashSet
+//go:generate ../../bin/containerInterfaceTests -type=HookedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateHookedHashSet
+//go:generate ../../bin/containerInterfaceTests -type=SyncedHookedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedHookedHashSet
 
 type testSetHooks struct {
 	addOpCntr int

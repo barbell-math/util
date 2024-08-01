@@ -8,8 +8,8 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate go run interfaceTest.go -type=HashMap -category=dynamic -interface=Map -genericDecl=[int,int] -factory=generateHashMap
-//go:generate go run interfaceTest.go -type=SyncedHashMap -category=dynamic -interface=Map -genericDecl=[int,int] -factory=generateSyncedHashMap
+//go:generate ../../bin/containerInterfaceTests -type=HashMap -category=dynamic -interface=Map -genericDecl=[int,int] -factory=generateHashMap
+//go:generate ../../bin/containerInterfaceTests -type=SyncedHashMap -category=dynamic -interface=Map -genericDecl=[int,int] -factory=generateSyncedHashMap
 
 func generateHashMap(capacity int) HashMap[int, int, badBuiltinInt, widgets.BuiltinInt] {
 	m, _ := NewHashMap[int, int, badBuiltinInt, widgets.BuiltinInt](capacity)

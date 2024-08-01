@@ -14,22 +14,22 @@ var RANDOM_SEED_string maphash.Seed = maphash.MakeSeed()
 type BuiltinString struct{}
 
 // Returns true if both string's are equal. Uses the standard == operator internally.
-func (a BuiltinString) Eq(l *string, r *string) bool {
+func (_ BuiltinString) Eq(l *string, r *string) bool {
 	return *l == *r
 }
 
 // Returns true if a is less than r. Uses the standard < operator internally.
-func (a BuiltinString) Lt(l *string, r *string) bool {
+func (_ BuiltinString) Lt(l *string, r *string) bool {
 	return *l < *r
 }
 
 // Provides a hash function for the value that it is wrapping.
-func (a BuiltinString) Hash(v *string) hash.Hash {
+func (_ BuiltinString) Hash(v *string) hash.Hash {
 	return hash.Hash(maphash.String(RANDOM_SEED_string, *(v)))
 }
 
 // Zeros the supplied value.
-func (a BuiltinString) Zero(v *string) {
+func (_ BuiltinString) Zero(v *string) {
 	*v = ""
 }
 

@@ -1,3 +1,5 @@
+// This package defines several functions that help when working with errors. It
+// provides a way to have consistent, descriptive errors.
 package customerr
 
 import (

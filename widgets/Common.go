@@ -215,26 +215,30 @@ func (w *ArithWidget[T, I]) Div(res *T, l *T, r *T) {
 	w.iFace.Div(res, l, r)
 }
 
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=byte
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=bool
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=byte
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=uintptr
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=string
 
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=int
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=int8
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=int16
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=int32
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=int64
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=int
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=int8
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=int16
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=int32
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=int64
 
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=uint
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=uint8
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=uint16
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=uint32
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=uint64
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=uint
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=uint8
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=uint16
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=uint32
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=uint64
 
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=float32
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=float64
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=float32
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=float64
 
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=string
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=complex64
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=complex128
 
 // This is a special case that is only allowed because the widget package itself
 // relies on hash.Hash, making it so the hash.Hash package cannot implement the
 // widget interface on itself, would create circular imports.
-//go:generate go run widgetInterfaceImpl.go -package=widgets -type=hash.Hash
+//go:generate ../bin/widgetInterfaceImpl -package=widgets -type=hash.Hash

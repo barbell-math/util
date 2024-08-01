@@ -1,3 +1,5 @@
+// This package defines a logger writer and reader that is capible of logging
+// arbitrary values. This is extremely useful when debugging an application.
 package log
 
 import (

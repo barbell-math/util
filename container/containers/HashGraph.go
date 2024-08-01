@@ -131,6 +131,7 @@ func (h *hashGraphEdges[V, E, VI, EI]) deleteOp(
 ) {
 	// These calculations depend on the ordering of the fields in the graph impl
 	// struct!
+	// Note: Sizeof does NOT allocate: https://stackoverflow.com/a/71061506/8317099
 	numLinksPntr := (*int)(unsafe.Pointer(
 		uintptr(unsafe.Pointer(h)) - numLinksOffset))
 	graphImpl := *(*graphImpl)(unsafe.Pointer(
@@ -172,6 +173,7 @@ func (h *hashGraphVertices[V, E, VI, EI]) deleteOp(
 ) {
 	// These calculations depend on the ordering of the fields in the graph impl
 	// struct!
+	// Note: Sizeof does NOT allocate: https://stackoverflow.com/a/71061506/8317099
 	numLinksPntr := (*int)(unsafe.Pointer(
 		uintptr(unsafe.Pointer(h)) - numLinksOffset - unsafe.Sizeof(
 			*(*HookedHashSet[E, EI])(nil),

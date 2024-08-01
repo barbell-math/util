@@ -9,49 +9,49 @@ import "github.com/barbell-math/util/hash"
 type BuiltinByte struct{}
 
 // Returns true if both byte's are equal. Uses the standard == operator internally.
-func (a BuiltinByte) Eq(l *byte, r *byte) bool {
+func (_ BuiltinByte) Eq(l *byte, r *byte) bool {
 	return *l == *r
 }
 
 // Returns true if a is less than r. Uses the standard < operator internally.
-func (a BuiltinByte) Lt(l *byte, r *byte) bool {
+func (_ BuiltinByte) Lt(l *byte, r *byte) bool {
 	return *l < *r
 }
 
 // Provides a hash function for the value that it is wrapping.
-func (a BuiltinByte) Hash(v *byte) hash.Hash {
+func (_ BuiltinByte) Hash(v *byte) hash.Hash {
 	return hash.Hash(*v)
 }
 
 // Zeros the supplied value.
-func (a BuiltinByte) Zero(v *byte) {
+func (_ BuiltinByte) Zero(v *byte) {
 	*v = byte(0)
 }
 
-func (a BuiltinByte) ZeroVal() byte {
+func (_ BuiltinByte) ZeroVal() byte {
 	return byte(0)
 }
 
-func (a BuiltinByte) UnitVal() byte {
+func (_ BuiltinByte) UnitVal() byte {
 	return byte(1)
 }
 
-func (a BuiltinByte) Neg(v *byte) {
+func (_ BuiltinByte) Neg(v *byte) {
 	*v = -(*v)
 }
 
-func (a BuiltinByte) Add(res *byte, l *byte, r *byte) {
+func (_ BuiltinByte) Add(res *byte, l *byte, r *byte) {
 	*res = *l + *r
 }
 
-func (a BuiltinByte) Sub(res *byte, l *byte, r *byte) {
+func (_ BuiltinByte) Sub(res *byte, l *byte, r *byte) {
 	*res = *l - *r
 }
 
-func (a BuiltinByte) Mul(res *byte, l *byte, r *byte) {
+func (_ BuiltinByte) Mul(res *byte, l *byte, r *byte) {
 	*res = *l * *r
 }
 
-func (a BuiltinByte) Div(res *byte, l *byte, r *byte) {
+func (_ BuiltinByte) Div(res *byte, l *byte, r *byte) {
 	*res = *l / *r
 }

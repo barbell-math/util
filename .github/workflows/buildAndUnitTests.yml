@@ -35,7 +35,7 @@ jobs:
       shell: bash
 
     - name: Build Global Generator Programs
-      run: go build -o ./bin/ ./widgets/passThroughTypeAliasWidget.go
+      run: go build -o ./bin/ ./generators/...
 
     - name: Generate
       run: go generate -v ./...

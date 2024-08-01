@@ -8,8 +8,8 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate go run interfaceTest.go -type=HashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateHashSet
-//go:generate go run interfaceTest.go -type=SyncedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedHashSet
+//go:generate ../../bin/containerInterfaceTests -type=HashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateHashSet
+//go:generate ../../bin/containerInterfaceTests -type=SyncedHashSet -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedHashSet
 
 func generateHashSet(capacity int) HashSet[int, badBuiltinInt] {
 	v, _ := NewHashSet[int, badBuiltinInt](capacity)

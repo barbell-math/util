@@ -1,3 +1,4 @@
+// This is a package that defines helper functions for writing unit tests.
 package test
 
 import (
@@ -52,7 +53,7 @@ func NoPanic(action func(), t *testing.T) {
 		if r := recover(); r != nil {
 			_, f, line, _ := runtime.Caller(1)
 			FormatError(
-				"panic", "",
+				"", "panic",
 				"The supplied funciton paniced when it shouldn't have.",
 				f, line, t,
 			)
@@ -67,6 +68,20 @@ func Eq(l any, r any, t *testing.T) {
 		FormatError(
 			l, r,
 			"The supplied values were not equal but were expected to be.",
+			f, line, t,
+		)
+	}
+}
+
+func FloatEq[T ~float32 | float64](l T, r T, eps T, t *testing.T) {
+	if l-r > eps {
+		_, f, line, _ := runtime.Caller(1)
+		FormatError(
+			l, r,
+			fmt.Sprintf(
+				"The supplied float was not within the expected range of %e to be considered equal.",
+				eps,
+			),
 			f, line, t,
 		)
 	}

@@ -1,3 +1,5 @@
+// This package defines an iterator framework comprized of lazily evaluated,
+// pull style iterators.
 package iter
 
 // A type that defines the valid states that an iterator chain can use.

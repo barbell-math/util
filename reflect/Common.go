@@ -1,3 +1,6 @@
+// This package defines many helper functions that make it easier to get values
+// from the standard libraries reflect package. To do this the [iter] package is
+// used frequently.
 package reflect
 
 import (

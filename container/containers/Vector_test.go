@@ -7,16 +7,16 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateSyncedVector
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Deque -genericDecl=[int] -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Deque -genericDecl=[int] -factory=generateSyncedVector
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Queue -genericDecl=[int] -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Queue -genericDecl=[int] -factory=generateSyncedVector
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Stack -genericDecl=[int] -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Stack -genericDecl=[int] -factory=generateSyncedVector
-//go:generate go run interfaceTest.go -type=Vector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateVector
-//go:generate go run interfaceTest.go -type=SyncedVector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedVector
+//go:generate ../../bin/containerInterfaceTests -type=Vector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateVector
+//go:generate ../../bin/containerInterfaceTests -type=SyncedVector -category=dynamic -interface=Vector -genericDecl=[int] -factory=generateSyncedVector
+//go:generate ../../bin/containerInterfaceTests -type=Vector -category=dynamic -interface=Deque -genericDecl=[int] -factory=generateVector
+//go:generate ../../bin/containerInterfaceTests -type=SyncedVector -category=dynamic -interface=Deque -genericDecl=[int] -factory=generateSyncedVector
+//go:generate ../../bin/containerInterfaceTests -type=Vector -category=dynamic -interface=Queue -genericDecl=[int] -factory=generateVector
+//go:generate ../../bin/containerInterfaceTests -type=SyncedVector -category=dynamic -interface=Queue -genericDecl=[int] -factory=generateSyncedVector
+//go:generate ../../bin/containerInterfaceTests -type=Vector -category=dynamic -interface=Stack -genericDecl=[int] -factory=generateVector
+//go:generate ../../bin/containerInterfaceTests -type=SyncedVector -category=dynamic -interface=Stack -genericDecl=[int] -factory=generateSyncedVector
+//go:generate ../../bin/containerInterfaceTests -type=Vector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateVector
+//go:generate ../../bin/containerInterfaceTests -type=SyncedVector -category=dynamic -interface=Set -genericDecl=[int] -factory=generateSyncedVector
 
 func generateVector(capacity int) Vector[int, widgets.BuiltinInt] {
 	v, _ := NewVector[int, widgets.BuiltinInt](capacity)
