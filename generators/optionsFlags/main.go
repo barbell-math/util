@@ -42,6 +42,7 @@ type (
 		StructFields  []StructFieldTemplateVals
 		StructFieldDefaults []StructDefaultTemplateVals
 		Imports []string
+		GeneratorName string
 	}
 	EnumFlagTemplateVals struct {
 		OptionsStruct string
@@ -105,6 +106,7 @@ func New{{ .CapOptionsStruct }}() *{{ .OptionsStruct }} {
 `,
 			"file": `
 package {{ .Package }}
+{{template "autoGenComment" .}}
 import (
 	{{range .Imports}}{{.}}{{end}}
 )
@@ -185,6 +187,7 @@ func main() {
 		StructFields:  make([]StructFieldTemplateVals, len(progState.autoFields)),
 		StructFieldDefaults: make([]StructDefaultTemplateVals, len(progState.defaults)),
 		Imports: progState.imports,
+		GeneratorName: os.Args[0],
 	}
 	cntr := 0
 	for e, c := range progState.enumVars {
