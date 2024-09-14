@@ -25,17 +25,20 @@ func TestArgsNonStruct(t *testing.T) {
 	)
 }
 
-func TestArgsStruct(t *testing.T) {
-	test.NoPanic(
+func TestMissingShowInfoStructField(t *testing.T) {
+	type bad struct {
+		A int
+	}
+	test.Panics(
 		func() {
-			tmp := struct{}{}
+			tmp := bad{}
 			Args(&tmp, []string{"progName"})
 		},
 		t,
 	)
 }
 
-func TestDuplicatedShowInfoField(t *testing.T) {
+func TestShowInfoStructFieldBadType(t *testing.T) {
 	type bad struct {
 		ShowInfo int
 	}
@@ -50,7 +53,8 @@ func TestDuplicatedShowInfoField(t *testing.T) {
 
 func TestMissingHelpTag(t *testing.T) {
 	type bad struct {
-		A int
+		A        int
+		ShowInfo bool
 	}
 	test.Panics(
 		func() {
@@ -63,7 +67,8 @@ func TestMissingHelpTag(t *testing.T) {
 
 func TestMissingDefaultTag(t *testing.T) {
 	type bad struct {
-		A int `help:""`
+		A        int  `help:""`
+		ShowInfo bool `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -76,7 +81,8 @@ func TestMissingDefaultTag(t *testing.T) {
 
 func TestMissingRequiredTag(t *testing.T) {
 	type bad struct {
-		A int `help:"" default:""`
+		A        int  `help:"" default:""`
+		ShowInfo bool `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -89,7 +95,8 @@ func TestMissingRequiredTag(t *testing.T) {
 
 func TestInvalidRequiredTag(t *testing.T) {
 	type bad struct {
-		A int `help:"" default:"" required:"foobar"`
+		A        int  `help:"" default:"" required:"foobar"`
+		ShowInfo bool `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -102,7 +109,8 @@ func TestInvalidRequiredTag(t *testing.T) {
 
 func TestInvalidBoolDefault(t *testing.T) {
 	type bad struct {
-		A bool `help:"" default:"foobar" required:"false"`
+		A        bool `help:"" default:"foobar" required:"false"`
+		ShowInfo bool `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -115,7 +123,8 @@ func TestInvalidBoolDefault(t *testing.T) {
 
 func TestInvalidFloat64Default(t *testing.T) {
 	type bad struct {
-		A float64 `help:"" default:"foobar" required:"false"`
+		A        float64 `help:"" default:"foobar" required:"false"`
+		ShowInfo bool    `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -128,7 +137,8 @@ func TestInvalidFloat64Default(t *testing.T) {
 
 func TestInvalidIntDefault(t *testing.T) {
 	type bad struct {
-		A int `help:"" default:"foobar" required:"false"`
+		A        int  `help:"" default:"foobar" required:"false"`
+		ShowInfo bool `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -141,7 +151,8 @@ func TestInvalidIntDefault(t *testing.T) {
 
 func TestInvalidInt64Default(t *testing.T) {
 	type bad struct {
-		A int64 `help:"" default:"foobar" required:"false"`
+		A        int64 `help:"" default:"foobar" required:"false"`
+		ShowInfo bool  `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -154,7 +165,8 @@ func TestInvalidInt64Default(t *testing.T) {
 
 func TestInvalidUintDefault(t *testing.T) {
 	type bad struct {
-		A uint `help:"" default:"foobar" required:"false"`
+		A        uint `help:"" default:"foobar" required:"false"`
+		ShowInfo bool `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -167,7 +179,8 @@ func TestInvalidUintDefault(t *testing.T) {
 
 func TestInvalidUint64Default(t *testing.T) {
 	type bad struct {
-		A uint64 `help:"" default:"foobar" required:"false"`
+		A        uint64 `help:"" default:"foobar" required:"false"`
+		ShowInfo bool   `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -180,7 +193,8 @@ func TestInvalidUint64Default(t *testing.T) {
 
 func TestUnsupportedType(t *testing.T) {
 	type bad struct {
-		A complex64 `help:"" default:"foobar" required:"false"`
+		A        complex64 `help:"" default:"foobar" required:"false"`
+		ShowInfo bool      `required:"f" default:"f" help:"Show debug info."`
 	}
 	test.Panics(
 		func() {
@@ -193,8 +207,9 @@ func TestUnsupportedType(t *testing.T) {
 
 func TestMissingRequiredArgs(t *testing.T) {
 	type bad struct {
-		A bool `help:"" required:"true"`
-		B bool `help:"" default:"false" required:"false"`
+		A        bool `help:"" required:"true"`
+		B        bool `help:"" default:"false" required:"false"`
+		ShowInfo bool `required:"f" default:"f" help:"Show debug info."`
 	}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	exitOnFail = false
@@ -209,9 +224,10 @@ func TestMissingRequiredArgs(t *testing.T) {
 
 func TestPassingArgs(t *testing.T) {
 	type good struct {
-		A bool   `help:"" required:"true"`
-		B string `help:"" default:"false" required:"false"`
-		C int    `help:"" default:"-1" required:"false"`
+		A        bool   `help:"" required:"true"`
+		B        string `help:"" default:"false" required:"false"`
+		C        int    `help:"" default:"-1" required:"false"`
+		ShowInfo bool   `required:"f" default:"f" help:"Show debug info."`
 	}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.PanicOnError)
 	exitOnFail = false

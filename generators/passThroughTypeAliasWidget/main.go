@@ -15,6 +15,7 @@ type (
 		BaseType       string `required:"t" help:"The base type to generate the widget for."`
 		BaseTypeWidget string `required:"t" help:"The base type widget to use when generating the new widget."`
 		WidgetPackage  string `required:"t" help:"The package the base type widget resides in. If it is this package, put '.'"`
+		ShowInfo       bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 )
 

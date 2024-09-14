@@ -23,6 +23,7 @@ type (
 		Category    string `required:"t" help:"Either static or dynamic."`
 		CapType     string `required:"f" default:"" help:"The type but the first letter is capitilized. This will be calculated if left blank."`
 		Debug       bool   `required:"f" default:"false" help:"Print diagonistic information to the console."`
+		ShowInfo    bool   `required:"f" default:"t" help:"Show debug info."`
 
 		cat category
 	}

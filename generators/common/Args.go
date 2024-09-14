@@ -26,6 +26,7 @@ func Args(globalStruct any, args []string) error {
 	refStructType := refStructPntr.Elem()
 	refStructVal := reflect.ValueOf(globalStruct).Elem()
 
+	var showInfoRef *bool
 	requiredArgs := []string{}
 	for i := 0; i < refStructType.NumField(); i++ {
 		iterFName := refStructType.Field(i).Name
@@ -35,9 +36,6 @@ func Args(globalStruct any, args []string) error {
 			continue
 		}
 
-		if iterFName == "ShowInfo" {
-			panic("The field name 'ShowInfo' is reserved.")
-		}
 		if !refStructVal.Field(i).CanAddr() {
 			panic(fmt.Sprintf(
 				"The %s field on the supplied struct was not addressable.",
@@ -45,6 +43,13 @@ func Args(globalStruct any, args []string) error {
 			))
 		}
 		iterFAddr := refStructVal.Field(i).Addr().Interface()
+
+		if iterFName == "ShowInfo" {
+			if iterFKind != reflect.Bool {
+				panic("The ShowInfo field must be a boolean.")
+			}
+			showInfoRef = iterFAddr.(*bool)
+		}
 
 		helpTag, ok1 := iterFTag.Lookup("help")
 		if !ok1 {
@@ -62,7 +67,7 @@ func Args(globalStruct any, args []string) error {
 			))
 		}
 		lowerCaseName := strings.ToLower(iterFName[0:1]) + iterFName[1:]
-		requiredArg, err:=strconv.ParseBool(requiredTag)
+		requiredArg, err := strconv.ParseBool(requiredTag)
 		if err == nil {
 			if requiredArg {
 				requiredArgs = append(requiredArgs, lowerCaseName)
@@ -98,7 +103,7 @@ func Args(globalStruct any, args []string) error {
 			)
 		case reflect.Bool:
 			if requiredArg {
-				defaultTag="false"
+				defaultTag = "false"
 			}
 			defaultVal, err := strconv.ParseBool(defaultTag)
 			if err != nil {
@@ -115,7 +120,7 @@ func Args(globalStruct any, args []string) error {
 			)
 		case reflect.Float64:
 			if requiredArg {
-				defaultTag="0"
+				defaultTag = "0"
 			}
 			defaultVal, err := strconv.ParseFloat(defaultTag, 64)
 			if err != nil {
@@ -132,7 +137,7 @@ func Args(globalStruct any, args []string) error {
 			)
 		case reflect.Int:
 			if requiredArg {
-				defaultTag="0"
+				defaultTag = "0"
 			}
 			defaultVal, err := strconv.ParseInt(defaultTag, 10, 64)
 			if err != nil {
@@ -149,7 +154,7 @@ func Args(globalStruct any, args []string) error {
 			)
 		case reflect.Int64:
 			if requiredArg {
-				defaultTag="0"
+				defaultTag = "0"
 			}
 			defaultVal, err := strconv.ParseInt(defaultTag, 10, 64)
 			if err != nil {
@@ -166,7 +171,7 @@ func Args(globalStruct any, args []string) error {
 			)
 		case reflect.Uint:
 			if requiredArg {
-				defaultTag="0"
+				defaultTag = "0"
 			}
 			defaultVal, err := strconv.ParseUint(defaultTag, 10, 64)
 			if err != nil {
@@ -183,7 +188,7 @@ func Args(globalStruct any, args []string) error {
 			)
 		case reflect.Uint64:
 			if requiredArg {
-				defaultTag="0"
+				defaultTag = "0"
 			}
 			defaultVal, err := strconv.ParseUint(defaultTag, 10, 64)
 			if err != nil {
@@ -206,8 +211,10 @@ func Args(globalStruct any, args []string) error {
 			))
 		}
 	}
-	var showInfo bool
-	flag.BoolVar(&showInfo, "showInfo", true, "Print out the received values or not.")
+
+	if showInfoRef == nil {
+		panic("The boolean ShowInfo field must be present in the supplied struct.")
+	}
 
 	flag.CommandLine.Parse(args[1:])
 
@@ -237,7 +244,7 @@ func Args(globalStruct any, args []string) error {
 		return MissingRequiredArgs
 	}
 
-	if showInfo {
+	if *showInfoRef {
 		PrintRunningInfo("Received arguments:")
 		for i := 0; i < refStructType.NumField(); i++ {
 			if !refStructType.Field(i).IsExported() {
