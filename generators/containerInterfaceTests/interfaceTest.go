@@ -16,11 +16,11 @@ type (
 	category byte
 
 	Values struct {
-		Type        string `required:"t" default:"" help:"The underlying type to generate the widget for."`
-		Interface   string `required:"t" default:"" help:"The packge to put the files in."`
-		GenericDecl string `required:"t" default:"" help:"The generic type signature to use."`
-		Factory     string `required:"t" default:"" help:"The factory that will produce containers to test."`
-		Category    string `required:"t" default:"" help:"Either static or dynamic."`
+		Type        string `required:"t" help:"The underlying type to generate the widget for."`
+		Interface   string `required:"t" help:"The packge to put the files in."`
+		GenericDecl string `required:"t" help:"The generic type signature to use."`
+		Factory     string `required:"t" help:"The factory that will produce containers to test."`
+		Category    string `required:"t" help:"Either static or dynamic."`
 		CapType     string `required:"f" default:"" help:"The type but the first letter is capitilized. This will be calculated if left blank."`
 		Debug       bool   `required:"f" default:"false" help:"Print diagonistic information to the console."`
 

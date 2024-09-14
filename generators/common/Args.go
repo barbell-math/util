@@ -53,13 +53,7 @@ func Args(globalStruct any, args []string) error {
 				iterFName,
 			))
 		}
-		defaultTag, ok2 := iterFTag.Lookup("default")
-		if !ok2 {
-			panic(fmt.Sprintf(
-				"The supplied struct was missing a default tag on field %s",
-				iterFName,
-			))
-		}
+
 		requiredTag, ok2 := iterFTag.Lookup("required")
 		if !ok2 {
 			panic(fmt.Sprintf(
@@ -67,16 +61,30 @@ func Args(globalStruct any, args []string) error {
 				iterFName,
 			))
 		}
-
 		lowerCaseName := strings.ToLower(iterFName[0:1]) + iterFName[1:]
-		if val, err := strconv.ParseBool(requiredTag); err == nil {
-			if val {
+		requiredArg, err:=strconv.ParseBool(requiredTag)
+		if err == nil {
+			if requiredArg {
 				requiredArgs = append(requiredArgs, lowerCaseName)
 			}
 		} else {
 			panic(fmt.Sprintf(
 				"The required flag on field %s was not a valid boolean expression: %s",
 				iterFName, err,
+			))
+		}
+
+		defaultTag, ok2 := iterFTag.Lookup("default")
+		if !requiredArg && !ok2 {
+			panic(fmt.Sprintf(
+				"The supplied struct was missing a default tag on field %s",
+				iterFName,
+			))
+		}
+		if requiredArg && ok2 {
+			panic(fmt.Sprintf(
+				"The supplied struct added a default value to a required argument on field %s",
+				iterFName,
 			))
 		}
 
@@ -89,6 +97,9 @@ func Args(globalStruct any, args []string) error {
 				helpTag,
 			)
 		case reflect.Bool:
+			if requiredArg {
+				defaultTag="false"
+			}
 			defaultVal, err := strconv.ParseBool(defaultTag)
 			if err != nil {
 				panic(fmt.Sprintf(
@@ -103,6 +114,9 @@ func Args(globalStruct any, args []string) error {
 				helpTag,
 			)
 		case reflect.Float64:
+			if requiredArg {
+				defaultTag="0"
+			}
 			defaultVal, err := strconv.ParseFloat(defaultTag, 64)
 			if err != nil {
 				panic(fmt.Sprintf(
@@ -117,6 +131,9 @@ func Args(globalStruct any, args []string) error {
 				helpTag,
 			)
 		case reflect.Int:
+			if requiredArg {
+				defaultTag="0"
+			}
 			defaultVal, err := strconv.ParseInt(defaultTag, 10, 64)
 			if err != nil {
 				panic(fmt.Sprintf(
@@ -131,6 +148,9 @@ func Args(globalStruct any, args []string) error {
 				helpTag,
 			)
 		case reflect.Int64:
+			if requiredArg {
+				defaultTag="0"
+			}
 			defaultVal, err := strconv.ParseInt(defaultTag, 10, 64)
 			if err != nil {
 				panic(fmt.Sprintf(
@@ -145,6 +165,9 @@ func Args(globalStruct any, args []string) error {
 				helpTag,
 			)
 		case reflect.Uint:
+			if requiredArg {
+				defaultTag="0"
+			}
 			defaultVal, err := strconv.ParseUint(defaultTag, 10, 64)
 			if err != nil {
 				panic(fmt.Sprintf(
@@ -159,6 +182,9 @@ func Args(globalStruct any, args []string) error {
 				helpTag,
 			)
 		case reflect.Uint64:
+			if requiredArg {
+				defaultTag="0"
+			}
 			defaultVal, err := strconv.ParseUint(defaultTag, 10, 64)
 			if err != nil {
 				panic(fmt.Sprintf(
@@ -181,19 +207,7 @@ func Args(globalStruct any, args []string) error {
 		}
 	}
 	var showInfo bool
-	flag.BoolVar(&showInfo, "showInfo", true, "Print out the receved values or not.")
-
-	if len(args)-1 < len(requiredArgs) {
-		PrintRunningError("Not enough arguments.")
-		PrintRunningError("Received: ", args[1:])
-		PrintRunningError("The accepted flags are as follows:")
-		flag.PrintDefaults()
-		PrintRunningError("Re-run go generate after fixing the problem.")
-		if exitOnFail {
-			os.Exit(1)
-		}
-		return NotEnoughArgs
-	}
+	flag.BoolVar(&showInfo, "showInfo", true, "Print out the received values or not.")
 
 	flag.CommandLine.Parse(args[1:])
 
@@ -207,13 +221,13 @@ func Args(globalStruct any, args []string) error {
 	})
 	if len(requiredCopy) > 0 {
 		PrintRunningError("Not all required flags were passed.")
-		PrintRunningError("The following flags must be added: ", requiredCopy)
+		PrintRunningError("The following flags must be added: %v", requiredCopy)
 
 		cntr := 0
-		fmt.Println("Received: ")
+		PrintRunningError("Received: ")
 		flag.Visit(func(f *flag.Flag) {
 			cntr++
-			PrintRunningError(" |- (%d) %s: %+v\n", cntr, f.Name, f.Value)
+			PrintRunningError("|- (%d) %s: %+v\n", cntr, f.Name, f.Value)
 		})
 		PrintRunningError("The accepted flags are as follows:")
 		flag.PrintDefaults()
@@ -232,21 +246,11 @@ func Args(globalStruct any, args []string) error {
 			iterFName := refStructType.Field(i).Name
 			iterFVal := refStructVal.Field(i).Interface()
 			PrintRunningInfo(
-				" |- (%d) | Name: %-20s | Value: %v",
+				"|- (%d) | Name: %-20s | Value: %v",
 				i+1, iterFName, iterFVal,
 			)
 		}
 	}
 
 	return nil
-}
-
-func PrintRunningInfo(fmtStr string, args ...any) {
-	fmtStr = " |- " + fmtStr + "\n"
-	fmt.Printf(fmtStr, args...)
-}
-
-func PrintRunningError(fmtStr string, args ...any) {
-	fmtStr = " |- ERROR: " + fmtStr + "\n"
-	fmt.Printf(fmtStr, args...)
 }

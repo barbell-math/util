@@ -191,24 +191,9 @@ func TestUnsupportedType(t *testing.T) {
 	)
 }
 
-func TestNotEnoughArgs(t *testing.T) {
-	type bad struct {
-		A bool `help:"" default:"false" required:"true"`
-	}
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	exitOnFail = false
-	tmp := bad{}
-	test.ContainsError(
-		NotEnoughArgs,
-		Args(&tmp, []string{"progName"}),
-		t,
-	)
-	exitOnFail = true
-}
-
 func TestMissingRequiredArgs(t *testing.T) {
 	type bad struct {
-		A bool `help:"" default:"false" required:"true"`
+		A bool `help:"" required:"true"`
 		B bool `help:"" default:"false" required:"false"`
 	}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
@@ -224,7 +209,7 @@ func TestMissingRequiredArgs(t *testing.T) {
 
 func TestPassingArgs(t *testing.T) {
 	type good struct {
-		A bool   `help:"" default:"false" required:"true"`
+		A bool   `help:"" required:"true"`
 		B string `help:"" default:"false" required:"false"`
 		C int    `help:"" default:"-1" required:"false"`
 	}

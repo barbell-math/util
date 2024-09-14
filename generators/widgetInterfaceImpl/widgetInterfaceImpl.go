@@ -11,8 +11,8 @@ import (
 
 type (
 	Values struct {
-		Package string `required:"t" default:"" help:"The package to put the files in."`
-		Type    string `required:"t" default:"" help:"The underlying type to generate the widget for."`
+		Package string `required:"t" help:"The package to put the files in."`
+		Type    string `required:"t" help:"The underlying type to generate the widget for."`
 		CapType string `required:"f" default:"" help:"The type with the first letter capitilized. This will be generated automatically if not supplied."`
 	}
 )

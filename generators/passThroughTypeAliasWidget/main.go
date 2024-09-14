@@ -10,11 +10,11 @@ import (
 
 type (
 	Values struct {
-		Package        string `required:"t" default:"" help:"The packge to put the files in."`
-		AliasType      string `required:"t" default:"" help:"The alias type to generate the widget for."`
-		BaseType       string `required:"t" default:"" help:"The base type to generate the widget for."`
-		BaseTypeWidget string `required:"t" default:"" help:"The base type widget to use when generating the new widget."`
-		WidgetPackage  string `required:"t" default:"" help:"The package the base type widget resides in. If it is this package, put '.'"`
+		Package        string `required:"t" help:"The packge to put the files in."`
+		AliasType      string `required:"t" help:"The alias type to generate the widget for."`
+		BaseType       string `required:"t" help:"The base type to generate the widget for."`
+		BaseTypeWidget string `required:"t" help:"The base type widget to use when generating the new widget."`
+		WidgetPackage  string `required:"t" help:"The package the base type widget resides in. If it is this package, put '.'"`
 	}
 )
 
