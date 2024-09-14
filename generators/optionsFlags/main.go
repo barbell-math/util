@@ -30,19 +30,19 @@ type (
 		defaults      map[string]string
 		fieldTypes    map[string]string
 		fieldComments map[string]string
-		imports []string
+		imports       []string
 	}
 
 	TemplateVals struct {
-		OptionsStruct string
-		CapOptionsStruct string
-		OptionsEnum   string
-		Package       string
-		EnumFlags     []EnumFlagTemplateVals
-		StructFields  []StructFieldTemplateVals
+		OptionsStruct       string
+		CapOptionsStruct    string
+		OptionsEnum         string
+		Package             string
+		EnumFlags           []EnumFlagTemplateVals
+		StructFields        []StructFieldTemplateVals
 		StructFieldDefaults []StructDefaultTemplateVals
-		Imports []string
-		GeneratorName string
+		Imports             []string
+		GeneratorName       string
 	}
 	EnumFlagTemplateVals struct {
 		OptionsStruct string
@@ -51,7 +51,7 @@ type (
 		Comment       string
 	}
 	StructDefaultTemplateVals struct {
-		StructField string
+		StructField        string
 		StructFieldDefault string
 	}
 	StructFieldTemplateVals struct {
@@ -134,7 +134,7 @@ func main() {
 		defaults:      map[string]string{},
 		fieldTypes:    map[string]string{},
 		fieldComments: map[string]string{},
-		imports: []string{},
+		imports:       []string{},
 	}
 
 	common.IterateOverAST(
@@ -178,16 +178,15 @@ func main() {
 	)
 
 	templateData := TemplateVals{
-		OptionsStruct: VALS.OptionsStruct,
-		CapOptionsStruct: 
-			strings.ToUpper(VALS.OptionsStruct[0:1])+VALS.OptionsStruct[1:],
-		OptionsEnum:   VALS.OptionsEnum,
-		Package:       VALS.Package,
-		EnumFlags:     make([]EnumFlagTemplateVals, len(progState.enumVars)),
-		StructFields:  make([]StructFieldTemplateVals, len(progState.autoFields)),
+		OptionsStruct:       VALS.OptionsStruct,
+		CapOptionsStruct:    strings.ToUpper(VALS.OptionsStruct[0:1]) + VALS.OptionsStruct[1:],
+		OptionsEnum:         VALS.OptionsEnum,
+		Package:             VALS.Package,
+		EnumFlags:           make([]EnumFlagTemplateVals, len(progState.enumVars)),
+		StructFields:        make([]StructFieldTemplateVals, len(progState.autoFields)),
 		StructFieldDefaults: make([]StructDefaultTemplateVals, len(progState.defaults)),
-		Imports: progState.imports,
-		GeneratorName: os.Args[0],
+		Imports:             progState.imports,
+		GeneratorName:       os.Args[0],
 	}
 	cntr := 0
 	for e, c := range progState.enumVars {
@@ -210,10 +209,10 @@ func main() {
 			Comment:        progState.fieldComments[v],
 		}
 	}
-	cntr=0
-	for field, _default:=range progState.defaults {
-		templateData.StructFieldDefaults[cntr]=StructDefaultTemplateVals{
-			StructField: field,
+	cntr = 0
+	for field, _default := range progState.defaults {
+		templateData.StructFieldDefaults[cntr] = StructDefaultTemplateVals{
+			StructField:        field,
 			StructFieldDefault: _default,
 		}
 		cntr++
@@ -352,7 +351,7 @@ func parseTypeSpec(
 				}
 			}
 
-			if _import,ok:=tags.Lookup("import"); ok {
+			if _import, ok := tags.Lookup("import"); ok {
 				progState.imports = append(progState.imports, _import)
 			}
 		}
