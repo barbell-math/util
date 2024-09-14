@@ -234,7 +234,7 @@ func Args(globalStruct any, args []string) error {
 		PrintRunningError("Received: ")
 		flag.Visit(func(f *flag.Flag) {
 			cntr++
-			PrintRunningError("|- (%d) %s: %+v\n", cntr, f.Name, f.Value)
+			PrintRunningError("|- (%d) %s: %+v", cntr, f.Name, f.Value)
 		})
 		PrintRunningError("The accepted flags are as follows:")
 		flag.PrintDefaults()
