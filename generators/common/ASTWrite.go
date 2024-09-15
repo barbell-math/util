@@ -2,8 +2,8 @@ package common
 
 import (
 	"fmt"
+	"go/format"
 	"go/parser"
-	"go/printer"
 	"go/token"
 	"os"
 	"strings"
@@ -67,6 +67,6 @@ func (g *GeneratedFilesRegistry) WriteToFile(
 	if err != nil {
 		return fmt.Errorf("File error: %w", err)
 	}
-	printer.Fprint(f, fSet, ast)
+	format.Node(f, fSet, ast)
 	return nil
 }
