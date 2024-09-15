@@ -8,12 +8,12 @@ import (
 // Returns a new options struct initialized with the default values.
 func NewOptions() *options {
 	return &options{
-		delimiter:	',',
-		structTagName:	"csv",
-		dateTimeFormat:	time.DateTime,
-		headers:	[]string{},
-		flags:		0 | hasHeaders | useStructTags | writeHeaders,
-		comment:	'#',
+		delimiter:      ',',
+		structTagName:  "csv",
+		dateTimeFormat: time.DateTime,
+		headers:        []string{},
+		flags:          0 | hasHeaders | useStructTags | writeHeaders,
+		comment:        '#',
 	}
 }
 

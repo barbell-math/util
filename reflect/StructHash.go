@@ -18,14 +18,14 @@ type (
 )
 
 const (
-	// Description: set to true if the hash value should be calculated by 
+	// Description: set to true if the hash value should be calculated by
 	// following pointer values rather than using the pointers value itself
 	//
 	// Used by: [ToStructs]
 	//
 	// Default: true
 	followPntrs optionsFlag = 1 << iota
-	// Description: set to true if the hash value should be calculated by 
+	// Description: set to true if the hash value should be calculated by
 	// following interface values rather than using the interface value itself
 	//
 	// Used by: [ToStructs]
@@ -146,7 +146,7 @@ func getHash(val FieldInfo, opts *structHashOps) hash.Hash {
 	case reflect.Pointer:
 		if !opts.getFlag(followPntrs) {
 			uw := widgets.BuiltinUintptr{}
-			if iterV, err:=val.Pntr(); err!=nil {
+			if iterV, err := val.Pntr(); err != nil {
 				rv = uw.Hash(uintptr(iterV)).Combine(rv)
 			}
 		} else {
@@ -160,7 +160,7 @@ func getHash(val FieldInfo, opts *structHashOps) hash.Hash {
 	case reflect.Interface:
 	case reflect.UnsafePointer:
 	case reflect.Struct:
-		fallthrough	// iteration will be handled by the calling func
+		fallthrough // iteration will be handled by the calling func
 	case reflect.Invalid:
 		fallthrough // Ignore "bad" values
 	default:

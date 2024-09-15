@@ -10,8 +10,7 @@ import (
 )
 
 func GenFileExclusionFilter(f fs.FileInfo) bool {
-	return (
-		!strings.HasSuffix(f.Name(), string(GeneratedSrcFileExt)) &&
+	return (!strings.HasSuffix(f.Name(), string(GeneratedSrcFileExt)) &&
 		!strings.HasSuffix(f.Name(), string(GeneratedTestFileExt)))
 }
 

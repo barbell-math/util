@@ -27,7 +27,7 @@ func Args(globalStruct any, args []string) error {
 	refStructVal := reflect.ValueOf(globalStruct).Elem()
 
 	var showInfoRef *bool
-	allArgs:=map[string]struct{}{}
+	allArgs := map[string]struct{}{}
 	requiredArgs := map[string]struct{}{}
 	for i := 0; i < refStructType.NumField(); i++ {
 		iterFName := refStructType.Field(i).Name
@@ -71,7 +71,7 @@ func Args(globalStruct any, args []string) error {
 		requiredArg, err := strconv.ParseBool(requiredTag)
 		if err == nil {
 			if requiredArg {
-				requiredArgs[lowerCaseName]=struct{}{}
+				requiredArgs[lowerCaseName] = struct{}{}
 			}
 		} else {
 			panic(fmt.Sprintf(
@@ -94,7 +94,7 @@ func Args(globalStruct any, args []string) error {
 			))
 		}
 
-		allArgs[lowerCaseName]=struct{}{}
+		allArgs[lowerCaseName] = struct{}{}
 
 		switch iterFKind {
 		case reflect.String:
@@ -222,11 +222,11 @@ func Args(globalStruct any, args []string) error {
 	flag.CommandLine.Parse(args[1:])
 
 	requiredCopy := map[string]struct{}{}
-	for r, _:=range(requiredArgs) {
-		requiredCopy[r]=struct{}{}
+	for r, _ := range requiredArgs {
+		requiredCopy[r] = struct{}{}
 	}
 	flag.CommandLine.Visit(func(f *flag.Flag) {
-		if _,ok:=requiredCopy[f.Name]; ok {
+		if _, ok := requiredCopy[f.Name]; ok {
 			delete(requiredCopy, f.Name)
 		}
 	})
