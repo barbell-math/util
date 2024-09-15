@@ -168,6 +168,7 @@ func main() {
 
 	if err := TEMPLATES.WriteToFile(
 		fileName(),
+		common.GeneratedTestFileExt,
 		"file",
 		templateData,
 	); err != nil {

@@ -221,6 +221,7 @@ func main() {
 
 	if err := TEMPLATES.WriteToFile(
 		VALS.OptionsStruct,
+		common.GeneratedSrcFileExt,
 		"file",
 		templateData,
 	); err != nil {
