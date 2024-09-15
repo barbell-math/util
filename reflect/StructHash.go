@@ -25,6 +25,13 @@ const (
 	//
 	// Default: true
 	followPntrs optionsFlag = 1 << iota
+	// Description: set to true if the hash value should be calculated by 
+	// following interface values rather than using the interface value itself
+	//
+	// Used by: [ToStructs]
+	//
+	// Default: true
+	followInterface
 	// Description: set to true to include map key value pairs in the hash
 	// calculation
 	//

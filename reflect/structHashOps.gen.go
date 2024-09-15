@@ -29,6 +29,21 @@ func (o *structHashOps) FollowPntrs(b bool) *structHashOps {
 	return o
 }
 
+// Description: set to true if the hash value should be calculated by
+// following interface values rather than using the interface value itself
+//
+// Used by: [ToStructs]
+//
+// Default: true
+func (o *structHashOps) FollowInterface(b bool) *structHashOps {
+	if b {
+		o.flags |= followInterface
+	} else {
+		o.flags &= ^followInterface
+	}
+	return o
+}
+
 // Description: set to true to include map key value pairs in the hash
 // calculation
 //

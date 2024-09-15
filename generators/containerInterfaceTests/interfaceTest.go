@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/token"
 	"os"
 	"regexp"
@@ -24,8 +23,25 @@ type (
 		CapType     string `required:"f" default:"" help:"The type but the first letter is capitilized. This will be calculated if left blank."`
 		Debug       bool   `required:"f" default:"false" help:"Print diagonistic information to the console."`
 		ShowInfo    bool   `required:"f" default:"t" help:"Show debug info."`
+	}
 
-		cat category
+	ProgState struct {
+		Cat category
+		ViableFuncs []*ast.FuncDecl
+	}
+	TemplateVals struct {
+		Cat string
+		Type string
+		Interface string
+		GenericDecl string
+		FuncNames []FuncTemplateVals
+		GeneratorName string
+		Factory string
+	}
+	FuncTemplateVals struct {
+		Name string
+		Type string
+		Interface string
 	}
 )
 
@@ -47,6 +63,36 @@ var (
 		"factory",
 		"genericDecl",
 	}
+	PROG_STATE ProgState=ProgState{
+		ViableFuncs: []*ast.FuncDecl{},
+	}
+	TEMPLATES common.GeneratedFilesRegistry=common.NewGeneratedFilesRegistryFromMap(
+		map[string]string{
+			"funcTemplate": `
+func Test{{ .Type }}_{{ .Name }}(t *testing.T){
+	tests.{{ .Name }}({{ .Type }}To{{ .Interface }}InterfaceFactory,t)
+}`,
+			"file": `
+package containers
+
+{{template "autoGenComment" .}}
+import (
+	"testing"
+	"github.com/barbell-math/util/container/tests"
+	"github.com/barbell-math/util/container/{{ .Cat }}Containers"
+)
+
+func {{ .Type }}To{{ .Interface }}InterfaceFactory(capacity int) {{ .Cat }}Containers.{{ .Interface }}{{ .GenericDecl }} {
+	v:= {{ .Factory }}(capacity)
+	var rv {{ .Cat }}Containers.{{ .Interface }}{{ .GenericDecl }}=&v
+	return rv
+}
+{{range .FuncNames}}
+	{{template "funcTemplate" .}}
+{{end}}
+`,
+		},
+	)
 )
 
 func (c category) String() string {
@@ -74,52 +120,60 @@ func (c category) FromString(s string) category {
 func main() {
 	common.Args(&VALS, os.Args)
 	checkGenericDecl()
-
-	VALS.cat = Dynamic.FromString(VALS.Category)
 	VALS.CapType = strings.ToUpper(VALS.Type)[:1] + VALS.Type[1:]
+	PROG_STATE.Cat=Dynamic.FromString(VALS.Category)
 
-	testFuncs := viableFuncs()
-	common.PrintRunningInfo("Num Funcs: %3d", len(testFuncs))
+	common.IterateOverAST(
+		"../tests/",
+		common.GenFileExclusionFilter,
+		func(fSet *token.FileSet, file *ast.File, srcFile *os.File, node ast.Node) bool {
+			switch node.(type) {
+				case *ast.FuncDecl:
+					fd:=node.(*ast.FuncDecl)
+					if VALS.Debug {
+						fmt.Print("Found func: ", fd.Name, "| Status: ")
+					}
+					if ok, info := hasViableSignature(fSet, srcFile, fd); ok {
+						if VALS.Debug {
+							fmt.Println("Accepted")
+						}
+						PROG_STATE.ViableFuncs=append(PROG_STATE.ViableFuncs, fd)
+					} else if VALS.Debug {
+						fmt.Println("Rejected | Reason:", info)
+					}
+					return false
+				case *ast.GenDecl: return false
+				default: return true
+			}
+		},
+	)
+	common.PrintRunningInfo("Num Funcs: %3d", len(PROG_STATE.ViableFuncs))
 
-	fName := fileName()
-	f, err := os.Create(fName)
-	if err != nil {
-		common.PrintRunningError("Could not open %s to write to it.", fName)
+	templateData:=TemplateVals{
+		Cat: PROG_STATE.Cat.String(),
+		Type: VALS.Type,
+		Interface: VALS.Interface,
+		GenericDecl: VALS.GenericDecl,
+		FuncNames: make([]FuncTemplateVals, len(PROG_STATE.ViableFuncs)),
+		GeneratorName: os.Args[0],
+		Factory: VALS.Factory,
+	}
+	for i,f:=range(PROG_STATE.ViableFuncs) {
+		templateData.FuncNames[i]=FuncTemplateVals{
+			Name: f.Name.Name,
+			Type: VALS.Type,
+			Interface: VALS.Interface,
+		}
+	}
+
+	if err := TEMPLATES.WriteToFile(
+		fileName(),
+		"file",
+		templateData,
+	); err != nil {
+		common.PrintRunningError("%s", err)
 		os.Exit(1)
 	}
-
-	f.WriteString("package containers\n\n")
-	f.WriteString("// THIS FILE IS AUTO-GENERATED. DO NOT EDIT AND EXPECT CHANGES TO PERSIST.\n\n")
-	f.WriteString("import (\n")
-	f.WriteString("    \"testing\"\n")
-	f.WriteString("    \"github.com/barbell-math/util/container/tests\"\n")
-	f.WriteString(fmt.Sprintf(
-		"    \"github.com/barbell-math/util/container/%sContainers\"\n",
-		VALS.cat.String(),
-	))
-	f.WriteString(")\n\n")
-	f.WriteString(fmt.Sprintf(
-		"func %sTo%sInterfaceFactory(capacity int) %sContainers.%s%s {\n",
-		VALS.Type, VALS.Interface, VALS.cat.String(), VALS.Interface, VALS.GenericDecl,
-	))
-	f.WriteString(fmt.Sprintf("    v:= %s(capacity)\n", VALS.Factory))
-	f.WriteString(fmt.Sprintf(
-		"    var rv %sContainers.%s%s=&v\n",
-		VALS.cat.String(), VALS.Interface, VALS.GenericDecl,
-	))
-	f.WriteString("    return rv\n")
-	f.WriteString("}\n\n")
-
-	for _, iterFunc := range testFuncs {
-		f.WriteString(fmt.Sprintf(
-			"func Test%s_%s(t *testing.T){\n"+
-				"    tests.%s(%sTo%sInterfaceFactory,t)\n"+
-				"}\n\n",
-			VALS.Type, iterFunc.Name, iterFunc.Name, VALS.Type, VALS.Interface,
-		))
-	}
-
-	f.Close()
 }
 
 func checkGenericDecl() {
@@ -134,63 +188,21 @@ func checkGenericDecl() {
 
 func fileName() string {
 	category := ""
-	switch VALS.cat {
+	switch PROG_STATE.Cat {
 	case Dynamic:
 		category = "Dynamic"
 	case Static:
 		category = "Static"
 	}
 	return fmt.Sprintf(
-		"./%s_%s_%sInterface_test.go",
+		"%s_%s_%sInterface_test",
 		VALS.CapType,
 		category,
 		VALS.Interface,
 	)
 }
 
-func viableFuncs() []*ast.FuncDecl {
-	fSet := token.NewFileSet()
-	if VALS.Debug {
-		fmt.Println("Locating appropriate funcs from tests dir.")
-	}
-	packs, err := parser.ParseDir(fSet, "../tests/", nil, 0)
-	if err != nil {
-		common.PrintRunningError("Failed to parse package:", err)
-		os.Exit(1)
-	}
-	rv := []*ast.FuncDecl{}
-	for _, pack := range packs {
-		for fileName, f := range pack.Files {
-			srcFile, err := os.OpenFile(fileName, os.O_RDONLY, 666)
-			if err != nil {
-				common.PrintRunningError(
-					"Could not open file %s to parse source.",
-					fileName,
-				)
-			}
-			ast.Inspect(f, func(n ast.Node) bool {
-				if fd, ok := n.(*ast.FuncDecl); ok {
-					if VALS.Debug {
-						fmt.Print("Found func: ", fd.Name, "| Status: ")
-					}
-					if ok, info := hasViableSignature(fd, srcFile, fSet); ok {
-						if VALS.Debug {
-							fmt.Println("Accepted")
-						}
-						rv = append(rv, fd)
-					} else if VALS.Debug {
-						fmt.Println("Rejected | Reason:", info)
-					}
-				}
-				return true
-			})
-			srcFile.Close()
-		}
-	}
-	return rv
-}
-
-func hasViableSignature(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet) (bool, string) {
+func hasViableSignature(fSet *token.FileSet, srcFile *os.File, fn *ast.FuncDecl) (bool, string) {
 	if len(fn.Type.Params.List) != 2 {
 		return false, "Did not have two parameters."
 	}
@@ -206,6 +218,7 @@ func hasViableSignature(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet)
 	return true, ""
 }
 
+// todo reorder func params
 func viableFirstParam(fn *ast.FuncDecl, srcFile *os.File, fSet *token.FileSet) (bool, string) {
 	if fn.Type.Params.List[0].Names[0].Name != FirstParamName {
 		return false, fmt.Sprintf("Was not named %s", FirstParamName)
@@ -243,7 +256,7 @@ func isViableFactory(f *ast.FuncType, srcFile *os.File, fSet *token.FileSet) (bo
 	}
 	src = make([]byte, f.Results.End()-f.Results.Pos())
 	if _, err := srcFile.Read(src); err == nil {
-		expSrcType := fmt.Sprintf("%sContainers.%s*", VALS.cat.String(), VALS.Interface)
+		expSrcType := fmt.Sprintf("%sContainers.%s*", PROG_STATE.Cat.String(), VALS.Interface)
 		if match, _ := regexp.Match(expSrcType, src); !match {
 			return false, fmt.Sprintf("Src type was not correct.\nExpected: '%s'\nGot: '%s'\n", expSrcType, string(src))
 		}

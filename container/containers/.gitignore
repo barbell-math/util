@@ -1,4 +1,0 @@
-# The generated test files should not be put in vc - they are not required for
-# the library to work out-of-the-box and are really only needed for development
-# purposes.
-*_*_*_test.go

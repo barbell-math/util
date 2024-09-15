@@ -30,19 +30,19 @@ type (
 		defaults      map[string]string
 		fieldTypes    map[string]string
 		fieldComments map[string]string
-		imports       []string
+		imports []string
 	}
 
 	TemplateVals struct {
-		OptionsStruct       string
-		CapOptionsStruct    string
-		OptionsEnum         string
-		Package             string
-		EnumFlags           []EnumFlagTemplateVals
-		StructFields        []StructFieldTemplateVals
+		OptionsStruct string
+		CapOptionsStruct string
+		OptionsEnum   string
+		Package       string
+		EnumFlags     []EnumFlagTemplateVals
+		StructFields  []StructFieldTemplateVals
 		StructFieldDefaults []StructDefaultTemplateVals
-		Imports             []string
-		GeneratorName       string
+		Imports []string
+		GeneratorName string
 	}
 	EnumFlagTemplateVals struct {
 		OptionsStruct string
@@ -51,7 +51,7 @@ type (
 		Comment       string
 	}
 	StructDefaultTemplateVals struct {
-		StructField        string
+		StructField string
 		StructFieldDefault string
 	}
 	StructFieldTemplateVals struct {
@@ -69,6 +69,14 @@ const (
 
 var (
 	VALS      Values
+	PROG_STATE ProgState=ProgState{
+		enumVars:      map[string]string{},
+		autoFields:    []string{},
+		defaults:      map[string]string{},
+		fieldTypes:    map[string]string{},
+		fieldComments: map[string]string{},
+		imports: []string{},
+	}
 	TEMPLATES common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
 		map[string]string{
 			"flagOptionFunc": `
@@ -128,14 +136,6 @@ func main() {
 	common.Args(&VALS, os.Args)
 
 	optionsStructFound := false
-	progState := ProgState{
-		enumVars:      map[string]string{},
-		autoFields:    []string{},
-		defaults:      map[string]string{},
-		fieldTypes:    map[string]string{},
-		fieldComments: map[string]string{},
-		imports:       []string{},
-	}
 
 	common.IterateOverAST(
 		".",
@@ -146,11 +146,11 @@ func main() {
 				gdNode := node.(*ast.GenDecl)
 				if gdNode.Tok == token.CONST {
 					for _, spec := range gdNode.Specs {
-						progState.prevType = parseValueSpec(
+						PROG_STATE.prevType = parseValueSpec(
 							fSet,
 							srcFile,
 							spec.(*ast.ValueSpec),
-							&progState,
+							&PROG_STATE,
 						)
 					}
 				} else if gdNode.Tok == token.TYPE && !optionsStructFound {
@@ -160,7 +160,7 @@ func main() {
 							fSet,
 							srcFile,
 							spec.(*ast.TypeSpec),
-							&progState,
+							&PROG_STATE,
 						)
 						if optionsStructFound {
 							break
@@ -178,18 +178,19 @@ func main() {
 	)
 
 	templateData := TemplateVals{
-		OptionsStruct:       VALS.OptionsStruct,
-		CapOptionsStruct:    strings.ToUpper(VALS.OptionsStruct[0:1]) + VALS.OptionsStruct[1:],
-		OptionsEnum:         VALS.OptionsEnum,
-		Package:             VALS.Package,
-		EnumFlags:           make([]EnumFlagTemplateVals, len(progState.enumVars)),
-		StructFields:        make([]StructFieldTemplateVals, len(progState.autoFields)),
-		StructFieldDefaults: make([]StructDefaultTemplateVals, len(progState.defaults)),
-		Imports:             progState.imports,
-		GeneratorName:       os.Args[0],
+		OptionsStruct: VALS.OptionsStruct,
+		CapOptionsStruct: 
+			strings.ToUpper(VALS.OptionsStruct[0:1])+VALS.OptionsStruct[1:],
+		OptionsEnum:   VALS.OptionsEnum,
+		Package:       VALS.Package,
+		EnumFlags:     make([]EnumFlagTemplateVals, len(PROG_STATE.enumVars)),
+		StructFields:  make([]StructFieldTemplateVals, len(PROG_STATE.autoFields)),
+		StructFieldDefaults: make([]StructDefaultTemplateVals, len(PROG_STATE.defaults)),
+		Imports: PROG_STATE.imports,
+		GeneratorName: os.Args[0],
 	}
 	cntr := 0
-	for e, c := range progState.enumVars {
+	for e, c := range PROG_STATE.enumVars {
 		capEnumFlag := strings.ToUpper(e[0:1]) + e[1:]
 		templateData.EnumFlags[cntr] = EnumFlagTemplateVals{
 			OptionsStruct: VALS.OptionsStruct,
@@ -199,20 +200,20 @@ func main() {
 		}
 		cntr++
 	}
-	for i, v := range progState.autoFields {
+	for i, v := range PROG_STATE.autoFields {
 		capStructField := strings.ToUpper(v[0:1]) + v[1:]
 		templateData.StructFields[i] = StructFieldTemplateVals{
 			OptionsStruct:  VALS.OptionsStruct,
 			CapStructField: capStructField,
 			StructField:    v,
-			FieldType:      progState.fieldTypes[v],
-			Comment:        progState.fieldComments[v],
+			FieldType:      PROG_STATE.fieldTypes[v],
+			Comment:        PROG_STATE.fieldComments[v],
 		}
 	}
-	cntr = 0
-	for field, _default := range progState.defaults {
-		templateData.StructFieldDefaults[cntr] = StructDefaultTemplateVals{
-			StructField:        field,
+	cntr=0
+	for field, _default:=range PROG_STATE.defaults {
+		templateData.StructFieldDefaults[cntr]=StructDefaultTemplateVals{
+			StructField: field,
 			StructFieldDefault: _default,
 		}
 		cntr++
@@ -224,6 +225,7 @@ func main() {
 		templateData,
 	); err != nil {
 		common.PrintRunningError("%s", err)
+		os.Exit(1)
 	}
 }
 
@@ -231,23 +233,23 @@ func parseValueSpec(
 	fSet *token.FileSet,
 	srcFile *os.File,
 	vs *ast.ValueSpec,
-	progState *ProgState,
+	PROG_STATE *ProgState,
 ) string {
 	getType := func() (string, error) {
 		var err error
-		rv := progState.prevType
+		rv := PROG_STATE.prevType
 		if vs.Type != nil {
 			rv, err = common.GetSourceTextFromExpr(
 				fSet, srcFile, vs.Type,
 			)
-		} else if vs.Type == nil && progState.prevType != "" {
-			rv = progState.prevType
+		} else if vs.Type == nil && PROG_STATE.prevType != "" {
+			rv = PROG_STATE.prevType
 		}
 		return rv, err
 	}
 
 	if len(vs.Names) > 0 && vs.Names[0].Name == "_" {
-		return progState.prevType
+		return PROG_STATE.prevType
 	}
 
 	iterType, err := getType()
@@ -264,7 +266,7 @@ func parseValueSpec(
 	if len(vs.Names) > 0 &&
 		iterType == VALS.OptionsEnum &&
 		comment != IgnoreEnumValue {
-		progState.enumVars[vs.Names[0].Name] = comment
+		PROG_STATE.enumVars[vs.Names[0].Name] = comment
 	}
 
 	return iterType
@@ -274,7 +276,7 @@ func parseTypeSpec(
 	fSet *token.FileSet,
 	srcFile *os.File,
 	ts *ast.TypeSpec,
-	progState *ProgState,
+	PROG_STATE *ProgState,
 ) bool {
 	if ts.Name.Name == "_" {
 		return false
@@ -319,8 +321,8 @@ func parseTypeSpec(
 				os.Exit(1)
 			}
 
-			progState.fieldTypes[fieldName] = fieldType
-			progState.fieldComments[fieldName] = fieldComment
+			PROG_STATE.fieldTypes[fieldName] = fieldType
+			PROG_STATE.fieldComments[fieldName] = fieldComment
 
 			// Remove the ticks
 			tags := reflect.StructTag(rawFieldTag[1 : len(rawFieldTag)-1])
@@ -332,7 +334,7 @@ func parseTypeSpec(
 				common.PrintRunningError("the default tag must not be an empty value")
 				os.Exit(1)
 			} else {
-				progState.defaults[fieldName] = _default
+				PROG_STATE.defaults[fieldName] = _default
 			}
 
 			auto, ok := tags.Lookup("auto")
@@ -347,12 +349,12 @@ func parseTypeSpec(
 					common.PrintRunningError("the auto tag must be a bool type: %w", err)
 					os.Exit(1)
 				} else if b {
-					progState.autoFields = append(progState.autoFields, fieldName)
+					PROG_STATE.autoFields = append(PROG_STATE.autoFields, fieldName)
 				}
 			}
 
-			if _import, ok := tags.Lookup("import"); ok {
-				progState.imports = append(progState.imports, _import)
+			if _import,ok:=tags.Lookup("import"); ok {
+				PROG_STATE.imports = append(PROG_STATE.imports, _import)
 			}
 		}
 
