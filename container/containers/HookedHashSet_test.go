@@ -54,7 +54,7 @@ func generateSyncedHookedHashSet(
 }
 
 func TestHookedHashSetWidgetInterface(t *testing.T) {
-	var widget widgets.WidgetInterface[HookedHashSet[
+	var widget widgets.BaseInterface[HookedHashSet[
 		string, widgets.BuiltinString,
 	]]
 

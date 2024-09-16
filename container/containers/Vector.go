@@ -19,12 +19,12 @@ type (
 	// [dynamicContainers] packages. The type constraints on the generics
 	// define the logic for how value specific operations, such as equality
 	// comparisons, will be handled.
-	Vector[T any, U widgets.WidgetInterface[T]] []T
+	Vector[T any, U widgets.BaseInterface[T]] []T
 
 	// A synchronized version of [Vector]. All operations will be wrapped in the
 	// appropriate calls to the embedded RWMutex. A pointer to a RWMutex is
 	// embedded rather than a value to avoid copying the lock value.
-	SyncedVector[T any, U widgets.WidgetInterface[T]] struct {
+	SyncedVector[T any, U widgets.BaseInterface[T]] struct {
 		*sync.RWMutex
 		Vector[T, U]
 	}
@@ -36,15 +36,15 @@ type (
 // standard slice, as shown below.
 //
 //	// Vector to slice.
-//	v,_:=NewVector[string,builtinWidgets.BuiltinString](3)
+//	v,_:=NewVector[string,builtinBases.BuiltinString](3)
 //	s:=[]string(v)
 //	// Slice to vector.
 //	s2:=make([]string,4)
-//	v2:=Vector[string,builtinWidgets.BuiltinString](s2)
+//	v2:=Vector[string,builtinBases.BuiltinString](s2)
 //
 // Note that by performing the above type casts the operations provided by the
 // widget, including equality, are not preserved.
-func NewVector[T any, U widgets.WidgetInterface[T]](size int) (Vector[T, U], error) {
+func NewVector[T any, U widgets.BaseInterface[T]](size int) (Vector[T, U], error) {
 	if size < 0 {
 		return Vector[T, U]{}, getSizeError(size)
 	}
@@ -55,7 +55,7 @@ func NewVector[T any, U widgets.WidgetInterface[T]](size int) (Vector[T, U], err
 // must be >= 0, an error will be returned if it is not. If size is 0 the vector
 // will be initialized with 0 elements. The underlying RWMutex value will be
 // fully unlocked upon initialization.
-func NewSyncedVector[T any, U widgets.WidgetInterface[T]](
+func NewSyncedVector[T any, U widgets.BaseInterface[T]](
 	size int,
 ) (SyncedVector[T, U], error) {
 	rv, err := NewVector[T, U](size)
@@ -66,12 +66,12 @@ func NewSyncedVector[T any, U widgets.WidgetInterface[T]](
 }
 
 // Creates a new vector and populates it with the supplied values.
-func VectorValInit[T any, U widgets.WidgetInterface[T]](vals ...T) Vector[T, U] {
+func VectorValInit[T any, U widgets.BaseInterface[T]](vals ...T) Vector[T, U] {
 	return Vector[T, U](vals)
 }
 
 // Creates a new synced vector and populates it with the supplied values.
-func SyncedVectorValInit[T any, U widgets.WidgetInterface[T]](
+func SyncedVectorValInit[T any, U widgets.BaseInterface[T]](
 	vals ...T,
 ) SyncedVector[T, U] {
 	return SyncedVector[T, U]{
@@ -174,7 +174,7 @@ func (v *SyncedVector[T, U]) Capacity() int {
 //
 // Time Complexity: O(n) because a copy operation is performed.
 func (v *Vector[T, U]) SetCapacity(c int) error {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := c + 1; i < len(*v); i++ {
 		w.Zero(&(*v)[i])
 	}
@@ -259,7 +259,7 @@ func (v *SyncedVector[T, U]) GetPntr(idx int) (*T, error) {
 //
 // Time complexity: O(n)
 func (v *Vector[T, U]) GetUnique(val *T) error {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := 0; i < len(*v); i++ {
 		if w.Eq(val, &(*v)[i]) {
 			*val = (*v)[i]
@@ -309,7 +309,7 @@ func (v *SyncedVector[T, U]) Contains(val T) bool {
 // Time Complexity: O(n) (linear search)
 func (v *Vector[T, U]) ContainsPntr(val *T) bool {
 	found := false
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := 0; i < len(*v) && !found; i++ {
 		found = w.Eq(val, &(*v)[i])
 	}
@@ -363,7 +363,7 @@ func (v *SyncedVector[T, U]) KeyOf(val T) (int, bool) {
 func (v *Vector[T, U]) KeyOfPntr(val *T) (int, bool) {
 	rv := -1
 	found := false
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := 0; i < len(*v) && !found; i++ {
 		if found = w.Eq(val, &(*v)[i]); found {
 			rv = i
@@ -473,7 +473,7 @@ func (v *SyncedVector[T, U]) Append(vals ...T) error {
 // (reallocation), where m=len(vals).
 func (v *Vector[T, U]) AppendUnique(vals ...T) error {
 	found := false
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := 0; i < len(vals); i++ {
 		for j := 0; j < len(*v) && !found; j++ {
 			found = w.Eq(&vals[i], &(*v)[j])
@@ -515,7 +515,7 @@ func (v *SyncedVector[T, U]) UpdateUnique(orig T, updateOp func(orig *T)) error 
 }
 
 func (v *Vector[T, U]) updateUniqueOp(orig *T, updateOp func(orig *T)) error {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	idx, found := v.KeyOfPntr(orig)
 	if !found {
 		return getValueError[T](orig)
@@ -687,7 +687,7 @@ func (v *SyncedVector[T, U]) PopSequential(val T, num int) int {
 func (v *Vector[T, U]) popSequentialImpl(val *T, num int) int {
 	cntr := 0
 	prevIndex := -1
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := 0; i < len(*v); i++ {
 		if w.Eq(val, &(*v)[i]) && cntr+1 <= num {
 			if prevIndex == -1 { // Initial value found
@@ -718,7 +718,7 @@ func (v *Vector[T, U]) Delete(idx int) error {
 	if idx < 0 || idx >= len(*v) {
 		return getIndexOutOfBoundsError(idx, 0, len(*v))
 	} else if idx >= 0 && idx < len(*v) && len(*v) > 0 {
-		w := widgets.Widget[T, U]{}
+		w := widgets.Base[T, U]{}
 		w.Zero(&(*v)[idx])
 		*v = append((*v)[:idx], (*v)[idx+1:]...)
 	}
@@ -752,7 +752,7 @@ func (v *Vector[T, U]) DeleteSequential(start int, end int) error {
 	if end <= start {
 		return getStartEndIndexError(start, end)
 	}
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := start; i < end; i++ {
 		w.Zero(&(*v)[i])
 	}
@@ -776,7 +776,7 @@ func (v *SyncedVector[T, U]) DeleteSequential(start int, end int) error {
 //
 // Time Complexity: O(n) (Because of zeroing)
 func (v *Vector[T, U]) Clear() {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := 0; i < len(*v); i++ {
 		w.Zero(&(*v)[i])
 	}
@@ -926,7 +926,7 @@ func (v *SyncedVector[T, U]) PopFront() (T, error) {
 }
 
 func (v *Vector[T, U]) popFontImpl(rv *T) error {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	if len(*v) > 0 {
 		*rv = (*v)[0]
 		w.Zero(&(*v)[0])
@@ -959,7 +959,7 @@ func (v *SyncedVector[T, U]) PopBack() (T, error) {
 }
 
 func (v *Vector[T, U]) popBackImpl(rv *T) error {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	if len(*v) > 0 {
 		*rv = (*v)[len(*v)-1]
 		w.Zero(&(*v)[len(*v)-1])
@@ -1204,7 +1204,7 @@ func (v *SyncedVector[T, U]) UnorderedEq(
 func (v *Vector[T, U]) KeyedEq(
 	other containerTypes.KeyedComparisonsOtherConstraint[int, T],
 ) bool {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	rv := (len(*v) == other.Length())
 	for i := 0; i < len(*v) && rv; i++ {
 		if otherV, err := addressableSafeGet[int, T](other, i); err == nil {
@@ -1481,57 +1481,28 @@ func (v *SyncedVector[T, U]) IsSubset(
 	return v.Vector.IsSubset(other)
 }
 
-// An equality function that implements the [algo.widget.WidgetInterface]
+// An equality function that implements the [widget.Base]
 // interface. Internally this is equivalent to [Vector.KeyedEq]. Returns true
 // if l==r, false otherwise.
 func (_ *Vector[T, U]) Eq(l *Vector[T, U], r *Vector[T, U]) bool {
 	return l.KeyedEq(r)
 }
 
-// An equality function that implements the [algo.widget.WidgetInterface]
+// An equality function that implements the [widget.Base]
 // interface. Internally this is equivalent to [SyncedVector.KeyedEq]. Returns
 // true if l==r, false otherwise.
 func (_ *SyncedVector[T, U]) Eq(l *SyncedVector[T, U], r *SyncedVector[T, U]) bool {
 	return l.KeyedEq(r)
 }
 
-// A function that implements the [algo.widget.WidgetInterface] less than
-// operation on vectors. The l and r vectors will be compared lexographically.
-func (_ *Vector[T, U]) Lt(l *Vector[T, U], r *Vector[T, U]) bool {
-	w := widgets.Widget[T, U]{}
-	for i := 0; i < min(len(*l), len(*r)); i++ {
-		if w.Lt(&(*l)[i], &(*r)[i]) {
-			return true
-		} else if w.Gt(&(*l)[i], &(*r)[i]) {
-			return false
-		}
-	}
-	if len(*l) >= len(*r) {
-		return false
-	}
-	return true
-}
-
-// A function that implements the [algo.widget.WidgetInterface] less than
-// operation on vectors. The l and r vectors will be compared lexographically.
-// Read locks are placed on l and r before calling the underlying vectors
-// [Vector.Lt] method.
-func (_ *SyncedVector[T, U]) Lt(l *SyncedVector[T, U], r *SyncedVector[T, U]) bool {
-	l.RLock()
-	r.RLock()
-	defer l.RUnlock()
-	defer r.RUnlock()
-	return l.Vector.Lt(&l.Vector, &r.Vector)
-}
-
 // A function that returns a hash of a vector to implement the
-// [algo.widget.WidgetInterface]. To do this all of the individual hashes that
+// [widget.Base]. To do this all of the individual hashes that
 // are produced from the elements of the vector are combined in a way that
 // maintains identity, making it so the hash will represent the same equality
 // operation that [Vector.KeyedEq] and [Vector.Eq] provide.
 func (_ *Vector[T, U]) Hash(other *Vector[T, U]) hash.Hash {
 	var rv hash.Hash
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	if len(*other) > 0 {
 		rv = w.Hash(&(*other)[0])
 		for i := 1; i < len(*other); i++ {
@@ -1543,20 +1514,20 @@ func (_ *Vector[T, U]) Hash(other *Vector[T, U]) hash.Hash {
 
 // Places a read lock on the underlying vector of other and then calls others
 // underlying vector [Vector.Hash] method. Implements the
-// [algo.widget.WidgetInterface].
+// [widget.Base].
 func (_ *SyncedVector[T, U]) Hash(other *SyncedVector[T, U]) hash.Hash {
 	other.RLock()
 	defer other.RUnlock()
 	return other.Vector.Hash(&other.Vector)
 }
 
-// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// An zero function that implements the [widget.Base] interface.
 // Internally this is equivalent to [Vector.Clear].
 func (_ *Vector[T, U]) Zero(other *Vector[T, U]) {
 	other.Clear()
 }
 
-// An zero function that implements the [algo.widget.WidgetInterface] interface.
+// An zero function that implements the [widget.Base] interface.
 // Internally this is equivalent to [SyncedVector.Clear].
 func (_ *SyncedVector[T, U]) Zero(other *SyncedVector[T, U]) {
 	other.Clear()

@@ -27,7 +27,7 @@ func generateSyncedHashMap(capacity int) SyncedHashMap[
 }
 
 func TestHashMapWidgetInterface(t *testing.T) {
-	var widget widgets.WidgetInterface[HashMap[string, string, widgets.BuiltinString, widgets.BuiltinString]]
+	var widget widgets.BaseInterface[HashMap[string, string, widgets.BuiltinString, widgets.BuiltinString]]
 	v, _ := NewHashMap[string, string, widgets.BuiltinString, widgets.BuiltinString](0)
 	widget = &v
 	_ = widget
@@ -53,16 +53,6 @@ func TestHashMapEq(t *testing.T) {
 	m2.Delete(0)
 	test.False(m1.Eq(&m1, &m2), t)
 	test.False(m2.Eq(&m1, &m2), t)
-}
-
-func TestHashMapLt(t *testing.T) {
-	m1, _ := NewHashMap[int, string, widgets.BuiltinInt, widgets.BuiltinString](0)
-	test.Panics(
-		func() {
-			m1.Lt(&m1, &m1)
-		},
-		t,
-	)
 }
 
 func TestHashMapHash(t *testing.T) {

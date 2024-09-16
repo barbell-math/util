@@ -1,12 +1,21 @@
 package common
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"io/fs"
 	"os"
 	"strings"
+)
+
+type (
+	CommentArgVals map[string]string
+)
+
+const (
+	GeneratorCommentPrefix string = "gen"
 )
 
 func GenFileExclusionFilter(f fs.FileInfo) bool {
@@ -105,4 +114,91 @@ func GetComment(
 		rvLines[i] = strings.TrimSpace(rvLines[i])
 	}
 	return strings.Join(rvLines, "\n"), nil
+}
+
+func GetCommentArgVals(
+	fSet *token.FileSet,
+	srcFile *os.File,
+	doc *ast.CommentGroup,
+) (CommentArgVals, error) {
+	comment, err:=GetComment(fSet, srcFile, doc, nil)
+	if err!=nil {
+		return CommentArgVals{}, err
+	}
+
+	progPrefix:=fmt.Sprintf(
+		"//%s:%s ",
+		GeneratorCommentPrefix, GetProgName(os.Args),
+	)
+
+	argLines:=[]string{}
+	for _, l:=range(strings.Split(comment, "\n")) {
+		l = strings.TrimSpace(l)
+		if strings.HasPrefix(l, progPrefix) {
+			argLines = append(argLines, strings.Replace(l, progPrefix, "", 1))	
+		}
+	}
+
+	rv:=CommentArgVals{}
+	for _,l:=range argLines {
+		args:=strings.SplitN(l, " ", 2)
+		if len(args)!=2 {
+			return rv, fmt.Errorf(
+				"%w | Expected the following format: %s <arg name> <arg val>",
+				CommentArgsMalformed, progPrefix,
+			)
+		}
+		rv[args[0]]=args[1]
+	}
+	return rv, nil
+}
+
+func CommentArgsAstFilter(
+	expectedType string,
+	globalStruct any,
+) func(fSet *token.FileSet, srcFile *os.File, node ast.Node) error {
+	foundTypeDef:=false
+
+	parseComment:=func(
+		fSet *token.FileSet,
+		srcFile *os.File,
+		ts *ast.TypeSpec,
+	) error {
+		if foundTypeDef || ts.Name.Name!=expectedType {
+			return nil
+		}
+
+		if comment, err:=GetCommentArgVals(fSet, srcFile, ts.Doc); err!=nil {
+			return err
+		} else if err:=CommentArgs(globalStruct, comment); err!=nil {
+			return err
+		} else {
+			foundTypeDef=true
+		}
+		return nil
+	}
+
+	return func(fSet *token.FileSet, srcFile *os.File, node ast.Node) error {
+		if foundTypeDef {
+			return nil
+		}
+
+		switch node.(type) {
+		case *ast.GenDecl:
+			gdNode:=node.(*ast.GenDecl)
+			if gdNode.Tok == token.TYPE {
+				for _, spec := range gdNode.Specs {
+					if err:=parseComment(
+						fSet,
+						srcFile,
+						spec.(*ast.TypeSpec),
+					); err!=nil {
+						return err
+					}
+				}
+			}
+			return nil
+		default: return nil
+		}
+	}
 }

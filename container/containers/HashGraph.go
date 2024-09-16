@@ -12,9 +12,9 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=edgeHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
-//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=vertexHash -baseType=HashSetHash -baseTypeWidget=*HashSetHash -widgetPackage=.
-//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=graphLink "-baseType=basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]" "-baseTypeWidget=basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]" -widgetPackage=github.com/barbell-math/util/container/basic
+//go:generate ../../bin/passThroughWidget -type=edgeHash
+//go:generate ../../bin/passThroughWidget -type=vertexHash
+//go:generate ../../bin/passThroughWidget -type=graphLink
 
 const (
 	numLinksOffset  uintptr = unsafe.Sizeof(graphImpl{}) + unsafe.Sizeof(int(0))
@@ -22,8 +22,23 @@ const (
 )
 
 type (
+	//gen:passThroughWidget widgetType Base
+	//gen:passThroughWidget package containers
+	//gen:passThroughWidget baseType HashSetHash
+	//gen:passThroughWidget baseTypeWidget *HashSetHash
+	//gen:passThroughWidget widgetPackage .
 	edgeHash   HashSetHash
+	//gen:passThroughWidget widgetType Base
+	//gen:passThroughWidget package containers
+	//gen:passThroughWidget baseType HashSetHash
+	//gen:passThroughWidget baseTypeWidget *HashSetHash
+	//gen:passThroughWidget widgetPackage .
 	vertexHash HashSetHash
+	//gen:passThroughWidget widgetType Base
+	//gen:passThroughWidget package containers
+	//gen:passThroughWidget baseType basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
+	//gen:passThroughWidget baseTypeWidget basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
+	//gen:passThroughWidget widgetPackage github.com/barbell-math/util/container/basic
 	graphLink  basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	graphImpl  map[vertexHash]Vector[graphLink, *graphLink]
 
@@ -35,8 +50,8 @@ type (
 	internalHashGraphImpl[
 		V any,
 		E any,
-		VI widgets.WidgetInterface[V],
-		EI widgets.WidgetInterface[E],
+		VI widgets.BaseInterface[V],
+		EI widgets.BaseInterface[E],
 	] struct {
 		numLinks int
 		graph    graphImpl
@@ -47,8 +62,8 @@ type (
 	hashGraphEdges[
 		V any,
 		E any,
-		VI widgets.WidgetInterface[V],
-		EI widgets.WidgetInterface[E],
+		VI widgets.BaseInterface[V],
+		EI widgets.BaseInterface[E],
 	] struct {
 		HookedHashSet[E, EI]
 	}
@@ -56,8 +71,8 @@ type (
 	hashGraphVertices[
 		V any,
 		E any,
-		VI widgets.WidgetInterface[V],
-		EI widgets.WidgetInterface[E],
+		VI widgets.BaseInterface[V],
+		EI widgets.BaseInterface[E],
 	] struct {
 		HookedHashSet[V, VI]
 	}
@@ -71,8 +86,8 @@ type (
 	HashGraph[
 		V any,
 		E any,
-		VI widgets.WidgetInterface[V],
-		EI widgets.WidgetInterface[E],
+		VI widgets.BaseInterface[V],
+		EI widgets.BaseInterface[E],
 	] struct {
 		// By making this struct nothing more than a pointer to the true
 		// graphImpl it makes it so that it will have the same behavior as a
@@ -88,8 +103,8 @@ type (
 	SyncedHashGraph[
 		V any,
 		E any,
-		VI widgets.WidgetInterface[V],
-		EI widgets.WidgetInterface[E],
+		VI widgets.BaseInterface[V],
+		EI widgets.BaseInterface[E],
 	] struct {
 		*sync.RWMutex
 		HashGraph[V, E, VI, EI]
@@ -223,8 +238,8 @@ func (_ *hashGraphVertices[V, E, VI, EI]) clearOp() {
 func NewHashGraph[
 	V any,
 	E any,
-	VI widgets.WidgetInterface[V],
-	EI widgets.WidgetInterface[E],
+	VI widgets.BaseInterface[V],
+	EI widgets.BaseInterface[E],
 ](numVertices int, numEdges int) (HashGraph[V, E, VI, EI], error) {
 	if numVertices < 0 {
 		return HashGraph[V, E, VI, EI]{}, getSizeError(numVertices)
@@ -261,8 +276,8 @@ func NewHashGraph[
 func NewSyncedHashGraph[
 	V any,
 	E any,
-	VI widgets.WidgetInterface[V],
-	EI widgets.WidgetInterface[E],
+	VI widgets.BaseInterface[V],
+	EI widgets.BaseInterface[E],
 ](numVertices int, numEdges int) (SyncedHashGraph[V, E, VI, EI], error) {
 	if numVertices < 0 {
 		return SyncedHashGraph[V, E, VI, EI]{}, getSizeError(numVertices)
@@ -1860,22 +1875,6 @@ func (_ *SyncedHashGraph[V, E, VI, EI]) Eq(
 	defer l.RUnlock()
 	defer r.RUnlock()
 	return l.HashGraph.KeyedEq(r)
-}
-
-// Panics, hash graphs cannot be compared for order.
-func (_ *HashGraph[V, E, VI, EI]) Lt(
-	l *HashGraph[V, E, VI, EI],
-	r *HashGraph[V, E, VI, EI],
-) bool {
-	panic("Hash graphs maps cannot be compared relative to each other.")
-}
-
-// Panics, hash graphs cannot be compared for order.
-func (_ *SyncedHashGraph[V, E, VI, EI]) Lt(
-	l *SyncedHashGraph[V, E, VI, EI],
-	r *SyncedHashGraph[V, E, VI, EI],
-) bool {
-	panic("Hash graphs maps cannot be compared relative to each other.")
 }
 
 // A function that returns a hash of a hash graph. To do this all of the

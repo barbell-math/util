@@ -42,7 +42,7 @@ func ExampleVector_typeCasting() {
 }
 
 func TestVectorWidgetInterface(t *testing.T) {
-	var widget widgets.WidgetInterface[Vector[string, widgets.BuiltinString]]
+	var widget widgets.BaseInterface[Vector[string, widgets.BuiltinString]]
 	v, _ := NewVector[string, widgets.BuiltinString](0)
 	widget = &v
 	_ = widget
@@ -70,42 +70,6 @@ func TestVectorOfVectorsEquality(t *testing.T) {
 	v1[0][0] = "blah"
 	test.False(v1.Eq(&v1, &v2), t)
 	test.False(v1.Eq(&v2, &v1), t)
-}
-
-func TestVectorOfVectorsLt(t *testing.T) {
-	v1 := Vector[
-		Vector[string, widgets.BuiltinString],
-		*Vector[string, widgets.BuiltinString],
-	]{
-		{"a", "b", "c"},
-		{"d", "e", "f"},
-		{"h", "i", "j"},
-	}
-	v2 := Vector[
-		Vector[string, widgets.BuiltinString],
-		*Vector[string, widgets.BuiltinString],
-	]{
-		{"a", "b", "c"},
-		{"d", "e", "f"},
-		{"h", "i", "j"},
-	}
-	test.False(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v1[0][0] = "A"
-	test.True(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v1[0][0] = "a"
-	v1[0][1] = "B"
-	test.True(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v1[0][1] = "b"
-	v1.Delete(2)
-	test.True(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v2.Delete(1)
-	v2.Delete(1)
-	test.False(v1.Lt(&v1, &v2), t)
-	test.True(v1.Lt(&v2, &v1), t)
 }
 
 func TestVectorOfVectorsHash(t *testing.T) {

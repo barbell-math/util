@@ -31,7 +31,7 @@ func generateSyncedHashGraph(
 }
 
 func TestHashGraphWidgetInterface(t *testing.T) {
-	var widget widgets.WidgetInterface[HashGraph[
+	var widget widgets.BaseInterface[HashGraph[
 		string, string,
 		widgets.BuiltinString, widgets.BuiltinString,
 	]]
@@ -77,20 +77,6 @@ func TestHashGraphEq(t *testing.T) {
 
 	test.False(g1.Eq(&g1, &g2), t)
 	test.False(g1.Eq(&g2, &g1), t)
-}
-
-func TestHashGraphLt(t *testing.T) {
-	g, err := NewHashGraph[
-		string, int,
-		widgets.BuiltinString, widgets.BuiltinInt,
-	](0, 0)
-	test.Nil(err, t)
-	test.Panics(
-		func() {
-			g.Lt(&g, &g)
-		},
-		t,
-	)
 }
 
 func TestHashGraphHash(t *testing.T) {

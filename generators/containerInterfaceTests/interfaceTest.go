@@ -14,7 +14,7 @@ import (
 type (
 	category byte
 
-	Values struct {
+	InlineArgs struct {
 		Type        string `required:"t" help:"The underlying type to generate the widget for."`
 		Interface   string `required:"t" help:"The packge to put the files in."`
 		GenericDecl string `required:"t" help:"The generic type signature to use."`
@@ -55,7 +55,7 @@ const (
 )
 
 var (
-	VALS          Values
+	INLINE_ARGS          InlineArgs
 	REQUIRED_ARGS []string = []string{
 		"type",
 		"category",
@@ -118,10 +118,10 @@ func (c category) FromString(s string) category {
 }
 
 func main() {
-	common.Args(&VALS, os.Args)
+	common.InlineArgs(&INLINE_ARGS, os.Args)
 	checkGenericDecl()
-	VALS.CapType = strings.ToUpper(VALS.Type)[:1] + VALS.Type[1:]
-	PROG_STATE.Cat = Dynamic.FromString(VALS.Category)
+	INLINE_ARGS.CapType = strings.ToUpper(INLINE_ARGS.Type)[:1] + INLINE_ARGS.Type[1:]
+	PROG_STATE.Cat = Dynamic.FromString(INLINE_ARGS.Category)
 
 	common.IterateOverAST(
 		"../tests/",
@@ -130,15 +130,15 @@ func main() {
 			switch node.(type) {
 			case *ast.FuncDecl:
 				fd := node.(*ast.FuncDecl)
-				if VALS.Debug {
+				if INLINE_ARGS.Debug {
 					fmt.Print("Found func: ", fd.Name, "| Status: ")
 				}
 				if ok, info := hasViableSignature(fSet, srcFile, fd); ok {
-					if VALS.Debug {
+					if INLINE_ARGS.Debug {
 						fmt.Println("Accepted")
 					}
 					PROG_STATE.ViableFuncs = append(PROG_STATE.ViableFuncs, fd)
-				} else if VALS.Debug {
+				} else if INLINE_ARGS.Debug {
 					fmt.Println("Rejected | Reason:", info)
 				}
 				return false
@@ -153,18 +153,18 @@ func main() {
 
 	templateData := TemplateVals{
 		Cat:           PROG_STATE.Cat.String(),
-		Type:          VALS.Type,
-		Interface:     VALS.Interface,
-		GenericDecl:   VALS.GenericDecl,
+		Type:          INLINE_ARGS.Type,
+		Interface:     INLINE_ARGS.Interface,
+		GenericDecl:   INLINE_ARGS.GenericDecl,
 		FuncNames:     make([]FuncTemplateVals, len(PROG_STATE.ViableFuncs)),
 		GeneratorName: os.Args[0],
-		Factory:       VALS.Factory,
+		Factory:       INLINE_ARGS.Factory,
 	}
 	for i, f := range PROG_STATE.ViableFuncs {
 		templateData.FuncNames[i] = FuncTemplateVals{
 			Name:      f.Name.Name,
-			Type:      VALS.Type,
-			Interface: VALS.Interface,
+			Type:      INLINE_ARGS.Type,
+			Interface: INLINE_ARGS.Interface,
 		}
 	}
 
@@ -180,9 +180,9 @@ func main() {
 }
 
 func checkGenericDecl() {
-	if len(VALS.GenericDecl) < 2 ||
-		VALS.GenericDecl[0] != '[' ||
-		VALS.GenericDecl[len(VALS.GenericDecl)-1] != ']' {
+	if len(INLINE_ARGS.GenericDecl) < 2 ||
+		INLINE_ARGS.GenericDecl[0] != '[' ||
+		INLINE_ARGS.GenericDecl[len(INLINE_ARGS.GenericDecl)-1] != ']' {
 		common.PrintRunningError("The supplied generic declaration was not valid.")
 		common.PrintRunningError("Expected a value of the form '[*]' where * represent the generic types.")
 		os.Exit(1)
@@ -199,9 +199,9 @@ func fileName() string {
 	}
 	return fmt.Sprintf(
 		"%s_%s_%sInterface_test",
-		VALS.CapType,
+		INLINE_ARGS.CapType,
 		category,
-		VALS.Interface,
+		INLINE_ARGS.Interface,
 	)
 }
 
@@ -250,7 +250,7 @@ func isViableFactory(fSet *token.FileSet, srcFile *os.File, ft *ast.FuncType) (b
 		return false, "Expected a function that returned a single value."
 	}
 
-	expSrcType := fmt.Sprintf("%sContainers.%s*", PROG_STATE.Cat.String(), VALS.Interface)
+	expSrcType := fmt.Sprintf("%sContainers.%s*", PROG_STATE.Cat.String(), INLINE_ARGS.Interface)
 	if src, err := common.GetSourceTextFromExpr(fSet, srcFile, ft.Results); err != nil {
 		return false, fmt.Sprintf("An error ocurred reading it's return type from the src file.\n%s", err.Error())
 	} else if match, _ := regexp.Match(expSrcType, []byte(src)); !match {

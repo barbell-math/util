@@ -1,16 +1,13 @@
-// This package serves to implement the comparison and hash operations necessary
-// to put built-in types into the containers defined in [containers]. All of the
-// types in this package will implement the [containers.Widget] interface.
-// Basically all of the code in this package is generated with go:generate comments.
+// This package defines several widget types that allow logic for certian
+// common operations to be passed arround as state.
 package widgets
 
 import "github.com/barbell-math/util/hash"
 
 type (
-	// The interface that defines what it means to be a widget. This interface
-	// is used by the containers in the [containers] package when performing
-	// certain operations. Implementations of this interface are expected to
-	// hold no state as the methods shown below will not be called in any
+	// The interface that defines what it means to be a widget. Implementations
+	// of this interface are expected to hold no state that pertains to the
+	// widget functions as the methods shown below will not be called in any
 	// predetermined order.
 	BaseInterface[T any] interface {
 		// A function that should return true if the current value equals other.
@@ -23,18 +20,22 @@ type (
 		Zero(v *T)
 	}
 
+	// The interface that defines what it means to be a widget that can be
+	// compared to other widgets. Implementations of this interface are expected
+	// to hold no state that pertains to the widget functions as the methods
+	// shown below will not be called in any predetermined order.
 	PartialOrderInterface[T any] interface {
 		BaseInterface[T]
-		// A function that should return true if the current value is less than other.
+		// A function that should return true if the current value is less than
+		// other.
 		Lt(l *T, r *T) bool
 	}
 
 	// The interface that defines what it means to be a widget that can do
-	// basic arithmetic. This interface is used by the containers in the
-	// [container] package when performing certain operations. Implementations
-	// of this interface are expected to hold no state as the methods will not
+	// basic arithmetic. Implementations of this interface are expected to hold 
+	// no state that pertains to the widget functions as the methods will not
 	// be called in any predetermined order.
-	ArithWidgetInterface[T any] interface {
+	ArithInterface[T any] interface {
 		// An arith widget is a superset of the [WidgetInterface].
 		PartialOrderInterface[T]
 		// Returns the value that represents "zero" for the underlying type.
@@ -61,33 +62,28 @@ type (
 		Div(res *T, l *T, r *T)
 	}
 
-	// The base widget implementation that all the containers in the [containers]
-	// package use as a type restriction. Internally, this struct will create an
-	// interface value of type [BaseInterface] that points to nil data. All
-	// methods on widget are then very thin pass through functions that call the
-	// needed methods on the interface value with the supplied values.
+	// A concrete base widget. Internally, this struct will create an interface
+	// value of type [BaseInterface] that points to nil data. All methods on 
+	// widget are then very thin pass through functions that call the needed 
+	// methods on the interface value with the supplied values.
 	Base[T any, I BaseInterface[T]] struct {
 		iFace I
 	}
 
-	// The paritial order widget implementation that some of the containers in
-	// the [containers] package use as a type restriction. Internally, this
-	// struct will create an interface value of type [PartialOrderInterface]
-	// that points to nil data. All methods on widget are then very thin pass
-	// through functions that call the needed methods on the interface value
-	// with the supplied values.
+	// A concrete partial order widget. Internally, this struct will create an
+	// interface value of type [PartialOrderInterface] that points to nil data. 
+	// All methods on widget are then very thin pass through functions that call
+	// the needed methods on the interface value with the supplied values.
 	PartialOrder[T any, I PartialOrderInterface[T]] struct {
-		iFace I
+		Base[T, I]
 	}
 
-	// An arithmitic aware version of the base [Widget] type that some of the
-	// containers in the [container] package use as a type restriction.
-	// Internally, this struct will create an interface value of type
-	// [ArithWidgetInterface] that points to nil data. All methods on
-	// widget are then very thin pass through functions that call the needed
-	// methods on the interface value with the supplied values.
-	ArithWidget[T any, I ArithWidgetInterface[T]] struct {
-		iFace I
+	// A concrete arithmitic widget. Internally, this struct will create an
+	// interface value of type [ArithInterface] that points to nil data. All
+	// methods on widget are then very thin pass through functions that call the
+	// needed methods on the interface value with the supplied values.
+	Arith[T any, I ArithInterface[T]] struct {
+		PartialOrder[T, I]
 	}
 )
 
@@ -99,7 +95,7 @@ func (w *Base[T, I]) Zero(v *T) {
 
 // Zeros the supplied value using the logic defined by the interface that was
 // supplied as a generic type.
-func (w *ArithWidget[T, I]) Zero(v *T) {
+func (w *Arith[T, I]) Zero(v *T) {
 	w.iFace.Zero(v)
 }
 
@@ -111,7 +107,7 @@ func (w *Base[T, I]) Eq(l *T, r *T) bool {
 
 // Compares the left (l) and right (r) values and returns true is l==r using the
 // Eq function from the interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) Eq(l *T, r *T) bool {
+func (w *Arith[T, I]) Eq(l *T, r *T) bool {
 	return w.iFace.Eq(l, r)
 }
 
@@ -123,7 +119,7 @@ func (w *Base[T, I]) Neq(l *T, r *T) bool {
 
 // Compares the left (l) and right (r) values and returns true is l!=r using the
 // Eq function from the interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) Neq(l *T, r *T) bool {
+func (w *Arith[T, I]) Neq(l *T, r *T) bool {
 	return !w.iFace.Eq(l, r)
 }
 
@@ -135,7 +131,7 @@ func (w *PartialOrder[T, I]) Lt(l *T, r *T) bool {
 
 // Compares the left (l) and right (r) values and returns true is l<r using the
 // Lt function from the interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) Lt(l *T, r *T) bool {
+func (w *Arith[T, I]) Lt(l *T, r *T) bool {
 	return w.iFace.Lt(l, r)
 }
 
@@ -147,7 +143,7 @@ func (w *PartialOrder[T, I]) Lte(l *T, r *T) bool {
 
 // Compares the left (l) and right (r) values and returns true is l<=r using the
 // Lt and Eq functions from the interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) Lte(l *T, r *T) bool {
+func (w *Arith[T, I]) Lte(l *T, r *T) bool {
 	return w.iFace.Lt(l, r) || w.iFace.Eq(l, r)
 }
 
@@ -159,7 +155,7 @@ func (w *PartialOrder[T, I]) Gt(l *T, r *T) bool {
 
 // Compares the left (l) and right (r) values and returns true is l>r using the
 // Lt and Eq functions from the interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) Gt(l *T, r *T) bool {
+func (w *Arith[T, I]) Gt(l *T, r *T) bool {
 	return !w.iFace.Lt(l, r) && !w.iFace.Eq(l, r)
 }
 
@@ -171,7 +167,7 @@ func (w *PartialOrder[T, I]) Gte(l *T, r *T) bool {
 
 // Compares the left (l) and right (r) values and returns true is l>=r using the
 // Lt function from the interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) Gte(l *T, r *T) bool {
+func (w *Arith[T, I]) Gte(l *T, r *T) bool {
 	return !w.iFace.Lt(l, r)
 }
 
@@ -183,49 +179,49 @@ func (w *Base[T, I]) Hash(v *T) hash.Hash {
 
 // Generates a hash for the given value using the hash function from the interface
 // that was supplied as a generic type.
-func (w *ArithWidget[T, I]) Hash(v *T) hash.Hash {
+func (w *Arith[T, I]) Hash(v *T) hash.Hash {
 	return w.iFace.Hash(v)
 }
 
 // Returns the "zero" value for the given widget type using the function from
 // the interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) ZeroVal() T {
+func (w *Arith[T, I]) ZeroVal() T {
 	return w.iFace.ZeroVal()
 }
 
 // Returns the "1" value for the given widget type using the function from the
 // interface that was supplied as a generic type.
-func (w *ArithWidget[T, I]) UnitVal() T {
+func (w *Arith[T, I]) UnitVal() T {
 	return w.iFace.UnitVal()
 }
 
 // Negates the supplied value using the function from the interface that was
 // supplied as a generic type.
-func (w *ArithWidget[T, I]) Neg(v *T) {
+func (w *Arith[T, I]) Neg(v *T) {
 	w.iFace.Neg(v)
 }
 
 // Adds the supplied values using the function from the interface that was
 // supplied as a generic type.
-func (w *ArithWidget[T, I]) Add(res *T, l *T, r *T) {
+func (w *Arith[T, I]) Add(res *T, l *T, r *T) {
 	w.iFace.Add(res, l, r)
 }
 
 // Subtracts the supplied values using the function from the interface that was
 // supplied as a generic type.
-func (w *ArithWidget[T, I]) Sub(res *T, l *T, r *T) {
+func (w *Arith[T, I]) Sub(res *T, l *T, r *T) {
 	w.iFace.Sub(res, l, r)
 }
 
 // Multiplies the supplied values using the function from the interface that was
 // supplied as a generic type.
-func (w *ArithWidget[T, I]) Mul(res *T, l *T, r *T) {
+func (w *Arith[T, I]) Mul(res *T, l *T, r *T) {
 	w.iFace.Mul(res, l, r)
 }
 
 // Divides the supplied values using the function from the interface that was
 // supplied as a generic type.
-func (w *ArithWidget[T, I]) Div(res *T, l *T, r *T) {
+func (w *Arith[T, I]) Div(res *T, l *T, r *T) {
 	w.iFace.Div(res, l, r)
 }
 

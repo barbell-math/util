@@ -40,7 +40,10 @@ func TestCustomWidgetInVector(t *testing.T) {
 }
 
 func TestCustomWidgetPntr(t *testing.T) {
-	v := make(Vector[*customWidget, widgets.Pntr[customWidget, *customWidget]], 0)
+	v := make(Vector[
+		*customWidget,
+		widgets.BasePntr[customWidget, *customWidget],
+	], 0)
 	v.Append(&customWidget{a: 10, b: 20}, &customWidget{a: 9, b: 20})
 	test.True(v[0].Eq(v[0], v[0]), t)
 	test.False(v[0].Eq(v[0], v[1]), t)
@@ -50,7 +53,11 @@ func TestCustomWidgetPntr(t *testing.T) {
 	test.True(v[0].Lt(v[1], v[0]), t)
 	test.Eq(hash.Hash(10), v[0].Hash(v[0]), t)
 	test.Eq(hash.Hash(9), v[0].Hash(v[1]), t)
-	v2 := make(Vector[*customWidget, widgets.Pntr[customWidget, *customWidget]], 0)
+
+	v2 := make(Vector[
+		*customWidget,
+		widgets.BasePntr[customWidget, *customWidget],
+	], 0)
 	v2.Append(&customWidget{a: 10, b: 20}, &customWidget{a: 9, b: 20})
 	test.True(v.Eq(&v, &v2), t)
 	v2[0] = &customWidget{a: 100, b: 200}

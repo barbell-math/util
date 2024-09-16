@@ -22,14 +22,14 @@ type (
 	// hashing method. The type constraints on the generics define the logic
 	// for how value specific operations, such as equality comparisons, will be
 	// handled.
-	HashSet[T any, U widgets.WidgetInterface[T]] struct {
+	HashSet[T any, U widgets.BaseInterface[T]] struct {
 		internalHashSetImpl[T]
 	}
 
 	// A synchronized version of HashSet. All operations will be wrapped in the
 	// appropriate calls the embedded RWMutex. A pointer to a RWMutex is embedded
 	// rather than a value to avoid copying the lock value.
-	SyncedHashSet[T any, U widgets.WidgetInterface[T]] struct {
+	SyncedHashSet[T any, U widgets.BaseInterface[T]] struct {
 		*sync.RWMutex
 		HashSet[T, U]
 	}
@@ -40,7 +40,7 @@ type (
 // hash set will be initialized with 0 elements.
 func NewHashSet[
 	T any,
-	U widgets.WidgetInterface[T],
+	U widgets.BaseInterface[T],
 ](size int) (HashSet[T, U], error) {
 	if size < 0 {
 		return HashSet[T, U]{}, getSizeError(size)
@@ -54,7 +54,7 @@ func NewHashSet[
 // elements. Size must be >= 0, an error will be returned if it is not. If size
 // is 0 the hash set will be initialized with 0 elements. The underlying RWMutex
 // value will be fully unlocked upon initialization.
-func NewSyncedHashSet[T any, U widgets.WidgetInterface[T]](
+func NewSyncedHashSet[T any, U widgets.BaseInterface[T]](
 	size int,
 ) (SyncedHashSet[T, U], error) {
 	rv, err := NewHashSet[T, U](size)
@@ -66,7 +66,7 @@ func NewSyncedHashSet[T any, U widgets.WidgetInterface[T]](
 
 // Creates a new hash set and populates it with the supplied values. Duplicated
 // values will be ignored.
-func HashSetValInit[T any, U widgets.WidgetInterface[T]](
+func HashSetValInit[T any, U widgets.BaseInterface[T]](
 	vals ...T,
 ) HashSet[T, U] {
 	rv, _ := NewHashSet[T, U](len(vals))
@@ -78,7 +78,7 @@ func HashSetValInit[T any, U widgets.WidgetInterface[T]](
 
 // Creates a new synced hash set and populates it with the supplied values.
 // Duplicated values will be ignored.
-func SyncedHashSetValInit[T any, U widgets.WidgetInterface[T]](
+func SyncedHashSetValInit[T any, U widgets.BaseInterface[T]](
 	vals ...T,
 ) SyncedHashSet[T, U] {
 	rv, _ := NewSyncedHashSet[T, U](len(vals))
@@ -260,7 +260,7 @@ func (h *SyncedHashSet[T, U]) ContainsPntr(v *T) bool {
 }
 
 func (h *HashSet[T, U]) getHashPosition(v *T) (HashSetHash, bool) {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := HashSetHash(w.Hash(v)); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; found && w.Eq(v, &iterV) {
 			return i, true
@@ -303,7 +303,7 @@ func (h *SyncedHashSet[T, U]) AppendUnique(vals ...T) error {
 }
 
 func (h *HashSet[T, U]) appendOp(v *T) {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := HashSetHash(w.Hash(v)); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; !found {
 			h.internalHashSetImpl[i] = *v
@@ -347,7 +347,7 @@ func (h *SyncedHashSet[T, U]) UpdateUnique(
 }
 
 func (h *HashSet[T, U]) updateOp(orig *T, updateOp func(orig *T)) error {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for i := HashSetHash(w.Hash(orig)); ; i++ {
 		if iterV, found := h.internalHashSetImpl[i]; !found {
 			return getValueError[T](orig)
@@ -398,7 +398,7 @@ func (h *SyncedHashSet[T, U]) Pop(v T) int {
 //
 // Time Complexity: O(1)
 func (h *HashSet[T, U]) PopPntr(v *T) int {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	if i, cont := h.getHashPosition(v); cont {
 		delete(h.internalHashSetImpl, i)
 		curPos := i
@@ -431,7 +431,7 @@ func (h *HashSet[T, U]) popAndGetAffectedHashes(
 	v *T,
 ) (HashSetHash, map[OldHashSetHash]NewHashSetHash, int) {
 	var deletedHash HashSetHash
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	rv := map[OldHashSetHash]NewHashSetHash{}
 	if i, cont := h.getHashPosition(v); cont {
 		deletedHash = i
@@ -475,7 +475,7 @@ func (h *SyncedHashSet[T, U]) PopPntr(v *T) int {
 //
 // Time Complexity: O(1)
 func (h *HashSet[T, U]) Clear() {
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for _, v := range h.internalHashSetImpl {
 		w.Zero(&v)
 	}
@@ -813,19 +813,6 @@ func (_ *SyncedHashSet[T, U]) Eq(
 	return l.UnorderedEq(r)
 }
 
-// Panics, sets cannot be compared for order.
-func (_ *HashSet[T, U]) Lt(l *HashSet[T, U], r *HashSet[T, U]) bool {
-	panic("Sets cannot be compared relative to each other.")
-}
-
-// Panics, sets cannot be compared for order.
-func (_ *SyncedHashSet[T, U]) Lt(
-	l *SyncedHashSet[T, U],
-	r *SyncedHashSet[T, U],
-) bool {
-	panic("Sets cannot be compared relative to each other.")
-}
-
 // A function that returns a hash of a hash set. To do this all of the individual
 // hashes that are produced from the elements of the hash set are combined in a
 // way that maintains identity, making it so the hash will represent the same
@@ -833,7 +820,7 @@ func (_ *SyncedHashSet[T, U]) Lt(
 func (_ *HashSet[T, U]) Hash(other *HashSet[T, U]) hash.Hash {
 	cntr := 0
 	var rv hash.Hash
-	w := widgets.Widget[T, U]{}
+	w := widgets.Base[T, U]{}
 	for _, v := range other.internalHashSetImpl {
 		if cntr == 0 {
 			rv = w.Hash(&v)

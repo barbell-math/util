@@ -12,7 +12,7 @@ import (
 )
 
 type (
-	Values struct {
+	InlineArgs struct {
 		OptionsStruct string `required:"t" help:"The struct type that holds the options."`
 		OptionsEnum   string `required:"t" help:"The type that holds the flags."`
 		Package       string `required:"t" help:"The package the options enum type is in."`
@@ -68,7 +68,7 @@ const (
 )
 
 var (
-	VALS       Values
+	INLINE_ARGS       InlineArgs
 	PROG_STATE ProgState = ProgState{
 		enumVars:      map[string]string{},
 		autoFields:    []string{},
@@ -133,7 +133,7 @@ import (
 )
 
 func main() {
-	common.Args(&VALS, os.Args)
+	common.InlineArgs(&INLINE_ARGS, os.Args)
 
 	optionsStructFound := false
 
@@ -154,7 +154,6 @@ func main() {
 						)
 					}
 				} else if gdNode.Tok == token.TYPE && !optionsStructFound {
-					gdNode := node.(*ast.GenDecl)
 					for _, spec := range gdNode.Specs {
 						optionsStructFound = parseTypeSpec(
 							fSet,
@@ -178,10 +177,10 @@ func main() {
 	)
 
 	templateData := TemplateVals{
-		OptionsStruct:       VALS.OptionsStruct,
-		CapOptionsStruct:    strings.ToUpper(VALS.OptionsStruct[0:1]) + VALS.OptionsStruct[1:],
-		OptionsEnum:         VALS.OptionsEnum,
-		Package:             VALS.Package,
+		OptionsStruct:       INLINE_ARGS.OptionsStruct,
+		CapOptionsStruct:    strings.ToUpper(INLINE_ARGS.OptionsStruct[0:1]) + INLINE_ARGS.OptionsStruct[1:],
+		OptionsEnum:         INLINE_ARGS.OptionsEnum,
+		Package:             INLINE_ARGS.Package,
 		EnumFlags:           make([]EnumFlagTemplateVals, len(PROG_STATE.enumVars)),
 		StructFields:        make([]StructFieldTemplateVals, len(PROG_STATE.autoFields)),
 		StructFieldDefaults: make([]StructDefaultTemplateVals, len(PROG_STATE.defaults)),
@@ -192,7 +191,7 @@ func main() {
 	for e, c := range PROG_STATE.enumVars {
 		capEnumFlag := strings.ToUpper(e[0:1]) + e[1:]
 		templateData.EnumFlags[cntr] = EnumFlagTemplateVals{
-			OptionsStruct: VALS.OptionsStruct,
+			OptionsStruct: INLINE_ARGS.OptionsStruct,
 			CapEnumFlag:   capEnumFlag,
 			EnumFlag:      e,
 			Comment:       c,
@@ -202,7 +201,7 @@ func main() {
 	for i, v := range PROG_STATE.autoFields {
 		capStructField := strings.ToUpper(v[0:1]) + v[1:]
 		templateData.StructFields[i] = StructFieldTemplateVals{
-			OptionsStruct:  VALS.OptionsStruct,
+			OptionsStruct:  INLINE_ARGS.OptionsStruct,
 			CapStructField: capStructField,
 			StructField:    v,
 			FieldType:      PROG_STATE.fieldTypes[v],
@@ -219,7 +218,7 @@ func main() {
 	}
 
 	if err := TEMPLATES.WriteToFile(
-		VALS.OptionsStruct,
+		INLINE_ARGS.OptionsStruct,
 		common.GeneratedSrcFileExt,
 		"file",
 		templateData,
@@ -264,7 +263,7 @@ func parseValueSpec(
 	}
 
 	if len(vs.Names) > 0 &&
-		iterType == VALS.OptionsEnum &&
+		iterType == INLINE_ARGS.OptionsEnum &&
 		comment != IgnoreEnumValue {
 		PROG_STATE.enumVars[vs.Names[0].Name] = comment
 	}
@@ -281,7 +280,7 @@ func parseTypeSpec(
 	if ts.Name.Name == "_" {
 		return false
 	}
-	if st, ok := ts.Type.(*ast.StructType); ok && ts.Name.Name == VALS.OptionsStruct {
+	if st, ok := ts.Type.(*ast.StructType); ok && ts.Name.Name == INLINE_ARGS.OptionsStruct {
 		if st.Fields.List == nil {
 			common.PrintRunningError("The supplied options struct has no fields.")
 			os.Exit(1)

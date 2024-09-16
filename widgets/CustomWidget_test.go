@@ -30,7 +30,7 @@ func testCustomWidgetHelper(
 	v2 customWidget,
 	t *testing.T,
 ) {
-	w := Widget[customWidget, *customWidget]{}
+	w := PartialOrder[customWidget, *customWidget]{}
 	test.True(w.Eq(&v, &v), t)
 	test.False(w.Eq(&v, &v2), t)
 	test.False(w.Lt(&v, &v), t)
@@ -48,8 +48,11 @@ func TestCustomWidget(t *testing.T) {
 
 func TestCustomWidgetPntr(t *testing.T) {
 	vImpl := &customWidget{a: 10, b: 20}
-	v := Widget[*customWidget, Pntr[customWidget, *customWidget]]{}
 	v2Impl := &customWidget{a: 9, b: 20}
+	v := PartialOrder[
+		*customWidget,
+		PartialOrderPntr[customWidget, *customWidget],
+	]{}
 	test.True(v.Eq(&vImpl, &vImpl), t)
 	test.False(v.Eq(&vImpl, &v2Impl), t)
 	test.False(v.Lt(&vImpl, &vImpl), t)

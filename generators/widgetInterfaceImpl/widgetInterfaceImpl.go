@@ -53,7 +53,7 @@ var (
 )
 
 func main() {
-	common.Args(&VALS, os.Args)
+	common.InlineArgs(&VALS, os.Args)
 	checkSuppliedType()
 
 	VALS.CapType = VALS.Type

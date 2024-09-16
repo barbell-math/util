@@ -9,15 +9,57 @@ import (
 	"strings"
 )
 
-var (
-	exitOnFail bool = true
+type (
+	argsOptions struct {
+		printProgName bool
+		mustHaveShowInfo bool
+		printArgs bool
+	}
 )
 
-func Args(globalStruct any, args []string) error {
-	fmt.Println(fmt.Sprintf("Running prog '%s", args[0]))
+var (
+	ArgParseExitOnFail bool = true
+)
+
+func GetProgName(args []string) string {
+	lastSplit:=strings.LastIndex(args[0], "/")
+	if lastSplit>0 && lastSplit<len(args[0])-1 {
+		return args[0][lastSplit+1:]
+	}
+	return args[0]
+}
+
+func CommentArgs(globalStruct any, comment CommentArgVals) error {
+	flagArgs:=[]string{GetProgName(os.Args)}
+	for arg, val:=range comment {
+		flagArgs=append(
+			flagArgs, 
+			fmt.Sprintf("-%s=%s", arg, val),
+		)
+	}
+	return parseArgs(globalStruct, flagArgs, &argsOptions{
+		printProgName: false,
+		mustHaveShowInfo: false,
+		printArgs: true,
+	})
+}
+
+func InlineArgs(globalStruct any, args []string) error {
+	return parseArgs(globalStruct, args, &argsOptions{
+		printProgName: true,
+		mustHaveShowInfo: true,
+		printArgs: true,
+	})
+}
+
+func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
+	if opts.printProgName {
+		fmt.Println(fmt.Sprintf("Running prog '%s'", args[0]))
+	}
 
 	refStructPntr := reflect.TypeOf(globalStruct)
-	if refStructPntr.Kind() != reflect.Pointer && refStructPntr.Elem().Kind() != reflect.Struct {
+	if (refStructPntr.Kind() != reflect.Pointer || 
+		(refStructPntr.Kind()==reflect.Pointer && refStructPntr.Elem().Kind() != reflect.Struct)) {
 		panic(fmt.Sprintf(
 			"The global struct paramerter must be a pointer to a struct! Got: %s",
 			reflect.TypeOf(globalStruct).Kind(),
@@ -215,7 +257,7 @@ func Args(globalStruct any, args []string) error {
 		}
 	}
 
-	if showInfoRef == nil {
+	if showInfoRef == nil && opts.mustHaveShowInfo {
 		panic("The boolean ShowInfo field must be present in the supplied struct.")
 	}
 
@@ -242,13 +284,13 @@ func Args(globalStruct any, args []string) error {
 		})
 		PrintRunningError("The accepted flags are as follows:")
 		flag.PrintDefaults()
-		if exitOnFail {
+		if ArgParseExitOnFail {
 			os.Exit(1)
 		}
 		return MissingRequiredArgs
 	}
 
-	if *showInfoRef {
+	if opts.printArgs {
 		PrintRunningInfo("Received arguments:")
 		for i := 0; i < refStructType.NumField(); i++ {
 			if !refStructType.Field(i).IsExported() {

@@ -21,8 +21,8 @@ type (
 	HashMap[
 		K any,
 		V any,
-		KI widgets.WidgetInterface[K],
-		VI widgets.WidgetInterface[V],
+		KI widgets.BaseInterface[K],
+		VI widgets.BaseInterface[V],
 	] struct {
 		internalHashMapImpl[K, V]
 	}
@@ -33,8 +33,8 @@ type (
 	SyncedHashMap[
 		K any,
 		V any,
-		KI widgets.WidgetInterface[K],
-		VI widgets.WidgetInterface[V],
+		KI widgets.BaseInterface[K],
+		VI widgets.BaseInterface[V],
 	] struct {
 		*sync.RWMutex
 		HashMap[K, V, KI, VI]
@@ -47,8 +47,8 @@ type (
 func NewHashMap[
 	K any,
 	V any,
-	KI widgets.WidgetInterface[K],
-	VI widgets.WidgetInterface[V],
+	KI widgets.BaseInterface[K],
+	VI widgets.BaseInterface[V],
 ](size int) (HashMap[K, V, KI, VI], error) {
 	if size < 0 {
 		return HashMap[K, V, KI, VI]{}, getSizeError(size)
@@ -65,8 +65,8 @@ func NewHashMap[
 func NewSyncedHashMap[
 	K any,
 	V any,
-	KI widgets.WidgetInterface[K],
-	VI widgets.WidgetInterface[V],
+	KI widgets.BaseInterface[K],
+	VI widgets.BaseInterface[V],
 ](size int) (SyncedHashMap[K, V, KI, VI], error) {
 	rv, err := NewHashMap[K, V, KI, VI](size)
 	return SyncedHashMap[K, V, KI, VI]{
@@ -81,8 +81,8 @@ func NewSyncedHashMap[
 func HashMapValInit[
 	K any,
 	V any,
-	KI widgets.WidgetInterface[K],
-	VI widgets.WidgetInterface[V],
+	KI widgets.BaseInterface[K],
+	VI widgets.BaseInterface[V],
 ](vals []basic.Pair[K, V]) HashMap[K, V, KI, VI] {
 	rv, _ := NewHashMap[K, V, KI, VI](len(vals))
 	for _, v := range vals {
@@ -97,8 +97,8 @@ func HashMapValInit[
 func SyncedHashMapValInit[
 	K any,
 	V any,
-	KI widgets.WidgetInterface[K],
-	VI widgets.WidgetInterface[V],
+	KI widgets.BaseInterface[K],
+	VI widgets.BaseInterface[V],
 ](vals []basic.Pair[K, V]) SyncedHashMap[K, V, KI, VI] {
 	rv, _ := NewSyncedHashMap[K, V, KI, VI](len(vals))
 	for _, v := range vals {
@@ -203,7 +203,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) Contains(v V) bool {
 //
 // Time Complexity: O(n) (linear search)
 func (m *HashMap[K, V, KI, VI]) ContainsPntr(v *V) bool {
-	w := widgets.Widget[V, VI]{}
+	w := widgets.Base[V, VI]{}
 	for _, iterV := range m.internalHashMapImpl {
 		if w.Eq(v, &iterV.B) {
 			return true
@@ -256,7 +256,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) Get(k K) (V, error) {
 }
 
 func (h *HashMap[K, V, KI, VI]) getHashPosition(k *K) (hash.Hash, bool) {
-	w := widgets.Widget[K, KI]{}
+	w := widgets.Base[K, KI]{}
 	for i := w.Hash(k); ; i++ {
 		if iterV, found := h.internalHashMapImpl[i]; found && w.Eq(k, &iterV.A) {
 			return i, true
@@ -326,7 +326,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) KeyOfPntr(v *V) (K, bool) {
 }
 
 func (m *HashMap[K, V, KI, VI]) keyOfImpl(k *K, v *V) bool {
-	w := widgets.Widget[V, VI]{}
+	w := widgets.Base[V, VI]{}
 	for _, iterV := range m.internalHashMapImpl {
 		if w.Eq(v, &iterV.B) {
 			*k = iterV.A
@@ -380,7 +380,7 @@ func (m *HashMap[K, V, KI, VI]) setImpl(kvPairs []basic.Pair[K, V]) error {
 //
 // Time Complexity: O(m), where m=len(vals)
 func (m *HashMap[K, V, KI, VI]) Emplace(vals ...basic.Pair[K, V]) error {
-	kw := widgets.Widget[K, KI]{}
+	kw := widgets.Base[K, KI]{}
 	for i := 0; i < len(vals); i++ {
 		for j := kw.Hash(&vals[i].A); ; j++ {
 			if iterV, found := m.internalHashMapImpl[j]; !found {
@@ -458,7 +458,7 @@ func (m *SyncedHashMap[K, V, KI, VI]) PopPntr(v *V) int {
 
 func (m *HashMap[K, V, KI, VI]) popImpl(v *V) int {
 	rv := 0
-	vw := widgets.Widget[V, VI]{}
+	vw := widgets.Base[V, VI]{}
 	for iterH, iterV := range m.internalHashMapImpl {
 		if vw.Eq(&iterV.B, v) {
 			m.removeMultipleValues(iterH, v)
@@ -469,8 +469,8 @@ func (m *HashMap[K, V, KI, VI]) popImpl(v *V) int {
 }
 
 func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
-	kw := widgets.Widget[K, KI]{}
-	vw := widgets.Widget[V, VI]{}
+	kw := widgets.Base[K, KI]{}
+	vw := widgets.Base[V, VI]{}
 	m.zeroKVPair(h)
 	delete(m.internalHashMapImpl, h)
 	curPos := h
@@ -507,8 +507,8 @@ func (m *HashMap[K, V, KI, VI]) removeMultipleValues(h hash.Hash, v *V) {
 }
 
 func (m *HashMap[K, V, KI, VI]) zeroKVPair(h hash.Hash) {
-	kw := widgets.Widget[K, KI]{}
-	vw := widgets.Widget[V, VI]{}
+	kw := widgets.Base[K, KI]{}
+	vw := widgets.Base[V, VI]{}
 	if v, ok := m.internalHashMapImpl[h]; ok {
 		kw.Zero(&v.A)
 		vw.Zero(&v.B)
@@ -544,7 +544,7 @@ func (m *HashMap[K, V, KI, VI]) deleteImpl(k *K) error {
 }
 
 func (m *HashMap[K, V, KI, VI]) removeSingleValue(h hash.Hash) {
-	kw := widgets.Widget[K, KI]{}
+	kw := widgets.Base[K, KI]{}
 	m.zeroKVPair(h)
 	delete(m.internalHashMapImpl, h)
 	curPos := h
@@ -571,8 +571,8 @@ func (m *HashMap[K, V, KI, VI]) removeSingleValue(h hash.Hash) {
 //
 // Time Complexity: O(1)
 func (m *HashMap[K, V, KI, VI]) Clear() {
-	kw := widgets.Widget[K, KI]{}
-	vw := widgets.Widget[V, VI]{}
+	kw := widgets.Base[K, KI]{}
+	vw := widgets.Base[V, VI]{}
 	for _, v := range m.internalHashMapImpl {
 		kw.Zero(&v.A)
 		vw.Zero(&v.B)
@@ -665,7 +665,7 @@ func (m *HashMap[K, V, KI, VI]) ValPntrs() iter.Iter[*V] {
 func (m *HashMap[K, V, KI, VI]) KeyedEq(
 	other containerTypes.KeyedComparisonsOtherConstraint[K, V],
 ) bool {
-	vw := widgets.Widget[V, VI]{}
+	vw := widgets.Base[V, VI]{}
 	if len(m.internalHashMapImpl) != other.Length() {
 		return false
 	}
@@ -722,22 +722,6 @@ func (_ *SyncedHashMap[K, V, KI, VI]) Eq(
 	return l.KeyedEq(r)
 }
 
-// Panics, hash maps cannot be compared for order.
-func (_ *HashMap[K, V, KI, VI]) Lt(
-	l *HashMap[K, V, KI, VI],
-	r *HashMap[K, V, KI, VI],
-) bool {
-	panic("Hash maps cannot be compared relative to each other.")
-}
-
-// Panics, hash maps cannot be compared for order.
-func (_ *SyncedHashMap[K, V, KI, VI]) Lt(
-	l *SyncedHashMap[K, V, KI, VI],
-	r *SyncedHashMap[K, V, KI, VI],
-) bool {
-	panic("Hash maps cannot be compared relative to each other.")
-}
-
 // A function that returns a hash of a hash map. To do this all of the
 // individual hashes that are produced from the elements of the hash map are
 // combined in a way that maintains identity, making it so the hash will
@@ -746,8 +730,8 @@ func (_ *SyncedHashMap[K, V, KI, VI]) Lt(
 func (_ *HashMap[K, V, KI, VI]) Hash(other *HashMap[K, V, KI, VI]) hash.Hash {
 	cntr := 0
 	var rv hash.Hash
-	kw := widgets.Widget[K, KI]{}
-	vw := widgets.Widget[V, VI]{}
+	kw := widgets.Base[K, KI]{}
+	vw := widgets.Base[V, VI]{}
 	for _, iterV := range other.internalHashMapImpl {
 		iterH := kw.Hash(&iterV.A).Combine(vw.Hash(&iterV.B))
 		if cntr == 0 {

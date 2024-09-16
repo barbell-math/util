@@ -203,7 +203,7 @@ func TestCircularBufferRandomDelete(t *testing.T) {
 }
 
 func TestCircularBufferWidgetInterface(t *testing.T) {
-	var widget widgets.WidgetInterface[CircularBuffer[string, widgets.BuiltinString]]
+	var widget widgets.BaseInterface[CircularBuffer[string, widgets.BuiltinString]]
 	v, _ := NewCircularBuffer[string, widgets.BuiltinString](0)
 	widget = &v
 	_ = widget
@@ -220,30 +220,6 @@ func TestCircularBufferEq(t *testing.T) {
 	v1.Set(basic.Pair[int, string]{0, "not one"})
 	test.False(v1.Eq(&v1, &v2), t)
 	test.False(v1.Eq(&v2, &v1), t)
-}
-
-func TestCircularBufferLt(t *testing.T) {
-	v1, _ := NewCircularBuffer[string, widgets.BuiltinString](5)
-	v1.Append("a", "b", "c", "d")
-	v2, _ := NewCircularBuffer[string, widgets.BuiltinString](5)
-	v2.Append("a", "b", "c", "d")
-
-	test.False(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v1.Set(basic.Pair[int, string]{0, "A"})
-	test.True(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v1.Set(basic.Pair[int, string]{0, "a"})
-	v1.Set(basic.Pair[int, string]{1, "B"})
-	test.True(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v1.Set(basic.Pair[int, string]{1, "b"})
-	v1.Delete(3)
-	test.True(v1.Lt(&v1, &v2), t)
-	test.False(v1.Lt(&v2, &v1), t)
-	v2.Clear()
-	test.False(v1.Lt(&v1, &v2), t)
-	test.True(v1.Lt(&v2, &v1), t)
 }
 
 func TestCircularBufferHash(t *testing.T) {

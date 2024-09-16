@@ -22,7 +22,7 @@ func generateSyncedHashSet(capacity int) SyncedHashSet[int, badBuiltinInt] {
 }
 
 func TestHashSetWidgetInterface(t *testing.T) {
-	var widget widgets.WidgetInterface[HashSet[string, widgets.BuiltinString]]
+	var widget widgets.BaseInterface[HashSet[string, widgets.BuiltinString]]
 	v, _ := NewHashSet[string, widgets.BuiltinString](0)
 	widget = &v
 	_ = widget
@@ -36,19 +36,6 @@ func TestHashSetEquality(t *testing.T) {
 	test.True(s1.Eq(&s1, &s2), t)
 	s2.AppendUnique(5)
 	test.False(s1.Eq(&s1, &s2), t)
-}
-
-func TestHashSetLt(t *testing.T) {
-	test.Panics(
-		func() {
-			s1, _ := NewHashSet[int, widgets.BuiltinInt](0)
-			s1.AppendUnique(0, 1, 2, 3, 4)
-			s2, _ := NewHashSet[int, widgets.BuiltinInt](0)
-			s2.AppendUnique(0, 1, 2, 3, 4)
-			s1.Lt(&s1, &s2)
-		},
-		t,
-	)
 }
 
 func TestHashSetHash(t *testing.T) {

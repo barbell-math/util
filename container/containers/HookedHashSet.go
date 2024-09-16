@@ -25,7 +25,7 @@ type (
 	// provided by the [HashSet] type. The type constraints on the generics
 	// define the logic for how value specific operations, such as equality
 	// comparisons, will be handled.
-	HookedHashSet[T any, U widgets.WidgetInterface[T]] struct {
+	HookedHashSet[T any, U widgets.BaseInterface[T]] struct {
 		HashSet[T, U]
 		hooks HashSetHooks
 	}
@@ -33,7 +33,7 @@ type (
 	// A synchronized version of [HookedHashSet]. All operations will be wrapped
 	// in the appropriate calls to the embedded RWMutex. A pointer to a RWMutex
 	// is embedded rather than a value to avoid copying the lock value.
-	SyncedHookedHashSet[T any, U widgets.WidgetInterface[T]] struct {
+	SyncedHookedHashSet[T any, U widgets.BaseInterface[T]] struct {
 		SyncedHashSet[T, U]
 		hooks HashSetHooks
 	}
@@ -42,7 +42,7 @@ type (
 // Creates a new hooked hash set with enough memory to store size number of
 // elements. Size must be >=0, an error will be returned if it is not. If size
 // is 0 the hooked hash set will be initialized with 0 elements.
-func NewHookedHashSet[T any, U widgets.WidgetInterface[T]](
+func NewHookedHashSet[T any, U widgets.BaseInterface[T]](
 	hooks HashSetHooks,
 	size int,
 ) (HookedHashSet[T, U], error) {
@@ -60,7 +60,7 @@ func NewHookedHashSet[T any, U widgets.WidgetInterface[T]](
 // size elements. Size must be >= 0, an error will be returned if it is not. If
 // size is 0 the hash set will be initialized with 0 elements. The underlying
 // RWMutex value will be fully unlocked upon initialization.
-func NewSyncedHookedHashSet[T any, U widgets.WidgetInterface[T]](
+func NewSyncedHookedHashSet[T any, U widgets.BaseInterface[T]](
 	hooks HashSetHooks,
 	size int,
 ) (SyncedHookedHashSet[T, U], error) {
@@ -266,24 +266,6 @@ func (_ *SyncedHookedHashSet[T, U]) Eq(
 	r *SyncedHookedHashSet[T, U],
 ) bool {
 	return l.HashSet.Eq(&l.HashSet, &r.HashSet)
-}
-
-// An equality function that implements the [algo.widget.WidgetInterface]
-// interface. Returns true if l<r, false otherwise.
-func (_ *HookedHashSet[T, U]) Lt(
-	l *HookedHashSet[T, U],
-	r *HookedHashSet[T, U],
-) bool {
-	return l.HashSet.Lt(&l.HashSet, &r.HashSet)
-}
-
-// An equality function that implements the [algo.widget.WidgetInterface]
-// interface. Returns true if l<r, false otherwise.
-func (_ *SyncedHookedHashSet[T, U]) Lt(
-	l *SyncedHookedHashSet[T, U],
-	r *SyncedHookedHashSet[T, U],
-) bool {
-	return l.HashSet.Lt(&l.HashSet, &r.HashSet)
 }
 
 // A function that returns a hash of a vector to implement the
