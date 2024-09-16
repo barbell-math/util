@@ -16,11 +16,6 @@ import (
 //go:generate ../../bin/passThroughWidget -type=vertexHash
 //go:generate ../../bin/passThroughWidget -type=graphLink
 
-const (
-	numLinksOffset  uintptr = unsafe.Sizeof(graphImpl{}) + unsafe.Sizeof(int(0))
-	graphImplOffset uintptr = unsafe.Sizeof(graphImpl{})
-)
-
 type (
 	//gen:passThroughWidget widgetType Base
 	//gen:passThroughWidget package containers
@@ -111,11 +106,13 @@ type (
 	}
 )
 
+const (
+	numLinksOffset  uintptr = unsafe.Sizeof(graphImpl{}) + unsafe.Sizeof(int(0))
+	graphImplOffset uintptr = unsafe.Sizeof(graphImpl{})
+)
+
 func (_ *vertexOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
 	return l.B.Eq(&l.B, &r.B)
-}
-func (_ *vertexOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
-	return l.B.Lt(&l.B, &r.B)
 }
 func (_ *vertexOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return other.B.Hash(&other.B)
@@ -126,9 +123,6 @@ func (_ *vertexOnlyGraphLinkWidget) Zero(other *graphLink) {
 
 func (_ *edgeOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
 	return l.A.Eq(&l.A, &r.A)
-}
-func (_ *edgeOnlyGraphLinkWidget) Lt(l *graphLink, r *graphLink) bool {
-	return l.A.Lt(&l.A, &r.A)
 }
 func (_ *edgeOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return other.A.Hash(&other.A)
