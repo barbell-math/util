@@ -121,34 +121,34 @@ func GetCommentArgVals(
 	srcFile *os.File,
 	doc *ast.CommentGroup,
 ) (CommentArgVals, error) {
-	comment, err:=GetComment(fSet, srcFile, doc, nil)
-	if err!=nil {
+	comment, err := GetComment(fSet, srcFile, doc, nil)
+	if err != nil {
 		return CommentArgVals{}, err
 	}
 
-	progPrefix:=fmt.Sprintf(
+	progPrefix := fmt.Sprintf(
 		"//%s:%s ",
 		GeneratorCommentPrefix, GetProgName(os.Args),
 	)
 
-	argLines:=[]string{}
-	for _, l:=range(strings.Split(comment, "\n")) {
+	argLines := []string{}
+	for _, l := range strings.Split(comment, "\n") {
 		l = strings.TrimSpace(l)
 		if strings.HasPrefix(l, progPrefix) {
-			argLines = append(argLines, strings.Replace(l, progPrefix, "", 1))	
+			argLines = append(argLines, strings.Replace(l, progPrefix, "", 1))
 		}
 	}
 
-	rv:=CommentArgVals{}
-	for _,l:=range argLines {
-		args:=strings.SplitN(l, " ", 2)
-		if len(args)!=2 {
+	rv := CommentArgVals{}
+	for _, l := range argLines {
+		args := strings.SplitN(l, " ", 2)
+		if len(args) != 2 {
 			return rv, fmt.Errorf(
 				"%w | Expected the following format: %s <arg name> <arg val>",
 				CommentArgsMalformed, progPrefix,
 			)
 		}
-		rv[args[0]]=args[1]
+		rv[args[0]] = args[1]
 	}
 	return rv, nil
 }
@@ -157,23 +157,23 @@ func CommentArgsAstFilter(
 	expectedType string,
 	globalStruct any,
 ) func(fSet *token.FileSet, srcFile *os.File, node ast.Node) error {
-	foundTypeDef:=false
+	foundTypeDef := false
 
-	parseComment:=func(
+	parseComment := func(
 		fSet *token.FileSet,
 		srcFile *os.File,
 		ts *ast.TypeSpec,
 	) error {
-		if foundTypeDef || ts.Name.Name!=expectedType {
+		if foundTypeDef || ts.Name.Name != expectedType {
 			return nil
 		}
 
-		if comment, err:=GetCommentArgVals(fSet, srcFile, ts.Doc); err!=nil {
+		if comment, err := GetCommentArgVals(fSet, srcFile, ts.Doc); err != nil {
 			return err
-		} else if err:=CommentArgs(globalStruct, comment); err!=nil {
+		} else if err := CommentArgs(globalStruct, comment); err != nil {
 			return err
 		} else {
-			foundTypeDef=true
+			foundTypeDef = true
 		}
 		return nil
 	}
@@ -185,20 +185,21 @@ func CommentArgsAstFilter(
 
 		switch node.(type) {
 		case *ast.GenDecl:
-			gdNode:=node.(*ast.GenDecl)
+			gdNode := node.(*ast.GenDecl)
 			if gdNode.Tok == token.TYPE {
 				for _, spec := range gdNode.Specs {
-					if err:=parseComment(
+					if err := parseComment(
 						fSet,
 						srcFile,
 						spec.(*ast.TypeSpec),
-					); err!=nil {
+					); err != nil {
 						return err
 					}
 				}
 			}
 			return nil
-		default: return nil
+		default:
+			return nil
 		}
 	}
 }

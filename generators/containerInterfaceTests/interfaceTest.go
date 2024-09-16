@@ -55,7 +55,7 @@ const (
 )
 
 var (
-	INLINE_ARGS          InlineArgs
+	INLINE_ARGS   InlineArgs
 	REQUIRED_ARGS []string = []string{
 		"type",
 		"category",

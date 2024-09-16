@@ -44,7 +44,7 @@ var (
 		// widget interface on itself, would create circular imports.
 		"hash.Hash",
 	}
-	TEMPLATES common.GeneratedFilesRegistry=common.NewGeneratedFilesRegistryFromMap(
+	TEMPLATES common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
 		map[string]string{
 			"file": `
 `,

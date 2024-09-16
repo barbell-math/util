@@ -11,9 +11,9 @@ import (
 
 type (
 	argsOptions struct {
-		printProgName bool
+		printProgName    bool
 		mustHaveShowInfo bool
-		printArgs bool
+		printArgs        bool
 	}
 )
 
@@ -22,33 +22,33 @@ var (
 )
 
 func GetProgName(args []string) string {
-	lastSplit:=strings.LastIndex(args[0], "/")
-	if lastSplit>0 && lastSplit<len(args[0])-1 {
+	lastSplit := strings.LastIndex(args[0], "/")
+	if lastSplit > 0 && lastSplit < len(args[0])-1 {
 		return args[0][lastSplit+1:]
 	}
 	return args[0]
 }
 
 func CommentArgs(globalStruct any, comment CommentArgVals) error {
-	flagArgs:=[]string{GetProgName(os.Args)}
-	for arg, val:=range comment {
-		flagArgs=append(
-			flagArgs, 
+	flagArgs := []string{GetProgName(os.Args)}
+	for arg, val := range comment {
+		flagArgs = append(
+			flagArgs,
 			fmt.Sprintf("-%s=%s", arg, val),
 		)
 	}
 	return parseArgs(globalStruct, flagArgs, &argsOptions{
-		printProgName: false,
+		printProgName:    false,
 		mustHaveShowInfo: false,
-		printArgs: true,
+		printArgs:        true,
 	})
 }
 
 func InlineArgs(globalStruct any, args []string) error {
 	return parseArgs(globalStruct, args, &argsOptions{
-		printProgName: true,
+		printProgName:    true,
 		mustHaveShowInfo: true,
-		printArgs: true,
+		printArgs:        true,
 	})
 }
 
@@ -58,8 +58,8 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 	}
 
 	refStructPntr := reflect.TypeOf(globalStruct)
-	if (refStructPntr.Kind() != reflect.Pointer || 
-		(refStructPntr.Kind()==reflect.Pointer && refStructPntr.Elem().Kind() != reflect.Struct)) {
+	if refStructPntr.Kind() != reflect.Pointer ||
+		(refStructPntr.Kind() == reflect.Pointer && refStructPntr.Elem().Kind() != reflect.Struct) {
 		panic(fmt.Sprintf(
 			"The global struct paramerter must be a pointer to a struct! Got: %s",
 			reflect.TypeOf(globalStruct).Kind(),

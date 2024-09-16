@@ -22,7 +22,7 @@ type (
 	//gen:passThroughWidget baseType HashSetHash
 	//gen:passThroughWidget baseTypeWidget *HashSetHash
 	//gen:passThroughWidget widgetPackage .
-	edgeHash   HashSetHash
+	edgeHash HashSetHash
 	//gen:passThroughWidget widgetType Base
 	//gen:passThroughWidget package containers
 	//gen:passThroughWidget baseType HashSetHash
@@ -34,8 +34,8 @@ type (
 	//gen:passThroughWidget baseType basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	//gen:passThroughWidget baseTypeWidget basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	//gen:passThroughWidget widgetPackage github.com/barbell-math/util/container/basic
-	graphLink  basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
-	graphImpl  map[vertexHash]Vector[graphLink, *graphLink]
+	graphLink basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
+	graphImpl map[vertexHash]Vector[graphLink, *graphLink]
 
 	// This is used when only the vertex part of a graph edge is pertinent
 	vertexOnlyGraphLinkWidget graphLink

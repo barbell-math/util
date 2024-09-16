@@ -11,11 +11,11 @@ import (
 
 type (
 	InlineArgs struct {
-		Type string `required:"t" help:"The type to make the alias for."`
-		ShowInfo       bool   `required:"f" default:"t" help:"Show debug info."`
+		Type     string `required:"t" help:"The type to make the alias for."`
+		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 	CommentArgs struct {
-		WidgetType string `required:"t" help:"The type of widget to make. (Base, PartialOrder, Arith)."`
+		WidgetType     string `required:"t" help:"The type of widget to make. (Base, PartialOrder, Arith)."`
 		Package        string `required:"t" help:"The packge to put the files in."`
 		BaseType       string `required:"t" help:"The base type to generate the widget for."`
 		BaseTypeWidget string `required:"t" help:"The base type widget to use when generating the new widget."`
@@ -23,31 +23,31 @@ type (
 	}
 
 	widgetType string
-	ProgState struct {
+	ProgState  struct {
 		widgetType widgetType
 	}
 	TemplateVals struct {
-		GeneratorName string
-		Package string
-		Imports []string
-		AliasType string
-		BaseType string
+		GeneratorName  string
+		Package        string
+		Imports        []string
+		AliasType      string
+		BaseType       string
 		BaseTypeWidget string
 	}
 )
 
 const (
-	BaseWidget widgetType="Base"
-	PartialOrderWidget widgetType="PartialOrder"
-	ArithWidget widgetType="Arith"
-	Unknown widgetType="UNKNOWN"
+	BaseWidget         widgetType = "Base"
+	PartialOrderWidget widgetType = "PartialOrder"
+	ArithWidget        widgetType = "Arith"
+	Unknown            widgetType = "UNKNOWN"
 )
 
 var (
-	INLINE_ARGS InlineArgs
+	INLINE_ARGS  InlineArgs
 	COMMENT_ARGS CommentArgs
-	PROG_STATE ProgState
-	TEMPLATES common.GeneratedFilesRegistry=common.NewGeneratedFilesRegistryFromMap(
+	PROG_STATE   ProgState
+	TEMPLATES    common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
 		map[string]string{
 			"imports": `
 import (
@@ -191,49 +191,56 @@ package {{ .Package }}
 
 func (w widgetType) FromString(s string) widgetType {
 	switch s {
-	case string(BaseWidget): return BaseWidget
-	case string(PartialOrderWidget): return PartialOrderWidget
-	case string(ArithWidget): return ArithWidget
-	default: return Unknown
+	case string(BaseWidget):
+		return BaseWidget
+	case string(PartialOrderWidget):
+		return PartialOrderWidget
+	case string(ArithWidget):
+		return ArithWidget
+	default:
+		return Unknown
 	}
 }
 
 func main() {
 	common.InlineArgs(&INLINE_ARGS, os.Args)
 
-	commentArgsFilter:=common.CommentArgsAstFilter(INLINE_ARGS.Type, &COMMENT_ARGS)
+	commentArgsFilter := common.CommentArgsAstFilter(INLINE_ARGS.Type, &COMMENT_ARGS)
 	common.IterateOverAST(
 		".",
 		common.GenFileExclusionFilter,
 		func(fSet *token.FileSet, file *ast.File, srcFile *os.File, node ast.Node) bool {
 			commentArgsFilter(fSet, srcFile, node)
 			switch node.(type) {
-			case *ast.GenDecl: return false
-			case *ast.FuncDecl: return false
-			default: return true
+			case *ast.GenDecl:
+				return false
+			case *ast.FuncDecl:
+				return false
+			default:
+				return true
 			}
 		},
 	)
 
-	if t:=Unknown.FromString(COMMENT_ARGS.WidgetType); t==Unknown {
+	if t := Unknown.FromString(COMMENT_ARGS.WidgetType); t == Unknown {
 		common.PrintRunningError(
 			"The supplied widget type was not recognized. Must be one of %v",
 			[]widgetType{BaseWidget, PartialOrderWidget, ArithWidget},
 		)
 		os.Exit(1)
 	} else {
-		PROG_STATE.widgetType=t
+		PROG_STATE.widgetType = t
 	}
 
-	templateData:=TemplateVals{
-		GeneratorName: os.Args[0],
-		Package: COMMENT_ARGS.Package,
-		Imports: []string{},
-		AliasType: INLINE_ARGS.Type,
-		BaseType: COMMENT_ARGS.BaseType,
+	templateData := TemplateVals{
+		GeneratorName:  os.Args[0],
+		Package:        COMMENT_ARGS.Package,
+		Imports:        []string{},
+		AliasType:      INLINE_ARGS.Type,
+		BaseType:       COMMENT_ARGS.BaseType,
 		BaseTypeWidget: COMMENT_ARGS.BaseTypeWidget,
 	}
-	if COMMENT_ARGS.WidgetPackage!="." {
+	if COMMENT_ARGS.WidgetPackage != "." {
 		templateData.Imports = append(templateData.Imports, COMMENT_ARGS.WidgetPackage)
 	}
 
@@ -241,9 +248,9 @@ func main() {
 		fileName(),
 		common.GeneratedSrcFileExt,
 		map[widgetType]string{
-			BaseWidget: "baseFile",
+			BaseWidget:         "baseFile",
 			PartialOrderWidget: "partialOrderFile",
-			ArithWidget: "arithFile",
+			ArithWidget:        "arithFile",
 		}[PROG_STATE.widgetType],
 		templateData,
 	); err != nil {

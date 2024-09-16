@@ -32,7 +32,7 @@ type (
 	}
 
 	// The interface that defines what it means to be a widget that can do
-	// basic arithmetic. Implementations of this interface are expected to hold 
+	// basic arithmetic. Implementations of this interface are expected to hold
 	// no state that pertains to the widget functions as the methods will not
 	// be called in any predetermined order.
 	ArithInterface[T any] interface {
@@ -63,15 +63,15 @@ type (
 	}
 
 	// A concrete base widget. Internally, this struct will create an interface
-	// value of type [BaseInterface] that points to nil data. All methods on 
-	// widget are then very thin pass through functions that call the needed 
+	// value of type [BaseInterface] that points to nil data. All methods on
+	// widget are then very thin pass through functions that call the needed
 	// methods on the interface value with the supplied values.
 	Base[T any, I BaseInterface[T]] struct {
 		iFace I
 	}
 
 	// A concrete partial order widget. Internally, this struct will create an
-	// interface value of type [PartialOrderInterface] that points to nil data. 
+	// interface value of type [PartialOrderInterface] that points to nil data.
 	// All methods on widget are then very thin pass through functions that call
 	// the needed methods on the interface value with the supplied values.
 	PartialOrder[T any, I PartialOrderInterface[T]] struct {

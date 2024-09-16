@@ -68,8 +68,8 @@ const (
 )
 
 var (
-	INLINE_ARGS       InlineArgs
-	PROG_STATE ProgState = ProgState{
+	INLINE_ARGS InlineArgs
+	PROG_STATE  ProgState = ProgState{
 		enumVars:      map[string]string{},
 		autoFields:    []string{},
 		defaults:      map[string]string{},
