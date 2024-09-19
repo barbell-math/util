@@ -17,6 +17,11 @@ func NewOptions() *options {
 	}
 }
 
+// Description: boolean options encoded in a bit flag enum.
+//
+// Used by: [Parse], [Flatten], [FromStructs]
+//
+// Default: See the [DefaultOptionsFlag] function.
 func (o *options) OptionsFlag(v optionsFlag) *options {
 	o.optionsFlag = v
 	return o

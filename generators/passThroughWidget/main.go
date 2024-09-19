@@ -1,3 +1,7 @@
+// This is a generator program that is used to create pass through widgets. A pass
+// through widget is a widget that simply calls the methods of another widget
+// without adding any additional logic. It is assumed that the two widget types can
+// be cast to and from each other.
 package main
 
 import (
@@ -17,7 +21,6 @@ type (
 	CommentArgs struct {
 		WidgetType     string `required:"t" help:"The type of widget to make. (Base, PartialOrder, Arith)."`
 		Package        string `required:"t" help:"The packge to put the files in."`
-		BaseType       string `required:"t" help:"The base type to generate the widget for."`
 		BaseTypeWidget string `required:"t" help:"The base type widget to use when generating the new widget."`
 		WidgetPackage  string `required:"t" help:"The package the base type widget resides in. If it is this package, put '.'"`
 	}
@@ -25,6 +28,7 @@ type (
 	widgetType string
 	ProgState  struct {
 		widgetType widgetType
+		baseType       string// TODO - del `required:"t" help:"The base type to generate the widget for."`
 	}
 	TemplateVals struct {
 		GeneratorName  string
@@ -227,6 +231,19 @@ func main() {
 			commentArgsFilter(fSet, srcFile, node)
 			switch node.(type) {
 			case *ast.GenDecl:
+				if PROG_STATE.baseType!="" {
+					return false
+				}
+				gdNode := node.(*ast.GenDecl)
+				if gdNode.Tok == token.TYPE {
+					for _, spec := range gdNode.Specs {
+						parseTypeSpec(
+							fSet,
+							srcFile,
+							spec.(*ast.TypeSpec),
+						)
+					}
+				}
 				return false
 			case *ast.FuncDecl:
 				return false
@@ -240,6 +257,10 @@ func main() {
 		common.PrintRunningError(
 			"The supplied type did not have comment args but they are required.",
 		)
+		os.Exit(1)
+	}
+	if PROG_STATE.baseType=="" {
+		common.PrintRunningError("The base type was not found!")
 		os.Exit(1)
 	}
 
@@ -263,7 +284,7 @@ func main() {
 		Package:        COMMENT_ARGS.Package,
 		Imports:        []string{},
 		AliasType:      INLINE_ARGS.Type,
-		BaseType:       COMMENT_ARGS.BaseType,
+		BaseType:       PROG_STATE.baseType,
 		BaseTypeWidget: COMMENT_ARGS.BaseTypeWidget,
 	}
 	if COMMENT_ARGS.WidgetPackage != "." {
@@ -287,7 +308,7 @@ func main() {
 }
 
 func fileName() string {
-	fileNameBaseType := []byte(COMMENT_ARGS.BaseType)
+	fileNameBaseType := []byte(PROG_STATE.baseType)
 	fileNameAliasType := []byte(INLINE_ARGS.Type)
 	bannedChars := map[byte]struct{}{
 		'[':  {},
@@ -325,4 +346,31 @@ func fileName() string {
 		fileNameAliasType,
 		fileNameBaseType,
 	)
+}
+
+func parseTypeSpec(
+	fSet *token.FileSet,
+	srcFile *os.File,
+	ts *ast.TypeSpec,
+) {
+	name, err := common.GetSourceTextFromExpr(
+		fSet, srcFile, ts.Name,
+	)
+	fmt.Println(name)
+	if err != nil {
+		common.PrintRunningError("%s", err)
+		os.Exit(1)
+	}
+	
+	if name==INLINE_ARGS.Type {
+		baseType, err := common.GetSourceTextFromExpr(
+			fSet, srcFile, ts.Type,
+		)
+		if err != nil {
+			common.PrintRunningError("%s", err)
+			os.Exit(1)
+		}
+
+		PROG_STATE.baseType=baseType
+	}
 }

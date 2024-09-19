@@ -1,3 +1,4 @@
+// A generator program that creates methods surrounding a bit-flag enum type.
 package main
 
 import (
@@ -154,7 +155,6 @@ func main() {
 							fSet,
 							srcFile,
 							spec.(*ast.ValueSpec),
-							&PROG_STATE,
 						)
 					}
 				}
@@ -237,7 +237,6 @@ func parseValueSpec(
 	fSet *token.FileSet,
 	srcFile *os.File,
 	vs *ast.ValueSpec,
-	PROG_STATE *ProgState,
 ) string {
 	getType := func() (string, error) {
 		var err error
