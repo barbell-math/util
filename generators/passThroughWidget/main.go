@@ -37,10 +37,11 @@ type (
 )
 
 const (
-	BaseWidget         widgetType = "Base"
-	PartialOrderWidget widgetType = "PartialOrder"
-	ArithWidget        widgetType = "Arith"
-	Unknown            widgetType = "UNKNOWN"
+	BaseWidget              widgetType = "Base"
+	PartialOrderWidget      widgetType = "PartialOrder"
+	ArithWidget             widgetType = "Arith"
+	PartialOrderArithWidget widgetType = "PartialOrderArith"
+	Unknown                 widgetType = "UNKNOWN"
 )
 
 var (
@@ -52,9 +53,7 @@ var (
 			"imports": `
 import (
 	"github.com/barbell-math/util/hash"
-	{{range .Imports}}
-		"{{ . }}"
-	{{end}}
+	{{range .Imports}} "{{ . }}" {{end}}
 )
 `,
 			"eqFunc": `
@@ -161,8 +160,19 @@ func (_ *{{ .AliasType}}) Div(res *{{ .AliasType }}, l *{{ .AliasType }}, r *{{ 
 	))
 }
 `,
+			"partialOrderArithFile": `
+{{template "baseFile" .}}
+{{template "ltFunc" .}}
+{{template "zeroValFunc" .}}
+{{template "unitValFunc" .}}
+{{template "negFunc" .}}
+{{template "addFunc" .}}
+{{template "subFunc" .}}
+{{template "mulFunc" .}}
+{{template "divFunc" .}}
+`,
 			"arithFile": `
-{{template "partialOrderFile" .}}
+{{template "baseFile" .}}
 {{template "zeroValFunc" .}}
 {{template "unitValFunc" .}}
 {{template "negFunc" .}}
@@ -197,6 +207,8 @@ func (w widgetType) FromString(s string) widgetType {
 		return PartialOrderWidget
 	case string(ArithWidget):
 		return ArithWidget
+	case string(PartialOrderArithWidget):
+		return PartialOrderArithWidget
 	default:
 		return Unknown
 	}
@@ -205,7 +217,9 @@ func (w widgetType) FromString(s string) widgetType {
 func main() {
 	common.InlineArgs(&INLINE_ARGS, os.Args)
 
-	commentArgsFilter := common.CommentArgsAstFilter(INLINE_ARGS.Type, &COMMENT_ARGS)
+	commentArgsFilter, foundArgs := common.DocArgsAstFilter(
+		INLINE_ARGS.Type, &COMMENT_ARGS,
+	)
 	common.IterateOverAST(
 		".",
 		common.GenFileExclusionFilter,
@@ -222,10 +236,22 @@ func main() {
 		},
 	)
 
+	if !*foundArgs {
+		common.PrintRunningError(
+			"The supplied type did not have comment args but they are required.",
+		)
+		os.Exit(1)
+	}
+
 	if t := Unknown.FromString(COMMENT_ARGS.WidgetType); t == Unknown {
 		common.PrintRunningError(
 			"The supplied widget type was not recognized. Must be one of %v",
-			[]widgetType{BaseWidget, PartialOrderWidget, ArithWidget},
+			[]widgetType{
+				BaseWidget,
+				PartialOrderWidget,
+				ArithWidget,
+				PartialOrderArithWidget,
+			},
 		)
 		os.Exit(1)
 	} else {
@@ -248,9 +274,10 @@ func main() {
 		fileName(),
 		common.GeneratedSrcFileExt,
 		map[widgetType]string{
-			BaseWidget:         "baseFile",
-			PartialOrderWidget: "partialOrderFile",
-			ArithWidget:        "arithFile",
+			BaseWidget:              "baseFile",
+			PartialOrderWidget:      "partialOrderFile",
+			ArithWidget:             "arithFile",
+			PartialOrderArithWidget: "partialOrderArithFile",
 		}[PROG_STATE.widgetType],
 		templateData,
 	); err != nil {

@@ -57,6 +57,8 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 		fmt.Println(fmt.Sprintf("Running prog '%s'", args[0]))
 	}
 
+	flagSet := flag.NewFlagSet("", flag.PanicOnError)
+
 	refStructPntr := reflect.TypeOf(globalStruct)
 	if refStructPntr.Kind() != reflect.Pointer ||
 		(refStructPntr.Kind() == reflect.Pointer && refStructPntr.Elem().Kind() != reflect.Struct) {
@@ -140,7 +142,7 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 
 		switch iterFKind {
 		case reflect.String:
-			flag.StringVar(
+			flagSet.StringVar(
 				iterFAddr.(*string),
 				lowerCaseName,
 				defaultTag,
@@ -157,7 +159,7 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 					iterFName, err,
 				))
 			}
-			flag.BoolVar(
+			flagSet.BoolVar(
 				iterFAddr.(*bool),
 				lowerCaseName,
 				defaultVal,
@@ -174,7 +176,7 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 					iterFName, err,
 				))
 			}
-			flag.Float64Var(
+			flagSet.Float64Var(
 				iterFAddr.(*float64),
 				lowerCaseName,
 				defaultVal,
@@ -191,7 +193,7 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 					iterFName, err,
 				))
 			}
-			flag.IntVar(
+			flagSet.IntVar(
 				iterFAddr.(*int),
 				lowerCaseName,
 				int(defaultVal),
@@ -208,7 +210,7 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 					iterFName, err,
 				))
 			}
-			flag.Int64Var(
+			flagSet.Int64Var(
 				iterFAddr.(*int64),
 				lowerCaseName,
 				defaultVal,
@@ -242,7 +244,7 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 					iterFName, err,
 				))
 			}
-			flag.Uint64Var(
+			flagSet.Uint64Var(
 				iterFAddr.(*uint64),
 				lowerCaseName,
 				defaultVal,
@@ -261,29 +263,33 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 		panic("The boolean ShowInfo field must be present in the supplied struct.")
 	}
 
-	flag.CommandLine.Parse(args[1:])
+	flagSet.Parse(args[1:])
 
 	requiredCopy := map[string]struct{}{}
 	for r, _ := range requiredArgs {
 		requiredCopy[r] = struct{}{}
 	}
-	flag.CommandLine.Visit(func(f *flag.Flag) {
+	flagSet.Visit(func(f *flag.Flag) {
 		if _, ok := requiredCopy[f.Name]; ok {
 			delete(requiredCopy, f.Name)
 		}
 	})
 	if len(requiredCopy) > 0 {
+		args := []string{}
+		for k, _ := range requiredCopy {
+			args = append(args, k)
+		}
 		PrintRunningError("Not all required flags were passed.")
-		PrintRunningError("The following flags must be added: %v", requiredCopy)
+		PrintRunningError("The following flags must be added: %v", args)
 
 		cntr := 0
 		PrintRunningError("Received: ")
-		flag.Visit(func(f *flag.Flag) {
+		flagSet.Visit(func(f *flag.Flag) {
 			cntr++
 			PrintRunningError("|- (%d) %s: %+v", cntr, f.Name, f.Value)
 		})
 		PrintRunningError("The accepted flags are as follows:")
-		flag.PrintDefaults()
+		flagSet.PrintDefaults()
 		if ArgParseExitOnFail {
 			os.Exit(1)
 		}

@@ -8,12 +8,16 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate ../bin/optionsFlags -optionsStruct=structHashOps -optionsEnum=optionsFlag -package=reflect -debug
+//go:generate ../bin/flagEnum -type=optionsFlag
+//go:generate ../bin/structDefaultInit -struct=structHashOpts -package=reflect
 
 type (
-	optionsFlag   int
-	structHashOps struct {
-		flags optionsFlag `default:"includeMapVals | includeArrayVals | includeSliceVals | followPntrs"`
+	//gen:flagEnum package reflect
+	//gen:flagEnum unknownValue unknownOptionsFlag
+	//gen:flagEnum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs
+	optionsFlag    int
+	structHashOpts struct {
+		optionsFlag `default:"DefaultOptionsFlag()" setter:"f" getter:"f"`
 	}
 )
 
@@ -24,6 +28,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
+	//gen:flagEnum string followPntrs
 	followPntrs optionsFlag = 1 << iota
 	// Description: set to true if the hash value should be calculated by
 	// following interface values rather than using the interface value itself
@@ -31,6 +36,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
+	//gen:flagEnum string followInterface
 	followInterface
 	// Description: set to true to include map key value pairs in the hash
 	// calculation
@@ -38,6 +44,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
+	//gen:flagEnum string includeMapVals
 	includeMapVals
 	// Description: set to true to include slice values in the hash
 	// calculation
@@ -45,6 +52,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
+	//gen:flagEnum string includeSliceVals
 	includeSliceVals
 	// Description: set to true to include array values in the hash
 	// calculation
@@ -52,10 +60,14 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
+	//gen:flagEnum string includeArrayVals
 	includeArrayVals
+	//gen:flagEnum noSetter
+	//gen:flagEnum string unknownOptionsFlag
+	unknownOptionsFlag
 )
 
-func getHash(val FieldInfo, opts *structHashOps) hash.Hash {
+func getHash(val FieldInfo, opts *structHashOpts) hash.Hash {
 	var rv hash.Hash
 	switch val.Kind {
 	case reflect.Bool:
@@ -144,10 +156,11 @@ func getHash(val FieldInfo, opts *structHashOps) hash.Hash {
 			rv = uw.Hash(iterV.(*uintptr)).Combine(rv)
 		}
 	case reflect.Pointer:
-		if !opts.getFlag(followPntrs) {
+		if !opts.GetFlag(followPntrs) {
 			uw := widgets.BuiltinUintptr{}
-			if iterV, err := val.Pntr(); err != nil {
-				rv = uw.Hash(uintptr(iterV)).Combine(rv)
+			if iterV, err := val.ReflectPntr(); err != nil {
+				v := uintptr(iterV.Pointer())
+				rv = uw.Hash(&v)
 			}
 		} else {
 			// get hash of underlying value
@@ -170,7 +183,7 @@ func getHash(val FieldInfo, opts *structHashOps) hash.Hash {
 
 func StructHash[T any, S reflect.Value | *T](
 	s S,
-	opts *structHashOps,
+	opts *structHashOpts,
 ) hash.Hash {
 	var rv hash.Hash
 	RecursiveStructFieldInfo[T, S](s, false).ForEach(

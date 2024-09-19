@@ -55,7 +55,9 @@ func TestFromStructsValidStruct(t *testing.T) {
 func TestFromStructsValidStructDontWriteHeaders(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](VALID_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006").WriteHeaders(false),
+		NewOptions().DateTimeFormat("01/02/2006").OptionsFlag(
+			DefaultOptionsFlag().WriteHeaders(false),
+		),
 	).Collect()
 	test.Nil(err, t)
 	test.Eq(len(VALID_FROM_STRUCT)-1, len(res), t)
@@ -90,7 +92,9 @@ func TestFromStructMissingValues(t *testing.T) {
 func TestFromStructsMissingHeaders(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](MISSING_HEADERS_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006").WriteHeaders(false),
+		NewOptions().DateTimeFormat("01/02/2006").OptionsFlag(
+			DefaultOptionsFlag().WriteHeaders(false),
+		),
 	).Collect()
 	test.Nil(err, t)
 	fromStructsEqualityHelper(MISSING_HEADERS_FROM_STRUCT, res, t)

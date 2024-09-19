@@ -9,9 +9,14 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate ../../bin/passThroughTypeAliasWidget -package=containers -aliasType=HashSetHash -baseType=hash.Hash -baseTypeWidget=widgets.BuiltinHash -widgetPackage=github.com/barbell-math/util/widgets
+//go:generate ../../bin/passThroughWidget -type=HashSetHash
 
 type (
+	//gen:passThroughWidget widgetType Base
+	//gen:passThroughWidget package containers
+	//gen:passThroughWidget baseType hash.Hash
+	//gen:passThroughWidget baseTypeWidget widgets.BuiltinHash
+	//gen:passThroughWidget widgetPackage github.com/barbell-math/util/widgets
 	HashSetHash                hash.Hash
 	OldHashSetHash             HashSetHash
 	NewHashSetHash             HashSetHash

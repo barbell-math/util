@@ -25,7 +25,7 @@ func newStructToHeaderIndexMapping[R any](
 		return rv, getBadRowTypeError(r)
 	}
 
-	if !opts.getFlag(headersSupplied) {
+	if !opts.GetFlag(headersSupplied) {
 		// Get all public data from the struct
 		return rv, rv.getHeadersUntil(math.MaxInt, r)
 	}
@@ -76,7 +76,7 @@ func (i *structToHeaderIndexMapping[R]) detectHeaderDuplicates(
 ) error {
 	set, err := containers.NewHashSet[
 		*string,
-		widgets.Pntr[string, widgets.BuiltinString],
+		widgets.BasePntr[string, widgets.BuiltinString],
 	](0)
 	if err != nil {
 		return err

@@ -76,7 +76,7 @@ func ToStructs[R any](src iter.Iter[[]string], opts *options) iter.Iter[R] {
 			}
 			// If there were no headers then there is an incorrect header cnt,
 			// so set it to the correct value here.
-			if index == 0 && !opts.getFlag(hasHeaders) {
+			if index == 0 && !opts.GetFlag(hasHeaders) {
 				prevLen = len(val)
 			}
 			if len(val) != prevLen {

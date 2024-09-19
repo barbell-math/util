@@ -116,7 +116,7 @@ func GetComment(
 	return strings.Join(rvLines, "\n"), nil
 }
 
-func GetCommentArgVals(
+func GetDocArgVals(
 	fSet *token.FileSet,
 	srcFile *os.File,
 	doc *ast.CommentGroup,
@@ -142,21 +142,27 @@ func GetCommentArgVals(
 	rv := CommentArgVals{}
 	for _, l := range argLines {
 		args := strings.SplitN(l, " ", 2)
-		if len(args) != 2 {
+		if len(args) == 2 {
+			rv[args[0]] = args[1]
+		} else if len(args) == 1 {
+			rv[args[0]] = "true"
+		} else {
 			return rv, fmt.Errorf(
-				"%w | Expected the following format: %s <arg name> <arg val>",
+				"%w | Expected the following format: %s <arg name> [<arg val>]",
 				CommentArgsMalformed, progPrefix,
 			)
 		}
-		rv[args[0]] = args[1]
 	}
 	return rv, nil
 }
 
-func CommentArgsAstFilter(
+func DocArgsAstFilter(
 	expectedType string,
 	globalStruct any,
-) func(fSet *token.FileSet, srcFile *os.File, node ast.Node) error {
+) (
+	func(fSet *token.FileSet, srcFile *os.File, node ast.Node) error,
+	*bool,
+) {
 	foundTypeDef := false
 
 	parseComment := func(
@@ -168,7 +174,7 @@ func CommentArgsAstFilter(
 			return nil
 		}
 
-		if comment, err := GetCommentArgVals(fSet, srcFile, ts.Doc); err != nil {
+		if comment, err := GetDocArgVals(fSet, srcFile, ts.Doc); err != nil {
 			return err
 		} else if err := CommentArgs(globalStruct, comment); err != nil {
 			return err
@@ -201,5 +207,5 @@ func CommentArgsAstFilter(
 		default:
 			return nil
 		}
-	}
+	}, &foundTypeDef
 }

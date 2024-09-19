@@ -208,6 +208,12 @@ func StructFieldInfo[T any, S reflect.Value | *T](
 						}
 						return nil, getInaddressableFieldError(n)
 					},
+					ReflectPntr: func() (reflect.Value, error) {
+						if f.CanAddr() {
+							return f.Addr(), nil
+						}
+						return reflect.Value{}, getInaddressableFieldError(n)
+					},
 				},
 			}, nil
 		},

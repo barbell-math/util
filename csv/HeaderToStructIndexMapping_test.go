@@ -106,7 +106,7 @@ func TestNewHeaderToStructIndexMappingIgnoreHeaders(t *testing.T) {
 		iter.SliceElems[[]string]([][]string{{"Some", "Bad", "Headers"}}),
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().IgnoreHeaders(true),
+		NewOptions().OptionsFlag(DefaultOptionsFlag().IgnoreHeaders(true)),
 	)
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)
@@ -126,7 +126,7 @@ func TestNewHeaderToStructIndexMappingIgnoreHeadersMissingHeaders(t *testing.T) 
 		iter.SliceElems[[]string]([][]string{{"Some", "Headers"}}),
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().IgnoreHeaders(true),
+		NewOptions().OptionsFlag(DefaultOptionsFlag().IgnoreHeaders(true)),
 	)
 	test.Nil(err, t)
 	test.Eq(2, len(m), t)
@@ -145,7 +145,7 @@ func TestNewHeaderToStructIndexMappingIgnoreHeadersMoreHeaders(t *testing.T) {
 		iter.SliceElems[[]string]([][]string{{"Some", "Very", "Bad", "Headers"}}),
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().IgnoreHeaders(true),
+		NewOptions().OptionsFlag(DefaultOptionsFlag().IgnoreHeaders(true)),
 	)
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)
@@ -165,7 +165,7 @@ func TestNewHeaderToStructIndexMappingNoHeaders(t *testing.T) {
 		iter.SliceElems[[]string]([][]string{{"1", "2", "3"}}),
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().HasHeaders(false),
+		NewOptions().OptionsFlag(DefaultOptionsFlag().HasHeaders(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)

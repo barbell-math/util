@@ -17,7 +17,7 @@ type ValInfo struct {
 	Type reflect.Type
 	// The kind of the field.
 	Kind reflect.Kind
-	// The concreete value of the field. This is a copy of the value, not the
+	// The concrete value of the field. This is a copy of the value, not the
 	// original value contained in the struct. To access the original value
 	// use the Pntr field of this struct.
 	Val func() (any, bool)
@@ -26,6 +26,37 @@ type ValInfo struct {
 	// because, depending on the value that is passed to the iterator function,
 	// not all struct fields will be addressable.
 	Pntr func() (any, error)
+	// Returns a reflect value of a pointer to the struct field, if possible.
+	// Note that the Pntr field of this struct is a function that may return an
+	// error. This is because, depending on the value that is passed to the
+	// iterator function, not all struct fields will be addressable.
+	ReflectPntr func() (reflect.Value, error)
+}
+
+func NewValInfo(v reflect.Value, keepVal bool, addressableErr error) ValInfo {
+	// TODO - add to struct, map, array, slice, test, use in struct hash
+	return ValInfo{
+		Type: v.Type(),
+		Kind: v.Kind(),
+		Val: func() (any, bool) {
+			if keepVal {
+				return v.Interface(), true
+			}
+			return nil, false
+		},
+		Pntr: func() (any, error) {
+			if v.CanAddr() {
+				return v.Addr().Interface(), nil
+			}
+			return nil, addressableErr
+		},
+		ReflectPntr: func() (reflect.Value, error) {
+			if v.CanAddr() {
+				return v.Addr(), nil
+			}
+			return reflect.Value{}, addressableErr
+		},
+	}
 }
 
 func isKindOrReflectValKind[T any, U reflect.Value | *T](

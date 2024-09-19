@@ -26,7 +26,7 @@ func newHeaderToStructIndexMapping[R any](
 		return rv, getBadRowTypeError(r)
 	}
 
-	if !opts.getFlag(hasHeaders) {
+	if !opts.GetFlag(hasHeaders) {
 		// No way to get the correct number of headers without pulling a row of
 		// data which would need to be parsed later so just get all the indexes.
 		return rv, rv.getHeadersUntil(math.MaxInt, r)
@@ -36,7 +36,7 @@ func newHeaderToStructIndexMapping[R any](
 	if !ok || err != nil {
 		return headerToStructIndexMapping[R]{}, err
 	}
-	if opts.getFlag(ignoreHeaders) {
+	if opts.GetFlag(ignoreHeaders) {
 		// Get all struct indexes up to the total number of headers. The headers
 		// are ignored and the structs field ordering determines the indexes.
 		return rv, rv.getHeadersUntil(len(headers), r)
@@ -82,7 +82,7 @@ func (i *headerToStructIndexMapping[R]) getHeadersUntil(num int, r *R) error {
 func (i *headerToStructIndexMapping[R]) detectHeaderDuplicates(headers []string) error {
 	set, err := containers.NewHashSet[
 		*string,
-		widgets.Pntr[string, widgets.BuiltinString],
+		widgets.BasePntr[string, widgets.BuiltinString],
 	](0)
 	if err != nil {
 		return err

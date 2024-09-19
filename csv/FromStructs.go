@@ -85,10 +85,10 @@ func FromStructs[R any](src iter.Iter[R], opts *options) iter.Iter[[]string] {
 			return iter.Continue, rv, nil
 		},
 	).Inject(func(idx int, val []string, injectedPrev bool) ([]string, error, bool) {
-		if idx > 0 || !opts.getFlag(writeHeaders) {
+		if idx > 0 || !opts.GetFlag(writeHeaders) {
 			return []string{}, nil, false
 		}
-		if opts.getFlag(headersSupplied) {
+		if opts.GetFlag(headersSupplied) {
 			return opts.headers, nil, true
 		}
 		rv := make([]string, len(idxMapping))
@@ -107,7 +107,7 @@ func getValAsString[R any](r *R, sIdx structIndex, opts *options) (string, error
 	var val stdReflect.Value
 	actualVal := v.Interface()
 	if v.Type() == stdReflect.TypeOf((*time.Time)(nil)).Elem() {
-		if actualVal.(time.Time).Equal(time.Time{}) && !opts.getFlag(writeZeroValues) {
+		if actualVal.(time.Time).Equal(time.Time{}) && !opts.GetFlag(writeZeroValues) {
 			return "", nil
 		}
 		return v.Interface().(time.Time).Format(opts.dateTimeFormat), nil
@@ -170,7 +170,7 @@ func getValAsString[R any](r *R, sIdx structIndex, opts *options) (string, error
 			stdReflect.TypeOf(r).Elem().Field(int(sIdx)).Name, v.Kind().String(),
 		)
 	}
-	if actualVal == val.Interface() && !opts.getFlag(writeZeroValues) {
+	if actualVal == val.Interface() && !opts.GetFlag(writeZeroValues) {
 		return "", nil
 	}
 	return fmt.Sprintf("%v", actualVal), nil

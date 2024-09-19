@@ -219,6 +219,12 @@ func elemInfo[T any, U reflect.Value | *T](
 					}
 					return nil, getInaddressableIndexError(i)
 				},
+				ReflectPntr: func() (reflect.Value, error) {
+					if arrayVal.Index(i).CanAddr() {
+						return arrayVal.Index(i).Addr(), nil
+					}
+					return reflect.Value{}, getInaddressableIndexError(i)
+				},
 			}, nil
 		},
 	)

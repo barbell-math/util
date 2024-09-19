@@ -183,7 +183,9 @@ func TestNewStructMappingIgnoreTags(t *testing.T) {
 		Three int `csv:"three"`
 	}
 	var tmp Row
-	m, err := newStructHeaderMapping[Row](&tmp, NewOptions().UseStructTags(false))
+	m, err := newStructHeaderMapping[Row](&tmp, NewOptions().OptionsFlag(
+		DefaultOptionsFlag().UseStructTags(false),
+	))
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)
 	test.Eq(structIndex(0), m["One"], t)
@@ -200,7 +202,9 @@ func TestNewStructMappingIgnoreTagsAndNonDefaultTag(t *testing.T) {
 	var tmp Row
 	m, err := newStructHeaderMapping[Row](
 		&tmp,
-		NewOptions().StructTagName("tag").UseStructTags(false),
+		NewOptions().StructTagName("tag").OptionsFlag(
+			DefaultOptionsFlag().UseStructTags(false),
+		),
 	)
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)

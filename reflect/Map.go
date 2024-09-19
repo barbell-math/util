@@ -237,6 +237,9 @@ func MapElemInfo[T any, M reflect.Value | *T](
 					Pntr: func() (any, error) {
 						return nil, getInaddressableMapError()
 					},
+					ReflectPntr: func() (reflect.Value, error) {
+						return reflect.Value{}, getInaddressableMapError()
+					},
 				},
 				B: ValInfo{
 					Type: mapVal.Type().Elem(),
@@ -249,6 +252,9 @@ func MapElemInfo[T any, M reflect.Value | *T](
 					},
 					Pntr: func() (any, error) {
 						return nil, getInaddressableMapError()
+					},
+					ReflectPntr: func() (reflect.Value, error) {
+						return reflect.Value{}, getInaddressableMapError()
 					},
 				},
 			}, nil

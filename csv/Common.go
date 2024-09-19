@@ -36,7 +36,7 @@ func getBadRowTypeError[R any](r R) error {
 
 func getColCountError(idx int, expLen int, gotLen int, opts *options) error {
 	rowNum := idx + 1
-	if opts.getFlag(hasHeaders) {
+	if opts.GetFlag(hasHeaders) {
 		rowNum++
 	}
 	return customerr.Wrap(
