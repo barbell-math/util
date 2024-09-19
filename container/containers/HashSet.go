@@ -13,7 +13,6 @@ import (
 
 type (
 	//gen:passThroughWidget widgetType Base
-	//gen:passThroughWidget package containers
 	//gen:passThroughWidget baseTypeWidget widgets.BuiltinHash
 	//gen:passThroughWidget widgetPackage github.com/barbell-math/util/widgets
 	HashSetHash                hash.Hash

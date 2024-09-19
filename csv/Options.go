@@ -1,10 +1,9 @@
 package csv
 
-//go:generate ../bin/flagEnum -type=optionsFlag
-//go:generate ../bin/structDefaultInit -struct=options -package=csv
+//go:generate ../bin/flagEnum -type=optionsFlag -package=csv
+//go:generate ../bin/structDefaultInit -struct=options
 
 type (
-	//gen:flagEnum package csv
 	//gen:flagEnum unknownValue unknownOptionsFlag
 	//gen:flagEnum default 0 | hasHeaders | useStructTags | writeHeaders
 	optionsFlag int

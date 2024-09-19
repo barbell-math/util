@@ -270,30 +270,30 @@ func (w *PartialOrderArith[T, I]) Div(res *T, l *T, r *T) {
 	w.iFace.Div(res, l, r)
 }
 
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=Base -type=bool
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=byte
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=uintptr
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrder -type=string
+//go:generate ../bin/widgetInterfaceImpl -widgetType=Base -type=bool
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=byte
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=uintptr
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrder -type=string
 
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=int
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=int8
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=int16
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=int32
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=int64
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=int
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=int8
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=int16
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=int32
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=int64
 
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=uint
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=uint8
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=uint16
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=uint32
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=uint64
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=uint
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=uint8
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=uint16
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=uint32
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=uint64
 
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=float32
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=float64
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=float32
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=float64
 
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=Arith -type=complex64
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=Arith -type=complex128
+//go:generate ../bin/widgetInterfaceImpl -widgetType=Arith -type=complex64
+//go:generate ../bin/widgetInterfaceImpl -widgetType=Arith -type=complex128
 
 // This is a special case that is only allowed because the widget package itself
 // relies on hash.Hash, making it so the hash.Hash package cannot implement the
 // widget interface on itself (would create circular imports).
-//go:generate ../bin/widgetInterfaceImpl -package=widgets -widgetType=PartialOrderArith -type=hash.Hash
+//go:generate ../bin/widgetInterfaceImpl -widgetType=PartialOrderArith -type=hash.Hash

@@ -8,11 +8,10 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate ../bin/flagEnum -type=optionsFlag
-//go:generate ../bin/structDefaultInit -struct=structHashOpts -package=reflect
+//go:generate ../bin/flagEnum -type=optionsFlag -package=reflect
+//go:generate ../bin/structDefaultInit -struct=structHashOpts
 
 type (
-	//gen:flagEnum package reflect
 	//gen:flagEnum unknownValue unknownOptionsFlag
 	//gen:flagEnum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs
 	optionsFlag    int

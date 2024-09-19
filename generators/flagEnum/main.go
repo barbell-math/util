@@ -13,11 +13,11 @@ import (
 type (
 	InlineArgs struct {
 		Type     string `required:"t" help:"The type that is used to represent the flag values."`
+		Package      string `required:"t" help:"The package the options enum type is in."`
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 
 	CommentArgs struct {
-		Package      string `required:"t" help:"The package the options enum type is in."`
 		UnknownValue string `required:"t" help:"The value that will be returned should an invalid enum type be used."`
 		Default      string `required:"t" help:"The default value the new function should return."`
 	}
@@ -144,6 +144,9 @@ func main() {
 		".",
 		common.GenFileExclusionFilter,
 		func(fSet *token.FileSet, file *ast.File, srcFile *os.File, node ast.Node) bool {
+			if file.Name.Name!=INLINE_ARGS.Package {
+				return false
+			}
 			op(fSet, srcFile, node)
 			switch node.(type) {
 			case *ast.GenDecl:
@@ -191,7 +194,7 @@ func main() {
 	allCapsEnumType := getAllCapsType()
 	templateData := TemplateVals{
 		GeneratorName:   os.Args[0],
-		Package:         COMMENT_ARGS.Package,
+		Package:         INLINE_ARGS.Package,
 		EnumType:        INLINE_ARGS.Type,
 		CapEnumType:     strings.ToUpper(INLINE_ARGS.Type[0:1]) + INLINE_ARGS.Type[1:],
 		AllCapsEnumType: allCapsEnumType,

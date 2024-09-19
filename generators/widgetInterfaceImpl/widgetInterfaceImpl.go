@@ -12,7 +12,6 @@ import (
 
 type (
 	InlineArgs struct {
-		Package    string `required:"t" help:"The package to put the files in."`
 		Type       string `required:"t" help:"The underlying type to generate the widget for."`
 		WidgetType string `required:"t" help:"The type of widget to generate. (Base, PartialOrder, Arith)"`
 		ShowInfo   bool   `required:"f" default:"t" help:"Show debug info."`
@@ -255,7 +254,7 @@ func (_ Builtin{{ .CapType }}) Div(res *{{ .Type }}, l *{{ .Type }}, r *{{ .Type
 {{template "ltFunc" .}}
 `,
 			"baseFile": `
-package {{ .Package }}
+package widgets
 
 {{template "autoGenComment" .}}
 {{template "imports" .}}
@@ -323,7 +322,6 @@ func main() {
 
 	templateData := TemplateVals{
 		GeneratorName: os.Args[0],
-		Package:       INLINE_ARGS.Package,
 		Type:          INLINE_ARGS.Type,
 		CapType:       PROG_STATE.CapType,
 		ZeroValue:     VALID_TYPES[INLINE_ARGS.Type].ZeroValue,

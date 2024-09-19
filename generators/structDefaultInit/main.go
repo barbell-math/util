@@ -16,7 +16,6 @@ import (
 type (
 	InlineArgs struct {
 		Struct   string `required:"t" help:"The struct type to generate code for."`
-		Package  string `required:"t" help:"The package the options enum type is in."`
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 
@@ -27,6 +26,7 @@ type (
 		fieldTypes    map[string]string
 		fieldComments map[string]string
 		imports       []string
+		_package string
 	}
 	DefaultInfo struct {
 		name  string
@@ -140,6 +140,9 @@ func main() {
 							break
 						}
 					}
+					if optionsStructFound {
+						PROG_STATE._package=file.Name.Name
+					}
 					return false
 				}
 				return false
@@ -154,7 +157,7 @@ func main() {
 	templateData := TemplateVals{
 		StructName:          INLINE_ARGS.Struct,
 		CapStructName:       strings.ToUpper(INLINE_ARGS.Struct[0:1]) + INLINE_ARGS.Struct[1:],
-		Package:             INLINE_ARGS.Package,
+		Package:             PROG_STATE._package,
 		StructFieldSetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldSetters)),
 		StructFieldGetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldGetters)),
 		StructFieldDefaults: make([]StructDefaultTemplateVals, len(PROG_STATE.fieldDefaults)),

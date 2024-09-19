@@ -22,7 +22,6 @@ which are shown below.
 ```
 type (
 	//gen:passThroughWidget widgetType <widget type>
-	//gen:passThroughWidget package <package>
 	//gen:passThroughWidget baseTypeWidget <base type widget>
 	//gen:passThroughWidget widgetPackage <base type widget package>
 	<type> <base type>
@@ -33,7 +32,6 @@ The comment arguments are listed below:
 
 1. widgetType (string) (required): the type of widget to generate. One of Base,
 PartialOrder, Arith, or PartialOrderArith.
-1. package (string) (required): the package the supplied type is in.
 1. baseTypeWidget (string) (required): the widget that is associated with the
 current types underlying type.
 1. widgetPackage (string) (required): the package the base types widget is in.

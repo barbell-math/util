@@ -8,7 +8,7 @@ and basic methods.
 To execute this program use a go generate command of the following structure:
 
 ```
-//go:generate <path to exe>/structDefaultInit -struct=<struct type> -package=<package of struct type>
+//go:generate <path to exe>/structDefaultInit -struct=<struct type>
 ```
 
 Given this generate command, the ```structDefaultInit``` program will search the

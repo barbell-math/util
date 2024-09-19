@@ -20,7 +20,6 @@ type (
 	}
 	CommentArgs struct {
 		WidgetType     string `required:"t" help:"The type of widget to make. (Base, PartialOrder, Arith)."`
-		Package        string `required:"t" help:"The packge to put the files in."`
 		BaseTypeWidget string `required:"t" help:"The base type widget to use when generating the new widget."`
 		WidgetPackage  string `required:"t" help:"The package the base type widget resides in. If it is this package, put '.'"`
 	}
@@ -28,7 +27,8 @@ type (
 	widgetType string
 	ProgState  struct {
 		widgetType widgetType
-		baseType   string // TODO - del `required:"t" help:"The base type to generate the widget for."`
+		baseType   string
+		_package string
 	}
 	TemplateVals struct {
 		GeneratorName  string
@@ -244,6 +244,9 @@ func main() {
 						)
 					}
 				}
+				if PROG_STATE.baseType!="" {
+					PROG_STATE._package=file.Name.Name
+				}
 				return false
 			case *ast.FuncDecl:
 				return false
@@ -281,7 +284,7 @@ func main() {
 
 	templateData := TemplateVals{
 		GeneratorName:  os.Args[0],
-		Package:        COMMENT_ARGS.Package,
+		Package:        PROG_STATE._package,
 		Imports:        []string{},
 		AliasType:      INLINE_ARGS.Type,
 		BaseType:       PROG_STATE.baseType,

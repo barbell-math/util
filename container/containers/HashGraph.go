@@ -18,17 +18,14 @@ import (
 
 type (
 	//gen:passThroughWidget widgetType Base
-	//gen:passThroughWidget package containers
 	//gen:passThroughWidget baseTypeWidget *HashSetHash
 	//gen:passThroughWidget widgetPackage .
 	edgeHash HashSetHash
 	//gen:passThroughWidget widgetType Base
-	//gen:passThroughWidget package containers
 	//gen:passThroughWidget baseTypeWidget *HashSetHash
 	//gen:passThroughWidget widgetPackage .
 	vertexHash HashSetHash
 	//gen:passThroughWidget widgetType Base
-	//gen:passThroughWidget package containers
 	//gen:passThroughWidget baseTypeWidget basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	//gen:passThroughWidget widgetPackage github.com/barbell-math/util/container/basic
 	graphLink basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
