@@ -1,6 +1,6 @@
 // A generator program that removes all generated code files in the current
 // directory. Generated files are defined to match *.gen.go or *.gen_test.go.
-package clean
+package main
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 
 func main() {
 	pattern := fmt.Sprintf(
-		"(\\%s$) | (\\%s$)",
+		"(\\%s$)|(\\%s$)",
 		common.GeneratedSrcFileExt, common.GeneratedTestFileExt,
 	)
 
@@ -38,8 +38,6 @@ func main() {
 				if err != nil {
 					return err
 				}
-
-				println("Removed:", path)
 			}
 			return nil
 		},
