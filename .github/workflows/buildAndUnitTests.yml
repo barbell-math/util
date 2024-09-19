@@ -37,6 +37,9 @@ jobs:
     - name: Build Global Generator Programs
       run: go build -o ./bin/ ./generators/...
 
+    - name: Clean all generated files
+      run: ./bin/clean
+
     - name: Generate
       run: go generate -v ./...
 
