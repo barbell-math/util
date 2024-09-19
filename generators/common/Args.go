@@ -57,7 +57,7 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 		fmt.Println(fmt.Sprintf("Running prog '%s'", args[0]))
 	}
 
-	flagSet := flag.NewFlagSet("", flag.PanicOnError)
+	flagSet := flag.NewFlagSet("", flag.ExitOnError)
 
 	refStructPntr := reflect.TypeOf(globalStruct)
 	if refStructPntr.Kind() != reflect.Pointer ||
