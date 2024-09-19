@@ -7,7 +7,7 @@ A generator program that creates methods surrounding a bit-flag enum type.
 To execute this program use a go generate command of the following structure:
 
 ```
-//go:generate <path to exe>/flagEnum -type=<type>
+//go:generate <path to exe>/flagEnum -type=<type> -package=<package>
 ```
 
 Given this go generate command, the ```flagEnum``` program will perform two
@@ -20,7 +20,6 @@ type, as shown below.
 
 ```
 type (
-	//gen:flagEnum package <package>
 	//gen:flagEnum unknownValue <default unknown value>
 	//gen:flagEnum default <default value>
 	optionsFlag int
@@ -29,7 +28,6 @@ type (
 
 The arguments are as follows:
 
-1. package (string) (required): the package that the type is in
 1. unknownValue (string) (required): the constant value that is part of the enum
 that represents an unknown or invalid enum state. If a value is supplied that is
 not found to be value for this enum the program will print an error and exit with
