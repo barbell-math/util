@@ -28,7 +28,7 @@ type (
 	widgetType string
 	ProgState  struct {
 		widgetType widgetType
-		baseType       string// TODO - del `required:"t" help:"The base type to generate the widget for."`
+		baseType   string // TODO - del `required:"t" help:"The base type to generate the widget for."`
 	}
 	TemplateVals struct {
 		GeneratorName  string
@@ -231,7 +231,7 @@ func main() {
 			commentArgsFilter(fSet, srcFile, node)
 			switch node.(type) {
 			case *ast.GenDecl:
-				if PROG_STATE.baseType!="" {
+				if PROG_STATE.baseType != "" {
 					return false
 				}
 				gdNode := node.(*ast.GenDecl)
@@ -259,7 +259,7 @@ func main() {
 		)
 		os.Exit(1)
 	}
-	if PROG_STATE.baseType=="" {
+	if PROG_STATE.baseType == "" {
 		common.PrintRunningError("The base type was not found!")
 		os.Exit(1)
 	}
@@ -361,8 +361,8 @@ func parseTypeSpec(
 		common.PrintRunningError("%s", err)
 		os.Exit(1)
 	}
-	
-	if name==INLINE_ARGS.Type {
+
+	if name == INLINE_ARGS.Type {
 		baseType, err := common.GetSourceTextFromExpr(
 			fSet, srcFile, ts.Type,
 		)
@@ -371,6 +371,6 @@ func parseTypeSpec(
 			os.Exit(1)
 		}
 
-		PROG_STATE.baseType=baseType
+		PROG_STATE.baseType = baseType
 	}
 }

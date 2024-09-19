@@ -39,8 +39,8 @@ current types underlying type.
 1. widgetPackage (string) (required): the package the base types widget is in.
 
 Given the example used throughout this file, with the information from the 
-inline arguments and the struct tags the following code, and assuming that a
-base type widget was specified, the following code will be generated:
+inline arguments and comment arguments, and assuming that a base type widget was
+specified, the following code will be generated:
 
 ```
 package <package>
