@@ -148,6 +148,7 @@ func main() {
 			case *ast.GenDecl:
 				gdNode := node.(*ast.GenDecl)
 				if gdNode.Tok == token.CONST {
+					PROG_STATE.prevType=""
 					for _, spec := range gdNode.Specs {
 						PROG_STATE.prevType = parseValueSpec(
 							fSet,

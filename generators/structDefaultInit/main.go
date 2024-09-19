@@ -1,3 +1,5 @@
+// A generator program that provides boiler plate code for struct initialization
+// and basic methods.
 package main
 
 import (

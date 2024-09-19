@@ -11,10 +11,10 @@ To execute this program use a go generate command of the following structure:
 //go:generate <path to exe>/structDefaultInit -struct=<struct type> -package=<package of struct type>
 ```
 
-Given this generate command, the structDefaultInit program will search the ast
-of any non-generated code in the current directory for the supplied struct type
-definition. Once the supplied struct type definition is found it will use the
-comments and tags on each of the struct fields to generate several pieces of
+Given this generate command, the ```structDefaultInit``` program will search the
+ast of any non-generated code in the current directory for the supplied struct
+type definition. Once the supplied struct type definition is found it will use
+the comments and tags on each of the struct fields to generate several pieces of
 code. Before going over the code this is generated, the code below shows the
 expected struct format:
 
@@ -29,8 +29,7 @@ type <struct type> struct {
 }
 ```
 
-With the struct type definition the structDefaultInit program will use the struct
-tags to control what code is output. The following tags are supported:
+The following struct tags are supported:
 
 1. default (string) (required): the value that the field should be initialized 
 with. This value is treated as a string, meaning whatever text is in the string
