@@ -3,15 +3,35 @@ package widgets
 import "github.com/barbell-math/util/hash"
 
 type (
+	// A pass through widget that represents a pointer to an underlying type
+	// that is a base widget. This is useful for when you need a widget for
+	// a pointer. Consider a *int that you need a base widget for. The BasePntr
+	// struct would be used like this:
+	//	BasePntr[int, widgets.BuiltinInt]
 	BasePntr[T any, I BaseInterface[T]] struct {
 		iFace I
 	}
+	// A pass through widget that represents a pointer to an underlying type
+	// that is a partial order widget. This is useful for when you need a
+	// widget for a pointer. Consider a *int that you need a partial order
+	// widget for. The PartialOrderPntr struct would be used like this:
+	//	PartialOrderPntr[int, widgets.BuiltinInt]
 	PartialOrderPntr[T any, I PartialOrderInterface[T]] struct {
 		iFace I
 	}
+	// A pass through widget that represents a pointer to an underlying type
+	// that is an arith widget. This is useful for when you need a widget for a
+	// pointer. Consider a *int that you need an arith widget for. The
+	// ArithPntr struct would be used like this:
+	//	ArithPntr[int, widgets.BuiltinInt]
 	ArithPntr[T any, I ArithInterface[T]] struct {
 		iFace I
 	}
+	// A pass through widget that represents a pointer to an underlying type
+	// that is an arith partial order widget. This is useful for when you need a
+	// widget for a pointer. Consider a *int that you need a partial order arith
+	// widget for. The PartialOrderArithPntr struct would be used like this:
+	//	PartialOrderArithPntr[int, widgets.BuiltinInt]
 	PartialOrderArithPntr[T any, I PartialOrderArithInterface[T]] struct {
 		iFace I
 	}

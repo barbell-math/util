@@ -1,5 +1,6 @@
-// A generator program that removes all generated code files in the current
-// directory. Generated files are defined to match *.gen.go or *.gen_test.go.
+// A generator program that recursively removes all generated code files in the 
+// current directory. Generated files are defined to match *.gen.go or 
+// *.gen_test.go.
 package main
 
 import (

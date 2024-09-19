@@ -35,7 +35,7 @@ that represents an unknown or invalid enum state. If a value is supplied that is
 not found to be value for this enum the program will print an error and exit with
 a non-zero exit status.
 1. default (string) (required): The default value that a new instance of this
-enum should be initilized with. This is usefull for setting a default set of
+enum should be initilized with. This is useful for setting a default set of
 flags.
 
 The second task is to search the ast of any non-generated code in the current
@@ -68,7 +68,7 @@ The arguments are as follows:
 1. noSetter (boolean) (optional): true to not generate a setter function for
 this flag, false or missing to generate a setter function for this flag.
 1. string (string) (required): the string representation of this enum value.
-This is often usefull when decoding config files where all valid keys/values can
+This is often useful when decoding config files where all valid keys/values can
 be represented by a set of enum values.
 
 

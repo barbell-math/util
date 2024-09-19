@@ -2,7 +2,7 @@ package containers
 
 import "github.com/barbell-math/util/widgets"
 
-func ExampleVector_OfPntrs() {
+func Example_Pntrs() {
 	// Lets say that you wanted to create a vector of pointers to integers.
 	// You might try to create the vector like this:
 	//
