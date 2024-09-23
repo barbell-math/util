@@ -28,7 +28,7 @@ type (
 	ProgState  struct {
 		widgetType widgetType
 		baseType   string
-		_package string
+		_package   string
 	}
 	TemplateVals struct {
 		GeneratorName  string
@@ -244,8 +244,8 @@ func main() {
 						)
 					}
 				}
-				if PROG_STATE.baseType!="" {
-					PROG_STATE._package=file.Name.Name
+				if PROG_STATE.baseType != "" {
+					PROG_STATE._package = file.Name.Name
 				}
 				return false
 			case *ast.FuncDecl:

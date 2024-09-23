@@ -26,7 +26,7 @@ type (
 		fieldTypes    map[string]string
 		fieldComments map[string]string
 		imports       []string
-		_package string
+		_package      string
 	}
 	DefaultInfo struct {
 		name  string
@@ -141,7 +141,7 @@ func main() {
 						}
 					}
 					if optionsStructFound {
-						PROG_STATE._package=file.Name.Name
+						PROG_STATE._package = file.Name.Name
 					}
 					return false
 				}

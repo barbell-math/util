@@ -13,7 +13,7 @@ import (
 type (
 	InlineArgs struct {
 		Type     string `required:"t" help:"The type that is used to represent the flag values."`
-		Package      string `required:"t" help:"The package the options enum type is in."`
+		Package  string `required:"t" help:"The package the options enum type is in."`
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 
@@ -144,7 +144,7 @@ func main() {
 		".",
 		common.GenFileExclusionFilter,
 		func(fSet *token.FileSet, file *ast.File, srcFile *os.File, node ast.Node) bool {
-			if file.Name.Name!=INLINE_ARGS.Package {
+			if file.Name.Name != INLINE_ARGS.Package {
 				return false
 			}
 			op(fSet, srcFile, node)
