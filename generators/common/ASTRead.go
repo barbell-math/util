@@ -135,8 +135,8 @@ func GetDocArgVals(
 	for _, l := range strings.Split(comment, "\n") {
 		l = strings.TrimSpace(l)
 		if strings.HasPrefix(l, progPrefix) {
-			tmp:=strings.Replace(l, progPrefix, "", 1)
-			tmp=strings.TrimSpace(tmp)
+			tmp := strings.Replace(l, progPrefix, "", 1)
+			tmp = strings.TrimSpace(tmp)
 			argLines = append(argLines, tmp)
 		}
 	}
@@ -180,7 +180,7 @@ func DocArgsAstFilter(
 			return err
 		} else if err := CommentArgs(globalStruct, comment); err != nil {
 			return err
-		} 
+		}
 		foundTypeDef = true
 		return nil
 	}

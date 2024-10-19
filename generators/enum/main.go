@@ -28,9 +28,9 @@ type (
 		enumVars []EnumVar
 	}
 	EnumVar struct {
-		name     string
-		comment  string
-		String   string `required:"t" help:"The string representation of this flag. Used for json marshaling and unmarshaling."`
+		name    string
+		comment string
+		String  string `required:"t" help:"The string representation of this flag. Used for json marshaling and unmarshaling."`
 	}
 
 	TemplateVals struct {

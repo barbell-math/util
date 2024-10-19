@@ -34,7 +34,7 @@ type ValInfo struct {
 }
 
 // Makes a new val info struct with the supplied reflect value. Set keepVal to
-// true to make a copy of the underlying reflect value, false to not make a 
+// true to make a copy of the underlying reflect value, false to not make a
 // copy. The addressableErr will be the error that is returned when trying to
 // access get the address of a non-addressable reflect value.
 func NewValInfo(v reflect.Value, keepVal bool, addressableErr error) ValInfo {

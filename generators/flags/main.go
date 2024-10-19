@@ -25,17 +25,17 @@ type (
 	EnumVar struct {
 		name     string
 		comment  string
-		NoSetter bool   `required:"f" default:"f" help:"Set to true to not generate the setter code for this flag."`
+		NoSetter bool `required:"f" default:"f" help:"Set to true to not generate the setter code for this flag."`
 	}
 
 	TemplateVals struct {
-		GeneratorName      string
-		Package            string
-		EnumType           string
-		CapEnumType        string
-		AllCapsEnumType    string
-		EnumFlags          []EnumFlagTemplateVals
-		EnumFlagSetters    []EnumFlagTemplateVals
+		GeneratorName   string
+		Package         string
+		EnumType        string
+		CapEnumType     string
+		AllCapsEnumType string
+		EnumFlags       []EnumFlagTemplateVals
+		EnumFlagSetters []EnumFlagTemplateVals
 	}
 	EnumFlagTemplateVals struct {
 		EnumType       string
@@ -47,8 +47,8 @@ type (
 )
 
 var (
-	INLINE_ARGS  InlineArgs
-	PROG_STATE   ProgState = ProgState{
+	INLINE_ARGS InlineArgs
+	PROG_STATE  ProgState = ProgState{
 		enumVars: []EnumVar{},
 	}
 	TEMPLATES common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
@@ -129,10 +129,10 @@ func main() {
 	for _, v := range PROG_STATE.enumVars {
 		capEnumFlag := strings.ToUpper(v.name[0:1]) + v.name[1:]
 		iterV := EnumFlagTemplateVals{
-			EnumType:       INLINE_ARGS.Type,
-			CapEnumFlag:    capEnumFlag,
-			EnumFlag:       v.name,
-			Comment:        v.comment,
+			EnumType:    INLINE_ARGS.Type,
+			CapEnumFlag: capEnumFlag,
+			EnumFlag:    v.name,
+			Comment:     v.comment,
 		}
 		templateData.EnumFlags[cntr] = iterV
 		if !v.NoSetter {
