@@ -104,7 +104,7 @@ func TestToStructsMalformedDifferingRowLengthNoHeaders(t *testing.T) {
 	cntr := 0
 	err := ToStructs[csvTest](
 		iter.SliceElems[[]string](MALFORMED_DIFFERING_ROW_LEN_NO_HEADERS_PARSE),
-		NewOptions().DateTimeFormat("01/02/2006").OptionsFlag(DefaultOptionsFlag().HasHeaders(false)),
+		NewOptions().DateTimeFormat("01/02/2006").OptionsFlag(NewOptionsFlag().HasHeaders(false)),
 	).ForEach(func(index int, val csvTest) (iter.IteratorFeedback, error) {
 		MALFORMED_DIFFERING_ROW_LEN_NO_HEADERS_STRUCT[index].Eq(&val, t)
 		cntr++

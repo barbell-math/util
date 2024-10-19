@@ -184,7 +184,7 @@ func TestNewStructMappingIgnoreTags(t *testing.T) {
 	}
 	var tmp Row
 	m, err := newStructHeaderMapping[Row](&tmp, NewOptions().OptionsFlag(
-		DefaultOptionsFlag().UseStructTags(false),
+		NewOptionsFlag().UseStructTags(false),
 	))
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)
@@ -203,7 +203,7 @@ func TestNewStructMappingIgnoreTagsAndNonDefaultTag(t *testing.T) {
 	m, err := newStructHeaderMapping[Row](
 		&tmp,
 		NewOptions().StructTagName("tag").OptionsFlag(
-			DefaultOptionsFlag().UseStructTags(false),
+			NewOptionsFlag().UseStructTags(false),
 		),
 	)
 	test.Nil(err, t)

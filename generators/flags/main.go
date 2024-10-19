@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"os"
@@ -17,11 +18,6 @@ type (
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 
-	CommentArgs struct {
-		UnknownValue string `required:"t" help:"The value that will be returned should an invalid enum type be used."`
-		Default      string `required:"t" help:"The default value the new function should return."`
-	}
-
 	ProgState struct {
 		prevType string
 		enumVars []EnumVar
@@ -30,7 +26,6 @@ type (
 		name     string
 		comment  string
 		NoSetter bool   `required:"f" default:"f" help:"Set to true to not generate the setter code for this flag."`
-		String   string `required:"t" help:"The string representation of this flag."`
 	}
 
 	TemplateVals struct {
@@ -41,9 +36,6 @@ type (
 		AllCapsEnumType    string
 		EnumFlags          []EnumFlagTemplateVals
 		EnumFlagSetters    []EnumFlagTemplateVals
-		UnknownValue       string
-		UnknownValueString string
-		Default            string
 	}
 	EnumFlagTemplateVals struct {
 		EnumType       string
@@ -56,7 +48,6 @@ type (
 
 var (
 	INLINE_ARGS  InlineArgs
-	COMMENT_ARGS CommentArgs
 	PROG_STATE   ProgState = ProgState{
 		enumVars: []EnumVar{},
 	}
@@ -79,53 +70,9 @@ func (o {{ .EnumType }}) GetFlag(flag {{ .EnumType }}) bool {
 	return o & flag>0
 }
 `,
-			"stringFunc": `
-func (o {{ .EnumType }}) String() string {
-	switch o {
-	{{range .EnumFlags }} case {{ .EnumFlag }}: return "{{ .EnumFlagString }}"
-	{{end}}
-	default: return "{{ .UnknownValueString }}"
-	}
-}
-`,
-			"fromStringFunc": `
-func (o *{{ .EnumType }}) FromString(s string) error {
-	switch s {
-	{{range .EnumFlags}}
-	case "{{ .EnumFlagString }}":
-		*o={{ .EnumFlag }}
-		return nil
-	{{end}}
-	default:
-		*o={{ .UnknownValue }}
-		return fmt.Errorf("%w: %s",Invalid{{ .CapEnumType }}, s)
-	}
-}
-`,
-			"defaultFunc": `
-func Default{{ .CapEnumType }}() {{ .EnumType }} {
-	return {{ .Default }}
-}
-`,
 			"file": `
 package {{ .Package }}
 {{template "autoGenComment" .}}
-import (
-	"fmt"
-	"errors"
-)
-
-var (
-	Invalid{{ .CapEnumType }}=errors.New("Invalid {{ .EnumType }}")
-	{{ .AllCapsEnumType }} []{{ .EnumType }}=[]{{ .EnumType }}{
-		{{range .EnumFlags}} {{.EnumFlag}},
-		{{end}}
-	}
-)
-
-{{template "defaultFunc" .}}
-{{template "stringFunc" .}}
-{{template "fromStringFunc" .}}
 
 {{template "getFlagFunc" .}}
 {{range .EnumFlagSetters}}
@@ -139,7 +86,6 @@ var (
 func main() {
 	common.InlineArgs(&INLINE_ARGS, os.Args)
 
-	op, found := common.DocArgsAstFilter(INLINE_ARGS.Type, &COMMENT_ARGS)
 	common.IterateOverAST(
 		".",
 		common.GenFileExclusionFilter,
@@ -147,7 +93,6 @@ func main() {
 			if file.Name.Name != INLINE_ARGS.Package {
 				return false
 			}
-			op(fSet, srcFile, node)
 			switch node.(type) {
 			case *ast.GenDecl:
 				gdNode := node.(*ast.GenDecl)
@@ -170,27 +115,6 @@ func main() {
 		},
 	)
 
-	if !*found {
-		common.PrintRunningError(
-			"The supplied type did not have comment args but they are required.",
-		)
-		os.Exit(1)
-	}
-
-	foundUnknownValue := false
-	for _, v := range PROG_STATE.enumVars {
-		foundUnknownValue = (v.name == COMMENT_ARGS.UnknownValue)
-		if foundUnknownValue {
-			break
-		}
-	}
-	if !foundUnknownValue {
-		common.PrintRunningError(
-			"The supplied unknown value was not found in the list of enum flag values.",
-		)
-		os.Exit(1)
-	}
-
 	allCapsEnumType := getAllCapsType()
 	templateData := TemplateVals{
 		GeneratorName:   os.Args[0],
@@ -200,7 +124,6 @@ func main() {
 		AllCapsEnumType: allCapsEnumType,
 		EnumFlags:       make([]EnumFlagTemplateVals, len(PROG_STATE.enumVars)),
 		EnumFlagSetters: make([]EnumFlagTemplateVals, 0),
-		Default:         COMMENT_ARGS.Default,
 	}
 	cntr := 0
 	for _, v := range PROG_STATE.enumVars {
@@ -210,7 +133,6 @@ func main() {
 			CapEnumFlag:    capEnumFlag,
 			EnumFlag:       v.name,
 			Comment:        v.comment,
-			EnumFlagString: v.String,
 		}
 		templateData.EnumFlags[cntr] = iterV
 		if !v.NoSetter {
@@ -218,15 +140,11 @@ func main() {
 				templateData.EnumFlagSetters, iterV,
 			)
 		}
-		if v.name == COMMENT_ARGS.UnknownValue {
-			templateData.UnknownValue = v.name
-			templateData.UnknownValueString = v.String
-		}
 		cntr++
 	}
 
 	if err := TEMPLATES.WriteToFile(
-		INLINE_ARGS.Type,
+		fmt.Sprintf("%sFlags", INLINE_ARGS.Type),
 		common.GeneratedSrcFileExt,
 		"file",
 		templateData,

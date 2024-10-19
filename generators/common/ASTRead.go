@@ -127,7 +127,7 @@ func GetDocArgVals(
 	}
 
 	progPrefix := fmt.Sprintf(
-		"//%s:%s ",
+		"//%s:%s",
 		GeneratorCommentPrefix, GetProgName(os.Args),
 	)
 
@@ -135,7 +135,9 @@ func GetDocArgVals(
 	for _, l := range strings.Split(comment, "\n") {
 		l = strings.TrimSpace(l)
 		if strings.HasPrefix(l, progPrefix) {
-			argLines = append(argLines, strings.Replace(l, progPrefix, "", 1))
+			tmp:=strings.Replace(l, progPrefix, "", 1)
+			tmp=strings.TrimSpace(tmp)
+			argLines = append(argLines, tmp)
 		}
 	}
 
@@ -178,9 +180,8 @@ func DocArgsAstFilter(
 			return err
 		} else if err := CommentArgs(globalStruct, comment); err != nil {
 			return err
-		} else {
-			foundTypeDef = true
-		}
+		} 
+		foundTypeDef = true
 		return nil
 	}
 

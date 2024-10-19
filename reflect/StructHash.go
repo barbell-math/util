@@ -8,15 +8,16 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-//go:generate ../bin/flagEnum -type=optionsFlag -package=reflect
+//go:generate ../bin/enum -type=optionsFlag -package=reflect
+//go:generate ../bin/flags -type=optionsFlag -package=reflect
 //go:generate ../bin/structDefaultInit -struct=structHashOpts
 
 type (
-	//gen:flagEnum unknownValue unknownOptionsFlag
-	//gen:flagEnum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs
+	//gen:enum unknownValue unknownOptionsFlag
+	//gen:enum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs
 	optionsFlag    int
 	structHashOpts struct {
-		optionsFlag `default:"DefaultOptionsFlag()" setter:"f" getter:"f"`
+		optionsFlag `default:"NewOptionsFlag()" setter:"f" getter:"f"`
 	}
 )
 
@@ -27,7 +28,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
-	//gen:flagEnum string followPntrs
+	//gen:enum string followPntrs
 	followPntrs optionsFlag = 1 << iota
 	// Description: set to true if the hash value should be calculated by
 	// following interface values rather than using the interface value itself
@@ -35,7 +36,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
-	//gen:flagEnum string followInterface
+	//gen:enum string followInterface
 	followInterface
 	// Description: set to true to include map key value pairs in the hash
 	// calculation
@@ -43,15 +44,14 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
-	//gen:flagEnum string includeMapVals
+	//gen:enum string includeMapVals
 	includeMapVals
-	// Description: set to true to include slice values in the hash
-	// calculation
+	// Description: set to true to include slice values in the hash calculation
 	//
 	// Used by: [ToStructs]
 	//
 	// Default: true
-	//gen:flagEnum string includeSliceVals
+	//gen:enum string includeSliceVals
 	includeSliceVals
 	// Description: set to true to include array values in the hash
 	// calculation
@@ -59,10 +59,10 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
-	//gen:flagEnum string includeArrayVals
+	//gen:enum string includeArrayVals
 	includeArrayVals
-	//gen:flagEnum noSetter
-	//gen:flagEnum string unknownOptionsFlag
+	//gen:flags noSetter
+	//gen:enum string unknownOptionsFlag
 	unknownOptionsFlag
 )
 

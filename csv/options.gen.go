@@ -8,7 +8,7 @@ import (
 // Returns a new options struct initialized with the default values.
 func NewOptions() *options {
 	return &options{
-		optionsFlag:    DefaultOptionsFlag(),
+		optionsFlag:    NewOptionsFlag(),
 		comment:        '#',
 		delimiter:      ',',
 		structTagName:  "csv",
@@ -21,7 +21,7 @@ func NewOptions() *options {
 //
 // Used by: [Parse], [Flatten], [FromStructs]
 //
-// Default: See the [DefaultOptionsFlag] function.
+// Default: See the [NewOptionsFlag] function.
 func (o *options) OptionsFlag(v optionsFlag) *options {
 	o.optionsFlag = v
 	return o

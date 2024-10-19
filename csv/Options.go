@@ -1,19 +1,20 @@
 package csv
 
-//go:generate ../bin/flagEnum -type=optionsFlag -package=csv
+//go:generate ../bin/enum -type=optionsFlag -package=csv
+//go:generate ../bin/flags -type=optionsFlag -package=csv
 //go:generate ../bin/structDefaultInit -struct=options
 
 type (
-	//gen:flagEnum unknownValue unknownOptionsFlag
-	//gen:flagEnum default 0 | hasHeaders | useStructTags | writeHeaders
+	//gen:enum unknownValue unknownOptionsFlag
+	//gen:enum default 0 | hasHeaders | useStructTags | writeHeaders
 	optionsFlag int
 	options     struct {
 		// Description: boolean options encoded in a bit flag enum.
 		//
 		// Used by: [Parse], [Flatten], [FromStructs]
 		//
-		// Default: See the [DefaultOptionsFlag] function.
-		optionsFlag `default:"DefaultOptionsFlag()" setter:"t" getter:"f"`
+		// Default: See the [NewOptionsFlag] function.
+		optionsFlag `default:"NewOptionsFlag()" setter:"t" getter:"f"`
 
 		// Description: determines what character is considered to be a comment
 		//
@@ -62,7 +63,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: true
-	//gen:flagEnum string hasHeaders
+	//gen:enum string hasHeaders
 	hasHeaders optionsFlag = 1 << iota
 	// Description: set to true to skip the headers from the incoming
 	// iterator stream and instead determine field ordering by the order of
@@ -71,7 +72,7 @@ const (
 	// Used by: [ToStructs]
 	//
 	// Default: false
-	//gen:flagEnum string ignoreHeaders
+	//gen:enum string ignoreHeaders
 	ignoreHeaders
 	// Description: set to true to use struct field tags instead of the
 	// field name when a tag is present and has the same name as defined by
@@ -80,17 +81,17 @@ const (
 	// Used by: [ToStructs], [FromStructs]
 	//
 	// Default: true
-	//gen:flagEnum string useStructTags
+	//gen:enum string useStructTags
 	useStructTags
 	// Description: set to true to write the headers to the file
 	//
 	// Used by: [FromStructs]
 	//
 	// Default: true
-	//gen:flagEnum string writeHeaders
+	//gen:enum string writeHeaders
 	writeHeaders
-	//gen:flagEnum noSetter
-	//gen:flagEnum string headersSupplied
+	//gen:flags	noSetter
+	//gen:enum string headersSupplied
 	headersSupplied
 	// Description: whether or not to write zero-values to the csv file. If false,
 	// any zero values will be left as blank fields.
@@ -98,10 +99,10 @@ const (
 	// Used by: [FromStructs]
 	//
 	// Default: false
-	//gen:flagEnum string writeZeroValues
+	//gen:enum string writeZeroValues
 	writeZeroValues
-	//gen:flagEnum noSetter
-	//gen:flagEnum string unknownOptionsFlag
+	//gen:flags	noSetter
+	//gen:enum string unknownOptionsFlag
 	unknownOptionsFlag
 )
 
