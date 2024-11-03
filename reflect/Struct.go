@@ -14,12 +14,12 @@ func getInaddressableFieldError(name string) error {
 // This struct has fields that contain all the possible relevant information
 // about a structs field.
 type FieldInfo struct {
+	ValInfo
 	// The name of the field.
 	Name string
 	// The tag associated with the struct field.
 	Tag reflect.StructTag
 	// The value information for the field.
-	ValInfo
 }
 
 // Returns true if the supplied value is a pointer to a struct. As a special
@@ -192,29 +192,8 @@ func StructFieldInfo[T any, S reflect.Value | *T](
 			f := structVal.Field(i)
 			return FieldInfo{
 				Name: n,
-				Tag:  structVal.Type().Field(i).Tag,
-				ValInfo: ValInfo{
-					Type: f.Type(),
-					Kind: f.Kind(),
-					Val: func() (any, bool) {
-						if keepVal {
-							return f.Interface(), true
-						}
-						return nil, false
-					},
-					Pntr: func() (any, error) {
-						if f.CanAddr() {
-							return f.Addr().Interface(), nil
-						}
-						return nil, getInaddressableFieldError(n)
-					},
-					ReflectPntr: func() (reflect.Value, error) {
-						if f.CanAddr() {
-							return f.Addr(), nil
-						}
-						return reflect.Value{}, getInaddressableFieldError(n)
-					},
-				},
+				Tag: structVal.Type().Field(i).Tag,
+				ValInfo: NewValInfo(f, keepVal, getInaddressableFieldError(n)),
 			}, nil
 		},
 	)

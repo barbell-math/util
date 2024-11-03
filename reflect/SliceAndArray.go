@@ -205,6 +205,7 @@ func elemInfo[T any, U reflect.Value | *T](
 		arrayVal.Len(),
 		func(i int) (ValInfo, error) {
 			return ValInfo{
+				v: arrayVal.Index(i),
 				Type: arrayVal.Index(i).Type(),
 				Kind: arrayVal.Index(i).Kind(),
 				Val: func() (any, bool) {
@@ -218,12 +219,6 @@ func elemInfo[T any, U reflect.Value | *T](
 						return arrayVal.Index(i).Addr().Interface(), nil
 					}
 					return nil, getInaddressableIndexError(i)
-				},
-				ReflectPntr: func() (reflect.Value, error) {
-					if arrayVal.Index(i).CanAddr() {
-						return arrayVal.Index(i).Addr(), nil
-					}
-					return reflect.Value{}, getInaddressableIndexError(i)
 				},
 			}, nil
 		},

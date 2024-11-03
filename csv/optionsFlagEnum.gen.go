@@ -23,6 +23,35 @@ func NewOptionsFlag() optionsFlag {
 	return 0 | hasHeaders | useStructTags | writeHeaders
 }
 
+func (o optionsFlag) Valid() error {
+	switch o {
+
+	case hasHeaders:
+		return nil
+
+	case ignoreHeaders:
+		return nil
+
+	case useStructTags:
+		return nil
+
+	case writeHeaders:
+		return nil
+
+	case headersSupplied:
+		return nil
+
+	case writeZeroValues:
+		return nil
+
+	case unknownOptionsFlag:
+		return nil
+
+	default:
+		return InvalidOptionsFlag
+	}
+}
+
 func (o optionsFlag) String() string {
 	switch o {
 	case hasHeaders:

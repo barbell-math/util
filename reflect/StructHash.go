@@ -66,111 +66,105 @@ const (
 	unknownOptionsFlag
 )
 
-func getHash(val FieldInfo, opts *structHashOpts) hash.Hash {
+func typeCastHashOp[
+	T any,
+	W widgets.BaseInterface[T],
+](val ValInfo, h *hash.Hash) {
+	w := widgets.Base[T, W]{}
+	if iterV, err := val.Pntr(); err != nil {
+		*h = h.Combine(w.Hash(iterV.(*T)))
+	}
+}
+
+func pointerHashOp(val ValInfo, h *hash.Hash) {
+	w := widgets.BuiltinUintptr{}
+	if val.v.CanAddr() {
+		v := uintptr(val.v.Addr().Pointer())
+		*h = h.Combine(w.Hash(&v))
+	}
+}
+
+func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 	var rv hash.Hash
 	switch val.Kind {
 	case reflect.Bool:
-		bw := widgets.BuiltinBool{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = bw.Hash(iterV.(*bool)).Combine(rv)
-		}
+		typeCastHashOp[bool, widgets.BuiltinBool](val, &rv)
 	case reflect.Int:
-		iw := widgets.BuiltinInt{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = iw.Hash(iterV.(*int)).Combine(rv)
-		}
+		typeCastHashOp[int, widgets.BuiltinInt](val, &rv)
 	case reflect.Int8:
-		i8w := widgets.BuiltinInt8{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = i8w.Hash(iterV.(*int8)).Combine(rv)
-		}
+		typeCastHashOp[int8, widgets.BuiltinInt8](val, &rv)
 	case reflect.Int16:
-		i16w := widgets.BuiltinInt16{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = i16w.Hash(iterV.(*int16)).Combine(rv)
-		}
+		typeCastHashOp[int16, widgets.BuiltinInt16](val, &rv)
 	case reflect.Int32:
-		i32w := widgets.BuiltinInt32{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = i32w.Hash(iterV.(*int32)).Combine(rv)
-		}
+		typeCastHashOp[int32, widgets.BuiltinInt32](val, &rv)
 	case reflect.Int64:
-		i64w := widgets.BuiltinInt64{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = i64w.Hash(iterV.(*int64)).Combine(rv)
-		}
+		typeCastHashOp[int64, widgets.BuiltinInt64](val, &rv)
 	case reflect.Uint:
-		uw := widgets.BuiltinUint{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = uw.Hash(iterV.(*uint)).Combine(rv)
-		}
+		typeCastHashOp[uint, widgets.BuiltinUint](val, &rv)
 	case reflect.Uint8:
-		u8w := widgets.BuiltinUint8{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = u8w.Hash(iterV.(*uint8)).Combine(rv)
-		}
+		typeCastHashOp[uint8, widgets.BuiltinUint8](val, &rv)
 	case reflect.Uint16:
-		u16w := widgets.BuiltinUint16{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = u16w.Hash(iterV.(*uint16)).Combine(rv)
-		}
+		typeCastHashOp[uint16, widgets.BuiltinUint16](val, &rv)
 	case reflect.Uint32:
-		u32w := widgets.BuiltinUint32{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = u32w.Hash(iterV.(*uint32)).Combine(rv)
-		}
+		typeCastHashOp[uint32, widgets.BuiltinUint32](val, &rv)
 	case reflect.Uint64:
-		u64w := widgets.BuiltinUint64{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = u64w.Hash(iterV.(*uint64)).Combine(rv)
-		}
+		typeCastHashOp[uint64, widgets.BuiltinUint64](val, &rv)
 	case reflect.Float32:
-		f32w := widgets.BuiltinFloat32{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = f32w.Hash(iterV.(*float32)).Combine(rv)
-		}
+		typeCastHashOp[float32, widgets.BuiltinFloat32](val, &rv)
 	case reflect.Float64:
-		f64w := widgets.BuiltinFloat64{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = f64w.Hash(iterV.(*float64)).Combine(rv)
-		}
+		typeCastHashOp[float64, widgets.BuiltinFloat64](val, &rv)
 	case reflect.Complex64:
-		c64w := widgets.BuiltinComplex64{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = c64w.Hash(iterV.(*complex64)).Combine(rv)
-		}
+		typeCastHashOp[complex64, widgets.BuiltinComplex64](val, &rv)
 	case reflect.Complex128:
-		c128w := widgets.BuiltinComplex128{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = c128w.Hash(iterV.(*complex128)).Combine(rv)
-		}
+		typeCastHashOp[complex128, widgets.BuiltinComplex128](val, &rv)
 	case reflect.String:
-		sw := widgets.BuiltinString{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = sw.Hash(iterV.(*string)).Combine(rv)
-		}
+		typeCastHashOp[string, widgets.BuiltinString](val, &rv)
 	case reflect.Uintptr:
-		uw := widgets.BuiltinUintptr{}
-		if iterV, err := val.Pntr(); err != nil {
-			rv = uw.Hash(iterV.(*uintptr)).Combine(rv)
-		}
+		typeCastHashOp[uintptr, widgets.BuiltinUintptr](val, &rv)
 	case reflect.Pointer:
-		if !opts.GetFlag(followPntrs) {
-			uw := widgets.BuiltinUintptr{}
-			if iterV, err := val.ReflectPntr(); err != nil {
-				v := uintptr(iterV.Pointer())
-				rv = uw.Hash(&v)
-			}
+		if opts.GetFlag(followPntrs) {
+			rv = rv.Combine(getHash(
+				NewValInfo(
+					// This copy should be ok because it is only copying a pntr
+					reflect.ValueOf(val.v.Interface()),
+					false,
+					nil,
+				),
+				opts,
+			))
 		} else {
-			// get hash of underlying value
+			pointerHashOp(val, &rv)
 		}
 	case reflect.Chan:
+		pointerHashOp(val, &rv)
 	case reflect.Array:
+		if opts.GetFlag(includeArrayVals) {
+			// iterate over array and get hash values
+		} else {
+			pointerHashOp(val, &rv)
+		}
 	case reflect.Slice:
+		if opts.GetFlag(includeArrayVals) {
+			// iterate over slice and get hash values
+		} else {
+			pointerHashOp(val, &rv)
+		}
 	case reflect.Map:
+		if opts.GetFlag(includeMapVals) {
+			// iterate over map and get hash values
+		} else {
+			pointerHashOp(val, &rv)
+		}
 	case reflect.Func:
+		pointerHashOp(val, &rv)
 	case reflect.Interface:
+		if opts.GetFlag(followInterface) {
+			// follow interface data value
+		} else {
+			pointerHashOp(val, &rv)
+		}
 	case reflect.UnsafePointer:
+		fallthrough // do nothing because it's unsafe
 	case reflect.Struct:
 		fallthrough // iteration will be handled by the calling func
 	case reflect.Invalid:
@@ -180,6 +174,10 @@ func getHash(val FieldInfo, opts *structHashOpts) hash.Hash {
 	return 0
 }
 
+// Returns a hash for the supplied struct. The hash is generated by reflexively
+// iterating over the structs fields. The widgets in the [widgets] package are
+// used when generating hashes. The opts struct determines behaviors about which
+// struct fields are used and how they are used.
 func StructHash[T any, S reflect.Value | *T](
 	s S,
 	opts *structHashOpts,
@@ -187,7 +185,7 @@ func StructHash[T any, S reflect.Value | *T](
 	var rv hash.Hash
 	RecursiveStructFieldInfo[T, S](s, false).ForEach(
 		func(index int, val FieldInfo) (iter.IteratorFeedback, error) {
-			rv.Combine(getHash(val, opts))
+			rv.Combine(getHash(val.ValInfo, opts))
 			return iter.Continue, nil
 		},
 	)

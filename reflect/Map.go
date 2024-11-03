@@ -158,19 +158,7 @@ func MapElemKeyInfo[T any, M reflect.Value | *T](
 	return iter.Map[reflect.Value, ValInfo](
 		iter.SliceElems[reflect.Value](mapVal.MapKeys()),
 		func(index int, val reflect.Value) (ValInfo, error) {
-			return ValInfo{
-				Type: mapVal.Type().Key(),
-				Kind: mapVal.Type().Key().Kind(),
-				Val: func() (any, bool) {
-					if keepVal {
-						return val.Interface(), true
-					}
-					return nil, false
-				},
-				Pntr: func() (any, error) {
-					return nil, getInaddressableMapError()
-				},
-			}, nil
+			return NewValInfo(mapVal, keepVal, getInaddressableMapError()), nil
 		},
 	)
 }
@@ -226,6 +214,7 @@ func MapElemInfo[T any, M reflect.Value | *T](
 		func(index int, val reflect.Value) (KeyValInfo, error) {
 			return KeyValInfo{
 				A: ValInfo{
+					v: val,
 					Type: mapVal.Type().Key(),
 					Kind: mapVal.Type().Key().Kind(),
 					Val: func() (any, bool) {
@@ -237,11 +226,9 @@ func MapElemInfo[T any, M reflect.Value | *T](
 					Pntr: func() (any, error) {
 						return nil, getInaddressableMapError()
 					},
-					ReflectPntr: func() (reflect.Value, error) {
-						return reflect.Value{}, getInaddressableMapError()
-					},
 				},
 				B: ValInfo{
+					v: mapVal.MapIndex(val),
 					Type: mapVal.Type().Elem(),
 					Kind: mapVal.Type().Elem().Kind(),
 					Val: func() (any, bool) {
@@ -252,9 +239,6 @@ func MapElemInfo[T any, M reflect.Value | *T](
 					},
 					Pntr: func() (any, error) {
 						return nil, getInaddressableMapError()
-					},
-					ReflectPntr: func() (reflect.Value, error) {
-						return reflect.Value{}, getInaddressableMapError()
 					},
 				},
 			}, nil

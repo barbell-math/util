@@ -10,27 +10,16 @@ import (
 	"github.com/barbell-math/util/customerr"
 )
 
-// This struct has fields that contain all the possible relevant information
-// about a value.
 type ValInfo struct {
-	// The type of the field.
+	v reflect.Value
 	Type reflect.Type
-	// The kind of the field.
 	Kind reflect.Kind
-	// The concrete value of the field. This is a copy of the value, not the
-	// original value contained in the struct. To access the original value
-	// use the Pntr field of this struct.
+	// The underlying value. This is a copy of the value, not the
+	// original value. To access the original value use the Pntr field.
 	Val func() (any, bool)
-	// Returns a pointer to the struct field, if possible. Note that the Pntr
-	// field of this struct is a function that may return an error. This is
-	// because, depending on the value that is passed to the iterator function,
-	// not all struct fields will be addressable.
+	// Returns a pointer to the value, if possible. An error will be returned if
+	// the value is not addressable.
 	Pntr func() (any, error)
-	// Returns a reflect value of a pointer to the struct field, if possible.
-	// Note that the Pntr field of this struct is a function that may return an
-	// error. This is because, depending on the value that is passed to the
-	// iterator function, not all struct fields will be addressable.
-	ReflectPntr func() (reflect.Value, error)
 }
 
 // Makes a new val info struct with the supplied reflect value. Set keepVal to
@@ -38,8 +27,8 @@ type ValInfo struct {
 // copy. The addressableErr will be the error that is returned when trying to
 // access get the address of a non-addressable reflect value.
 func NewValInfo(v reflect.Value, keepVal bool, addressableErr error) ValInfo {
-	// TODO - add to struct, map, array, slice, test, use in struct hash
 	return ValInfo{
+		v: v,
 		Type: v.Type(),
 		Kind: v.Kind(),
 		Val: func() (any, bool) {
@@ -53,12 +42,6 @@ func NewValInfo(v reflect.Value, keepVal bool, addressableErr error) ValInfo {
 				return v.Addr().Interface(), nil
 			}
 			return nil, addressableErr
-		},
-		ReflectPntr: func() (reflect.Value, error) {
-			if v.CanAddr() {
-				return v.Addr(), nil
-			}
-			return reflect.Value{}, addressableErr
 		},
 	}
 }

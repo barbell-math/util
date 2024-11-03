@@ -62,6 +62,16 @@ var (
 	}
 	TEMPLATES common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
 		map[string]string{
+			"validFunc": `
+func (o {{ .EnumType }}) Valid() error {
+	switch o {
+	{{range .EnumFlags }}
+			case {{ .EnumFlag }}: return nil
+	{{end}}
+	default: return Invalid{{ .CapEnumType }}
+	}
+}
+`,
 			"marshalJSONFunc": `
 func (o {{ .EnumType }}) MarshalJSON() ([]byte, error) {
 	switch o {
@@ -131,6 +141,7 @@ var (
 )
 
 {{template "defaultFunc" .}}
+{{template "validFunc" .}}
 {{template "stringFunc" .}}
 {{template "marshalJSONFunc" .}}
 {{template "fromStringFunc" .}}
