@@ -54,10 +54,18 @@ func TestStructHashEmptyStruct(t *testing.T) {
 func TestStructHashSimpleStruct(t *testing.T) {
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
+}
+
+func TestStructHashNoExportedFields(t *testing.T) {
+	type s struct { a int }
+
+	h, err:=StructHash[s, *s](&s{a: 10}, NewStructHashOpts())
+	test.Nil(err, t)
+	test.Eq(hash.Hash(0), h, t)
 }
 
 func TestStructHashPopulatedPointers(t *testing.T) {
@@ -65,14 +73,14 @@ func TestStructHashPopulatedPointers(t *testing.T) {
 
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{P: &i},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
@@ -83,14 +91,14 @@ func TestStructHashPopulatedPointers(t *testing.T) {
 func TestStructHashPopulatedChan(t *testing.T) {
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{C: make(chan int)},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
@@ -101,14 +109,14 @@ func TestStructHashPopulatedChan(t *testing.T) {
 func TestStructHashPopulatedArray(t *testing.T) {
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeArrayVals(false)),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{A: [3]int{}},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
@@ -119,14 +127,14 @@ func TestStructHashPopulatedArray(t *testing.T) {
 func TestStructHashPopulatedSlice(t *testing.T) {
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeSliceVals(false)),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{Sl: []int{}},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
@@ -137,14 +145,14 @@ func TestStructHashPopulatedSlice(t *testing.T) {
 func TestStructHashPopulatedMap(t *testing.T) {
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeMapVals(false)),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{M: map[int]int{}},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
@@ -157,14 +165,14 @@ func TestStructHashPopulatedFunc(t *testing.T) {
 
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{F: f},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
@@ -175,14 +183,14 @@ func TestStructHashPopulatedFunc(t *testing.T) {
 func TestStructHashPopulatedInterface(t *testing.T) {
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{Intf: 5},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
@@ -193,17 +201,96 @@ func TestStructHashPopulatedInterface(t *testing.T) {
 func TestStructHashPopulatedStruct(t *testing.T) {
 	h, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	h2, err:=StructHash[structHashTest, *structHashTest](
 		&structHashTest{St: structTest{One: 1}},
-		&structHashOpts{},
+		NewStructHashOpts(),
 	)
 	test.Nil(err, t)
 	test.Neq(hash.Hash(0), h, t)
 
 	test.Neq(h, h2, t)
 }
+
+func TestStructHashStability(t *testing.T) {
+	h, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{},
+		NewStructHashOpts(),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+
+	h2, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{},
+		NewStructHashOpts(),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+	test.Eq(h, h2, t)
+}
+
+func TestStructHashDontFollowPntrs(t *testing.T) {
+	i:=0
+
+	h, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{P: &i},
+		NewStructHashOpts().OptionsFlag(NewOptionsFlag().FollowPntrs(false)),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+
+	h2, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{P: &i},
+		NewStructHashOpts().OptionsFlag(NewOptionsFlag().FollowPntrs(false)),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+	test.Eq(h, h2, t)
+
+	i=1
+	h3, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{P: &i},
+		NewStructHashOpts().OptionsFlag(NewOptionsFlag().FollowPntrs(false)),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+	test.Eq(h, h3, t)
+}
+
+func TestStructHashFollowPntrs(t *testing.T) {
+	i:=0
+
+	h, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{P: &i},
+		NewStructHashOpts(),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+
+	h2, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{P: &i},
+		NewStructHashOpts(),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+	test.Eq(h, h2, t)
+
+	i=1
+	h3, err:=StructHash[structHashTest, *structHashTest](
+		&structHashTest{P: &i},
+		NewStructHashOpts(),
+	)
+	test.Nil(err, t)
+	test.Neq(hash.Hash(0), h, t)
+	test.Neq(h, h3, t)
+}
+
+// TODO - test follow pntrs
+// TODO - test include array vals
+// TODO - test include slice vals
+// TODO - test include map vals
+// TODO - test follow interface

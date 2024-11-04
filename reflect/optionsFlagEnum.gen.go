@@ -22,6 +22,32 @@ func NewOptionsFlag() optionsFlag {
 	return includeMapVals | includeArrayVals | includeSliceVals | followPntrs
 }
 
+func (o optionsFlag) Valid() error {
+	switch o {
+
+	case followPntrs:
+		return nil
+
+	case followInterface:
+		return nil
+
+	case includeMapVals:
+		return nil
+
+	case includeSliceVals:
+		return nil
+
+	case includeArrayVals:
+		return nil
+
+	case unknownOptionsFlag:
+		return nil
+
+	default:
+		return InvalidOptionsFlag
+	}
+}
+
 func (o optionsFlag) String() string {
 	switch o {
 	case followPntrs:

@@ -18,7 +18,7 @@ type (
 	//gen:enum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs
 	optionsFlag    int
 	structHashOpts struct {
-		optionsFlag `default:"NewOptionsFlag()" setter:"f" getter:"f"`
+		optionsFlag `default:"NewOptionsFlag()" setter:"t" getter:"f"`
 	}
 )
 
@@ -26,7 +26,7 @@ const (
 	// Description: set to true if the hash value should be calculated by
 	// following pointer values rather than using the pointers value itself
 	//
-	// Used by: [ToStructs]
+	// Used by: [StructHash]
 	//
 	// Default: true
 	//gen:enum string followPntrs
@@ -34,7 +34,7 @@ const (
 	// Description: set to true if the hash value should be calculated by
 	// following interface values rather than using the interface value itself
 	//
-	// Used by: [ToStructs]
+	// Used by: [StructHash]
 	//
 	// Default: true
 	//gen:enum string followInterface
@@ -42,14 +42,14 @@ const (
 	// Description: set to true to include map key value pairs in the hash
 	// calculation
 	//
-	// Used by: [ToStructs]
+	// Used by: [StructHash]
 	//
 	// Default: true
 	//gen:enum string includeMapVals
 	includeMapVals
 	// Description: set to true to include slice values in the hash calculation
 	//
-	// Used by: [ToStructs]
+	// Used by: [StructHash]
 	//
 	// Default: true
 	//gen:enum string includeSliceVals
@@ -57,7 +57,7 @@ const (
 	// Description: set to true to include array values in the hash
 	// calculation
 	//
-	// Used by: [ToStructs]
+	// Used by: [StructHash]
 	//
 	// Default: true
 	//gen:enum string includeArrayVals
@@ -82,7 +82,7 @@ func typeCastHashOp[
 
 func pointerHashOp(val ValInfo, h *hash.Hash) {
 	w := widgets.BuiltinUintptr{}
-	if val.v.CanAddr() {
+	if val.v.CanAddr() && !val.v.IsNil() {
 		v := uintptr(val.v.Addr().Pointer())
 		*h = h.Combine(w.Hash(&v))
 	}
@@ -126,7 +126,7 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 	case reflect.Uintptr:
 		typeCastHashOp[uintptr, widgets.BuiltinUintptr](val, &rv)
 	case reflect.Pointer:
-		if opts.GetFlag(followPntrs) {
+		if opts.GetFlag(followPntrs) && !val.v.IsNil() {
 			fmt.Println(val)
 			rv = rv.Combine(getHash(
 				NewValInfo(val.v.Elem(), false, nil),
@@ -183,7 +183,8 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 // will not have a hash value generated.
 //  2. Only exported fields are exported. A struct with no exported fields will
 // have a hash of 0.
-
+//  3. nil values do not contribute to the hash value.
+//
 // The opts struct determines behaviors about which struct fields are used and
 // how they are used. 
 func StructHash[T any, S reflect.Value | *T](
