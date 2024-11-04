@@ -116,7 +116,7 @@ func StrElems(s string) Iter[byte] {
 // This function is a producer.
 //
 // SequentialElems returns an iterator that iterates over a general container
-// using the get function in combination with the length function. Note that
+// using the get function in combination with the length argument. Note that
 // unlike the SliceElems and StrElems producers this producer can return an
 // error.
 func SequentialElems[T any](_len int, get func(i int) (T, error)) Iter[T] {

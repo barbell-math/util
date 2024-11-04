@@ -8,17 +8,19 @@ import (
 	"github.com/barbell-math/util/test"
 )
 
-type customString string
-type testStruct struct {
-	One   int    `json:"one"`
-	Two   string `json:"two"`
-	Three customString
-}
-
-type testStruct2 struct {
-	Four float64
-	Five testStruct
-}
+type (
+	customString string
+	structTest struct {
+		One   int    `json:"one"`
+		Two   string `json:"two"`
+		Three customString
+	}
+	
+	structTest2 struct {
+		Four float64
+		Five structTest
+	}
+)
 
 func TestIsStructVal(t *testing.T) {
 	v := 0
@@ -27,12 +29,12 @@ func TestIsStructVal(t *testing.T) {
 	test.False(IsStructVal[int](v2), t)
 	v2 = reflect.ValueOf(&v)
 	test.False(IsStructVal[int](v2), t)
-	s := testStruct{}
-	test.True(IsStructVal[testStruct](&s), t)
+	s := structTest{}
+	test.True(IsStructVal[structTest](&s), t)
 	s2 := reflect.ValueOf(s)
-	test.True(IsStructVal[testStruct](s2), t)
+	test.True(IsStructVal[structTest](s2), t)
 	s2 = reflect.ValueOf(&s)
-	test.True(IsStructVal[testStruct](s2), t)
+	test.True(IsStructVal[structTest](s2), t)
 }
 
 func TestNonStructGetName(t *testing.T) {
@@ -59,26 +61,26 @@ func TestNonStructGetNameFromReflectValPntr(t *testing.T) {
 }
 
 func TestGetStructName(t *testing.T) {
-	var s testStruct
-	name, err := GetStructName[testStruct](&s)
+	var s structTest
+	name, err := GetStructName[structTest](&s)
 	test.Nil(err, t)
-	test.Eq("testStruct", name, t)
+	test.Eq("structTest", name, t)
 }
 
 func TestGetStructNameFromReflectVal(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(s)
 	name, err := GetStructName[reflect.Value](s2)
 	test.Nil(err, t)
-	test.Eq("testStruct", name, t)
+	test.Eq("structTest", name, t)
 }
 
 func TestGetStructNameFromReflectValPntr(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(&s)
 	name, err := GetStructName[reflect.Value](s2)
 	test.Nil(err, t)
-	test.Eq("testStruct", name, t)
+	test.Eq("structTest", name, t)
 }
 
 func TestNonStructStructFieldNames(t *testing.T) {
@@ -102,8 +104,8 @@ func TestNonStructStructFieldNamesFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldNames(t *testing.T) {
-	var s testStruct
-	vals, err := StructFieldNames[testStruct](&s).Collect()
+	var s structTest
+	vals, err := StructFieldNames[structTest](&s).Collect()
 	test.Eq(3, len(vals), t)
 	test.Eq("One", vals[0], t)
 	test.Eq("Two", vals[1], t)
@@ -112,7 +114,7 @@ func TestStructFieldNames(t *testing.T) {
 }
 
 func TestStructFieldNamesFromReflectVal(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(s)
 	vals, err := StructFieldNames[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -123,7 +125,7 @@ func TestStructFieldNamesFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldNamesFromReflectValPntr(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldNames[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -154,8 +156,8 @@ func TestNonStructStructFieldValsFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldVals(t *testing.T) {
-	var s testStruct = testStruct{One: 1, Two: "2", Three: "3"}
-	vals, err := StructFieldVals[testStruct](&s).Collect()
+	var s structTest = structTest{One: 1, Two: "2", Three: "3"}
+	vals, err := StructFieldVals[structTest](&s).Collect()
 	test.Eq(3, len(vals), t)
 	test.Eq(1, vals[0], t)
 	test.Eq("2", vals[1], t)
@@ -164,7 +166,7 @@ func TestStructFieldVals(t *testing.T) {
 }
 
 func TestStructFieldValsFromReflectVal(t *testing.T) {
-	var s testStruct = testStruct{One: 1, Two: "2", Three: "3"}
+	var s structTest = structTest{One: 1, Two: "2", Three: "3"}
 	s2 := reflect.ValueOf(s)
 	vals, err := StructFieldVals[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -175,7 +177,7 @@ func TestStructFieldValsFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldValsFromReflectValPntr(t *testing.T) {
-	var s testStruct = testStruct{One: 1, Two: "2", Three: "3"}
+	var s structTest = structTest{One: 1, Two: "2", Three: "3"}
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldVals[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -206,8 +208,11 @@ func TestNonStructStructFieldPntrsFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldPntrs(t *testing.T) {
-	var s testStruct
-	vals, err := StructFieldPntrs[testStruct](&s).Collect()
+	s:=structTest {
+		One: 1,
+		Two: "two",
+	}
+	vals, err := StructFieldPntrs[structTest](&s).Collect()
 	test.Eq(3, len(vals), t)
 	test.Eq(&s.One, vals[0].(*int), t)
 	test.Eq(&s.Two, vals[1].(*string), t)
@@ -216,7 +221,10 @@ func TestStructFieldPntrs(t *testing.T) {
 }
 
 func TestStructFieldPntrsFromReflectVal(t *testing.T) {
-	var s testStruct
+	s:=structTest {
+		One: 1,
+		Two: "two",
+	}
 	s2 := reflect.ValueOf(s)
 	vals, err := StructFieldPntrs[reflect.Value](s2).Collect()
 	test.Eq(0, len(vals), t)
@@ -224,7 +232,10 @@ func TestStructFieldPntrsFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldPntrsFromReflectValPntr(t *testing.T) {
-	var s testStruct
+	s:=structTest {
+		One: 1,
+		Two: "two",
+	}
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldPntrs[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -255,8 +266,8 @@ func TestNonStructStructFieldTypesFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldTypes(t *testing.T) {
-	var s testStruct
-	vals, err := StructFieldTypes[testStruct](&s).Collect()
+	var s structTest
+	vals, err := StructFieldTypes[structTest](&s).Collect()
 	test.Eq(3, len(vals), t)
 	test.Eq(reflect.TypeOf(s.One).String(), vals[0].String(), t)
 	test.Eq(reflect.TypeOf(s.Two).String(), vals[1].String(), t)
@@ -265,7 +276,7 @@ func TestStructFieldTypes(t *testing.T) {
 }
 
 func TestStructFieldTypesFromReflectVal(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldTypes[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -276,7 +287,7 @@ func TestStructFieldTypesFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldTypesFromReflectValPntr(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldTypes[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -307,8 +318,8 @@ func TestNonStructStructFieldKindsFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldKinds(t *testing.T) {
-	var s testStruct
-	vals, err := StructFieldKinds[testStruct](&s).Collect()
+	var s structTest
+	vals, err := StructFieldKinds[structTest](&s).Collect()
 	test.Eq(3, len(vals), t)
 	test.Eq(reflect.TypeOf(s.One).Kind(), vals[0], t)
 	test.Eq(reflect.TypeOf(s.Two).Kind(), vals[1], t)
@@ -317,7 +328,7 @@ func TestStructFieldKinds(t *testing.T) {
 }
 
 func TestStructFieldKindsFromReflectVal(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(s)
 	vals, err := StructFieldKinds[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -328,7 +339,7 @@ func TestStructFieldKindsFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldKindsFromReflectValPntr(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldKinds[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -359,8 +370,8 @@ func TestNonStructStructFieldTagsFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldTags(t *testing.T) {
-	var s testStruct
-	vals, err := StructFieldTags[testStruct](&s).Collect()
+	var s structTest
+	vals, err := StructFieldTags[structTest](&s).Collect()
 	test.Eq(3, len(vals), t)
 	test.Eq("one", vals[0].Get("json"), t)
 	test.Eq("two", vals[1].Get("json"), t)
@@ -369,7 +380,7 @@ func TestStructFieldTags(t *testing.T) {
 }
 
 func TestStructFieldTagsFromReflectVal(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(s)
 	vals, err := StructFieldTags[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -380,7 +391,7 @@ func TestStructFieldTagsFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldTagsFromReflectValPntr(t *testing.T) {
-	var s testStruct
+	var s structTest
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldTags[reflect.Value](s2).Collect()
 	test.Eq(3, len(vals), t)
@@ -411,8 +422,8 @@ func TestNonStructStructFieldInfoFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldInfo(t *testing.T) {
-	var s testStruct = testStruct{One: 1, Two: "2", Three: "3"}
-	vals, err := StructFieldInfo[testStruct](&s, true).Collect()
+	var s structTest = structTest{One: 1, Two: "2", Three: "3"}
+	vals, err := StructFieldInfo[structTest](&s, true).Collect()
 	test.Nil(err, t)
 	test.Eq(3, len(vals), t)
 	test.Eq("One", vals[0].Name, t)
@@ -448,7 +459,7 @@ func TestStructFieldInfo(t *testing.T) {
 }
 
 func TestStructFieldInfoFromReflectVal(t *testing.T) {
-	var s testStruct = testStruct{One: 1, Two: "2", Three: "3"}
+	var s structTest = structTest{One: 1, Two: "2", Three: "3"}
 	s2 := reflect.ValueOf(s)
 	vals, err := StructFieldInfo[reflect.Value](s2, true).Collect()
 	test.Nil(err, t)
@@ -486,7 +497,7 @@ func TestStructFieldInfoFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldInfoFromReflectValPntr(t *testing.T) {
-	var s testStruct = testStruct{One: 1, Two: "2", Three: "3"}
+	var s structTest = structTest{One: 1, Two: "2", Three: "3"}
 	s2 := reflect.ValueOf(&s)
 	vals, err := StructFieldInfo[reflect.Value](s2, true).Collect()
 	test.Nil(err, t)
@@ -546,8 +557,8 @@ func TestNonStructRecursiveStructFieldInfoFromReflectValPntr(t *testing.T) {
 }
 
 func TestRecursiveStructFieldInfo(t *testing.T) {
-	var s testStruct = testStruct{One: 1, Two: "2", Three: "3"}
-	vals, err := RecursiveStructFieldInfo[testStruct](&s, true).Collect()
+	var s structTest = structTest{One: 1, Two: "2", Three: "3"}
+	vals, err := RecursiveStructFieldInfo[structTest](&s, true).Collect()
 	test.Nil(err, t)
 	test.Eq(3, len(vals), t)
 	test.Eq("One", vals[0].Name, t)
@@ -583,11 +594,11 @@ func TestRecursiveStructFieldInfo(t *testing.T) {
 }
 
 func TestRecursiveStructFieldInfo2(t *testing.T) {
-	var s testStruct2 = testStruct2{
+	var s structTest2 = structTest2{
 		Four: 4.0,
-		Five: testStruct{One: 1, Two: "2", Three: "3"},
+		Five: structTest{One: 1, Two: "2", Three: "3"},
 	}
-	vals, err := RecursiveStructFieldInfo[testStruct2](&s, true).Collect()
+	vals, err := RecursiveStructFieldInfo[structTest2](&s, true).Collect()
 	test.Nil(err, t)
 	test.Eq(5, len(vals), t)
 	test.Eq("Four", vals[0].Name, t)
@@ -604,7 +615,7 @@ func TestRecursiveStructFieldInfo2(t *testing.T) {
 	test.Eq(4.0, v.(float64), t)
 	test.True(ok, t)
 	v, ok = vals[1].Val()
-	test.Eq(testStruct{One: 1, Two: "2", Three: "3"}, v.(testStruct), t)
+	test.Eq(structTest{One: 1, Two: "2", Three: "3"}, v.(structTest), t)
 	test.True(ok, t)
 	v, ok = vals[2].Val()
 	test.Eq(1, v.(int), t)
@@ -628,7 +639,7 @@ func TestRecursiveStructFieldInfo2(t *testing.T) {
 	test.Eq(&s.Four, p.(*float64), t)
 	test.Nil(err, t)
 	p, err = vals[1].Pntr()
-	test.Eq(&s.Five, p.(*testStruct), t)
+	test.Eq(&s.Five, p.(*structTest), t)
 	test.Nil(err, t)
 	p, err = vals[2].Pntr()
 	test.Eq(&s.Five.One, p.(*int), t)
@@ -642,9 +653,9 @@ func TestRecursiveStructFieldInfo2(t *testing.T) {
 }
 
 func TestRecursiveStructFieldInfo2FromReflectValue(t *testing.T) {
-	var s testStruct2 = testStruct2{
+	var s structTest2 = structTest2{
 		Four: 4.0,
-		Five: testStruct{One: 1, Two: "2", Three: "3"},
+		Five: structTest{One: 1, Two: "2", Three: "3"},
 	}
 	v2 := reflect.ValueOf(s)
 	vals, err := RecursiveStructFieldInfo[reflect.Value](v2, true).Collect()
@@ -658,7 +669,7 @@ func TestRecursiveStructFieldInfo2FromReflectValue(t *testing.T) {
 	test.Eq(4.0, v.(float64), t)
 	test.True(ok, t)
 	v, ok = vals[1].Val()
-	test.Eq(testStruct{One: 1, Two: "2", Three: "3"}, v.(testStruct), t)
+	test.Eq(structTest{One: 1, Two: "2", Three: "3"}, v.(structTest), t)
 	test.True(ok, t)
 	test.Eq(reflect.TypeOf(s.Four), vals[0].Type, t)
 	test.Eq(reflect.TypeOf(s.Five), vals[1].Type, t)
@@ -673,9 +684,9 @@ func TestRecursiveStructFieldInfo2FromReflectValue(t *testing.T) {
 }
 
 func TestRecursiveStructFieldInfo2FromReflectValuePntr(t *testing.T) {
-	var s testStruct2 = testStruct2{
+	var s structTest2 = structTest2{
 		Four: 4.0,
-		Five: testStruct{One: 1, Two: "2", Three: "3"},
+		Five: structTest{One: 1, Two: "2", Three: "3"},
 	}
 	s2 := reflect.ValueOf(&s)
 	vals, err := RecursiveStructFieldInfo[reflect.Value](s2, true).Collect()
@@ -695,7 +706,7 @@ func TestRecursiveStructFieldInfo2FromReflectValuePntr(t *testing.T) {
 	test.Eq(4.0, v.(float64), t)
 	test.True(ok, t)
 	v, ok = vals[1].Val()
-	test.Eq(testStruct{One: 1, Two: "2", Three: "3"}, v.(testStruct), t)
+	test.Eq(structTest{One: 1, Two: "2", Three: "3"}, v.(structTest), t)
 	test.True(ok, t)
 	v, ok = vals[2].Val()
 	test.Eq(1, v.(int), t)
@@ -720,7 +731,7 @@ func TestRecursiveStructFieldInfo2FromReflectValuePntr(t *testing.T) {
 	test.Eq(&s.Four, p.(*float64), t)
 	test.Nil(err, t)
 	p, err = vals[1].Pntr()
-	test.Eq(&s.Five, p.(*testStruct), t)
+	test.Eq(&s.Five, p.(*structTest), t)
 	test.Nil(err, t)
 	p, err = vals[2].Pntr()
 	test.Eq(&s.Five.One, p.(*int), t)

@@ -60,12 +60,19 @@ func StructFieldNames[T any, S reflect.Value | *T](s S) iter.Iter[string] {
 	if err != nil {
 		return iter.ValElem[string]("", err, 1)
 	}
-	return iter.SequentialElems[string](
-		structVal.NumField(),
-		func(i int) (string, error) {
-			return structVal.Type().Field(i).Name, nil
-		},
-	)
+
+	cntr:=0
+	return func(f iter.IteratorFeedback) (string, error, bool) {
+		for ; cntr<structVal.NumField(); {
+			t := structVal.Type().Field(cntr)
+			cntr++
+			if !t.IsExported() {
+				continue
+			}
+			return t.Name, nil, true
+		}
+		return "", nil, false
+	}
 }
 
 // Returns an iterator that provides the struct field values if a struct is
@@ -78,12 +85,20 @@ func StructFieldVals[T any, S reflect.Value | *T](s S) iter.Iter[any] {
 	if err != nil {
 		return iter.ValElem[any](nil, err, 1)
 	}
-	return iter.SequentialElems[any](
-		structVal.NumField(),
-		func(i int) (any, error) {
-			return structVal.Field(i).Interface(), nil
-		},
-	)
+
+	cntr:=0
+	return func(f iter.IteratorFeedback) (any, error, bool) {
+		for ; cntr<structVal.NumField(); {
+			t := structVal.Type().Field(cntr)
+			f := structVal.Field(cntr)
+			cntr++
+			if !t.IsExported() {
+				continue
+			}
+			return f.Interface(), nil, true
+		}
+		return nil, nil, false
+	}
 }
 
 // Returns an iterator that provides pointers to the struct field values if a
@@ -100,18 +115,25 @@ func StructFieldPntrs[T any, S reflect.Value | *T](s S) iter.Iter[any] {
 	if err != nil {
 		return iter.ValElem[any](nil, err, 1)
 	}
-	return iter.SequentialElems[any](
-		structVal.NumField(),
-		func(i int) (any, error) {
-			f := structVal.Field(i)
-			if f.CanAddr() {
-				return f.Addr().Interface(), nil
+
+	cntr:=0
+	return func(f iter.IteratorFeedback) (any, error, bool) {
+		for ; cntr<structVal.NumField(); {
+			t := structVal.Type().Field(cntr)
+			f := structVal.Field(cntr)
+			cntr++
+
+			if !t.IsExported() {
+				continue
 			}
-			return reflect.Value{}, getInaddressableFieldError(
-				structVal.Type().Field(i).Name,
-			)
-		},
-	)
+			if f.CanAddr() {
+				return f.Addr().Interface(), nil, true
+			}
+
+			return reflect.Value{}, getInaddressableFieldError(t.Name), false
+		}
+		return nil, nil, false
+	}
 }
 
 // Returns an iterator that provides the struct field types if a struct is
@@ -124,12 +146,21 @@ func StructFieldTypes[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Type] 
 	if err != nil {
 		return iter.ValElem[reflect.Type](nil, err, 1)
 	}
-	return iter.SequentialElems[reflect.Type](
-		structVal.NumField(),
-		func(i int) (reflect.Type, error) {
-			return structVal.Field(i).Type(), nil
-		},
-	)
+
+	cntr:=0
+	return func(f iter.IteratorFeedback) (reflect.Type, error, bool) {
+		for ; cntr<structVal.NumField(); {
+			t := structVal.Type().Field(cntr)
+			f := structVal.Field(cntr)
+			cntr++
+
+			if !t.IsExported() {
+				continue
+			}
+			return f.Type(), nil, true
+		}
+		return nil, nil, false
+	}
 }
 
 // Returns an iterator that provides the struct field kinds if a struct is
@@ -142,12 +173,21 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
 	if err != nil {
 		return iter.ValElem[reflect.Kind](0, err, 1)
 	}
-	return iter.SequentialElems[reflect.Kind](
-		structVal.NumField(),
-		func(i int) (reflect.Kind, error) {
-			return structVal.Field(i).Kind(), nil
-		},
-	)
+
+	cntr:=0
+	return func(f iter.IteratorFeedback) (reflect.Kind, error, bool) {
+		for ; cntr<structVal.NumField(); {
+			t := structVal.Type().Field(cntr)
+			f := structVal.Field(cntr)
+			cntr++
+
+			if !t.IsExported() {
+				continue
+			}
+			return f.Kind(), nil, true
+		}
+		return reflect.Kind(0), nil, false
+	}
 }
 
 // Returns an iterator that provides the struct field tags if a struct is
@@ -155,17 +195,27 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
 // if a reflect.Value is passed to this function it will return the field
 // tags of the struct it contains or the field tags of the struct that it
 // points to if the reflect.Value contains a pointer to a struct.
-func StructFieldTags[T any, S reflect.Value | *T](s S) iter.Iter[reflect.StructTag] {
+func StructFieldTags[T any, S reflect.Value | *T](
+	s S,
+) iter.Iter[reflect.StructTag] {
 	structVal, err := homogonizeStructVal[T, S](s)
 	if err != nil {
 		return iter.ValElem[reflect.StructTag]("", err, 1)
 	}
-	return iter.SequentialElems[reflect.StructTag](
-		structVal.NumField(),
-		func(i int) (reflect.StructTag, error) {
-			return structVal.Type().Field(i).Tag, nil
-		},
-	)
+
+	cntr:=0
+	return func(f iter.IteratorFeedback) (reflect.StructTag, error, bool) {
+		for ; cntr<structVal.NumField(); {
+			t := structVal.Type().Field(cntr)
+			cntr++
+
+			if !t.IsExported() {
+				continue
+			}
+			return t.Tag, nil, true
+		}
+		return reflect.StructTag(""), nil, false
+	}
 }
 
 // Returns an iterator that provides the struct field info if a struct is
@@ -185,18 +235,30 @@ func StructFieldInfo[T any, S reflect.Value | *T](
 	if err != nil {
 		return iter.ValElem[FieldInfo](FieldInfo{}, err, 1)
 	}
-	return iter.SequentialElems[FieldInfo](
-		structVal.NumField(),
-		func(i int) (FieldInfo, error) {
-			n := structVal.Type().Field(i).Name
-			f := structVal.Field(i)
+
+	cntr:=0
+	return func(f iter.IteratorFeedback) (FieldInfo, error, bool) {
+		for ; cntr<structVal.NumField(); {
+			t := structVal.Type().Field(cntr)
+			f := structVal.Field(cntr)
+			cntr++
+
+			if !t.IsExported() {
+				continue
+			}
+
 			return FieldInfo{
-				Name: n,
-				Tag: structVal.Type().Field(i).Tag,
-				ValInfo: NewValInfo(f, keepVal, getInaddressableFieldError(n)),
-			}, nil
-		},
-	)
+				Name: t.Name,
+				Tag: t.Tag,
+				ValInfo: NewValInfo(
+					f,
+					keepVal,
+					getInaddressableFieldError(t.Name),
+				),
+			}, nil, true
+		}
+		return FieldInfo{}, nil, false
+	}
 }
 
 // Returns an iterator that recursively provides the struct field info if a
