@@ -131,6 +131,17 @@ func Nil(v any, t *testing.T) {
 	}
 }
 
+func NilSlice[T any](v []T, t *testing.T) {
+	if v != nil {
+		_, f, line, _ := runtime.Caller(1)
+		FormatError(
+			nil, v,
+			"The supplied slice was not nil when it was expected to be.",
+			f, line, t,
+		)
+	}
+}
+
 func NilPntr[T any](v *T, t *testing.T) {
 	if v != (*T)(nil) {
 		_, f, line, _ := runtime.Caller(1)
@@ -148,6 +159,17 @@ func NotNil(v any, t *testing.T) {
 		FormatError(
 			"!nil", v,
 			"The supplied value was nil when it was not expected to be.",
+			f, line, t,
+		)
+	}
+}
+
+func NotNilSlice[T any](v []T, t *testing.T) {
+	if v == nil {
+		_, f, line, _ := runtime.Caller(1)
+		FormatError(
+			nil, v,
+			"The supplied slice was nil when it was not expected to be.",
 			f, line, t,
 		)
 	}

@@ -4,6 +4,7 @@
 package reflect
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -21,6 +22,10 @@ type ValInfo struct {
 	// the value is not addressable.
 	Pntr func() (any, error)
 }
+
+var (
+	InaddressableValueErr = errors.New("Inaddressable value")
+)
 
 // Makes a new val info struct with the supplied reflect value. Set keepVal to
 // true to make a copy of the underlying reflect value, false to not make a
@@ -43,6 +48,20 @@ func NewValInfo(v reflect.Value, keepVal bool, addressableErr error) ValInfo {
 			}
 			return nil, addressableErr
 		},
+	}
+}
+
+// Checks if the supplied value can be nil. Can be used as a safe guard to check
+// if the stdlib's [reflect.Value.IsNil] function will panic or not.
+func CanBeNil(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Chan: fallthrough
+	case reflect.Func: fallthrough
+	case reflect.Interface: fallthrough
+	case reflect.Map: fallthrough
+	case reflect.Pointer: fallthrough
+	case reflect.Slice: return true
+	default: return false
 	}
 }
 

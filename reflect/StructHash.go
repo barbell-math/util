@@ -1,7 +1,6 @@
 package reflect
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/barbell-math/util/hash"
@@ -15,7 +14,7 @@ import (
 
 type (
 	//gen:enum unknownValue unknownOptionsFlag
-	//gen:enum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs
+	//gen:enum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs | followInterfaces | recurseStructs
 	optionsFlag    int
 	structHashOpts struct {
 		optionsFlag `default:"NewOptionsFlag()" setter:"t" getter:"f"`
@@ -32,22 +31,32 @@ const (
 	//gen:enum string followPntrs
 	followPntrs optionsFlag = 1 << iota
 	// Description: set to true if the hash value should be calculated by
-	// following interface values rather than using the interface value itself
+	// following interface value
 	//
 	// Used by: [StructHash]
 	//
 	// Default: true
-	//gen:enum string followInterface
-	followInterface
+	//gen:enum string followInterfaces
+	followInterfaces
+	// Description: set to true if the hash value should be calculated by
+	// including all sub-struct fields
+	//
+	// Used by: [StructHash]
+	//
+	// Default: true
+	//gen:enum string recurseStructs
+	recurseStructs
 	// Description: set to true to include map key value pairs in the hash
-	// calculation
+	// calculation. If false the address of the map will be used when
+	// calculating the hash.
 	//
 	// Used by: [StructHash]
 	//
 	// Default: true
 	//gen:enum string includeMapVals
 	includeMapVals
-	// Description: set to true to include slice values in the hash calculation
+	// Description: set to true to include slice values in the hash calculation.
+	// If false the address of the slice will be used when calculating the hash.
 	//
 	// Used by: [StructHash]
 	//
@@ -55,7 +64,8 @@ const (
 	//gen:enum string includeSliceVals
 	includeSliceVals
 	// Description: set to true to include array values in the hash
-	// calculation
+	// calculation. If false the address of the slice will be used when 
+	// calculating the hash.
 	//
 	// Used by: [StructHash]
 	//
@@ -67,25 +77,49 @@ const (
 	unknownOptionsFlag
 )
 
-func typeCastHashOp[
-	T any,
-	W widgets.BaseInterface[T],
-](val ValInfo, h *hash.Hash) {
+func typeCastHashOp[T any, W widgets.BaseInterface[T]](
+	val ValInfo,
+	h *hash.Hash,
+) {
 	w := widgets.Base[T, W]{}
 	if !val.v.Type().AssignableTo(reflect.TypeOf((*T)(nil)).Elem()) {
 		return
 	}
-	if iterV, err := val.Pntr(); err == nil {
-		*h = h.Combine(w.Hash(iterV.(*T)))
+	if iterV, err := val.Pntr(); err==nil {
+		if v, ok:=iterV.(*T); ok {
+			*h=h.CombineIgnoreZero(w.Hash(v))
+		}
+	} else if iterV, ok := val.Val(); ok {
+		if v, ok:=iterV.(T); ok {
+			*h=h.CombineIgnoreZero(w.Hash(&v))
+		}
 	}
 }
 
+// Updates the hash value using the address of the supplied value.
+func addrHashOp(val ValInfo, h *hash.Hash) {
+	w := widgets.BuiltinUintptr{}
+	if CanBeNil(val.v) && val.v.IsNil() {
+		return
+	}
+	if val.v.CanAddr() {
+		v := uintptr(val.v.Addr().Pointer())
+		*h = h.CombineIgnoreZero(w.Hash(&v))
+	}
+}
+
+// Updates the hash value using the supplied pointers value. Noop if a pointer
+// is not supplied.
 func pointerHashOp(val ValInfo, h *hash.Hash) {
 	w := widgets.BuiltinUintptr{}
-	if val.v.CanAddr() && !val.v.IsNil() {
-		v := uintptr(val.v.Addr().Pointer())
-		*h = h.Combine(w.Hash(&v))
+	if CanBeNil(val.v) && val.v.IsNil() {
+		return
 	}
+	if val.v.Kind() != reflect.Pointer {
+		return
+	}
+	v := uintptr(val.v.Pointer())
+	*h = h.CombineIgnoreZero(w.Hash(&v))
 }
 
 func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
@@ -126,45 +160,84 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 	case reflect.Uintptr:
 		typeCastHashOp[uintptr, widgets.BuiltinUintptr](val, &rv)
 	case reflect.Pointer:
-		if opts.GetFlag(followPntrs) && !val.v.IsNil() {
-			fmt.Println(val)
-			rv = rv.Combine(getHash(
-				NewValInfo(val.v.Elem(), false, nil),
-				opts,
-			))
-		} else {
-			pointerHashOp(val, &rv)
+		if !val.v.IsNil() {
+			if opts.GetFlag(followPntrs) {
+				rv = rv.CombineIgnoreZero(getHash(
+					NewValInfo(reflect.Indirect(val.v), false, nil),
+					opts,
+				))
+			} else {
+				pointerHashOp(val, &rv)
+			}
 		}
-	case reflect.Chan:
-		pointerHashOp(val, &rv)
 	case reflect.Array:
+		rv=rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
 		if opts.GetFlag(includeArrayVals) {
-			// TODO - iterate over array and get hash values
-		} else {
-			pointerHashOp(val, &rv)
+			for i:=0; i<val.v.Len(); i++ {
+				rv = rv.CombineIgnoreZero(getHash(
+					NewValInfo(val.v.Index(i), false, nil),
+					opts,
+				))
+			}
 		}
 	case reflect.Slice:
-		if opts.GetFlag(includeArrayVals) {
-			// TODO - iterate over slice and get hash values
-		} else {
-			pointerHashOp(val, &rv)
+		rv=rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
+		if opts.GetFlag(includeSliceVals) {
+			for i:=0; i<val.v.Len(); i++ {
+				rv = rv.CombineIgnoreZero(getHash(
+					NewValInfo(val.v.Index(i), false, nil),
+					opts,
+				))
+			}
+		} else if val.v.Len()>0 {
+			addrHashOp(
+				NewValInfo(val.v.Index(0), false, nil),
+				&rv,
+			)
 		}
 	case reflect.Map:
+		rv=rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
 		if opts.GetFlag(includeMapVals) {
-			// TODO - iterate over map and get hash values
-		} else {
-			pointerHashOp(val, &rv)
+			mapIter:=val.v.MapRange()
+			for mapIter.Next() {
+				rv = rv.CombineIgnoreZero(getHash(
+					NewValInfo(mapIter.Key(), true, InaddressableMapErr),
+					opts,
+				))
+				rv = rv.CombineIgnoreZero(getHash(
+					NewValInfo(mapIter.Value(), true, InaddressableMapErr),
+					opts,
+				))
+			}
 		}
-	case reflect.Func:
-		pointerHashOp(val, &rv)
 	case reflect.Interface:
-		if opts.GetFlag(followInterface) {
-			// TODO - follow interface data value
-		} else {
-			pointerHashOp(val, &rv)
+		if opts.GetFlag(followInterfaces) && !val.v.IsNil() {
+			rv = rv.CombineIgnoreZero(getHash(
+				NewValInfo(
+					reflect.ValueOf(val.v.Interface()),
+					true,
+					InaddressableValueErr,
+				),
+				opts,
+			))
 		}
 	case reflect.Struct:
-		fallthrough // iteration will be handled by the calling func
+		if opts.GetFlag(recurseStructs) {
+			for i:=0; i<val.v.NumField(); i++ {
+				t:=val.v.Type().Field(i)
+				f:=val.v.Field(i)
+				if t.IsExported() {
+					rv = rv.CombineIgnoreZero(getHash(
+						NewValInfo(f, false, nil),
+						opts,
+					))
+				}
+			}
+		}
+	case reflect.Chan:
+		fallthrough	// no good way to get a unique value to represent a chan
+	case reflect.Func:
+		fallthrough	// no good way to get a unique value to represent a func
 	case reflect.UnsafePointer:
 		fallthrough // do nothing because it's unsafe
 	case reflect.Invalid:
@@ -181,9 +254,14 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 //  1. The widgets in the [widgets] package are used for generating hashes when
 // the underlying type is an exact match. Custom types of the built in types
 // will not have a hash value generated.
-//  2. Only exported fields are exported. A struct with no exported fields will
-// have a hash of 0.
-//  3. nil values do not contribute to the hash value.
+//  2. Only exported fields are used. A struct with no exported fields will have
+// a hash of 0.
+//  3. nil values do not contribute to the hash value. A value of 0 does.
+//  4. Arrays, slices, and maps lengths will always be included in the
+// calculated hash.
+//  5. The memory address of a slices data pointer will be included in the
+// calculated hash only if the underlying values are flagged to not be included.
+//  6. Channels and functions will be ignored.
 //
 // The opts struct determines behaviors about which struct fields are used and
 // how they are used. 
@@ -192,9 +270,9 @@ func StructHash[T any, S reflect.Value | *T](
 	opts *structHashOpts,
 ) (hash.Hash, error) {
 	var rv hash.Hash
-	err:=RecursiveStructFieldInfo[T, S](s, false).ForEach(
+	err:=StructFieldInfo[T, S](s, false).ForEach(
 		func(index int, val FieldInfo) (iter.IteratorFeedback, error) {
-			rv=rv.Combine(getHash(val.ValInfo, opts))
+			rv=rv.CombineIgnoreZero(getHash(val.ValInfo, opts))
 			return iter.Continue, nil
 		},
 	)

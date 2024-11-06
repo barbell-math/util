@@ -10,7 +10,8 @@ var (
 	InvalidOptionsFlag               = errors.New("Invalid optionsFlag")
 	OPTIONS_FLAG       []optionsFlag = []optionsFlag{
 		followPntrs,
-		followInterface,
+		followInterfaces,
+		recurseStructs,
 		includeMapVals,
 		includeSliceVals,
 		includeArrayVals,
@@ -19,7 +20,7 @@ var (
 )
 
 func NewOptionsFlag() optionsFlag {
-	return includeMapVals | includeArrayVals | includeSliceVals | followPntrs
+	return includeMapVals | includeArrayVals | includeSliceVals | followPntrs | followInterfaces | recurseStructs
 }
 
 func (o optionsFlag) Valid() error {
@@ -28,7 +29,10 @@ func (o optionsFlag) Valid() error {
 	case followPntrs:
 		return nil
 
-	case followInterface:
+	case followInterfaces:
+		return nil
+
+	case recurseStructs:
 		return nil
 
 	case includeMapVals:
@@ -52,8 +56,10 @@ func (o optionsFlag) String() string {
 	switch o {
 	case followPntrs:
 		return "followPntrs"
-	case followInterface:
-		return "followInterface"
+	case followInterfaces:
+		return "followInterfaces"
+	case recurseStructs:
+		return "recurseStructs"
 	case includeMapVals:
 		return "includeMapVals"
 	case includeSliceVals:
@@ -74,8 +80,11 @@ func (o optionsFlag) MarshalJSON() ([]byte, error) {
 	case followPntrs:
 		return []byte("followPntrs"), nil
 
-	case followInterface:
-		return []byte("followInterface"), nil
+	case followInterfaces:
+		return []byte("followInterfaces"), nil
+
+	case recurseStructs:
+		return []byte("recurseStructs"), nil
 
 	case includeMapVals:
 		return []byte("includeMapVals"), nil
@@ -101,8 +110,12 @@ func (o *optionsFlag) FromString(s string) error {
 		*o = followPntrs
 		return nil
 
-	case "followInterface":
-		*o = followInterface
+	case "followInterfaces":
+		*o = followInterfaces
+		return nil
+
+	case "recurseStructs":
+		*o = recurseStructs
 		return nil
 
 	case "includeMapVals":
@@ -134,8 +147,12 @@ func (o *optionsFlag) UnmarshalJSON(b []byte) error {
 		*o = followPntrs
 		return nil
 
-	case "followInterface":
-		*o = followInterface
+	case "followInterfaces":
+		*o = followInterfaces
+		return nil
+
+	case "recurseStructs":
+		*o = recurseStructs
 		return nil
 
 	case "includeMapVals":

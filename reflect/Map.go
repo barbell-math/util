@@ -8,12 +8,11 @@ import (
 	"github.com/barbell-math/util/iter"
 )
 
-func getInaddressableMapError() error {
-	return customerr.Wrap(
-		InAddressableField,
-		"Maps are not addressable.",
+var (
+	InaddressableMapErr = customerr.Wrap(
+		InAddressableField, "Maps are not addressable.",
 	)
-}
+)
 
 // A simple type to hold key value pairs from a map.
 type KeyValue basic.Pair[any, any]
@@ -158,7 +157,7 @@ func MapElemKeyInfo[T any, M reflect.Value | *T](
 	return iter.Map[reflect.Value, ValInfo](
 		iter.SliceElems[reflect.Value](mapVal.MapKeys()),
 		func(index int, val reflect.Value) (ValInfo, error) {
-			return NewValInfo(mapVal, keepVal, getInaddressableMapError()), nil
+			return NewValInfo(mapVal, keepVal, InaddressableMapErr), nil
 		},
 	)
 }
@@ -189,7 +188,7 @@ func MapElemValInfo[T any, M reflect.Value | *T](
 					return nil, false
 				},
 				Pntr: func() (any, error) {
-					return nil, getInaddressableMapError()
+					return nil, InaddressableMapErr
 				},
 			}, nil
 		},
@@ -224,7 +223,7 @@ func MapElemInfo[T any, M reflect.Value | *T](
 						return nil, false
 					},
 					Pntr: func() (any, error) {
-						return nil, getInaddressableMapError()
+						return nil, InaddressableMapErr
 					},
 				},
 				B: ValInfo{
@@ -238,7 +237,7 @@ func MapElemInfo[T any, M reflect.Value | *T](
 						return nil, false
 					},
 					Pntr: func() (any, error) {
-						return nil, getInaddressableMapError()
+						return nil, InaddressableMapErr
 					},
 				},
 			}, nil
@@ -269,7 +268,7 @@ func RecursiveMapElemInfo[T any, M reflect.Value | *T](
 			} else {
 				return iter.ValElem[KeyValInfo](
 					KeyValInfo{},
-					getInaddressableMapError(),
+					InaddressableMapErr,
 					1,
 				)
 			}
