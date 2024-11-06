@@ -12,7 +12,7 @@ import (
 )
 
 type ValInfo struct {
-	v reflect.Value
+	v    reflect.Value
 	Type reflect.Type
 	Kind reflect.Kind
 	// The underlying value. This is a copy of the value, not the
@@ -33,7 +33,7 @@ var (
 // access get the address of a non-addressable reflect value.
 func NewValInfo(v reflect.Value, keepVal bool, addressableErr error) ValInfo {
 	return ValInfo{
-		v: v,
+		v:    v,
 		Type: v.Type(),
 		Kind: v.Kind(),
 		Val: func() (any, bool) {
@@ -55,13 +55,20 @@ func NewValInfo(v reflect.Value, keepVal bool, addressableErr error) ValInfo {
 // if the stdlib's [reflect.Value.IsNil] function will panic or not.
 func CanBeNil(v reflect.Value) bool {
 	switch v.Kind() {
-	case reflect.Chan: fallthrough
-	case reflect.Func: fallthrough
-	case reflect.Interface: fallthrough
-	case reflect.Map: fallthrough
-	case reflect.Pointer: fallthrough
-	case reflect.Slice: return true
-	default: return false
+	case reflect.Chan:
+		fallthrough
+	case reflect.Func:
+		fallthrough
+	case reflect.Interface:
+		fallthrough
+	case reflect.Map:
+		fallthrough
+	case reflect.Pointer:
+		fallthrough
+	case reflect.Slice:
+		return true
+	default:
+		return false
 	}
 }
 

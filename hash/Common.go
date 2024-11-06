@@ -26,9 +26,9 @@ func (h Hash) Combine(hashes ...Hash) Hash {
 func (h Hash) CombineIgnoreZero(hashes ...Hash) Hash {
 	newH := h
 	for _, iterH := range hashes {
-		if newH ==0 {
-			newH=iterH
-		} else if iterH!=0 {
+		if newH == 0 {
+			newH = iterH
+		} else if iterH != 0 {
 			newH = Hash(
 				uint64(newH) ^ (uint64(iterH) + 0x517cc1b727220a95 + (uint64(newH) << 6) + (uint64(newH) >> 2)))
 		}
@@ -54,9 +54,9 @@ func (h Hash) CombineUnordered(hashes ...Hash) Hash {
 func (h Hash) CombineUnorderedIgnoreZero(hashes ...Hash) Hash {
 	newH := h
 	for _, iterH := range hashes {
-		if newH==0 {
-			newH=iterH
-		} else if iterH!=0 {
+		if newH == 0 {
+			newH = iterH
+		} else if iterH != 0 {
 			newH = Hash(uint64(newH) ^ uint64(iterH))
 		}
 	}

@@ -10,12 +10,12 @@ import (
 
 type (
 	customString string
-	structTest struct {
+	structTest   struct {
 		One   int    `json:"one"`
 		Two   string `json:"two"`
 		Three customString
 	}
-	
+
 	structTest2 struct {
 		Four float64
 		Five structTest
@@ -208,7 +208,7 @@ func TestNonStructStructFieldPntrsFromReflectValPntr(t *testing.T) {
 }
 
 func TestStructFieldPntrs(t *testing.T) {
-	s:=structTest {
+	s := structTest{
 		One: 1,
 		Two: "two",
 	}
@@ -221,7 +221,7 @@ func TestStructFieldPntrs(t *testing.T) {
 }
 
 func TestStructFieldPntrsFromReflectVal(t *testing.T) {
-	s:=structTest {
+	s := structTest{
 		One: 1,
 		Two: "two",
 	}
@@ -232,7 +232,7 @@ func TestStructFieldPntrsFromReflectVal(t *testing.T) {
 }
 
 func TestStructFieldPntrsFromReflectValPntr(t *testing.T) {
-	s:=structTest {
+	s := structTest{
 		One: 1,
 		Two: "two",
 	}

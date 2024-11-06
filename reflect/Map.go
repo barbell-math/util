@@ -213,7 +213,7 @@ func MapElemInfo[T any, M reflect.Value | *T](
 		func(index int, val reflect.Value) (KeyValInfo, error) {
 			return KeyValInfo{
 				A: ValInfo{
-					v: val,
+					v:    val,
 					Type: mapVal.Type().Key(),
 					Kind: mapVal.Type().Key().Kind(),
 					Val: func() (any, bool) {
@@ -227,7 +227,7 @@ func MapElemInfo[T any, M reflect.Value | *T](
 					},
 				},
 				B: ValInfo{
-					v: mapVal.MapIndex(val),
+					v:    mapVal.MapIndex(val),
 					Type: mapVal.Type().Elem(),
 					Kind: mapVal.Type().Elem().Kind(),
 					Val: func() (any, bool) {

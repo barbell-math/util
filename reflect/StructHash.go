@@ -64,7 +64,7 @@ const (
 	//gen:enum string includeSliceVals
 	includeSliceVals
 	// Description: set to true to include array values in the hash
-	// calculation. If false the address of the slice will be used when 
+	// calculation. If false the address of the slice will be used when
 	// calculating the hash.
 	//
 	// Used by: [StructHash]
@@ -85,13 +85,13 @@ func typeCastHashOp[T any, W widgets.BaseInterface[T]](
 	if !val.v.Type().AssignableTo(reflect.TypeOf((*T)(nil)).Elem()) {
 		return
 	}
-	if iterV, err := val.Pntr(); err==nil {
-		if v, ok:=iterV.(*T); ok {
-			*h=h.CombineIgnoreZero(w.Hash(v))
+	if iterV, err := val.Pntr(); err == nil {
+		if v, ok := iterV.(*T); ok {
+			*h = h.CombineIgnoreZero(w.Hash(v))
 		}
 	} else if iterV, ok := val.Val(); ok {
-		if v, ok:=iterV.(T); ok {
-			*h=h.CombineIgnoreZero(w.Hash(&v))
+		if v, ok := iterV.(T); ok {
+			*h = h.CombineIgnoreZero(w.Hash(&v))
 		}
 	}
 }
@@ -171,9 +171,9 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 			}
 		}
 	case reflect.Array:
-		rv=rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
+		rv = rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
 		if opts.GetFlag(includeArrayVals) {
-			for i:=0; i<val.v.Len(); i++ {
+			for i := 0; i < val.v.Len(); i++ {
 				rv = rv.CombineIgnoreZero(getHash(
 					NewValInfo(val.v.Index(i), false, nil),
 					opts,
@@ -181,24 +181,24 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 			}
 		}
 	case reflect.Slice:
-		rv=rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
+		rv = rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
 		if opts.GetFlag(includeSliceVals) {
-			for i:=0; i<val.v.Len(); i++ {
+			for i := 0; i < val.v.Len(); i++ {
 				rv = rv.CombineIgnoreZero(getHash(
 					NewValInfo(val.v.Index(i), false, nil),
 					opts,
 				))
 			}
-		} else if val.v.Len()>0 {
+		} else if val.v.Len() > 0 {
 			addrHashOp(
 				NewValInfo(val.v.Index(0), false, nil),
 				&rv,
 			)
 		}
 	case reflect.Map:
-		rv=rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
+		rv = rv.CombineIgnoreZero(hash.Hash(val.v.Len()))
 		if opts.GetFlag(includeMapVals) {
-			mapIter:=val.v.MapRange()
+			mapIter := val.v.MapRange()
 			for mapIter.Next() {
 				rv = rv.CombineIgnoreZero(getHash(
 					NewValInfo(mapIter.Key(), true, InaddressableMapErr),
@@ -223,9 +223,9 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 		}
 	case reflect.Struct:
 		if opts.GetFlag(recurseStructs) {
-			for i:=0; i<val.v.NumField(); i++ {
-				t:=val.v.Type().Field(i)
-				f:=val.v.Field(i)
+			for i := 0; i < val.v.NumField(); i++ {
+				t := val.v.Type().Field(i)
+				f := val.v.Field(i)
 				if t.IsExported() {
 					rv = rv.CombineIgnoreZero(getHash(
 						NewValInfo(f, false, nil),
@@ -235,9 +235,9 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 			}
 		}
 	case reflect.Chan:
-		fallthrough	// no good way to get a unique value to represent a chan
+		fallthrough // no good way to get a unique value to represent a chan
 	case reflect.Func:
-		fallthrough	// no good way to get a unique value to represent a func
+		fallthrough // no good way to get a unique value to represent a func
 	case reflect.UnsafePointer:
 		fallthrough // do nothing because it's unsafe
 	case reflect.Invalid:
@@ -252,27 +252,31 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 // the hash value that is generated:
 //
 //  1. The widgets in the [widgets] package are used for generating hashes when
+//
 // the underlying type is an exact match. Custom types of the built in types
 // will not have a hash value generated.
 //  2. Only exported fields are used. A struct with no exported fields will have
+//
 // a hash of 0.
 //  3. nil values do not contribute to the hash value. A value of 0 does.
 //  4. Arrays, slices, and maps lengths will always be included in the
+//
 // calculated hash.
 //  5. The memory address of a slices data pointer will be included in the
+//
 // calculated hash only if the underlying values are flagged to not be included.
 //  6. Channels and functions will be ignored.
 //
 // The opts struct determines behaviors about which struct fields are used and
-// how they are used. 
+// how they are used.
 func StructHash[T any, S reflect.Value | *T](
 	s S,
 	opts *structHashOpts,
 ) (hash.Hash, error) {
 	var rv hash.Hash
-	err:=StructFieldInfo[T, S](s, false).ForEach(
+	err := StructFieldInfo[T, S](s, false).ForEach(
 		func(index int, val FieldInfo) (iter.IteratorFeedback, error) {
-			rv=rv.CombineIgnoreZero(getHash(val.ValInfo, opts))
+			rv = rv.CombineIgnoreZero(getHash(val.ValInfo, opts))
 			return iter.Continue, nil
 		},
 	)

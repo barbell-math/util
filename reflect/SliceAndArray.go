@@ -205,7 +205,7 @@ func elemInfo[T any, U reflect.Value | *T](
 		arrayVal.Len(),
 		func(i int) (ValInfo, error) {
 			return ValInfo{
-				v: arrayVal.Index(i),
+				v:    arrayVal.Index(i),
 				Type: arrayVal.Index(i).Type(),
 				Kind: arrayVal.Index(i).Kind(),
 				Val: func() (any, bool) {

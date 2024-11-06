@@ -61,9 +61,9 @@ func StructFieldNames[T any, S reflect.Value | *T](s S) iter.Iter[string] {
 		return iter.ValElem[string]("", err, 1)
 	}
 
-	cntr:=0
+	cntr := 0
 	return func(f iter.IteratorFeedback) (string, error, bool) {
-		for ; cntr<structVal.NumField(); {
+		for cntr < structVal.NumField() {
 			t := structVal.Type().Field(cntr)
 			cntr++
 			if !t.IsExported() {
@@ -86,9 +86,9 @@ func StructFieldVals[T any, S reflect.Value | *T](s S) iter.Iter[any] {
 		return iter.ValElem[any](nil, err, 1)
 	}
 
-	cntr:=0
+	cntr := 0
 	return func(f iter.IteratorFeedback) (any, error, bool) {
-		for ; cntr<structVal.NumField(); {
+		for cntr < structVal.NumField() {
 			t := structVal.Type().Field(cntr)
 			f := structVal.Field(cntr)
 			cntr++
@@ -116,9 +116,9 @@ func StructFieldPntrs[T any, S reflect.Value | *T](s S) iter.Iter[any] {
 		return iter.ValElem[any](nil, err, 1)
 	}
 
-	cntr:=0
+	cntr := 0
 	return func(f iter.IteratorFeedback) (any, error, bool) {
-		for ; cntr<structVal.NumField(); {
+		for cntr < structVal.NumField() {
 			t := structVal.Type().Field(cntr)
 			f := structVal.Field(cntr)
 			cntr++
@@ -147,9 +147,9 @@ func StructFieldTypes[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Type] 
 		return iter.ValElem[reflect.Type](nil, err, 1)
 	}
 
-	cntr:=0
+	cntr := 0
 	return func(f iter.IteratorFeedback) (reflect.Type, error, bool) {
-		for ; cntr<structVal.NumField(); {
+		for cntr < structVal.NumField() {
 			t := structVal.Type().Field(cntr)
 			f := structVal.Field(cntr)
 			cntr++
@@ -174,9 +174,9 @@ func StructFieldKinds[T any, S reflect.Value | *T](s S) iter.Iter[reflect.Kind] 
 		return iter.ValElem[reflect.Kind](0, err, 1)
 	}
 
-	cntr:=0
+	cntr := 0
 	return func(f iter.IteratorFeedback) (reflect.Kind, error, bool) {
-		for ; cntr<structVal.NumField(); {
+		for cntr < structVal.NumField() {
 			t := structVal.Type().Field(cntr)
 			f := structVal.Field(cntr)
 			cntr++
@@ -203,9 +203,9 @@ func StructFieldTags[T any, S reflect.Value | *T](
 		return iter.ValElem[reflect.StructTag]("", err, 1)
 	}
 
-	cntr:=0
+	cntr := 0
 	return func(f iter.IteratorFeedback) (reflect.StructTag, error, bool) {
-		for ; cntr<structVal.NumField(); {
+		for cntr < structVal.NumField() {
 			t := structVal.Type().Field(cntr)
 			cntr++
 
@@ -236,9 +236,9 @@ func StructFieldInfo[T any, S reflect.Value | *T](
 		return iter.ValElem[FieldInfo](FieldInfo{}, err, 1)
 	}
 
-	cntr:=0
+	cntr := 0
 	return func(f iter.IteratorFeedback) (FieldInfo, error, bool) {
-		for ; cntr<structVal.NumField(); {
+		for cntr < structVal.NumField() {
 			t := structVal.Type().Field(cntr)
 			f := structVal.Field(cntr)
 			cntr++
@@ -249,7 +249,7 @@ func StructFieldInfo[T any, S reflect.Value | *T](
 
 			return FieldInfo{
 				Name: t.Name,
-				Tag: t.Tag,
+				Tag:  t.Tag,
 				ValInfo: NewValInfo(
 					f,
 					keepVal,
