@@ -3,7 +3,21 @@ package widgets
 import "github.com/barbell-math/util/hash"
 
 type (
+	// A widget value that is used when values do not necessarily need the
+	// methods that the widget interface imposes but still need to be used in
+	// scenarios that expect a widget type. The behavior of the widget interface
+	// is as follows:
+	//  - Widgets of this type will never be considered equal
+	//  - Widgets of this type will never be considered less than another
+	//  - Widgets of this type will always have a hash of 0
+	//  - Widgets of this type will perform no action with the zero function
 	NilWidget[T any] struct{}
+	// A widget value that is used to represent explicitly zero values.
+	// The behavior of the widget interface is as follows:
+	//  - Widgets of this type will always be considered equal
+	//  - Widgets of this type will never be considered less than another
+	//  - Widgets of this type will always have a hash of 0
+	//  - Widgets of this type will perform no action with the zero function
 	ZeroStructWidget struct{}
 )
 

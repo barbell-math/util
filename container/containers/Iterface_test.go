@@ -10,33 +10,33 @@ import (
 	"github.com/barbell-math/util/widgets"
 )
 
-func TestWindowEmpty(t *testing.T) {
+func TestSlidingWindowEmpty(t *testing.T) {
 	q, _ := NewCircularBuffer[int, widgets.BuiltinInt](2)
-	cnt, err := Window[int](iter.SliceElems([]int{}), &q, true).Count()
+	cnt, err := SlidingWindow[int](iter.SliceElems([]int{}), &q, true).Count()
 	test.Eq(0, cnt, t)
 	test.Nil(err, t)
 }
 
-func TestWindowNoPartialsNoWindowValues(t *testing.T) {
+func TestSlidingWindowNoPartialsNoSlidingWindowValues(t *testing.T) {
 	cntr := 0
 	q, _ := NewCircularBuffer[int, widgets.BuiltinInt](101)
 	vals := make([]int, 100)
 	for i := 0; i < len(vals); i++ {
 		vals[i] = i
 	}
-	cntr, err := Window[int](iter.SliceElems(vals), &q, false).Count()
+	cntr, err := SlidingWindow[int](iter.SliceElems(vals), &q, false).Count()
 	test.Eq(0, cntr, t)
 	test.Nil(err, t)
 }
 
-func TestWindowNoPartials(t *testing.T) {
+func TestSlidingWindowNoPartials(t *testing.T) {
 	cntr := 0
 	q, _ := NewCircularBuffer[int, widgets.BuiltinInt](2)
 	vals := make([]int, 100)
 	for i := 0; i < len(vals); i++ {
 		vals[i] = i
 	}
-	err := Window[int](iter.SliceElems(vals), &q, false).ForEach(
+	err := SlidingWindow[int](iter.SliceElems(vals), &q, false).ForEach(
 		func(index int, val staticContainers.Vector[int]) (iter.IteratorFeedback, error) {
 			cntr++
 			test.Eq(2, q.Length(), t)
@@ -47,19 +47,20 @@ func TestWindowNoPartials(t *testing.T) {
 				test.Eq(index+1, v, t)
 			}
 			return iter.Continue, nil
-		})
+		},
+	)
 	test.Eq(99, cntr, t)
 	test.Nil(err, t)
 }
 
-func TestWindowPartials(t *testing.T) {
+func TestSlidingWindowPartials(t *testing.T) {
 	cntr := 0
 	q, _ := NewCircularBuffer[int, widgets.BuiltinInt](2)
 	vals := make([]int, 100)
 	for i := 0; i < len(vals); i++ {
 		vals[i] = i
 	}
-	err := Window[int](iter.SliceElems(vals), &q, true).ForEach(
+	err := SlidingWindow[int](iter.SliceElems(vals), &q, true).ForEach(
 		func(index int, val staticContainers.Vector[int]) (iter.IteratorFeedback, error) {
 			cntr++
 			if index == 0 || index == 100 {
@@ -77,8 +78,52 @@ func TestWindowPartials(t *testing.T) {
 				}
 			}
 			return iter.Continue, nil
-		})
+		},
+	)
 	test.Eq(100, cntr, t)
+	test.Nil(err, t)
+}
+
+func TestSteppingWindowEmpty(t *testing.T) {
+	q, _ := NewCircularBuffer[int, widgets.BuiltinInt](2)
+	cnt, err := SteppingWindow[int](iter.SliceElems([]int{}), &q).Count()
+	test.Eq(0, cnt, t)
+	test.Nil(err, t)
+}
+
+func TestSteppingWindowNoStepValues(t *testing.T) {
+	cntr := 0
+	q, _ := NewCircularBuffer[int, widgets.BuiltinInt](101)
+	vals := make([]int, 100)
+	for i := 0; i < len(vals); i++ {
+		vals[i] = i
+	}
+	cntr, err := SteppingWindow[int](iter.SliceElems(vals), &q).Count()
+	test.Eq(0, cntr, t)
+	test.Nil(err, t)
+}
+
+func TestSteppingWindow(t *testing.T) {
+	cntr := 0
+	q, _ := NewCircularBuffer[int, widgets.BuiltinInt](2)
+	vals := make([]int, 100)
+	for i := 0; i < len(vals); i++ {
+		vals[i] = i
+	}
+	err := SteppingWindow[int](iter.SliceElems(vals), &q).ForEach(
+		func(index int, val staticContainers.Vector[int]) (iter.IteratorFeedback, error) {
+			test.Eq(2, q.Length(), t)
+			if v, err := q.PeekFront(); err == nil {
+				test.Eq(cntr*2, v, t)
+			}
+			if v, err := q.Get(1); err == nil {
+				test.Eq(cntr*2+1, v, t)
+			}
+			cntr++
+			return iter.Continue, nil
+		},
+	)
+	test.Eq(50, cntr, t)
 	test.Nil(err, t)
 }
 

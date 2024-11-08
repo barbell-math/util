@@ -291,11 +291,17 @@ func main() {
 		BaseTypeWidget: COMMENT_ARGS.BaseTypeWidget,
 	}
 	if COMMENT_ARGS.WidgetPackage != "." {
-		templateData.Imports = append(templateData.Imports, COMMENT_ARGS.WidgetPackage)
+		templateData.Imports = append(
+			templateData.Imports, COMMENT_ARGS.WidgetPackage,
+		)
 	}
 
 	if err := TEMPLATES.WriteToFile(
-		fileName(),
+		common.CleanFileName(fmt.Sprintf(
+			"TypeAliasPassThroughWidget_%s_to_%s",
+			INLINE_ARGS.Type,
+			PROG_STATE.baseType,
+		)),
 		common.GeneratedSrcFileExt,
 		map[widgetType]string{
 			BaseWidget:              "baseFile",
@@ -310,56 +316,12 @@ func main() {
 	}
 }
 
-func fileName() string {
-	fileNameBaseType := []byte(PROG_STATE.baseType)
-	fileNameAliasType := []byte(INLINE_ARGS.Type)
-	bannedChars := map[byte]struct{}{
-		'[':  {},
-		']':  {},
-		'{':  {},
-		'}':  {},
-		':':  {},
-		';':  {},
-		'<':  {},
-		'>':  {},
-		',':  {},
-		'.':  {},
-		'/':  {},
-		'\\': {},
-		'|':  {},
-		'*':  {},
-		'?':  {},
-		'%':  {},
-		'"':  {},
-		' ':  {},
-	}
-	for i, c := range fileNameBaseType {
-		if _, ok := bannedChars[c]; ok {
-			fileNameBaseType[i] = '_'
-		}
-	}
-	for i, c := range fileNameAliasType {
-		if _, ok := bannedChars[c]; ok {
-			fileNameAliasType[i] = '_'
-		}
-	}
-
-	return fmt.Sprintf(
-		"TypeAliasPassThroughWidget_%s_to_%s",
-		fileNameAliasType,
-		fileNameBaseType,
-	)
-}
-
 func parseTypeSpec(
 	fSet *token.FileSet,
 	srcFile *os.File,
 	ts *ast.TypeSpec,
 ) {
-	name, err := common.GetSourceTextFromExpr(
-		fSet, srcFile, ts.Name,
-	)
-	fmt.Println(name)
+	name, err := common.GetSourceTextFromExpr(fSet, srcFile, ts.Name)
 	if err != nil {
 		common.PrintRunningError("%s", err)
 		os.Exit(1)
