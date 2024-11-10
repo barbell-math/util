@@ -10,7 +10,7 @@ func NewStructHashOpts() *structHashOpts {
 	}
 }
 
-func (o *structHashOpts) OptionsFlag(v optionsFlag) *structHashOpts {
+func (o *structHashOpts) SetOptionsFlag(v optionsFlag) *structHashOpts {
 	o.optionsFlag = v
 	return o
 }

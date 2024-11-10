@@ -33,8 +33,7 @@ that represents an unknown or invalid enum state. If a value is supplied that is
 not found to be value for this enum the program will print an error and exit with
 a non-zero exit status.
 1. default (string) (required): The default value that a new instance of this
-enum should be initilized with. This is useful for setting a default set of
-flags.
+enum should be initilized with. This value is expected to be value go code.
 
 The second task is to search the ast of any non-generated code in the current
 directory for constant instances of the supplied type. These constant

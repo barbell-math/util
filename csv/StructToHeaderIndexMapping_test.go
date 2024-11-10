@@ -48,7 +48,7 @@ func TestNewStructToHeaderIndexMappingDuplicateHeaders(t *testing.T) {
 	m, err := newStructToHeaderIndexMapping[Row](
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().Headers([]string{"One", "Two", "One"}),
+		NewOptions().SetHeaders([]string{"One", "Two", "One"}),
 	)
 	test.ContainsError(DuplicateColName, err, t)
 	test.ContainsError(containerTypes.Duplicate, err, t)
@@ -65,7 +65,7 @@ func TestNewStructToHeaderIndexMappingSameHeadersSameOrder(t *testing.T) {
 	m, err := newStructToHeaderIndexMapping[Row](
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().Headers([]string{"One", "Two", "Three"}),
+		NewOptions().SetHeaders([]string{"One", "Two", "Three"}),
 	)
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)
@@ -84,7 +84,7 @@ func TestNewStructToHeaderIndexMappingSameHeadersDifferentOrder(t *testing.T) {
 	m, err := newStructToHeaderIndexMapping[Row](
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().Headers([]string{"Three", "One", "Two"}),
+		NewOptions().SetHeaders([]string{"Three", "One", "Two"}),
 	)
 	test.Nil(err, t)
 	test.Eq(3, len(m), t)
@@ -103,7 +103,7 @@ func TestNewStructToHeaderIndexMappingIncorrectHeaders(t *testing.T) {
 	m, err := newStructToHeaderIndexMapping[Row](
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().Headers([]string{"Very", "Bad", "Headers"}),
+		NewOptions().SetHeaders([]string{"Very", "Bad", "Headers"}),
 	)
 	test.ContainsError(InvalidHeaders, err, t)
 	test.ContainsError(InvalidHeader, err, t)
@@ -120,7 +120,7 @@ func TestNewStructToHeaderIndexMappingMissingHeaders(t *testing.T) {
 	m, err := newStructToHeaderIndexMapping[Row](
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().Headers([]string{"One", "Two"}),
+		NewOptions().SetHeaders([]string{"One", "Two"}),
 	)
 	test.Nil(err, t)
 	test.Eq(2, len(m), t)
@@ -138,7 +138,7 @@ func TestNewStructToHeaderIndexMappingExtraHeaders(t *testing.T) {
 	m, err := newStructToHeaderIndexMapping[Row](
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().Headers([]string{"One", "Two", "Three", "Four"}),
+		NewOptions().SetHeaders([]string{"One", "Two", "Three", "Four"}),
 	)
 	test.ContainsError(InvalidHeaders, err, t)
 	test.ContainsError(InvalidHeader, err, t)
@@ -158,7 +158,7 @@ func TestNewStructToHeaderIndexMappingExtraHeadersWithDuplicate(t *testing.T) {
 	m, err := newStructToHeaderIndexMapping[Row](
 		headerMapping[Row]{"One": 0, "Two": 1, "Three": 2},
 		&tmp,
-		NewOptions().Headers([]string{"One", "Two", "Three", "One"}),
+		NewOptions().SetHeaders([]string{"One", "Two", "Three", "One"}),
 	)
 	test.ContainsError(DuplicateColName, err, t)
 	test.ContainsError(containerTypes.Duplicate, err, t)

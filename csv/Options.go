@@ -44,7 +44,7 @@ type (
 		// Used by: [ToStructs], [FromStructs]
 		//
 		// Default: [time.DateTime]
-		dateTimeFormat string `default:"time.DateTime" import:"\"time\"" setter:"t" getter:"t"`
+		dateTimeFormat string `default:"time.DateTime" import:"time" setter:"t" getter:"t"`
 		// Description: the list of headers to use should you want them to be
 		// different from the options supplied by the struct field names or
 		// tag names.
@@ -113,7 +113,7 @@ const (
 // Used by: [FromStructs]
 //
 // Default: true
-func (o *options) Headers(h []string) *options {
+func (o *options) SetHeaders(h []string) *options {
 	o.headers = h
 	o.optionsFlag |= headersSupplied
 	return o

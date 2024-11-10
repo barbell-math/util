@@ -22,7 +22,7 @@ func NewOptions() *options {
 // Used by: [Parse], [Flatten], [FromStructs]
 //
 // Default: See the [NewOptionsFlag] function.
-func (o *options) OptionsFlag(v optionsFlag) *options {
+func (o *options) SetOptionsFlag(v optionsFlag) *options {
 	o.optionsFlag = v
 	return o
 }
@@ -32,7 +32,7 @@ func (o *options) OptionsFlag(v optionsFlag) *options {
 // Used by: [Parse]
 //
 // Default: '#'
-func (o *options) Comment(v rune) *options {
+func (o *options) SetComment(v rune) *options {
 	o.comment = v
 	return o
 }
@@ -43,7 +43,7 @@ func (o *options) Comment(v rune) *options {
 // Used by: [Parse], [Flatten]
 //
 // Default: ','
-func (o *options) Delimiter(v rune) *options {
+func (o *options) SetDelimiter(v rune) *options {
 	o.delimiter = v
 	return o
 }
@@ -54,7 +54,7 @@ func (o *options) Delimiter(v rune) *options {
 // Used by: [ToStructs], [FromStructs]
 //
 // Default: "csv"
-func (o *options) StructTagName(v string) *options {
+func (o *options) SetStructTagName(v string) *options {
 	o.structTagName = v
 	return o
 }
@@ -67,7 +67,7 @@ func (o *options) StructTagName(v string) *options {
 // Used by: [ToStructs], [FromStructs]
 //
 // Default: [time.DateTime]
-func (o *options) DateTimeFormat(v string) *options {
+func (o *options) SetDateTimeFormat(v string) *options {
 	o.dateTimeFormat = v
 	return o
 }

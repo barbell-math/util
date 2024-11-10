@@ -22,16 +22,16 @@ const (
 	//gen:enum string longFlagToken
 	longFlagToken
 	// Represents a argument value that would be attached to a token
-	//gen:enum string argumentToken
-	argumentToken
+	//gen:enum string valueToken
+	valueToken
 )
 
 var (
-	flagTokens = map[tokenType]struct{} {
+	flagTokens = map[tokenType]struct{}{
 		shortFlagToken: {},
-		longFlagToken: {},
+		longFlagToken:  {},
 	}
-	argumentTokens = map[tokenType]struct{} {
-		argumentToken: {},
+	argumentTokens = map[tokenType]struct{}{
+		valueToken: {},
 	}
 )

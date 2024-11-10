@@ -4,8 +4,8 @@ package argparse
 //go:generate ../bin/passThroughWidget -type=ArgType
 
 type (
-	//gen:enum unknownValue unknownArgType
-	//gen:enum default unknownArgType
+	//gen:enum unknownValue UnknownArgType
+	//gen:enum default UnknownArgType
 	//gen:passThroughWidget widgetType Base
 	//gen:passThroughWidget baseTypeWidget widgets.BuiltinInt
 	//gen:passThroughWidget widgetPackage github.com/barbell-math/util/widgets
@@ -13,7 +13,7 @@ type (
 )
 
 const (
-	//gen:enum string unknownArgType
+	//gen:enum string UnknownArgType
 	UnknownArgType ArgType = iota
 	// Represents a flag type that must accept a value as an argument and must
 	// only be supplied once.

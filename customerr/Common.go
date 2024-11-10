@@ -76,14 +76,6 @@ func WrapValueList(
 			sb.WriteByte('\n')
 		}
 	}
-	// cntr:=0
-	// for s,v:=range(valsList) {
-	// 	sb.WriteString(fmt.Sprintf("  |- %s (%T): %+v",s,v,v))
-	// 	cntr++
-	// 	if cntr<len(valsList) {
-	// 		sb.WriteByte('\n')
-	// 	}
-	// }
 	return fmt.Errorf(sb.String(), origErr)
 }
 

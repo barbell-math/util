@@ -21,10 +21,10 @@ expected struct format:
 ```
 type <struct type> struct {
     // This is an example embeded field - they are supported
-	<field 1> `default:"<default value 1>" setter:"f" getter:"f"`
+    <field 1> `default:"<default value 1>" setter:"f" getter:"f"`
 
     // Another comment for this field
-	<field 2> <field 2 type> `default:"<default value 2>" setter:"t" getter:"t"`
+    <field 2> <field 2 type> `default:"<default value 2>" setter:"t" getter:"t"`
     <field 3> <field 3 type> `default:"<default value 3>" setter:"t" getter:"f" import:"<imported package>"`
 }
 ```
@@ -40,9 +40,8 @@ false to not add one
 false to not add one
 1. import (string) (optional): a import to include in the generated code file.
 This is useful when the default value is derived from a value in an external
-package. This value is treated as a string, meaning whatever text is in the
-string will be what is placed in the generated code. Expressions are not
-evaluated.
+package. This value is treated as a string, though quotes will be added to the
+value to match the standard import syntax.
 
 Given the example used throughout this file, with the information from the 
 inline arguments and the struct tags the following code will be generated:

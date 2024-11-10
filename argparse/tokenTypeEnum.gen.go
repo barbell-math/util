@@ -12,7 +12,7 @@ var (
 		unknownTokenType,
 		shortFlagToken,
 		longFlagToken,
-		argumentToken,
+		valueToken,
 	}
 )
 
@@ -32,7 +32,7 @@ func (o tokenType) Valid() error {
 	case longFlagToken:
 		return nil
 
-	case argumentToken:
+	case valueToken:
 		return nil
 
 	default:
@@ -48,8 +48,8 @@ func (o tokenType) String() string {
 		return "shortFlagToken"
 	case longFlagToken:
 		return "longFlagToken"
-	case argumentToken:
-		return "argumentToken"
+	case valueToken:
+		return "valueToken"
 
 	default:
 		return "unknownTokenType"
@@ -68,8 +68,8 @@ func (o tokenType) MarshalJSON() ([]byte, error) {
 	case longFlagToken:
 		return []byte("longFlagToken"), nil
 
-	case argumentToken:
-		return []byte("argumentToken"), nil
+	case valueToken:
+		return []byte("valueToken"), nil
 
 	default:
 		return []byte("unknownTokenType"), InvalidTokenType
@@ -91,8 +91,8 @@ func (o *tokenType) FromString(s string) error {
 		*o = longFlagToken
 		return nil
 
-	case "argumentToken":
-		*o = argumentToken
+	case "valueToken":
+		*o = valueToken
 		return nil
 
 	default:
@@ -116,8 +116,8 @@ func (o *tokenType) UnmarshalJSON(b []byte) error {
 		*o = longFlagToken
 		return nil
 
-	case "argumentToken":
-		*o = argumentToken
+	case "valueToken":
+		*o = valueToken
 		return nil
 
 	default:

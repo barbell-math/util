@@ -3,102 +3,131 @@ package argparse
 import (
 	"fmt"
 
+	"github.com/barbell-math/util/container/basic"
+	"github.com/barbell-math/util/container/containers"
+	"github.com/barbell-math/util/customerr"
 	"github.com/barbell-math/util/iter"
+	"github.com/barbell-math/util/widgets"
 )
 
 type (
-	Options[T any, U ArgumentTranslation[T]] struct {
-		ShortName byte
-    	Required bool
-    	Description string
-    	Default U
-	}
-
-	ArgumentTranslation[T any] interface {
-		Translate(arg string) (T, error)
-		Default() T
-	}
-
 	Parser struct {
-		args []Arg
-		shortFlags map[byte]*Arg
-		longFlags map[string]*Arg
-	}
-	Arg struct {
-		setVal func(a *Arg, arg string) error
-		shortFlag byte
-		longFlag string
-		argType ArgType
-		present bool
-		required bool
-		description string
+		progName string
+		progDesc string
+
+		subParsers [][]Arg
+		requiredArgs containers.HashMap[
+			*string,
+			*longArg,
+			widgets.BasePntr[string, widgets.BuiltinString],
+			widgets.BasePntr[longArg, *longArg],
+		]
+		shortArgs containers.HashMap[
+			*byte,
+			*shortArg,
+			widgets.BasePntr[byte, widgets.BuiltinByte],
+			widgets.BasePntr[shortArg, *shortArg],
+		]
+		longArgs containers.HashMap[
+			*string,
+			*longArg,
+			widgets.BasePntr[string, widgets.BuiltinString],
+			widgets.BasePntr[longArg, *longArg],
+		]
 	}
 )
 
-func AddArg[T any, U ArgumentTranslation[T]](
-    parser *Parser, 
-    longName string, 
-	_type ArgType,
-    opts *Options[T,U],
-) *T {
-    var rv *T
-    if err:=parser.addArg(
-		Arg{
-			setVal: func(a *Arg, arg string) error {
-        	    if a.present {
-        	        if v,err:=opts.Default.Translate(arg); err==nil {
-        	            *rv=v
-        	        } else {
-        	            return err
-        	        }
-        	    } else {
-        	        *rv=opts.Default.Default()
-        	    }
-        	    return nil
-        	},
-        	required: opts.Required,
-        	description: opts.Description,
-			shortFlag: opts.ShortName,
-			longFlag: longName,
-		},
-	); err!=nil {
-        panic(fmt.Errorf("%w: %w", ParserConfigErr, err))
-    }
-    return rv
+func (p *Parser) getShortArg(b byte) (*Arg, error) {
+	a, err:=p.shortArgs.Get(&b)
+	if err!=nil {
+		return nil, customerr.Wrap(UnrecognizedShortArgErr, "Argument: '%c'", b)
+	}
+	return (*Arg)(a), nil
 }
 
-func (p *Parser) addArg(arg Arg) error {
-	if _, ok:=p.longFlags[arg.longFlag]; ok {
-		return fmt.Errorf(
-			"%w: the long name '%s' is has already been specified",
-			ParsingErr, arg.longFlag,
+func (p *Parser) getLongArg(s string) (*Arg, error) {
+	a, err:=p.longArgs.Get(&s)
+	if err!=nil {
+		return nil, customerr.Wrap(UnrecognizedLongArgErr, "Argument: '%s'", s)
+	}
+	return (*Arg)(a), nil
+}
+
+func (p *Parser) Combine(others ...*Parser) (*Parser, error) {
+	for _, otherP:=range(others) {
+		p.subParsers=append(p.subParsers, otherP.subParsers...)
+		if err:=containers.MapDisjointKeyedUnion[*byte, *shortArg](
+			&p.shortArgs, &otherP.shortArgs,
+		); err!=nil {
+			customerr.AppendError(ParserCombinationErr, err)
+		}
+		if err:=containers.MapDisjointKeyedUnion[*string, *longArg](
+			&p.longArgs, &otherP.longArgs,
+		); err!=nil {
+			customerr.AppendError(ParserCombinationErr, err)
+		}
+		// Required args are a subset of longArgs, no need to check for dups
+		containers.MapKeyedUnion[*string, *longArg](
+			&p.requiredArgs, &otherP.requiredArgs,
 		)
 	}
+	return p, nil
+}
 
-	if _, ok:=p.shortFlags[arg.shortFlag]; ok {
-		return fmt.Errorf(
-			"%w: the short name '%c' is has already been specified",
-			ParsingErr, arg.shortFlag,
-		)
+func (p *Parser) Parse(t tokenIter) error {
+	for _, subP:=range(p.subParsers) {
+		for _, arg:=range(subP) {
+			arg.setDefaultVal()
+		}
 	}
 
-	p.args = append(p.args, arg)
-	// Cannot populate name maps with arg structs until all args have been added
-	// due to the underlying slice reallocating
-	p.shortFlags[arg.shortFlag]=nil
-	p.longFlags[arg.longFlag]=nil
+	if err:=t.toArgValPairs(p).ToIter().ForEach(
+		func(
+			index int,
+			val basic.Pair[*Arg, string],
+		) (iter.IteratorFeedback, error) {
+			if val.A.present {
+				return iter.Break, customerr.Wrap(
+					ArgumentPassedMultipleTimesErr,
+					"'%s'", val.A.longFlag,
+				)
+			}
+
+			if err:=val.A.setVal(val.A, val.B); err!=nil {
+				return iter.Break, customerr.AppendError(
+					customerr.Wrap(
+						ArgumentTranslationErr,
+						"Argument: '%s'", val.A.longFlag,
+					),
+					err,
+				)
+			}
+
+			return iter.Continue, nil
+		},
+	); err==HelpErr {
+		fmt.Println(p.Help())
+		return err
+	} else if err!=nil {
+		return customerr.AppendError(ParsingErr, err)
+	}
+
+	if err:=p.requiredArgs.Vals().ForEach(
+		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			if !val.present {
+				return iter.Break, customerr.Wrap(
+					MissingRequiredArgErr, "'%s'", val.longFlag,
+				)
+			}
+			return iter.Continue, nil
+		},
+	); err!=nil {
+		return customerr.AppendError(ParsingErr, err)
+	}
+
 	return nil
 }
 
-func (p Parser) Parse(a ArgvIter) {
-	for i, _:=range(p.args) {
-		p.shortFlags[p.args[i].shortFlag]=&p.args[i]
-		p.longFlags[p.args[i].longFlag]=&p.args[i]
-	}
-
-	a.ToTokens().ToIter().ForEach(
-		func(index int, val token) (iter.IteratorFeedback, error) {
-			return iter.Continue, nil
-		},
-	)
+func (p *Parser) Help() string {
+	return "HELP ME!"
 }

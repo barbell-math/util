@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"os"
@@ -20,13 +21,15 @@ type (
 	}
 
 	ProgState struct {
-		fieldSetters  []string
-		fieldGetters  []string
-		fieldDefaults []DefaultInfo
-		fieldTypes    map[string]string
-		fieldComments map[string]string
-		imports       []string
-		_package      string
+		typeParamNames []string
+		typeParamTypes []string
+		fieldSetters   []string
+		fieldGetters   []string
+		fieldDefaults  []DefaultInfo
+		fieldTypes     map[string]string
+		fieldComments  map[string]string
+		imports        map[string]struct{}
+		_package       string
 	}
 	DefaultInfo struct {
 		name  string
@@ -36,6 +39,8 @@ type (
 	TemplateVals struct {
 		StructName          string
 		CapStructName       string
+		ShortStructGenerics string
+		LongStructGenerics  string
 		Package             string
 		StructFieldSetters  []StructFieldTemplateVals
 		StructFieldGetters  []StructFieldTemplateVals
@@ -54,11 +59,13 @@ type (
 		StructFieldDefault string
 	}
 	StructFieldTemplateVals struct {
-		StructName     string
-		CapStructField string
-		StructField    string
-		FieldType      string
-		Comment        string
+		StructName          string
+		CapStructField      string
+		ShortStructGenerics string
+		LongStructGenerics  string
+		StructField         string
+		FieldType           string
+		Comment             string
 	}
 )
 
@@ -70,20 +77,20 @@ var (
 		fieldDefaults: []DefaultInfo{},
 		fieldTypes:    map[string]string{},
 		fieldComments: map[string]string{},
-		imports:       []string{},
+		imports:       map[string]struct{}{},
 	}
 	TEMPLATES common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
 		map[string]string{
 			"structFieldSetter": `
 {{ .Comment }}
-func (o *{{ .StructName }}) {{ .CapStructField }}(v {{ .FieldType }}) *{{ .StructName }} {
+func (o *{{ .StructName }}{{ .ShortStructGenerics }}) Set{{ .CapStructField }}(v {{ .FieldType }}) *{{ .StructName }}{{ .ShortStructGenerics }} {
 	o.{{ .StructField }} = v
 	return o
 }
 `,
 			"structFieldGetter": `
 {{ .Comment }}
-func (o *{{ .StructName }}) Get{{ .CapStructField }}() {{ .FieldType }} {
+func (o *{{ .StructName }}{{ .ShortStructGenerics }}) Get{{ .CapStructField }}() {{ .FieldType }} {
 	return o.{{ .StructField }}
 }
 `,
@@ -91,8 +98,8 @@ func (o *{{ .StructName }}) Get{{ .CapStructField }}() {{ .FieldType }} {
 `,
 			"newFunc": `
 // Returns a new {{ .StructName }} struct initialized with the default values.
-func New{{ .CapStructName }}() *{{ .StructName }} {
-	return &{{ .StructName }} {
+func New{{ .CapStructName }}{{ .LongStructGenerics }}() *{{ .StructName }}{{ .ShortStructGenerics }} {
+	return &{{ .StructName }}{{ .ShortStructGenerics }} {
 		{{range .StructFieldDefaults}} {{template "defaultValueInit" .}} {{end}}
 	}
 }
@@ -101,7 +108,7 @@ func New{{ .CapStructName }}() *{{ .StructName }} {
 package {{ .Package }}
 {{template "autoGenComment" .}}
 import (
-	{{range .Imports}}{{.}}{{end}}
+	{{range .Imports}}"{{ . }}"{{end}}
 )
 
 {{template "newFunc" .}}
@@ -134,7 +141,6 @@ func main() {
 							fSet,
 							srcFile,
 							spec.(*ast.TypeSpec),
-							&PROG_STATE,
 						)
 						if optionsStructFound {
 							break
@@ -157,35 +163,64 @@ func main() {
 	templateData := TemplateVals{
 		StructName:          INLINE_ARGS.Struct,
 		CapStructName:       strings.ToUpper(INLINE_ARGS.Struct[0:1]) + INLINE_ARGS.Struct[1:],
+		ShortStructGenerics: "",
+		LongStructGenerics:  "",
 		Package:             PROG_STATE._package,
 		StructFieldSetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldSetters)),
 		StructFieldGetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldGetters)),
 		StructFieldDefaults: make([]StructDefaultTemplateVals, len(PROG_STATE.fieldDefaults)),
-		Imports:             PROG_STATE.imports,
 		GeneratorName:       os.Args[0],
 	}
-	cntr := 0
+
+	for k, _ := range PROG_STATE.imports {
+		templateData.Imports = append(templateData.Imports, k)
+	}
+
+	if len(PROG_STATE.typeParamNames) > 0 {
+		templateData.ShortStructGenerics = fmt.Sprintf(
+			"[%s]",
+			strings.Join(PROG_STATE.typeParamNames, ","),
+		)
+
+		var sb strings.Builder
+		sb.WriteString("[")
+		for i := 0; i < len(PROG_STATE.typeParamNames); i++ {
+			sb.WriteString(PROG_STATE.typeParamNames[i])
+			sb.WriteString(" ")
+			sb.WriteString(PROG_STATE.typeParamTypes[i])
+			if i+1 < len(PROG_STATE.typeParamNames) {
+				sb.WriteString(", ")
+			}
+		}
+		sb.WriteString("]")
+		templateData.LongStructGenerics = sb.String()
+		fmt.Println(templateData.LongStructGenerics)
+	}
+
 	for i, v := range PROG_STATE.fieldSetters {
 		capStructField := strings.ToUpper(v[0:1]) + v[1:]
 		templateData.StructFieldSetters[i] = StructFieldTemplateVals{
-			StructName:     INLINE_ARGS.Struct,
-			CapStructField: capStructField,
-			StructField:    v,
-			FieldType:      PROG_STATE.fieldTypes[v],
-			Comment:        PROG_STATE.fieldComments[v],
+			StructName:          INLINE_ARGS.Struct,
+			CapStructField:      capStructField,
+			ShortStructGenerics: templateData.ShortStructGenerics,
+			StructField:         v,
+			FieldType:           PROG_STATE.fieldTypes[v],
+			Comment:             PROG_STATE.fieldComments[v],
 		}
 	}
 	for i, v := range PROG_STATE.fieldGetters {
 		capStructField := strings.ToUpper(v[0:1]) + v[1:]
 		templateData.StructFieldGetters[i] = StructFieldTemplateVals{
-			StructName:     INLINE_ARGS.Struct,
-			CapStructField: capStructField,
-			StructField:    v,
-			FieldType:      PROG_STATE.fieldTypes[v],
-			Comment:        PROG_STATE.fieldComments[v],
+			StructName:          INLINE_ARGS.Struct,
+			CapStructField:      capStructField,
+			ShortStructGenerics: templateData.ShortStructGenerics,
+			StructField:         v,
+			FieldType:           PROG_STATE.fieldTypes[v],
+			Comment:             PROG_STATE.fieldComments[v],
 		}
 	}
-	cntr = 0
+
+	cntr := 0
 	for _, defaultInfo := range PROG_STATE.fieldDefaults {
 		templateData.StructFieldDefaults[cntr] = StructDefaultTemplateVals{
 			StructField:        defaultInfo.name,
@@ -209,7 +244,6 @@ func parseTypeSpec(
 	fSet *token.FileSet,
 	srcFile *os.File,
 	ts *ast.TypeSpec,
-	PROG_STATE *ProgState,
 ) bool {
 	if ts.Name.Name == "_" {
 		return false
@@ -220,113 +254,154 @@ func parseTypeSpec(
 			os.Exit(1)
 		}
 
-		for _, field := range st.Fields.List {
-			var err error
-			var fieldName string
-			if len(field.Names) > 0 {
-				fieldName, err = common.GetSourceTextFromExpr(
-					fSet, srcFile, field.Names[0],
-				)
-				if err != nil {
-					common.PrintRunningError(
-						"could not get struct field name: %w",
-						err,
-					)
-					os.Exit(1)
-				}
-			} else { // Embed type
-				fieldName, err = common.GetSourceTextFromExpr(
-					fSet, srcFile, field.Type,
-				)
-				if err != nil {
-					common.PrintRunningError(
-						"could not get embeded struct field name: %w",
-						err,
-					)
-					os.Exit(1)
-				}
-				if idx := strings.LastIndex(fieldName, "."); idx != -1 {
-					fieldName = fieldName[idx+1:]
-				}
-			}
-
-			rawFieldTag, err := common.GetSourceTextFromExpr(fSet, srcFile, field.Tag)
-			if err != nil {
-				common.PrintRunningError(
-					"could not get struct field tag: %w",
-					err,
-				)
-				os.Exit(1)
-			}
-			fieldType, err := common.GetSourceTextFromExpr(fSet, srcFile, field.Type)
-			if err != nil {
-				common.PrintRunningError(
-					"could not get struct field type: %w",
-					err,
-				)
-				os.Exit(1)
-			}
-			fieldComment, err := common.GetComment(fSet, srcFile, field.Doc, field.Comment)
-			if err != nil {
-				common.PrintRunningError(
-					"could not get struct field type: %w",
-					err,
-				)
-				os.Exit(1)
-			}
-
-			PROG_STATE.fieldTypes[fieldName] = fieldType
-			PROG_STATE.fieldComments[fieldName] = fieldComment
-
-			// Remove the ticks
-			tags := reflect.StructTag(rawFieldTag[1 : len(rawFieldTag)-1])
-
-			if _default, ok := tags.Lookup("default"); !ok {
-				common.PrintRunningError("all struct field tags must have a default value")
-				os.Exit(1)
-			} else if _default == "" {
-				common.PrintRunningError("the default tag must not be an empty value")
-				os.Exit(1)
-			} else {
-				PROG_STATE.fieldDefaults = append(
-					PROG_STATE.fieldDefaults,
-					DefaultInfo{
-						name:  fieldName,
-						value: _default,
-					},
-				)
-			}
-
-			if auto, ok := tags.Lookup("setter"); !ok {
-				common.PrintRunningError("all field tags the must have a setter entry")
-				os.Exit(1)
-			} else {
-				if b, err := strconv.ParseBool(auto); err != nil {
-					common.PrintRunningError("the setter tag must be a bool type: %w", err)
-					os.Exit(1)
-				} else if b {
-					PROG_STATE.fieldSetters = append(PROG_STATE.fieldSetters, fieldName)
-				}
-			}
-
-			if auto, ok := tags.Lookup("getter"); !ok {
-				common.PrintRunningError("all field tags the must have a getter entry")
-				os.Exit(1)
-			} else {
-				if b, err := strconv.ParseBool(auto); err != nil {
-					common.PrintRunningError("the getter tag must be a bool type: %w", err)
-					os.Exit(1)
-				} else if b {
-					PROG_STATE.fieldGetters = append(PROG_STATE.fieldGetters, fieldName)
-				}
-			}
-
-			if _import, ok := tags.Lookup("import"); ok {
-				PROG_STATE.imports = append(PROG_STATE.imports, _import)
-			}
-		}
+		setGenericVals(fSet, srcFile, ts)
+		setFieldVals(fSet, srcFile, st)
 
 		return true
 	}
 	return false
+}
+
+func setGenericVals(
+	fSet *token.FileSet,
+	srcFile *os.File,
+	ts *ast.TypeSpec,
+) {
+	if ts.TypeParams == nil {
+		return
+	}
+
+	for i := 0; i < len(ts.TypeParams.List); i++ {
+		PROG_STATE.typeParamNames = append(
+			PROG_STATE.typeParamNames,
+			ts.TypeParams.List[i].Names[0].Name,
+		)
+	}
+
+	for i := 0; i < len(ts.TypeParams.List); i++ {
+		t, err := common.GetSourceTextFromExpr(
+			fSet, srcFile,
+			ts.TypeParams.List[i].Type,
+		)
+		if err != nil {
+			common.PrintRunningError("could not get generic type: %w", err)
+			os.Exit(1)
+		}
+
+		PROG_STATE.typeParamTypes = append(PROG_STATE.typeParamTypes, t)
+	}
+
+	fmt.Println(PROG_STATE.typeParamTypes)
+}
+
+func setFieldVals(
+	fSet *token.FileSet,
+	srcFile *os.File,
+	st *ast.StructType,
+) {
+	for _, field := range st.Fields.List {
+		var err error
+		var fieldName string
+		if len(field.Names) > 0 {
+			fieldName, err = common.GetSourceTextFromExpr(
+				fSet, srcFile, field.Names[0],
+			)
+			if err != nil {
+				common.PrintRunningError(
+					"could not get struct field name: %w",
+					err,
+				)
+				os.Exit(1)
+			}
+		} else { // Embed type
+			fieldName, err = common.GetSourceTextFromExpr(
+				fSet, srcFile, field.Type,
+			)
+			if err != nil {
+				common.PrintRunningError(
+					"could not get embeded struct field name: %w",
+					err,
+				)
+				os.Exit(1)
+			}
+			if idx := strings.LastIndex(fieldName, "."); idx != -1 {
+				fieldName = fieldName[idx+1:]
+			}
+		}
+
+		rawFieldTag, err := common.GetSourceTextFromExpr(fSet, srcFile, field.Tag)
+		if err != nil {
+			common.PrintRunningError(
+				"could not get struct field tag: %w",
+				err,
+			)
+			os.Exit(1)
+		}
+		fieldType, err := common.GetSourceTextFromExpr(fSet, srcFile, field.Type)
+		if err != nil {
+			common.PrintRunningError(
+				"could not get struct field type: %w",
+				err,
+			)
+			os.Exit(1)
+		}
+		fieldComment, err := common.GetComment(fSet, srcFile, field.Doc, field.Comment)
+		if err != nil {
+			common.PrintRunningError(
+				"could not get struct field type: %w",
+				err,
+			)
+			os.Exit(1)
+		}
+
+		PROG_STATE.fieldTypes[fieldName] = fieldType
+		PROG_STATE.fieldComments[fieldName] = fieldComment
+
+		// Remove the ticks
+		tags := reflect.StructTag(rawFieldTag[1 : len(rawFieldTag)-1])
+
+		if _default, ok := tags.Lookup("default"); !ok {
+			common.PrintRunningError("all struct field tags must have a default value")
+			os.Exit(1)
+		} else if _default == "" {
+			common.PrintRunningError("the default tag must not be an empty value")
+			os.Exit(1)
+		} else {
+			PROG_STATE.fieldDefaults = append(
+				PROG_STATE.fieldDefaults,
+				DefaultInfo{
+					name:  fieldName,
+					value: _default,
+				},
+			)
+		}
+
+		if auto, ok := tags.Lookup("setter"); !ok {
+			common.PrintRunningError("all field tags the must have a setter entry")
+			os.Exit(1)
+		} else {
+			if b, err := strconv.ParseBool(auto); err != nil {
+				common.PrintRunningError("the setter tag must be a bool type: %w", err)
+				os.Exit(1)
+			} else if b {
+				PROG_STATE.fieldSetters = append(PROG_STATE.fieldSetters, fieldName)
+			}
+		}
+
+		if auto, ok := tags.Lookup("getter"); !ok {
+			common.PrintRunningError("all field tags the must have a getter entry")
+			os.Exit(1)
+		} else {
+			if b, err := strconv.ParseBool(auto); err != nil {
+				common.PrintRunningError("the getter tag must be a bool type: %w", err)
+				os.Exit(1)
+			} else if b {
+				PROG_STATE.fieldGetters = append(PROG_STATE.fieldGetters, fieldName)
+			}
+		}
+
+		if _import, ok := tags.Lookup("import"); ok {
+			PROG_STATE.imports[_import] = struct{}{}
+		}
+	}
 }

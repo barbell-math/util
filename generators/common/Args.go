@@ -297,16 +297,18 @@ func parseArgs(globalStruct any, args []string, opts *argsOptions) error {
 	}
 
 	if opts.printArgs {
+		exportedCntr := 0
 		PrintRunningInfo("Received arguments:")
 		for i := 0; i < refStructType.NumField(); i++ {
 			if !refStructType.Field(i).IsExported() {
 				continue
 			}
+			exportedCntr++
 			iterFName := refStructType.Field(i).Name
 			iterFVal := refStructVal.Field(i).Interface()
 			PrintRunningInfo(
 				"|- (%d) | Name: %-20s | Value: %v",
-				i+1, iterFName, iterFVal,
+				exportedCntr, iterFName, iterFVal,
 			)
 		}
 	}

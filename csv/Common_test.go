@@ -345,11 +345,11 @@ func TestIntegrationTest(t *testing.T) {
 		FromStructs[csvTest](
 			ToStructs[csvTest](
 				Parse(TEST_FILES[ValidCSV], NewOptions()),
-				NewOptions().DateTimeFormat("01/02/2006"),
+				NewOptions().SetDateTimeFormat("01/02/2006"),
 			),
-			NewOptions().DateTimeFormat("01/02/2006"),
+			NewOptions().SetDateTimeFormat("01/02/2006"),
 		),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).Reduce(
 		"",
 		func(accum *string, iter string) error { *accum += iter; return nil },

@@ -26,7 +26,7 @@ func TestFromStructsInvalidStruct(t *testing.T) {
 		iter.SliceElems[Row]([]Row{
 			{One: 1, Two: 2},
 		}),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).Count()
 	test.ContainsError(MalformedCSVStruct, err, t)
 	test.ContainsError(DuplicateColName, err, t)
@@ -46,7 +46,7 @@ func fromStructsEqualityHelper(exp [][]string, got [][]string, t *testing.T) {
 func TestFromStructsValidStruct(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](VALID_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).Collect()
 	test.Nil(err, t)
 	fromStructsEqualityHelper(VALID_FROM_STRUCT, res, t)
@@ -55,7 +55,7 @@ func TestFromStructsValidStruct(t *testing.T) {
 func TestFromStructsValidStructDontWriteHeaders(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](VALID_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006").OptionsFlag(
+		NewOptions().SetDateTimeFormat("01/02/2006").SetOptionsFlag(
 			NewOptionsFlag().WriteHeaders(false),
 		),
 	).Collect()
@@ -72,7 +72,7 @@ func TestFromStructsValidStructDontWriteHeaders(t *testing.T) {
 func TestFromStructsMissingColumnsWithHeadersSpecified(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](MISSING_COLUMNS_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006").Headers([]string{
+		NewOptions().SetDateTimeFormat("01/02/2006").SetHeaders([]string{
 			"I8", "Ui", "Ui8", "F32", "S", "B", "T",
 		}),
 	).Collect()
@@ -83,7 +83,7 @@ func TestFromStructsMissingColumnsWithHeadersSpecified(t *testing.T) {
 func TestFromStructMissingValues(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](MISSING_VALUES_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).Collect()
 	test.Nil(err, t)
 	fromStructsEqualityHelper(MISSING_VALUES_FROM_STRUCT, res, t)
@@ -92,7 +92,7 @@ func TestFromStructMissingValues(t *testing.T) {
 func TestFromStructsMissingHeaders(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](MISSING_HEADERS_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006").OptionsFlag(
+		NewOptions().SetDateTimeFormat("01/02/2006").SetOptionsFlag(
 			NewOptionsFlag().WriteHeaders(false),
 		),
 	).Collect()
@@ -103,7 +103,9 @@ func TestFromStructsMissingHeaders(t *testing.T) {
 func TestFromStructsStrings(t *testing.T) {
 	res, err := FromStructs[csvTest](
 		iter.SliceElems[csvTest](STRINGS_STRUCT),
-		NewOptions().DateTimeFormat("01/02/2006").Headers([]string{"S", "S1"}),
+		NewOptions().
+			SetDateTimeFormat("01/02/2006").
+			SetHeaders([]string{"S", "S1"}),
 	).Collect()
 	test.Nil(err, t)
 	fromStructsEqualityHelper(STRINGS_FROM_STRUCT, res, t)

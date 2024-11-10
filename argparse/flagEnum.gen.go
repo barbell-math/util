@@ -10,7 +10,8 @@ var (
 	InvalidFlag        = errors.New("Invalid flag")
 	FLAG        []flag = []flag{
 		unknownFlag,
-		shortFlag,
+		shortSpaceFlag,
+		shortEqualsFlag,
 		longSpaceFlag,
 		longEqualsFlag,
 	}
@@ -26,7 +27,10 @@ func (o flag) Valid() error {
 	case unknownFlag:
 		return nil
 
-	case shortFlag:
+	case shortSpaceFlag:
+		return nil
+
+	case shortEqualsFlag:
 		return nil
 
 	case longSpaceFlag:
@@ -44,8 +48,10 @@ func (o flag) String() string {
 	switch o {
 	case unknownFlag:
 		return "unknownFlag"
-	case shortFlag:
-		return "shortFlag"
+	case shortSpaceFlag:
+		return "shortSpaceFlag"
+	case shortEqualsFlag:
+		return "shortEqualsFlag"
 	case longSpaceFlag:
 		return "longSpaceFlag"
 	case longEqualsFlag:
@@ -62,8 +68,11 @@ func (o flag) MarshalJSON() ([]byte, error) {
 	case unknownFlag:
 		return []byte("unknownFlag"), nil
 
-	case shortFlag:
-		return []byte("shortFlag"), nil
+	case shortSpaceFlag:
+		return []byte("shortSpaceFlag"), nil
+
+	case shortEqualsFlag:
+		return []byte("shortEqualsFlag"), nil
 
 	case longSpaceFlag:
 		return []byte("longSpaceFlag"), nil
@@ -83,8 +92,12 @@ func (o *flag) FromString(s string) error {
 		*o = unknownFlag
 		return nil
 
-	case "shortFlag":
-		*o = shortFlag
+	case "shortSpaceFlag":
+		*o = shortSpaceFlag
+		return nil
+
+	case "shortEqualsFlag":
+		*o = shortEqualsFlag
 		return nil
 
 	case "longSpaceFlag":
@@ -108,8 +121,12 @@ func (o *flag) UnmarshalJSON(b []byte) error {
 		*o = unknownFlag
 		return nil
 
-	case "shortFlag":
-		*o = shortFlag
+	case "shortSpaceFlag":
+		*o = shortSpaceFlag
+		return nil
+
+	case "shortEqualsFlag":
+		*o = shortEqualsFlag
 		return nil
 
 	case "longSpaceFlag":

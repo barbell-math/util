@@ -43,14 +43,15 @@ func TestStructHashPointers(t *testing.T) {
 
 	h, err = StructHash[P, *P](
 		&P{},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().FollowPntrs(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().FollowPntrs(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(0), t)
 
 	h, err = StructHash[P, *P](
 		&P{&i},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().FollowPntrs(false)),
+		NewStructHashOpts().SetOptionsFlag(NewOptionsFlag().FollowPntrs(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(uintptr(unsafe.Pointer(&i))), t)
@@ -70,14 +71,16 @@ func TestStructHashArray(t *testing.T) {
 
 	h, err = StructHash[A, *A](
 		&A{},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeArrayVals(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().IncludeArrayVals(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(3), t)
 
 	h, err = StructHash[A, *A](
 		&A{i},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeArrayVals(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().IncludeArrayVals(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(3), t)
@@ -97,14 +100,16 @@ func TestStructHashSlice(t *testing.T) {
 
 	h, err = StructHash[S, *S](
 		&S{},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeSliceVals(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().IncludeSliceVals(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(0), t)
 
 	h, err = StructHash[S, *S](
 		&S{i},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeSliceVals(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().IncludeSliceVals(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(
@@ -128,14 +133,16 @@ func TestStructHashMap(t *testing.T) {
 
 	h, err = StructHash[M, *M](
 		&M{},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeMapVals(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().IncludeMapVals(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(0), t)
 
 	h, err = StructHash[M, *M](
 		&M{i},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().IncludeMapVals(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().IncludeMapVals(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(2), t)
@@ -155,14 +162,16 @@ func TestStructHashInterface(t *testing.T) {
 
 	h, err = StructHash[I, *I](
 		&I{},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().FollowInterfaces(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().FollowInterfaces(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(0), t)
 
 	h, err = StructHash[I, *I](
 		&I{i},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().FollowInterfaces(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().FollowInterfaces(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(0), t)
@@ -182,14 +191,16 @@ func TestStructHashStructs(t *testing.T) {
 
 	h, err = StructHash[S2, *S2](
 		&S2{},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().RecurseStructs(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().RecurseStructs(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(0), t)
 
 	h, err = StructHash[S2, *S2](
 		&S2{S: S1{1}},
-		NewStructHashOpts().OptionsFlag(NewOptionsFlag().RecurseStructs(false)),
+		NewStructHashOpts().
+			SetOptionsFlag(NewOptionsFlag().RecurseStructs(false)),
 	)
 	test.Nil(err, t)
 	test.Eq(h, hash.Hash(0), t)

@@ -25,7 +25,7 @@ const (
 )
 
 func CleanFileName(fName string) string {
-	convertedName:=[]byte(fName)
+	convertedName := []byte(fName)
 	bannedChars := map[byte]struct{}{
 		'[':  {},
 		']':  {},
@@ -101,8 +101,8 @@ func (g *GeneratedFilesRegistry) WriteToFile(
 		return fmt.Errorf("File error: %w", err)
 	}
 	format.Node(f, fSet, ast)
-	
-	if parsingErr!=nil {
+
+	if parsingErr != nil {
 		return fmt.Errorf("Parser error: (see file): %w", parsingErr)
 	}
 	return nil

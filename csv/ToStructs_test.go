@@ -24,7 +24,7 @@ func TestToStructsInvalidStruct(t *testing.T) {
 	}
 	cnt, err := ToStructs[Row](
 		iter.SliceElems[[]string](VALID_PARSE),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).Count()
 	test.ContainsError(MalformedCSVStruct, err, t)
 	test.ContainsError(DuplicateColName, err, t)
@@ -35,7 +35,7 @@ func TestToStructsValidStruct(t *testing.T) {
 	cntr := 0
 	err := ToStructs[csvTest](
 		iter.SliceElems[[]string](VALID_PARSE),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).ForEach(func(index int, val csvTest) (iter.IteratorFeedback, error) {
 		VALID_STRUCT[index].Eq(&val, t)
 		cntr++
@@ -49,7 +49,7 @@ func TestToStructsMissingColumns(t *testing.T) {
 	cntr := 0
 	err := ToStructs[csvTest](
 		iter.SliceElems[[]string](MISSING_COLUMNS_PARSE),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).ForEach(func(index int, val csvTest) (iter.IteratorFeedback, error) {
 		MISSING_COLUMNS_STRUCT[index].Eq(&val, t)
 		cntr++
@@ -63,7 +63,7 @@ func TestToStructsMissingValues(t *testing.T) {
 	cntr := 0
 	err := ToStructs[csvTest](
 		iter.SliceElems[[]string](MISSING_VALUES_PARSE),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).ForEach(func(index int, val csvTest) (iter.IteratorFeedback, error) {
 		MISSING_VALUES_STRUCT[index].Eq(&val, t)
 		cntr++
@@ -90,7 +90,7 @@ func TestToStructsMalformedDifferingRowLengths(t *testing.T) {
 	cntr := 0
 	err := ToStructs[csvTest](
 		iter.SliceElems[[]string](MALFORMED_DIFFERING_ROW_LEN_PARSE),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).ForEach(func(index int, val csvTest) (iter.IteratorFeedback, error) {
 		MALFORMED_DIFFERING_ROW_LEN_STRUCT[index].Eq(&val, t)
 		cntr++
@@ -104,7 +104,9 @@ func TestToStructsMalformedDifferingRowLengthNoHeaders(t *testing.T) {
 	cntr := 0
 	err := ToStructs[csvTest](
 		iter.SliceElems[[]string](MALFORMED_DIFFERING_ROW_LEN_NO_HEADERS_PARSE),
-		NewOptions().DateTimeFormat("01/02/2006").OptionsFlag(NewOptionsFlag().HasHeaders(false)),
+		NewOptions().
+			SetDateTimeFormat("01/02/2006").
+			SetOptionsFlag(NewOptionsFlag().HasHeaders(false)),
 	).ForEach(func(index int, val csvTest) (iter.IteratorFeedback, error) {
 		MALFORMED_DIFFERING_ROW_LEN_NO_HEADERS_STRUCT[index].Eq(&val, t)
 		cntr++
@@ -148,7 +150,7 @@ func TestToStructsMalformedTypes(t *testing.T) {
 
 	err = ToStructs[csvTest](
 		iter.SliceElems[[]string](MALFORMED_TIME),
-		NewOptions().DateTimeFormat("01/02/2006"),
+		NewOptions().SetDateTimeFormat("01/02/2006"),
 	).ForEach(func(index int, val csvTest) (iter.IteratorFeedback, error) {
 		cntr++
 		return iter.Continue, nil

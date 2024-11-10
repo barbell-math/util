@@ -9,41 +9,40 @@ import (
 	"github.com/barbell-math/util/generators/common"
 )
 
-
 type (
 	InlineArgs struct {
 		Type     string `required:"t" help:"The type to make the alias for."`
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 	CommentArgs struct {
-		name string
-		Identity  bool `required:"t" help:"Set flag to true if the value should be part of the new widgets identity."`
+		name           string
+		Identity       bool   `required:"t" help:"Set flag to true if the value should be part of the new widgets identity."`
 		BaseTypeWidget string `required:"t" help:"The underlying widget to use when making comparisons."`
-		WidgetPackage string `required:"t" help:"The package the base type widget is in. Use '.' for the current package."`
+		WidgetPackage  string `required:"t" help:"The package the base type widget is in. Use '.' for the current package."`
 	}
 
 	ProgState struct {
 		fieldArgs []CommentArgs
-		_package string
+		_package  string
 	}
 
 	TemplateVals struct {
-		GeneratorName string
-		Package string
-		Type string
-		Imports []string
+		GeneratorName  string
+		Package        string
+		Type           string
+		Imports        []string
 		IdentityFields []IdentityFields
 	}
 	IdentityFields struct {
-		Name string
+		Name   string
 		Widget string
 	}
 )
 
 var (
 	INLINE_ARGS InlineArgs
-	PROG_STATE ProgState
-	TEMPLATES common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
+	PROG_STATE  ProgState
+	TEMPLATES   common.GeneratedFilesRegistry = common.NewGeneratedFilesRegistryFromMap(
 		map[string]string{
 			"imports": `
 import (
@@ -127,7 +126,7 @@ package {{ .Package }}
 func main() {
 	common.InlineArgs(&INLINE_ARGS, os.Args)
 
-	found:=false
+	found := false
 	common.IterateOverAST(
 		".",
 		common.GenFileExclusionFilter,
@@ -137,11 +136,11 @@ func main() {
 				gdNode := node.(*ast.GenDecl)
 				if gdNode.Tok == token.TYPE {
 					for _, spec := range gdNode.Specs {
-						found=(found || parseTypeSpec(fSet, srcFile, spec.(*ast.TypeSpec)))
+						found = (found || parseTypeSpec(fSet, srcFile, spec.(*ast.TypeSpec)))
 					}
 				}
 				if found {
-					PROG_STATE._package=file.Name.Name
+					PROG_STATE._package = file.Name.Name
 				}
 				return found
 			case *ast.FuncDecl:
@@ -159,34 +158,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	templateData:=TemplateVals{
+	templateData := TemplateVals{
 		GeneratorName: os.Args[0],
-		Package: PROG_STATE._package,
-		Type: INLINE_ARGS.Type,
+		Package:       PROG_STATE._package,
+		Type:          INLINE_ARGS.Type,
 	}
-	for _, fArgs:=range(PROG_STATE.fieldArgs) {
-		if fArgs.WidgetPackage!="." {
+	for _, fArgs := range PROG_STATE.fieldArgs {
+		if fArgs.WidgetPackage != "." {
 			templateData.Imports = append(
 				templateData.Imports, fArgs.WidgetPackage,
 			)
 		}
 		if fArgs.Identity {
-			templateData.IdentityFields=append(
+			templateData.IdentityFields = append(
 				templateData.IdentityFields,
 				IdentityFields{
-					Name: fArgs.name,
+					Name:   fArgs.name,
 					Widget: fArgs.BaseTypeWidget,
 				},
 			)
 		}
 	}
 
-	if err:=TEMPLATES.WriteToFile(
+	if err := TEMPLATES.WriteToFile(
 		common.CleanFileName(fmt.Sprintf("%sWidget", INLINE_ARGS.Type)),
 		common.GeneratedSrcFileExt,
 		"file",
 		templateData,
-	); err!=nil {
+	); err != nil {
 		common.PrintRunningError("%s", err)
 		os.Exit(1)
 	}
@@ -197,7 +196,7 @@ func parseTypeSpec(
 	srcFile *os.File,
 	ts *ast.TypeSpec,
 ) bool {
-	structType, ok:=ts.Type.(*ast.StructType)
+	structType, ok := ts.Type.(*ast.StructType)
 	if !ok {
 		return false
 	}
@@ -212,26 +211,26 @@ func parseTypeSpec(
 		return false
 	}
 
-	for i:=0; i<structType.Fields.NumFields(); i++ {
-		field:=structType.Fields.List[i]
-		rawDocArgs, err:=common.GetDocArgVals(fSet, srcFile, field.Doc)
-		if err!=nil {
+	for i := 0; i < structType.Fields.NumFields(); i++ {
+		field := structType.Fields.List[i]
+		rawDocArgs, err := common.GetDocArgVals(fSet, srcFile, field.Doc)
+		if err != nil {
 			common.PrintRunningError("%s", err)
 			os.Exit(1)
 		}
 
-		if _, ok:=rawDocArgs["identity"]; !ok {
+		if _, ok := rawDocArgs["identity"]; !ok {
 			continue
 		}
 
-		docArgs:=CommentArgs{}
-		err=common.CommentArgs(&docArgs, rawDocArgs)
-		if err!=nil && docArgs.Identity {
+		docArgs := CommentArgs{}
+		err = common.CommentArgs(&docArgs, rawDocArgs)
+		if err != nil && docArgs.Identity {
 			common.PrintRunningError("%s", err)
 			os.Exit(1)
 		}
 
-		docArgs.name=field.Names[0].Name
+		docArgs.name = field.Names[0].Name
 		PROG_STATE.fieldArgs = append(PROG_STATE.fieldArgs, docArgs)
 	}
 

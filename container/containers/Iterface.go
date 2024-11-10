@@ -12,8 +12,8 @@ import (
 // cached values of length equal to the allowed capacity of the supplied queue
 // (q). Window values will overlap, as shown in the example below.
 //
-//  - Iteration 1: 1,2,3,4
-//  - Iteration 2: 2,3,4,5
+//   - Iteration 1: 1,2,3,4
+//   - Iteration 2: 2,3,4,5
 //
 // If allowPartials is true then windows that are not full will be
 // returned. Setting allowPartials to false will enforce all returned windows to
@@ -53,8 +53,8 @@ func SlidingWindow[T any](
 // partial queues will be returned, meaning any leftover values that do not make
 // a full queue at the end of iteration will not be returned.
 //
-//  - Iteration 1: 1,2,3,4
-//  - Iteration 2: 5,6,7,8
+//   - Iteration 1: 1,2,3,4
+//   - Iteration 2: 5,6,7,8
 //
 // An error will stop iteration.
 func SteppingWindow[T any](
@@ -64,23 +64,23 @@ func SteppingWindow[T any](
 		staticContainers.Vector[T]
 	},
 ) iter.Iter[staticContainers.Vector[T]] {
-	numVals:=0
+	numVals := 0
 	return iter.Next[T, staticContainers.Vector[T]](
 		i,
 		func(
 			index int, val T, status iter.IteratorFeedback,
 		) (iter.IteratorFeedback, staticContainers.Vector[T], error) {
-			if status==iter.Break {
+			if status == iter.Break {
 				return iter.Break, q, nil
 			}
 
 			q.ForcePushBack(val)
 			numVals++
 
-			if numVals<q.Capacity() {
+			if numVals < q.Capacity() {
 				return iter.Iterate, q, nil
 			}
-			numVals=0
+			numVals = 0
 			return iter.Continue, q, nil
 		},
 	)

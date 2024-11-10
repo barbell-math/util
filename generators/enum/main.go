@@ -306,7 +306,7 @@ func getAllCapsType() string {
 	prevIndex := 0
 	allCapsEnumType := ""
 	for i, v := range INLINE_ARGS.Type {
-		if strings.ToUpper(string(v)) == string(v) {
+		if strings.ToUpper(string(v)) == string(v) && i!=0 {
 			allCapsEnumType += "_"
 			allCapsEnumType += strings.ToUpper(INLINE_ARGS.Type[prevIndex:i])
 			prevIndex = i

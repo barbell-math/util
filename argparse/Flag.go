@@ -23,16 +23,22 @@ const (
 	unknownFlag flag = iota
 	// Represents a short flag, that is one with only one dash and one character.
 	//
-	// Example: -t
-	//gen:enum string shortFlag
-	shortFlag
+	// Example: -t 10:00
+	//gen:enum string shortSpaceFlag
+	shortSpaceFlag
+	// Represents a short flag, that is one with only one dash and one character,
+	// with an equals sign and a value.
+	//
+	// Example: -t=10:00
+	//gen:enum string shortEqualsFlag
+	shortEqualsFlag
 	// Represents a long flag, that is one with two dashes and a full name,
 	// without an equals sign.
 	//
 	// Example: --time 10:00
 	//gen:enum string longSpaceFlag
 	longSpaceFlag
-	// Represents a long flag, that is one with two dashes and a fill name,
+	// Represents a long flag, that is one with two dashes and a full name,
 	// with an equals sign and value.
 	//
 	// Example: --time=10:00
@@ -41,9 +47,10 @@ const (
 )
 
 var (
-	regexes = map[flag]*regexp.Regexp {
-		shortFlag: regexp.MustCompile("^-.$"),
-		longSpaceFlag: regexp.MustCompile("^--.*$"),
+	regexes = map[flag]*regexp.Regexp{
+		shortSpaceFlag:      regexp.MustCompile("^-.*$"),
+		shortEqualsFlag:      regexp.MustCompile("^-.*=.*$"),
+		longSpaceFlag:  regexp.MustCompile("^--.*$"),
 		longEqualsFlag: regexp.MustCompile("^--.*=.*$"),
 	}
 )
