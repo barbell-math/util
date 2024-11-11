@@ -25,7 +25,7 @@ type (
 )
 
 func (a Add[T]) ComputeVals() (T, error) {
-	return *a.L+*a.R, nil
+	return *a.L + *a.R, nil
 }
 
 func (a Add[T]) Reset() {
@@ -33,7 +33,7 @@ func (a Add[T]) Reset() {
 }
 
 func (a Sub[T]) ComputeVals() (T, error) {
-	return *a.L-*a.R, nil
+	return *a.L - *a.R, nil
 }
 
 func (a Sub[T]) Reset() {

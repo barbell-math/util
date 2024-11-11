@@ -400,7 +400,7 @@ func setFieldVals(
 		}
 
 		if _import, ok := tags.Lookup("import"); ok {
-			for _, i:=range(strings.Split(_import, " ")) {
+			for _, i := range strings.Split(_import, " ") {
 				PROG_STATE.imports[i] = struct{}{}
 			}
 		}

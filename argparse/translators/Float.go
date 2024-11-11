@@ -11,7 +11,7 @@ type (
 )
 
 func (_ BuiltinFloat32) Translate(arg string) (float32, error) {
-	f64, err:=strconv.ParseFloat(arg, 32)
+	f64, err := strconv.ParseFloat(arg, 32)
 	return float32(f64), err
 }
 
@@ -20,7 +20,7 @@ func (_ BuiltinFloat32) Reset() {
 }
 
 func (_ BuiltinFloat64) Translate(arg string) (float64, error) {
-	f64, err:=strconv.ParseFloat(arg, 32)
+	f64, err := strconv.ParseFloat(arg, 32)
 	return f64, err
 }
 

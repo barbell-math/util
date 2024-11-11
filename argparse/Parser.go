@@ -14,7 +14,7 @@ import (
 
 type (
 	computedArgsTree struct {
-		compedArgs []ComputedArg
+		compedArgs    []ComputedArg
 		subCompedArgs []computedArgsTree
 	}
 
@@ -22,9 +22,9 @@ type (
 		progName string
 		progDesc string
 
-		numArgs int
-		subParsers [][]Arg
-		compedArgs computedArgsTree
+		numArgs      int
+		subParsers   [][]Arg
+		compedArgs   computedArgsTree
 		requiredArgs containers.HashMap[
 			*string,
 			*longArg,
@@ -47,21 +47,21 @@ type (
 )
 
 const (
-	helpDescriptionWidth int=80
+	helpDescriptionWidth int = 80
 )
 
 func (c *computedArgsTree) leftRightRootTraversal(
 	op func(c *ComputedArg) error,
 ) error {
-	if len(c.subCompedArgs)>0 {
-		for _, v:=range(c.subCompedArgs) {
-			if err:=v.leftRightRootTraversal(op); err!=nil {
+	if len(c.subCompedArgs) > 0 {
+		for _, v := range c.subCompedArgs {
+			if err := v.leftRightRootTraversal(op); err != nil {
 				return err
 			}
 		}
 	}
-	for _, v:=range(c.compedArgs) {
-		if err:=op(&v); err!=nil {
+	for _, v := range c.compedArgs {
+		if err := op(&v); err != nil {
 			return err
 		}
 	}
@@ -74,26 +74,26 @@ func newParser(
 	args []Arg,
 	computedArgs []ComputedArg,
 ) Parser {
-	rv:=Parser{
-		progName: progName,
-		progDesc: progDesc,
-		numArgs: len(args)+len(computedArgs),
+	rv := Parser{
+		progName:   progName,
+		progDesc:   progDesc,
+		numArgs:    len(args) + len(computedArgs),
 		subParsers: [][]Arg{args},
 		compedArgs: computedArgsTree{compedArgs: computedArgs},
 	}
-	rv.requiredArgs, _=containers.NewHashMap[
+	rv.requiredArgs, _ = containers.NewHashMap[
 		*string,
 		*longArg,
 		widgets.BasePntr[string, widgets.BuiltinString],
 		widgets.BasePntr[longArg, *longArg],
 	](len(args))
-	rv.shortArgs, _=containers.NewHashMap[
+	rv.shortArgs, _ = containers.NewHashMap[
 		*byte,
 		*shortArg,
 		widgets.BasePntr[byte, widgets.BuiltinByte],
 		widgets.BasePntr[shortArg, *shortArg],
 	](len(args))
-	rv.longArgs, _=containers.NewHashMap[
+	rv.longArgs, _ = containers.NewHashMap[
 		*string,
 		*longArg,
 		widgets.BasePntr[string, widgets.BuiltinString],
@@ -103,16 +103,16 @@ func newParser(
 }
 
 func (p *Parser) getShortArg(b byte) (*Arg, error) {
-	a, err:=p.shortArgs.Get(&b)
-	if err!=nil {
+	a, err := p.shortArgs.Get(&b)
+	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedShortArgErr, "Argument: '%c'", b)
 	}
 	return (*Arg)(a), nil
 }
 
 func (p *Parser) getLongArg(s string) (*Arg, error) {
-	a, err:=p.longArgs.Get(&s)
-	if err!=nil {
+	a, err := p.longArgs.Get(&s)
+	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedLongArgErr, "Argument: '%s'", s)
 	}
 	return (*Arg)(a), nil
@@ -123,19 +123,19 @@ func (p *Parser) getLongArg(s string) (*Arg, error) {
 // computed args are added to a tree like data structure, which is used to
 // maintain the desired bottom up order of execution for computed arguments.
 func (p *Parser) AddSubParsers(others ...*Parser) error {
-	for _, otherP:=range(others) {
-		if otherP.numArgs>0 {
-			p.subParsers=append(p.subParsers, otherP.subParsers...)
-			if err:=containers.MapDisjointKeyedUnion[*byte, *shortArg](
+	for _, otherP := range others {
+		if otherP.numArgs > 0 {
+			p.subParsers = append(p.subParsers, otherP.subParsers...)
+			if err := containers.MapDisjointKeyedUnion[*byte, *shortArg](
 				&p.shortArgs, &otherP.shortArgs,
-			); err!=nil {
+			); err != nil {
 				return customerr.AppendError(
 					ParserCombinationErr, DuplicateShortNameErr, err,
 				)
 			}
-			if err:=containers.MapDisjointKeyedUnion[*string, *longArg](
+			if err := containers.MapDisjointKeyedUnion[*string, *longArg](
 				&p.longArgs, &otherP.longArgs,
-			); err!=nil {
+			); err != nil {
 				return customerr.AppendError(
 					ParserCombinationErr, DuplicateLongNameErr, err,
 				)
@@ -144,18 +144,18 @@ func (p *Parser) AddSubParsers(others ...*Parser) error {
 			containers.MapKeyedUnion[*string, *longArg](
 				&p.requiredArgs, &otherP.requiredArgs,
 			)
-			p.compedArgs.subCompedArgs=append(
+			p.compedArgs.subCompedArgs = append(
 				p.compedArgs.subCompedArgs, otherP.compedArgs,
 			)
-			p.numArgs+=otherP.numArgs
+			p.numArgs += otherP.numArgs
 		}
 	}
 	return nil
 }
 
 func (p *Parser) Parse(t tokenIter) error {
-	for _, subP:=range(p.subParsers) {
-		for _, arg:=range(subP) {
+	for _, subP := range p.subParsers {
+		for _, arg := range subP {
 			arg.reset()
 			arg.setDefaultVal()
 		}
@@ -165,19 +165,19 @@ func (p *Parser) Parse(t tokenIter) error {
 		return nil
 	})
 
-	if err:=t.toArgValPairs(p).ToIter().ForEach(
+	if err := t.toArgValPairs(p).ToIter().ForEach(
 		func(
 			index int,
 			val basic.Pair[*Arg, string],
 		) (iter.IteratorFeedback, error) {
-			if val.A.present && val.A.argType!=MultiFlagArgType {
+			if val.A.present && val.A.argType != MultiFlagArgType {
 				return iter.Break, customerr.Wrap(
 					ArgumentPassedMultipleTimesErr,
 					"'%s'", val.A.longFlag,
 				)
 			}
 
-			if err:=val.A.setVal(val.A, val.B); err!=nil {
+			if err := val.A.setVal(val.A, val.B); err != nil {
 				return iter.Break, customerr.AppendError(
 					customerr.Wrap(
 						ArgumentTranslationErr,
@@ -192,11 +192,11 @@ func (p *Parser) Parse(t tokenIter) error {
 	); errors.Is(err, HelpErr) {
 		fmt.Println(p.Help())
 		return err
-	} else if err!=nil {
+	} else if err != nil {
 		return customerr.AppendError(ParsingErr, err)
 	}
 
-	if err:=p.requiredArgs.Vals().ForEach(
+	if err := p.requiredArgs.Vals().ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
 			if !val.present {
 				return iter.Break, customerr.Wrap(
@@ -205,13 +205,13 @@ func (p *Parser) Parse(t tokenIter) error {
 			}
 			return iter.Continue, nil
 		},
-	); err!=nil {
+	); err != nil {
 		return customerr.AppendError(ParsingErr, err)
 	}
 
-	if err:=p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
+	if err := p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
 		return c.setVal()
-	}); err!=nil {
+	}); err != nil {
 		return customerr.AppendError(ParsingErr, ComputedArgumentErr, err)
 	}
 
@@ -219,12 +219,12 @@ func (p *Parser) Parse(t tokenIter) error {
 }
 
 func (p *Parser) Help() string {
-	start:=""
-	longestArg, _:=p.longArgs.Keys().Reduce(
+	start := ""
+	longestArg, _ := p.longArgs.Keys().Reduce(
 		&start,
 		func(accum **string, iter *string) error {
-			if len(*iter)>len(**accum) {
-				*accum=iter
+			if len(*iter) > len(**accum) {
+				*accum = iter
 			}
 			return nil
 		},
@@ -240,34 +240,36 @@ func (p *Parser) Help() string {
 
 	p.longArgs.Vals().ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
-			if val.shortFlag!=byte(0) {
+			if val.shortFlag != byte(0) {
 				sb.WriteString("-")
 				sb.WriteByte(val.shortFlag)
 				sb.WriteString("  ")
 			}
 			sb.WriteString("--")
 			sb.WriteString(val.longFlag)
-			for i:=0; i<len(*longestArg)-len(val.longFlag); i++ {
+			for i := 0; i < len(*longestArg)-len(val.longFlag); i++ {
 				sb.WriteByte(' ')
 			}
 			sb.WriteString(" ")
-			
+
 			if val.required {
 				sb.WriteString(" (required)  ")
 			} else {
 				sb.WriteString("             ")
 			}
 
-			cntr:=0
-			for _,s:=range(strings.Split(val.description, " ")) {
-				if cntr+len(s)>helpDescriptionWidth {
+			cntr := 0
+			for _, s := range strings.Split(val.description, " ") {
+				if cntr+len(s) > helpDescriptionWidth {
 					sb.WriteByte('\n')
-					for i:=0; i<len(*longestArg)+21; i++ { sb.WriteByte(' ') }
-					cntr=0
+					for i := 0; i < len(*longestArg)+21; i++ {
+						sb.WriteByte(' ')
+					}
+					cntr = 0
 				}
 				sb.WriteString(s)
 				sb.WriteString(" ")
-				cntr+=len(s)+1
+				cntr += len(s) + 1
 			}
 			sb.WriteByte('\n')
 			return iter.Continue, nil

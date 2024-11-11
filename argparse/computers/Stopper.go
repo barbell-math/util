@@ -1,7 +1,7 @@
 package computers
 
 type (
-	Stopper[T any] struct { Err error }
+	Stopper[T any] struct{ Err error }
 )
 
 func (s Stopper[T]) ComputeVals() (T, error) {

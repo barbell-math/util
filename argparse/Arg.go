@@ -25,7 +25,7 @@ type (
 	Arg struct {
 		setVal        func(a *Arg, arg string) error
 		setDefaultVal func()
-		reset func()
+		reset         func()
 		shortFlag     byte
 		longFlag      string
 		argType       ArgType
@@ -38,7 +38,7 @@ type (
 	// than being supplied on the cmd line interface.
 	ComputedArg struct {
 		setVal func() error
-		reset func()
+		reset  func()
 	}
 
 	// Used when only the shortName field of an Arg is important
@@ -65,8 +65,8 @@ func NewArg[T any, U translators.Translater[T]](
 		setDefaultVal: func() {
 			*val = opts.defaultVal
 		},
-		reset: func() { opts.translator.Reset() },
-		argType: opts.argType,
+		reset:       func() { opts.translator.Reset() },
+		argType:     opts.argType,
 		required:    opts.required,
 		description: opts.description,
 		shortFlag:   opts.shortName,
@@ -92,7 +92,7 @@ func NewComputedArg[T any, U computers.Computer[T]](
 	}
 }
 func (_ *shortArg) Eq(l *shortArg, r *shortArg) bool {
-	return l.shortFlag==r.shortFlag
+	return l.shortFlag == r.shortFlag
 }
 func (_ *shortArg) Hash(other *shortArg) hash.Hash {
 	return hash.Hash(other.shortFlag)
@@ -102,10 +102,10 @@ func (_ *shortArg) Zero(other *shortArg) {
 }
 
 func (_ *longArg) Eq(l *longArg, r *longArg) bool {
-	return l.longFlag==r.longFlag
+	return l.longFlag == r.longFlag
 }
 func (_ *longArg) Hash(other *longArg) hash.Hash {
-	s:=widgets.BuiltinString{}
+	s := widgets.BuiltinString{}
 	return s.Hash(&other.longFlag)
 }
 func (_ *longArg) Zero(other *longArg) {

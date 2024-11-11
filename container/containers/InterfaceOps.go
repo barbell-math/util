@@ -17,7 +17,7 @@ func MapKeyedUnion[K any, V any](
 ) {
 	r.Keys().ForEach(
 		func(index int, key K) (iter.IteratorFeedback, error) {
-			val, _:=r.Get(key)
+			val, _ := r.Get(key)
 			l.Emplace(basic.Pair[K, V]{key, val})
 			return iter.Continue, nil
 		},
@@ -34,12 +34,12 @@ func MapDisjointKeyedUnion[K any, V any](
 ) error {
 	return r.Keys().ForEach(
 		func(index int, key K) (iter.IteratorFeedback, error) {
-			if _, err:=l.Get(key); err==nil {
+			if _, err := l.Get(key); err == nil {
 				return iter.Break, customerr.Wrap(
 					containerTypes.Duplicate, "%+v", key,
 				)
 			}
-			val, _:=r.Get(key)
+			val, _ := r.Get(key)
 			l.Emplace(basic.Pair[K, V]{key, val})
 			return iter.Continue, nil
 		},

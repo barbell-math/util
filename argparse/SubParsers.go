@@ -8,7 +8,7 @@ import (
 // Creates a parser that will display the help menu when either -h or --help are
 // supplied.
 func NewHelpParser() *Parser {
-	res:=struct{}{}
+	res := struct{}{}
 	b := ArgBuilder{}
 	AddArg[struct{}, translators.Stopper[struct{}]](
 		&res,

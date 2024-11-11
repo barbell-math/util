@@ -48,9 +48,9 @@ const (
 
 var (
 	regexes = map[flag]*regexp.Regexp{
-		shortSpaceFlag:      regexp.MustCompile("^-.*$"),
-		shortEqualsFlag:      regexp.MustCompile("^-.*=.*$"),
-		longSpaceFlag:  regexp.MustCompile("^--.*$"),
-		longEqualsFlag: regexp.MustCompile("^--.*=.*$"),
+		shortSpaceFlag:  regexp.MustCompile("^-.*$"),
+		shortEqualsFlag: regexp.MustCompile("^-.*=.*$"),
+		longSpaceFlag:   regexp.MustCompile("^--.*$"),
+		longEqualsFlag:  regexp.MustCompile("^--.*=.*$"),
 	}
 )

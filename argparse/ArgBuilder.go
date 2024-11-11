@@ -11,7 +11,7 @@ import (
 type (
 	// Used to create a list of arguments that are then used to build the parser.
 	ArgBuilder struct {
-		args []Arg
+		args         []Arg
 		computedVals []ComputedArg
 	}
 )
@@ -24,10 +24,10 @@ func AddArg[T any, U translators.Translater[T]](
 	longName string,
 	opts *opts[T, U],
 ) {
-	builder.args=append(builder.args, NewArg[T, U](val, longName, opts))
+	builder.args = append(builder.args, NewArg[T, U](val, longName, opts))
 }
 
-// Appends a flag argument to the supplied builder without performing any 
+// Appends a flag argument to the supplied builder without performing any
 // validation of the argument or builder as a whole. Counter flags can only be
 // supplied once.
 // The arg type of the opts struct will be set to [FlagArgType].
@@ -37,7 +37,7 @@ func AddFlag(
 	longName string,
 	opts *opts[bool, translators.Flag],
 ) {
-	opts.argType=FlagArgType
+	opts.argType = FlagArgType
 	AddArg[bool, translators.Flag](val, builder, longName, opts)
 }
 
@@ -52,7 +52,7 @@ func AddFlagCntr[T mathBasic.Int | mathBasic.Uint](
 	longName string,
 	opts *opts[T, *translators.FlagCntr[T]],
 ) {
-	opts.argType=MultiFlagArgType
+	opts.argType = MultiFlagArgType
 	AddArg[T, *translators.FlagCntr[T]](val, builder, longName, opts)
 }
 
@@ -63,7 +63,7 @@ func AddComputedArg[T any, U computers.Computer[T]](
 	builder *ArgBuilder,
 	computer U,
 ) {
-	builder.computedVals=append(
+	builder.computedVals = append(
 		builder.computedVals,
 		NewComputedArg[T, U](val, computer),
 	)
@@ -74,17 +74,17 @@ func AddComputedArg[T any, U computers.Computer[T]](
 // added arguments will be validated. Validation can return one of the below
 // errors, all warpped in a top level [ParserConfigErr]:
 //
-//  - [ReservedShortNameErr]
-//  - [ReservedLongNameErr]
-//  - [DuplicateShortNameErr]
-//  - [DuplicateLongNameErr]
-//  - [LongNameToShortErr]
+//   - [ReservedShortNameErr]
+//   - [ReservedLongNameErr]
+//   - [DuplicateShortNameErr]
+//   - [DuplicateLongNameErr]
+//   - [LongNameToShortErr]
 func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) {
 	// After calling this function the args slice must not reallocate due to the
 	// maps containing pointers to the slice values.
-	rv:=newParser(progName, progDesc, b.args, b.computedVals)
-	for i:=0; i<len(b.args); i++ {
-		if _, err:=rv.shortArgs.Get(&b.args[i].shortFlag); err==nil {
+	rv := newParser(progName, progDesc, b.args, b.computedVals)
+	for i := 0; i < len(b.args); i++ {
+		if _, err := rv.shortArgs.Get(&b.args[i].shortFlag); err == nil {
 			return rv, customerr.AppendError(
 				ParserConfigErr,
 				customerr.Wrap(
@@ -92,14 +92,14 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 				),
 			)
 		}
-		if _, err:=rv.longArgs.Get(&b.args[i].longFlag); err==nil {
+		if _, err := rv.longArgs.Get(&b.args[i].longFlag); err == nil {
 			return rv, customerr.AppendError(
 				ParserConfigErr,
 				customerr.Wrap(DuplicateLongNameErr, "'%s'", b.args[i].longFlag),
 			)
 		}
 
-		if len(b.args[i].longFlag)<2 {
+		if len(b.args[i].longFlag) < 2 {
 			return rv, customerr.AppendError(
 				ParserConfigErr,
 				customerr.Wrap(

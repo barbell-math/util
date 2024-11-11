@@ -8,7 +8,7 @@ type (
 )
 
 func (_ BuiltinBool) Translate(arg string) (bool, error) {
-	c128, err:=strconv.ParseBool(arg)
+	c128, err := strconv.ParseBool(arg)
 	return c128, err
 }
 

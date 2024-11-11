@@ -11,7 +11,7 @@ type (
 )
 
 func (_ BuiltinComplex64) Translate(arg string) (complex64, error) {
-	c64, err:=strconv.ParseComplex(arg, 64)
+	c64, err := strconv.ParseComplex(arg, 64)
 	return complex64(c64), err
 }
 
@@ -20,7 +20,7 @@ func (_ BuiltinComplex64) Reset() {
 }
 
 func (_ BuiltinComplex128) Translate(arg string) (complex128, error) {
-	c128, err:=strconv.ParseComplex(arg, 32)
+	c128, err := strconv.ParseComplex(arg, 32)
 	return c128, err
 }
 

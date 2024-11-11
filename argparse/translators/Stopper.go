@@ -4,7 +4,7 @@ type (
 	// Used to represent a flag that when encountered should stop parsing of the
 	// cmd line arguments. The error that the stopper is created with will be
 	// returned when [Stopper.Translate] is called.
-	Stopper[T any] struct { Err error }
+	Stopper[T any] struct{ Err error }
 )
 
 func (s Stopper[T]) Translate(arg string) (T, error) {

@@ -18,5 +18,5 @@ func (f *FlagCntr[T]) Translate(arg string) (T, error) {
 }
 
 func (f *FlagCntr[T]) Reset() {
-	f.val=0
+	f.val = 0
 }

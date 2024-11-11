@@ -132,7 +132,7 @@ func TestToTokensAllFlags(t *testing.T) {
 }
 
 func TestToArgValPairsInvalidTokenType(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -144,14 +144,14 @@ func TestToArgValPairsInvalidTokenType(t *testing.T) {
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
 
-	_, err=tokenIter(iter.SliceElems[token]([]token{
+	_, err = tokenIter(iter.SliceElems[token]([]token{
 		{_type: unknownTokenType},
 	})).toArgValPairs(&p).ToIter().Collect()
 	test.ContainsError(InvalidTokenType, err, t)
 }
 
 func TestToArgValPairsExpectedArgument(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -172,7 +172,7 @@ func TestToArgValPairsExpectedArgument(t *testing.T) {
 }
 
 func TestToArgValPairsUnrecognizedShortFlag(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -199,7 +199,7 @@ func TestToArgValPairsUnrecognizedShortFlag(t *testing.T) {
 }
 
 func TestToArgValPairsUnrecognizedLongFlag(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -232,7 +232,7 @@ func TestToArgValPairsUnrecognizedLongFlag(t *testing.T) {
 }
 
 func TestToArgValPairsInvalidArgType(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -254,7 +254,7 @@ func TestToArgValPairsInvalidArgType(t *testing.T) {
 }
 
 func TestToArgValPairsEndOfTokenStream(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -276,7 +276,7 @@ func TestToArgValPairsEndOfTokenStream(t *testing.T) {
 }
 
 func TestToArgValPairsExpectedValue(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -315,7 +315,7 @@ func TestToArgValPairsExpectedValue(t *testing.T) {
 }
 
 func TestToArgValPairsPassingShortFlag(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -350,7 +350,7 @@ func TestToArgValPairsPassingShortFlag(t *testing.T) {
 }
 
 func TestToArgValPairsPassingLongFlag(t *testing.T) {
-	res:=struct { S string }{}
+	res := struct{ S string }{}
 
 	b := ArgBuilder{}
 	AddArg[string, translators.BuiltinString](
@@ -385,12 +385,12 @@ func TestToArgValPairsPassingLongFlag(t *testing.T) {
 }
 
 func TestToArgValPairsArgumentOnFlag(t *testing.T) {
-	res:=struct { B bool }{}
+	res := struct{ B bool }{}
 
 	b := ArgBuilder{}
 	AddFlag(
 		&res.B,
-		&b, 
+		&b,
 		"bool",
 		NewOpts[bool, translators.Flag]().SetShortName('b'),
 	)
@@ -411,12 +411,12 @@ func TestToArgValPairsArgumentOnFlag(t *testing.T) {
 }
 
 func TestToArgValPairsArgumentOnFlagCntr(t *testing.T) {
-	res:=struct { I int }{}
+	res := struct{ I int }{}
 
 	b := ArgBuilder{}
 	AddFlagCntr[int](
 		&res.I,
-		&b, 
+		&b,
 		"int",
 		NewOpts[int, *translators.FlagCntr[int]]().SetShortName('i'),
 	)
@@ -437,7 +437,10 @@ func TestToArgValPairsArgumentOnFlagCntr(t *testing.T) {
 }
 
 func TestToArgValPairsCombinedValueArgsPassing(t *testing.T) {
-	res:=struct { I int; B bool }{}
+	res := struct {
+		I int
+		B bool
+	}{}
 
 	b := ArgBuilder{}
 	AddFlag(
@@ -469,7 +472,10 @@ func TestToArgValPairsCombinedValueArgsPassing(t *testing.T) {
 }
 
 func TestToArgValPairsCombinedValueArgsPassingWithLongArg(t *testing.T) {
-	res:=struct { I int; B bool }{}
+	res := struct {
+		I int
+		B bool
+	}{}
 
 	b := ArgBuilder{}
 	AddFlag(
