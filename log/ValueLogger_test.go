@@ -69,7 +69,7 @@ func TestLogIterationTime(t *testing.T) {
 		LogEntry[int],
 		widgets.NilWidget[LogEntry[int]],
 	](2)
-	err := containers.Window[LogEntry[int]](
+	err := containers.SlidingWindow[LogEntry[int]](
 		l.LogElems(),
 		&c,
 		false,
