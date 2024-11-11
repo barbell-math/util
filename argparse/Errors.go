@@ -22,6 +22,7 @@ var (
 
 	ArgumentTranslationErr = errors.New("An error occurred translating the supplied argument")
 	MissingRequiredArgErr = errors.New("Required argument missing")
+	ComputedArgumentErr = errors.New("An error occurred calculating a computed argument")
 
 	HelpErr = errors.New("Help flag specified. Stopping.")
 )

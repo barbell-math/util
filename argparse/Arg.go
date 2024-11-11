@@ -1,6 +1,8 @@
 package argparse
 
 import (
+	"github.com/barbell-math/util/argparse/computers"
+	"github.com/barbell-math/util/argparse/translators"
 	"github.com/barbell-math/util/hash"
 	"github.com/barbell-math/util/widgets"
 )
@@ -8,22 +10,14 @@ import (
 //go:generate ../bin/structDefaultInit -struct opts
 
 type (
-	// An interface that defines what actions can be performed when translating
-	// a string argument to a typed value. The translator is expected to perform
-	// all validation required to ensure a correct value is returned. It is also
-	// expected to return an error if a value is found to be invalid.
-	Translater[T any] interface {
-		Translate(arg string) (T, error)
-	}
-
 	// The optional values that are associated with an argument.
-	opts[T any, U Translater[T]] struct {
+	opts[T any, U translators.Translater[T]] struct {
 		argType     ArgType `default:"ValueArgType" setter:"t" getter:"t"`
 		shortName   byte    `default:"byte(0)" setter:"t" getter:"t"`
 		required    bool    `default:"false" setter:"t" getter:"t"`
 		description string  `default:"\"\"" setter:"t" getter:"t"`
 		defaultVal  T       `default:"generics.ZeroVal[T]()" setter:"t" getter:"t" import:"github.com/barbell-math/util/generics"`
-		translator  U       `default:"generics.ZeroVal[U]()" setter:"t" getter:"t" import:"github.com/barbell-math/util/generics"`
+		translator  U       `default:"generics.ZeroVal[U]()" setter:"t" getter:"t" import:"github.com/barbell-math/util/generics github.com/barbell-math/util/argparse/translators"`
 	}
 
 	// Represents a single argument from the cmd line interface and all the
@@ -31,6 +25,7 @@ type (
 	Arg struct {
 		setVal        func(a *Arg, arg string) error
 		setDefaultVal func()
+		reset func()
 		shortFlag     byte
 		longFlag      string
 		argType       ArgType
@@ -39,11 +34,20 @@ type (
 		description   string
 	}
 
+	// Represents an argument value that is computed from other arguments rather
+	// than being supplied on the cmd line interface.
+	ComputedArg struct {
+		setVal func() error
+		reset func()
+	}
+
+	// Used when only the shortName field of an Arg is important
 	shortArg Arg
+	// Used when only the longName field of an Arg is important
 	longArg Arg
 )
 
-func NewArg[T any, U Translater[T]](
+func NewArg[T any, U translators.Translater[T]](
 	val *T,
 	longName string,
 	opts *opts[T, U],
@@ -61,6 +65,7 @@ func NewArg[T any, U Translater[T]](
 		setDefaultVal: func() {
 			*val = opts.defaultVal
 		},
+		reset: func() { opts.translator.Reset() },
 		argType: opts.argType,
 		required:    opts.required,
 		description: opts.description,
@@ -70,6 +75,22 @@ func NewArg[T any, U Translater[T]](
 	}
 }
 
+func NewComputedArg[T any, U computers.Computer[T]](
+	val *T,
+	computer U,
+) ComputedArg {
+	return ComputedArg{
+		setVal: func() error {
+			v, err := computer.ComputeVals()
+			if err != nil {
+				return err
+			}
+			*val = v
+			return nil
+		},
+		reset: func() { computer.Reset() },
+	}
+}
 func (_ *shortArg) Eq(l *shortArg, r *shortArg) bool {
 	return l.shortFlag==r.shortFlag
 }

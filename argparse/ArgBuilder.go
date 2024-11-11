@@ -1,28 +1,30 @@
 package argparse
 
 import (
+	"github.com/barbell-math/util/argparse/computers"
 	"github.com/barbell-math/util/argparse/translators"
 	containerBasic "github.com/barbell-math/util/container/basic"
-	mathBasic "github.com/barbell-math/util/math/basic"
-	"github.com/barbell-math/util/container/containers"
 	"github.com/barbell-math/util/customerr"
-	"github.com/barbell-math/util/widgets"
+	mathBasic "github.com/barbell-math/util/math/basic"
 )
 
 type (
 	// Used to create a list of arguments that are then used to build the parser.
-	ArgBuilder []Arg
+	ArgBuilder struct {
+		args []Arg
+		computedVals []ComputedArg
+	}
 )
 
 // Appends an argument to the supplied builder without performing any validation
 // of the argument or builder as a whole.
-func AddArg[T any, U Translater[T]](
+func AddArg[T any, U translators.Translater[T]](
 	val *T,
 	builder *ArgBuilder,
 	longName string,
 	opts *opts[T, U],
 ) {
-	*builder=append(*builder, NewArg[T, U](val, longName, opts))
+	builder.args=append(builder.args, NewArg[T, U](val, longName, opts))
 }
 
 // Appends a flag argument to the supplied builder without performing any 
@@ -54,6 +56,19 @@ func AddFlagCntr[T mathBasic.Int | mathBasic.Uint](
 	AddArg[T, *translators.FlagCntr[T]](val, builder, longName, opts)
 }
 
+// Appends a computed argument to the supplied builder without performing any
+// validation of computation of the argument or builder as a whole.
+func AddComputedArg[T any, U computers.Computer[T]](
+	val *T,
+	builder *ArgBuilder,
+	computer U,
+) {
+	builder.computedVals=append(
+		builder.computedVals,
+		NewComputedArg[T, U](val, computer),
+	)
+}
+
 // Creates a parser using the arg builder. Note that the arg builder will be
 // modified and should not be used again after calling ToParser. The previously
 // added arguments will be validated. Validation can return one of the below
@@ -67,77 +82,42 @@ func AddFlagCntr[T mathBasic.Int | mathBasic.Uint](
 func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) {
 	// After calling this function the args slice must not reallocate due to the
 	// maps containing pointers to the slice values.
-	// TODO - delete if subparsers work
-	// *b=append(*b, reservedArgs...)
-
-	rv:=Parser{progName: progName, progDesc: progDesc, subParsers: [][]Arg{*b}}
-	rv.requiredArgs, _=containers.NewHashMap[
-		*string,
-		*longArg,
-		widgets.BasePntr[string, widgets.BuiltinString],
-		widgets.BasePntr[longArg, *longArg],
-	](len(*b))
-	rv.shortArgs, _=containers.NewHashMap[
-		*byte,
-		*shortArg,
-		widgets.BasePntr[byte, widgets.BuiltinByte],
-		widgets.BasePntr[shortArg, *shortArg],
-	](len(*b))
-	rv.longArgs, _=containers.NewHashMap[
-		*string,
-		*longArg,
-		widgets.BasePntr[string, widgets.BuiltinString],
-		widgets.BasePntr[longArg, *longArg],
-	](len(*b))
-
-	// for i:=0; i<len(*b)-len(reservedArgs); i++ { - TODO - delete
-	for i:=0; i<len(*b); i++ {
-		// TODO - delete if subparsers work
-		// if err:=tmpShortName.FromString(string((*b)[i].shortFlag)); err==nil {
-		// 	return rv, customerr.AppendError(
-		// 		ParserConfigErr,
-		// 		customerr.Wrap(ReservedShortNameErr, "'%c'", (*b)[i].shortFlag),
-		// 	)
-		// }
-		// if err:=tmpLongName.FromString((*b)[i].longFlag); err==nil {
-		// 	return rv, customerr.AppendError(
-		// 		ParserConfigErr,
-		// 		customerr.Wrap(ReservedLongNameErr, "'%s'", (*b)[i].longFlag),
-		// 	)
-		// }
-
-		if _, err:=rv.shortArgs.Get(&(*b)[i].shortFlag); err==nil {
+	rv:=newParser(progName, progDesc, b.args, b.computedVals)
+	for i:=0; i<len(b.args); i++ {
+		if _, err:=rv.shortArgs.Get(&b.args[i].shortFlag); err==nil {
 			return rv, customerr.AppendError(
 				ParserConfigErr,
-				customerr.Wrap(DuplicateShortNameErr, "'%c'", (*b)[i].shortFlag),
+				customerr.Wrap(
+					DuplicateShortNameErr, "'%c'", b.args[i].shortFlag,
+				),
 			)
 		}
-		if _, err:=rv.longArgs.Get(&(*b)[i].longFlag); err==nil {
+		if _, err:=rv.longArgs.Get(&b.args[i].longFlag); err==nil {
 			return rv, customerr.AppendError(
 				ParserConfigErr,
-				customerr.Wrap(DuplicateLongNameErr, "'%s'", (*b)[i].longFlag),
+				customerr.Wrap(DuplicateLongNameErr, "'%s'", b.args[i].longFlag),
 			)
 		}
 
-		if len((*b)[i].longFlag)<2 {
+		if len(b.args[i].longFlag)<2 {
 			return rv, customerr.AppendError(
 				ParserConfigErr,
 				customerr.Wrap(
 					LongNameToShortErr,
-					"Name: '%s'", (*b)[i].longFlag,
+					"Name: '%s'", b.args[i].longFlag,
 				),
 			)
 		}
 
 		rv.shortArgs.Emplace(containerBasic.Pair[*byte, *shortArg]{
-			&(*b)[i].shortFlag, (*shortArg)(&(*b)[i]),
+			&b.args[i].shortFlag, (*shortArg)(&b.args[i]),
 		})
 		rv.longArgs.Emplace(containerBasic.Pair[*string, *longArg]{
-			&(*b)[i].longFlag, (*longArg)(&(*b)[i]),
+			&b.args[i].longFlag, (*longArg)(&b.args[i]),
 		})
-		if (*b)[i].required {
+		if b.args[i].required {
 			rv.requiredArgs.Emplace(containerBasic.Pair[*string, *longArg]{
-				&(*b)[i].longFlag, (*longArg)(&(*b)[i]),
+				&b.args[i].longFlag, (*longArg)(&b.args[i]),
 			})
 		}
 	}

@@ -108,7 +108,9 @@ func New{{ .CapStructName }}{{ .LongStructGenerics }}() *{{ .StructName }}{{ .Sh
 package {{ .Package }}
 {{template "autoGenComment" .}}
 import (
-	{{range .Imports}}"{{ . }}"{{end}}
+	{{range .Imports -}}
+		"{{ . }}"
+	{{end -}}
 )
 
 {{template "newFunc" .}}
@@ -194,7 +196,6 @@ func main() {
 		}
 		sb.WriteString("]")
 		templateData.LongStructGenerics = sb.String()
-		fmt.Println(templateData.LongStructGenerics)
 	}
 
 	for i, v := range PROG_STATE.fieldSetters {
@@ -290,8 +291,6 @@ func setGenericVals(
 
 		PROG_STATE.typeParamTypes = append(PROG_STATE.typeParamTypes, t)
 	}
-
-	fmt.Println(PROG_STATE.typeParamTypes)
 }
 
 func setFieldVals(
@@ -401,7 +400,9 @@ func setFieldVals(
 		}
 
 		if _import, ok := tags.Lookup("import"); ok {
-			PROG_STATE.imports[_import] = struct{}{}
+			for _, i:=range(strings.Split(_import, " ")) {
+				PROG_STATE.imports[i] = struct{}{}
+			}
 		}
 	}
 }

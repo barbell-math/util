@@ -55,41 +55,6 @@ func TestArgBuilderToParserDuplicateLongNames(t *testing.T) {
 	test.ContainsError(DuplicateLongNameErr, err, t)
 }
 
-// TODO - delete if subparsers work
-// func TestArgBuilderToParserReservedShortName(t *testing.T) {
-// 	res := ""
-// 	b := ArgBuilder{}
-// 
-// 	AddArg[string, translators.BuiltinString](
-// 		&res,
-// 		&b,
-// 		"str",
-// 		NewOpts[string, translators.BuiltinString]().
-// 			SetShortName('h'),
-// 	)
-// 
-// 	_, err := b.ToParser("", "")
-// 	test.ContainsError(ParserConfigErr, err, t)
-// 	test.ContainsError(ReservedShortNameErr, err, t)
-// }
-// 
-// func TestArgBuilderToParserReservedLongName(t *testing.T) {
-// 	res := ""
-// 	b := ArgBuilder{}
-// 
-// 	AddArg[string, translators.BuiltinString](
-// 		&res,
-// 		&b,
-// 		"help",
-// 		NewOpts[string, translators.BuiltinString]().
-// 			SetShortName('s'),
-// 	)
-// 
-// 	_, err := b.ToParser("", "")
-// 	test.ContainsError(ParserConfigErr, err, t)
-// 	test.ContainsError(ReservedLongNameErr, err, t)
-// }
-
 func TestArgBuilderToParserValidArgBuilder(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
