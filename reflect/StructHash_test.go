@@ -129,7 +129,7 @@ func TestStructHashMap(t *testing.T) {
 
 	h, err = StructHash[M, *M](&M{i}, NewStructHashOpts())
 	test.Nil(err, t)
-	test.Eq(h, hash.Hash(2).CombineIgnoreZero(1, 2, 3, 4), t)
+	test.Eq(h, hash.Hash(2).CombineUnorderedIgnoreZero(1, 2, 3, 4), t)
 
 	h, err = StructHash[M, *M](
 		&M{},

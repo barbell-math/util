@@ -200,11 +200,11 @@ func getHash(val ValInfo, opts *structHashOpts) hash.Hash {
 		if opts.GetFlag(includeMapVals) {
 			mapIter := val.v.MapRange()
 			for mapIter.Next() {
-				rv = rv.CombineIgnoreZero(getHash(
+				rv = rv.CombineUnorderedIgnoreZero(getHash(
 					NewValInfo(mapIter.Key(), true, InaddressableMapErr),
 					opts,
 				))
-				rv = rv.CombineIgnoreZero(getHash(
+				rv = rv.CombineUnorderedIgnoreZero(getHash(
 					NewValInfo(mapIter.Value(), true, InaddressableMapErr),
 					opts,
 				))
