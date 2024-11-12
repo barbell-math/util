@@ -22,7 +22,7 @@ type, as shown below.
 type (
 	//gen:enum unknownValue <default unknown value>
 	//gen:enum default <default value>
-	optionsFlag int
+	<enum type> int
 )
 ```
 

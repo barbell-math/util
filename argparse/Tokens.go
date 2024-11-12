@@ -11,6 +11,8 @@ import (
 //go:generate ../bin/structBaseWidget -type=token
 
 type (
+	// Represents an sequence of strings that can be translated into a sequence
+	// of tokens.
 	ArgvIter    iter.Iter[string]
 	tokenIter   iter.Iter[token]
 	argValPairs iter.Iter[basic.Pair[*Arg, string]]
@@ -43,6 +45,8 @@ func (a argValPairs) ToIter() iter.Iter[basic.Pair[*Arg, string]] {
 	return iter.Iter[basic.Pair[*Arg, string]](a)
 }
 
+// Translates the sequence of strings into tokens. No validation is done to
+// check that the stream of tokens is valid.
 func (a ArgvIter) ToTokens() tokenIter {
 	tokens := []token{}
 
@@ -112,6 +116,9 @@ func (a ArgvIter) ToTokens() tokenIter {
 	}
 }
 
+// Takes a sequence of tokens and turns it into a sequence of argument -> value
+// pairs. This validates that the sequence of tokens is a valid sequence given
+// the type of each token and the placement of each token.
 func (t tokenIter) toArgValPairs(p *Parser) argValPairs {
 	multiValue := false
 	var multiValueToken *Arg = nil

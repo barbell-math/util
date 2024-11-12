@@ -35,6 +35,7 @@ PartialOrder, Arith, or PartialOrderArith.
 1. baseTypeWidget (string) (required): the widget that is associated with the
 current types underlying type.
 1. widgetPackage (string) (required): the package the base types widget is in.
+Use '.' if it is in the current package.
 
 Given the example used throughout this file, with the information from the 
 inline arguments and comment arguments, and assuming that a base type widget was

@@ -24,5 +24,8 @@ var (
 	MissingRequiredArgErr  = errors.New("Required argument missing")
 	ComputedArgumentErr    = errors.New("An error occurred calculating a computed argument")
 
+	// The error returned when the help menu is displayed, indicating that the
+	// parsing the arguments did not end in a "true" error but also did not
+	// completely finish.
 	HelpErr = errors.New("Help flag specified. Stopping.")
 )

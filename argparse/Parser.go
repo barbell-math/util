@@ -18,6 +18,9 @@ type (
 		subCompedArgs []computedArgsTree
 	}
 
+	// The type that will take a token stream generated from a sequence of
+	// strings and perform all translating and computing tasks. See the
+	// [examples] package and README.md for more in depth information.
 	Parser struct {
 		progName string
 		progDesc string
@@ -153,6 +156,17 @@ func (p *Parser) AddSubParsers(others ...*Parser) error {
 	return nil
 }
 
+// Parses the token stream given to it. This is a two step process. The steps
+// are as follows:
+//
+//  1. Consume the tokens and translate all received values, saving the results
+// to the desired locations.
+//  2. Compute all computed arguments in a bottom-up, left-right fashion.
+//
+// If an error occurs in this process it will be returned wrapped in a top level
+// [ParsingErr]. The only exception to this will be the [HelpErr], which will 
+// stop all further parsing, print the help menu, and return. Any tokens that
+// were present before the help flag will be translated.
 func (p *Parser) Parse(t tokenIter) error {
 	for _, subP := range p.subParsers {
 		for i, arg := range subP {
@@ -219,6 +233,7 @@ func (p *Parser) Parse(t tokenIter) error {
 	return nil
 }
 
+// Returns a string representing the help menu.
 func (p *Parser) Help() string {
 	start := ""
 	longestArg, _ := p.longArgs.Keys().Reduce(

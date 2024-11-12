@@ -157,6 +157,12 @@ func main() {
 		)
 		os.Exit(1)
 	}
+	if len(PROG_STATE.fieldArgs)==0 {
+		common.PrintRunningError(
+			"The found struct definition had no fields with an identity flag. At least one is required.",
+		)
+		os.Exit(1)
+	}
 
 	templateData := TemplateVals{
 		GeneratorName: os.Args[0],
