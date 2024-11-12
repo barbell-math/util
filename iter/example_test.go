@@ -19,46 +19,48 @@ func sequenceGenerator(start float64, end float64, step float64) Iter[float64] {
 
 // Find the area under the function y=5cos(2pi/5(x-5))+5 between [-100,100]
 // using a Riemann sum with a given step size
-func testGeneratorIterator(step float64, print bool) func() {
+func testGeneratorIterator(step float64, output bool) func() {
 	return func() {
 		amp := 5.0
 		period := 5.0
 		hShift := 5.0
 		vShift := 5.0
-		val, err := sequenceGenerator(-100.0, 100.0, step).Map(func(index int, val float64) (float64, error) {
-			height := amp*math.Cos(2*math.Pi/period*(val-hShift)) + vShift
-			return height * step, nil
-		}).Reduce(0.0, func(accum *float64, iter float64) error {
-			*accum += iter
-			return nil
-		})
-		if print {
+		val, err := sequenceGenerator(-100.0, 100.0, step).
+			Map(func(index int, val float64) (float64, error) {
+				height := amp*math.Cos(2*math.Pi/period*(val-hShift)) + vShift
+				return height * step, nil
+			}).Reduce(0.0, func(accum *float64, iter float64) error {
+				*accum += iter
+				return nil
+			})
+		if output {
 			fmt.Printf("Area is: %f Using step size: %f\n", val, step)
 			fmt.Printf("Err is: %v\n", err)
 		}
 	}
 }
 
-func testGeneratorIterator2(step float64, print bool) func() {
+func testGeneratorIterator2(step float64, output bool) func() {
 	return func() {
 		amp := 5.0
 		period := 5.0
 		hShift := 5.0
 		vShift := 5.0
 		total := 0.0
-		err := sequenceGenerator(-100.0, 100.0, step).ForEach(func(index int, val float64) (IteratorFeedback, error) {
-			height := amp*math.Cos(2*math.Pi/period*(val-hShift)) + vShift
-			total += height * step
-			return Continue, nil
-		})
-		if print {
+		err := sequenceGenerator(-100.0, 100.0, step).
+			ForEach(func(index int, val float64) (IteratorFeedback, error) {
+				height := amp*math.Cos(2*math.Pi/period*(val-hShift)) + vShift
+				total += height * step
+				return Continue, nil
+			})
+		if output {
 			fmt.Printf("Area is: %f Using step size: %f\n", total, step)
 			fmt.Printf("Err is: %v\n", err)
 		}
 	}
 }
 
-func testGeneratorForLoop(step float64, print bool) func() {
+func testGeneratorForLoop(step float64, output bool) func() {
 	return func() {
 		amp := 5.0
 		period := 5.0
@@ -69,7 +71,7 @@ func testGeneratorForLoop(step float64, print bool) func() {
 			height := amp*math.Cos(2*math.Pi/period*(x-hShift)) + vShift
 			total += height * step
 		}
-		if print {
+		if output {
 			fmt.Printf("Area is: %f Using step size: %f\n", total, step)
 		}
 	}

@@ -3,33 +3,9 @@
 A generic lazy iterator framework library that respects errors as values with
 reverse message passing for resource management.
 
-```golang
-func sequenceGenerator(start float64, end float64, step float64) Iter[float64] {
-    cntr:=start;
-    return func(f IteratorFeedback) (float64,error,bool) {
-        if f!=Break && cntr<=end {
-            cntr+=step;
-            return cntr-1,nil,true;
-        }
-        return end,nil,false;
-    }
-}
-
-//Find the area under the function y=5cos(2pi/5(x-5))+5 between [-100,100]
-// using a Riemann sum with a given step size
-var step float64=0.0001
-
-total,err:=sequenceGenerator(-100.0,100.0,step).Map(func(index int, val float64) (float64,error) {
-    height:=amp*math.Cos(2*math.Pi/period*(val-hShift))+vShift;
-    return height*step,nil;
-}).Reduce(0.0, func(accum *float64, iter float64) error {
-    *accum+=iter;
-    return nil;
-});
-fmt.Printf("Area is: %f Using step size: %f\n",total,step);
-fmt.Printf("Err is: %v\n",err);
-
-//Output:
+https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/example_test.go#L28-L38
+```
+//Example Output:
 //Area is 1000.000000 Using step size: 0.000100
 //Err is: <nil>
 ```
@@ -39,14 +15,14 @@ fmt.Printf("Err is: %v\n",err);
 This library takes advantage of the fact that functions can have methods in go.
 This allows an iterator to be defined as a simple function, as shown below.
 
-https://github.com/barbell-math/util/blob/39c75bf23cb419d7abe71649578e026ffc66db85/iter/Common.go#L14
+https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/Common.go#L14-L21
 <sup>The iter type defined in this package.</sup>
 
-and for the methods on that
-function to call on there relative 'object' (which would be a function in this
-case) to get values as needed. Each method then returns a new iterator, allowing
-the methods to be chained together. The end result of this is a recursive,
-lazily evaluated iterator sequence.
+Given this iterator type, it can have methods attached to it that can call on
+their relative 'object' (which would be a function in this case) to get values
+as needed. Each method then returns a new iterator, allowing the method calls to
+be chained together. The end result of this is a recursive, lazily evaluated
+iterator sequence.
 
 There are three parts to any iterator chain, with the middle part being
 optional:
@@ -137,28 +113,35 @@ the way down to the consumer with no action being taken by any of the
 intermediaries. Recognizing that iteration should stop, the consumer must then
 call its parent iterator with the `Break` action. This action must be propagated
 all the way up to the produced without any intermediaries performing any action.
-Upon receiving this value the produced should perform it's resource management.
+Upon receiving this value the producer should perform it's resource management.
 Once done, the producer should return any errors and it's child iterator should
 then perform resource management. Each successive intermediary will then perform
 it's resource management once it's parent iterator is done until the consumer is
 reached. This allows for resources to be properly destroyed in a top-down
 fashion.
 
-## Sudo Iterators
+TODO - add picture
 
-They are responsible for
-ensuring all feedback messages get passed up the call chain to from the source
-of the message to the producer. This allows for resources to be managed properly.
+## Sudo Iterators
 
 The intermediaries and consumers can be further sub-categorized:
 
-1. Non-Pseudo: All iterators in the parent category (i.e. Intermediary or 
-consumer) can be expressed using a non-pseudo iterator. For intermediaries the
-non-pseudo iterators are `Next` and `Inject`. For consumers the non-pseudo
-iterators are `ForEach` and `Stop`.
-1. Pseudo: Any iterator in the parent category that can be expressed using the appropriate categories non-pseudo iterator.
+1. Pseudo: Any iterator that is expressed using another iterator. For
+intermediaries a it is common to use `Next` and for consumers it is common to
+use `ForEach`.
 
-If you are looking to extend this library and add more iterators, it is highly recommended that any new intermediary or consumer iterators are created _using the non-pseudo iterators_. This will reduce errors and time spent needlessly banging your head against a wall.
+https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/PseudoConsumer.go#L65-L77
+<sup>Example pseudo-consumer</sup>
+
+https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/PseudoIntermediary.go#L20-L34
+<sup>Example pseudo-intermediary</sup>
+
+1. Non-Pseudo: Any iterator that is not expressed using another iterator.
+
+If you are looking to extend this library and add more iterators, it is
+recommended that any new intermediary or consumer iterators are created
+_using the non-pseudo iterators_. This will reduce errors and time spent
+needlessly banging your head against a wall.
 
 ## Benchmarking
 
