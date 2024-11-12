@@ -112,15 +112,15 @@ iterating. When this happens, the command to stop iterating must be passed all
 the way down to the consumer with no action being taken by any of the
 intermediaries. Recognizing that iteration should stop, the consumer must then
 call its parent iterator with the `Break` action. This action must be propagated
-all the way up to the produced without any intermediaries performing any action.
+all the way up to the producer without any intermediaries performing any action.
 Upon receiving this value the producer should perform it's resource management.
 Once done, the producer should return any errors and it's child iterator should
 then perform resource management. Each successive intermediary will then perform
 it's resource management once it's parent iterator is done until the consumer is
 reached. This allows for resources to be properly destroyed in a top-down
-fashion.
+fashion. This pattern of events is demonstrated in the image below.
 
-TODO - add picture
+![Reverse Message Passing](../img/reverseMessagePassing.png)
 
 ## Sudo Iterators
 
