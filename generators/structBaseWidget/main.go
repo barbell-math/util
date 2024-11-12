@@ -1,3 +1,5 @@
+// A generator program that creates methods for a given struct that implement the
+// [widgets.BaseInterface].
 package main
 
 import (
@@ -23,6 +25,8 @@ type (
 
 	ProgState struct {
 		fieldArgs []CommentArgs
+		shortStructGenerics string
+		longStructGenerics string
 		_package  string
 	}
 
@@ -30,6 +34,8 @@ type (
 		GeneratorName  string
 		Package        string
 		Type           string
+		ShortStructGenerics string
+		LongStructGenerics string
 		Imports        []string
 		IdentityFields []IdentityFields
 	}
@@ -56,7 +62,7 @@ import (
 {{range .IdentityFields -}}
 //  - {{ .Name }}
 {{end -}}
-func (_ *{{ .Type }}) Eq(l *{{ .Type }}, r *{{ .Type }}) bool {
+func (_ *{{ .Type }}{{ .ShortStructGenerics }}) Eq(l *{{ .Type }}{{ .ShortStructGenerics }}, r *{{ .Type }}{{ .ShortStructGenerics }}) bool {
 	var (
 		{{range .IdentityFields -}}
 			{{ .Name }}Widget {{ .Widget }}
@@ -77,7 +83,7 @@ func (_ *{{ .Type }}) Eq(l *{{ .Type }}, r *{{ .Type }}) bool {
 {{range .IdentityFields -}}
 //  - {{ .Name }}
 {{end -}}
-func (_ *{{ .Type }}) Hash(other *{{ .Type }}) hash.Hash {
+func (_ *{{ .Type }}{{ .ShortStructGenerics }}) Hash(other *{{ .Type }}{{ .ShortStructGenerics }}) hash.Hash {
 	var (
 		{{range .IdentityFields -}}
 			{{ .Name }}Widget {{ .Widget }}
@@ -97,7 +103,7 @@ func (_ *{{ .Type }}) Hash(other *{{ .Type }}) hash.Hash {
 {{range .IdentityFields -}}
 //  - {{ .Name }}
 {{end -}}
-func (_ *{{ .Type }}) Zero (other *{{ .Type }}) {
+func (_ *{{ .Type }}{{ .ShortStructGenerics }}) Zero (other *{{ .Type }}{{ .ShortStructGenerics }}) {
 	var (
 		{{range .IdentityFields -}}
 			{{ .Name }}Widget {{ .Widget }}
@@ -168,6 +174,8 @@ func main() {
 		GeneratorName: os.Args[0],
 		Package:       PROG_STATE._package,
 		Type:          INLINE_ARGS.Type,
+		ShortStructGenerics: PROG_STATE.shortStructGenerics,
+		LongStructGenerics: PROG_STATE.longStructGenerics,
 	}
 	for _, fArgs := range PROG_STATE.fieldArgs {
 		if fArgs.WidgetPackage != "." {
@@ -215,6 +223,19 @@ func parseTypeSpec(
 
 	if name != INLINE_ARGS.Type {
 		return false
+	}
+
+	if PROG_STATE.shortStructGenerics, err=common.GetShortGenericsString(
+		fSet, srcFile, ts,
+	); err!=nil {
+		common.PrintRunningError("could not get generic type: %w", err)
+		os.Exit(1)
+	}
+	if PROG_STATE.longStructGenerics, err=common.GetLongGenericsString(
+		fSet, srcFile, ts,
+	); err!=nil {
+		common.PrintRunningError("could not get generic type: %w", err)
+		os.Exit(1)
 	}
 
 	for i := 0; i < structType.Fields.NumFields(); i++ {

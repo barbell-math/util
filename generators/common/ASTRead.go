@@ -210,3 +210,61 @@ func DocArgsAstFilter(
 		}
 	}, &foundTypeDef
 }
+
+func GetShortGenericsString(
+	fSet *token.FileSet,
+	srcFile *os.File,
+	ts *ast.TypeSpec,
+) (string, error) {
+	if ts.TypeParams == nil {
+		return "", nil
+	}
+
+	names:=[]string{}
+	for i := 0; i < len(ts.TypeParams.List); i++ {
+		names = append(names, ts.TypeParams.List[i].Names[0].Name)
+	}
+
+	return fmt.Sprintf("[%s]", strings.Join(names, ",")), nil
+}
+
+func GetLongGenericsString(
+	fSet *token.FileSet,
+	srcFile *os.File,
+	ts *ast.TypeSpec,
+) (string, error) {
+	if ts.TypeParams == nil {
+		return "", nil
+	}
+
+	names:=[]string{}
+	for i := 0; i < len(ts.TypeParams.List); i++ {
+		names = append(names, ts.TypeParams.List[i].Names[0].Name)
+	}
+
+	types:=[]string{}
+	for i := 0; i < len(ts.TypeParams.List); i++ {
+		t, err := GetSourceTextFromExpr(
+			fSet, srcFile,
+			ts.TypeParams.List[i].Type,
+		)
+		if err != nil {
+			return "", err
+		}
+
+		types = append(types, t)
+	}
+
+	var sb strings.Builder
+	sb.WriteString("[")
+	for i := 0; i < len(names); i++ {
+		sb.WriteString(names[i])
+		sb.WriteString(" ")
+		sb.WriteString(types[i])
+		if i+1 < len(names) {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString("]")
+	return sb.String(), nil
+}

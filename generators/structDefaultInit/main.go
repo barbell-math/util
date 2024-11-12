@@ -3,7 +3,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"os"
@@ -21,8 +20,8 @@ type (
 	}
 
 	ProgState struct {
-		typeParamNames []string
-		typeParamTypes []string
+		shortStructGenerics string
+		longStructGenerics  string
 		fieldSetters   []string
 		fieldGetters   []string
 		fieldDefaults  []DefaultInfo
@@ -165,8 +164,8 @@ func main() {
 	templateData := TemplateVals{
 		StructName:          INLINE_ARGS.Struct,
 		CapStructName:       strings.ToUpper(INLINE_ARGS.Struct[0:1]) + INLINE_ARGS.Struct[1:],
-		ShortStructGenerics: "",
-		LongStructGenerics:  "",
+		ShortStructGenerics: PROG_STATE.shortStructGenerics,
+		LongStructGenerics:  PROG_STATE.longStructGenerics,
 		Package:             PROG_STATE._package,
 		StructFieldSetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldSetters)),
 		StructFieldGetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldGetters)),
@@ -176,26 +175,6 @@ func main() {
 
 	for k, _ := range PROG_STATE.imports {
 		templateData.Imports = append(templateData.Imports, k)
-	}
-
-	if len(PROG_STATE.typeParamNames) > 0 {
-		templateData.ShortStructGenerics = fmt.Sprintf(
-			"[%s]",
-			strings.Join(PROG_STATE.typeParamNames, ","),
-		)
-
-		var sb strings.Builder
-		sb.WriteString("[")
-		for i := 0; i < len(PROG_STATE.typeParamNames); i++ {
-			sb.WriteString(PROG_STATE.typeParamNames[i])
-			sb.WriteString(" ")
-			sb.WriteString(PROG_STATE.typeParamTypes[i])
-			if i+1 < len(PROG_STATE.typeParamNames) {
-				sb.WriteString(", ")
-			}
-		}
-		sb.WriteString("]")
-		templateData.LongStructGenerics = sb.String()
 	}
 
 	for i, v := range PROG_STATE.fieldSetters {
@@ -249,48 +228,32 @@ func parseTypeSpec(
 	if ts.Name.Name == "_" {
 		return false
 	}
+
+	var err error
 	if st, ok := ts.Type.(*ast.StructType); ok && ts.Name.Name == INLINE_ARGS.Struct {
 		if st.Fields.List == nil {
 			common.PrintRunningError("The supplied options struct has no fields.")
 			os.Exit(1)
 		}
 
-		setGenericVals(fSet, srcFile, ts)
+		if PROG_STATE.shortStructGenerics, err=common.GetShortGenericsString(
+			fSet, srcFile, ts,
+		); err!=nil {
+			common.PrintRunningError("could not get generic type: %w", err)
+			os.Exit(1)
+		}
+		if PROG_STATE.longStructGenerics, err=common.GetLongGenericsString(
+			fSet, srcFile, ts,
+		); err!=nil {
+			common.PrintRunningError("could not get generic type: %w", err)
+			os.Exit(1)
+		}
+
 		setFieldVals(fSet, srcFile, st)
 
 		return true
 	}
 	return false
-}
-
-func setGenericVals(
-	fSet *token.FileSet,
-	srcFile *os.File,
-	ts *ast.TypeSpec,
-) {
-	if ts.TypeParams == nil {
-		return
-	}
-
-	for i := 0; i < len(ts.TypeParams.List); i++ {
-		PROG_STATE.typeParamNames = append(
-			PROG_STATE.typeParamNames,
-			ts.TypeParams.List[i].Names[0].Name,
-		)
-	}
-
-	for i := 0; i < len(ts.TypeParams.List); i++ {
-		t, err := common.GetSourceTextFromExpr(
-			fSet, srcFile,
-			ts.TypeParams.List[i].Type,
-		)
-		if err != nil {
-			common.PrintRunningError("could not get generic type: %w", err)
-			os.Exit(1)
-		}
-
-		PROG_STATE.typeParamTypes = append(PROG_STATE.typeParamTypes, t)
-	}
 }
 
 func setFieldVals(

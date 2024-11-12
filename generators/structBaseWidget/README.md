@@ -38,7 +38,8 @@ type (
 The arguments are as follows:
 
 1. identity (falg) (required): include this flag if the associated field should
-be considered to be part of the structs identity.
+be considered to be part of the structs identity. False or missing if the field
+should not be used as part of it's identity.
 2. baseTypeWidget (string) (required if identity is provided): the widget that
 should be associated with the struct field.
 3. widgetPackage (string) (required if identity is provided): the package the
@@ -78,7 +79,7 @@ func (_ *<type>) Eq(l *<type>, r *<type>) bool {
 // fields:
 //   - <field 1>
 //   - <field 2>
-func (_ *token) Hash(other *<type>) hash.Hash {
+func (_ *<type>) Hash(other *<type>) hash.Hash {
 	var (
 		<field 1>Widget <base type widget 1>
 		<field 2>Widget <base type widget 2>
@@ -94,7 +95,7 @@ func (_ *token) Hash(other *<type>) hash.Hash {
 // the following fields:
 //   - <field 1>
 //   - <field 2>
-func (_ *token) Zero(other *<type>) {
+func (_ *<type>) Zero(other *<type>) {
 	var (
 		<field 1>Widget <base type widget 1>
 		<field 2>Widget <base type widget 2>
@@ -104,3 +105,9 @@ func (_ *token) Zero(other *<type>) {
 	_typeWidget.Zero(&other.<field 2>)
 }
 ```
+
+At a high level the following code is generated:
+
+1. An Eq method on the specified type that implements the widget interface.
+1. A Hash method on the specified type that implements the widget interface.
+1. A Zero method on the specified type that implements the widget interface.
