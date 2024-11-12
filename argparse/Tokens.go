@@ -113,6 +113,29 @@ func (a ArgvIter) ToTokens() tokenIter {
 }
 
 func (t tokenIter) toArgValPairs(p *Parser) argValPairs {
+	multiValue := false
+	var multiValueToken *Arg = nil
+
+	getExpectedValue := func(f iter.IteratorFeedback) (string, error) {
+		iterToken, err, cont := t(f)
+		if err != nil {
+			return "", err
+		}
+		if !cont {
+			return "", customerr.AppendError(
+				EndOfTokenStreamErr,
+				ExpectedValueErr,
+			)
+		}
+		if iterToken._type != valueToken {
+			return "", customerr.Wrap(
+				ExpectedValueErr,
+				"Got: '%s' (%s)", iterToken.value, iterToken._type,
+			)
+		}
+		return iterToken.value, nil
+	}
+
 	return func(f iter.IteratorFeedback) (basic.Pair[*Arg, string], error, bool) {
 		if f == iter.Break {
 			return basic.Pair[*Arg, string]{}, nil, false
@@ -131,15 +154,22 @@ func (t tokenIter) toArgValPairs(p *Parser) argValPairs {
 			if rv.A, err = p.getShortArg(iterToken.value[0]); err != nil {
 				return rv, err, false
 			}
+			multiValue = false
 		case longFlagToken:
 			if rv.A, err = p.getLongArg(iterToken.value); err != nil {
 				return rv, err, false
 			}
+			multiValue = false
 		case valueToken:
-			return rv, customerr.Wrap(
-				ExpectedArgumentErr,
-				"Got: '%s' (%s)", iterToken.value, iterToken._type,
-			), false
+			if !multiValue {
+				return rv, customerr.Wrap(
+					ExpectedArgumentErr,
+					"Got: '%s' (%s)", iterToken.value, iterToken._type,
+				), false
+			} else {
+				rv.A = multiValueToken
+				rv.B = iterToken.value
+			}
 		default:
 			return rv, customerr.Wrap(
 				InvalidTokenType, "'%s' (%s)", iterToken.value, iterToken._type,
@@ -148,23 +178,17 @@ func (t tokenIter) toArgValPairs(p *Parser) argValPairs {
 
 		switch rv.A.argType {
 		case ValueArgType:
-			iterToken, err, cont = t(f)
-			if err != nil {
-				return rv, err, cont
+			if rv.B, err = getExpectedValue(f); err != nil {
+				return rv, err, false
 			}
-			if !cont {
-				return rv, customerr.AppendError(
-					EndOfTokenStreamErr,
-					ExpectedValueErr,
-				), false
+		case MultiValueArgType:
+			if !multiValue {
+				multiValueToken = rv.A
+				multiValue = true
+				if rv.B, err = getExpectedValue(f); err != nil {
+					return rv, err, false
+				}
 			}
-			if iterToken._type != valueToken {
-				return rv, customerr.Wrap(
-					ExpectedValueErr,
-					"Got: '%s' (%s)", iterToken.value, iterToken._type,
-				), false
-			}
-			rv.B = iterToken.value
 		case FlagArgType:
 			break
 		case MultiFlagArgType:

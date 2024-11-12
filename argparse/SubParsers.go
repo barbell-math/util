@@ -44,5 +44,3 @@ func NewVerbosityParser[T basic.Int | basic.Uint](val *T) *Parser {
 	rv, _ := b.ToParser("", "")
 	return &rv
 }
-
-// TODO - add db sub parser

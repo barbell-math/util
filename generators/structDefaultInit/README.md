@@ -38,12 +38,12 @@ will be what is placed in the generated code. Expressions are not evaluated.
 false to not add one
 1. getter (bool) (required): true to make a getter function for this field,
 false to not add one
-1. import (string) (optional): a import to include in the generated code file.
-This is useful when the default value is derived from a value in an external
-package. This value is treated as a string, though quotes will be added to the
-value to match the standard import syntax.
+1. import (string) (optional): a space separated list of imports to include in 
+the generated code file. This is useful when the default value is derived from a
+value in an external package. Every import will be automatically wrapped in
+quotes.
 
-Given the example used throughout this file, with the information from the 
+given the example used throughout this file, with the information from the 
 inline arguments and the struct tags the following code will be generated:
 
 ```
@@ -53,8 +53,8 @@ import (
     <imported package>
 )
 
-// Returns a new <struct type> struct initialized with the default values.
-func New<struct type>() <struct type> {
+// returns a new <struct type> struct initialized with the default values.
+func new<struct type>() <struct type> {
     return <struct type>{
         <field 1>: <default value 1>,
         <field 2>: <default value 2>,
@@ -62,14 +62,14 @@ func New<struct type>() <struct type> {
     }
 }
 
-// Another comment for this field
+// another comment for this field
 func (o *<struct type>) <field 2>(v <field 2 type>) *<struct type> {
     o.<field 2>=v
     return o
 }
 
-// Another comment for this field
-func (o *<struct type>) Get<field 2>() *<field 2 type> {
+// another comment for this field
+func (o *<struct type>) get<field 2>() *<field 2 type> {
     return o.<field 2>
 }
 

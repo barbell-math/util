@@ -11,6 +11,7 @@ var (
 	ARG_TYPE       []ArgType = []ArgType{
 		UnknownArgType,
 		ValueArgType,
+		MultiValueArgType,
 		FlagArgType,
 		MultiFlagArgType,
 	}
@@ -27,6 +28,9 @@ func (o ArgType) Valid() error {
 		return nil
 
 	case ValueArgType:
+		return nil
+
+	case MultiValueArgType:
 		return nil
 
 	case FlagArgType:
@@ -46,6 +50,8 @@ func (o ArgType) String() string {
 		return "UnknownArgType"
 	case ValueArgType:
 		return "ValueArgType"
+	case MultiValueArgType:
+		return "MultiValueArgType"
 	case FlagArgType:
 		return "FlagArgType"
 	case MultiFlagArgType:
@@ -64,6 +70,9 @@ func (o ArgType) MarshalJSON() ([]byte, error) {
 
 	case ValueArgType:
 		return []byte("ValueArgType"), nil
+
+	case MultiValueArgType:
+		return []byte("MultiValueArgType"), nil
 
 	case FlagArgType:
 		return []byte("FlagArgType"), nil
@@ -85,6 +94,10 @@ func (o *ArgType) FromString(s string) error {
 
 	case "ValueArgType":
 		*o = ValueArgType
+		return nil
+
+	case "MultiValueArgType":
+		*o = MultiValueArgType
 		return nil
 
 	case "FlagArgType":
@@ -110,6 +123,10 @@ func (o *ArgType) UnmarshalJSON(b []byte) error {
 
 	case "ValueArgType":
 		*o = ValueArgType
+		return nil
+
+	case "MultiValueArgType":
+		*o = MultiValueArgType
 		return nil
 
 	case "FlagArgType":

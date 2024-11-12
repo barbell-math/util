@@ -71,7 +71,15 @@ func WrapValueList(
 		sb.WriteByte('\n')
 	}
 	for i, v := range valsList {
-		sb.WriteString(fmt.Sprintf("  |- %s (%T): %+v", v.ItemName, v.Item, v.Item))
+		if stringer, ok := v.Item.(fmt.Stringer); ok {
+			sb.WriteString(fmt.Sprintf(
+				"  |- %s (%T): %s", v.ItemName, v.Item, stringer,
+			))
+		} else {
+			sb.WriteString(fmt.Sprintf(
+				"  |- %s (%T): %+v", v.ItemName, v.Item, v.Item,
+			))
+		}
 		if i+1 < len(valsList) {
 			sb.WriteByte('\n')
 		}

@@ -1,6 +1,8 @@
 package containers
 
 import (
+	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/barbell-math/util/container/containerTypes"
@@ -853,4 +855,26 @@ func (_ *HashSet[T, U]) Zero(other *HashSet[T, U]) {
 // Internally this is equivalent to [SyncedHashSet.Clear].
 func (_ *SyncedHashSet[T, U]) Zero(other *SyncedHashSet[T, U]) {
 	other.Clear()
+}
+
+// Implements the fmt.Stringer interface
+func (h *HashSet[T, U]) String() string {
+	var sb strings.Builder
+	sb.WriteByte('{')
+
+	cntr := 0
+	for _, v := range h.internalHashSetImpl {
+		if stringer, ok := any(&v).(fmt.Stringer); ok {
+			sb.WriteString(fmt.Sprintf("%s", stringer))
+		} else {
+			sb.WriteString(fmt.Sprintf("%+v", v))
+		}
+		if cntr+1 < h.Length() {
+			sb.WriteString(", ")
+		}
+		cntr++
+	}
+
+	sb.WriteByte('}')
+	return sb.String()
 }

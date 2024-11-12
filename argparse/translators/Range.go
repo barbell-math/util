@@ -6,6 +6,7 @@ import (
 )
 
 type (
+	// A translator that imposes a range on the supplied cmd line argument.
 	Range[T basic.Number, U Translater[T]] struct {
 		// Inclusive min
 		Min T
@@ -31,4 +32,8 @@ func (r Range[T, U]) Translate(arg string) (T, error) {
 		)
 	}
 	return rv, nil
+}
+
+func (r Range[T, U]) Reset() {
+	r.NumTranslator.Reset()
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/barbell-math/util/argparse/translators"
 	"github.com/barbell-math/util/iter"
 	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/widgets"
 )
 
 func TestToTokensNoArguments(t *testing.T) {
@@ -504,4 +505,112 @@ func TestToArgValPairsCombinedValueArgsPassingWithLongArg(t *testing.T) {
 	test.Eq(pairs[2].A.longFlag, "bool", t)
 	test.Eq(pairs[3].A.longFlag, "int", t)
 	test.Eq(pairs[4].A.longFlag, "int", t)
+}
+
+func TestToArgValPairsMultiArgPassing(t *testing.T) {
+	res := struct{ S []int }{}
+
+	b := ArgBuilder{}
+	AddListArg[int, translators.BuiltinInt](
+		&res.S,
+		&b,
+		"list",
+		NewOpts[
+			[]int,
+			*translators.ListValues[int, translators.BuiltinInt, widgets.BuiltinInt],
+		]().
+			SetShortName('l').
+			SetTranslator(&translators.ListValues[
+				int,
+				translators.BuiltinInt,
+				widgets.BuiltinInt,
+			]{
+				ValueTranslator: translators.BuiltinInt{Base: 10},
+			}),
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	pairs, err := ArgvIterFromSlice([]string{"-l=1", "2", "3"}).
+		ToTokens().
+		toArgValPairs(&p).
+		ToIter().Collect()
+	test.Nil(err, t)
+	test.Eq(len(pairs), 3, t)
+	test.Eq(pairs[0].A.longFlag, "list", t)
+	test.Eq(pairs[0].B, "1", t)
+	test.Eq(pairs[1].A.longFlag, "list", t)
+	test.Eq(pairs[1].B, "2", t)
+	test.Eq(pairs[2].A.longFlag, "list", t)
+	test.Eq(pairs[2].B, "3", t)
+
+	pairs, err = ArgvIterFromSlice([]string{"-l", "1", "2", "3"}).
+		ToTokens().
+		toArgValPairs(&p).
+		ToIter().Collect()
+	test.Nil(err, t)
+	test.Eq(len(pairs), 3, t)
+	test.Eq(pairs[0].A.longFlag, "list", t)
+	test.Eq(pairs[0].B, "1", t)
+	test.Eq(pairs[1].A.longFlag, "list", t)
+	test.Eq(pairs[1].B, "2", t)
+	test.Eq(pairs[2].A.longFlag, "list", t)
+	test.Eq(pairs[2].B, "3", t)
+
+	pairs, err = ArgvIterFromSlice([]string{"-list=1", "2", "3"}).
+		ToTokens().
+		toArgValPairs(&p).
+		ToIter().Collect()
+	test.Nil(err, t)
+	test.Eq(len(pairs), 3, t)
+	test.Eq(pairs[0].A.longFlag, "list", t)
+	test.Eq(pairs[0].B, "1", t)
+	test.Eq(pairs[1].A.longFlag, "list", t)
+	test.Eq(pairs[1].B, "2", t)
+	test.Eq(pairs[2].A.longFlag, "list", t)
+	test.Eq(pairs[2].B, "3", t)
+
+	pairs, err = ArgvIterFromSlice([]string{"--list", "1", "2", "3"}).
+		ToTokens().
+		toArgValPairs(&p).
+		ToIter().Collect()
+	test.Nil(err, t)
+	test.Eq(len(pairs), 3, t)
+	test.Eq(pairs[0].A.longFlag, "list", t)
+	test.Eq(pairs[0].B, "1", t)
+	test.Eq(pairs[1].A.longFlag, "list", t)
+	test.Eq(pairs[1].B, "2", t)
+	test.Eq(pairs[2].A.longFlag, "list", t)
+	test.Eq(pairs[2].B, "3", t)
+}
+
+func TestToArgValPairsMultiArgMissingValue(t *testing.T) {
+	res := struct{ S []int }{}
+
+	b := ArgBuilder{}
+	AddListArg[int, translators.BuiltinInt, widgets.BuiltinInt](
+		&res.S,
+		&b,
+		"list",
+		NewOpts[
+			[]int,
+			*translators.ListValues[int, translators.BuiltinInt, widgets.BuiltinInt],
+		]().
+			SetShortName('l').
+			SetTranslator(&translators.ListValues[
+				int,
+				translators.BuiltinInt,
+				widgets.BuiltinInt,
+			]{
+				ValueTranslator: translators.BuiltinInt{Base: 10},
+			}),
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	_, err = ArgvIterFromSlice([]string{"-list", "-t"}).
+		ToTokens().
+		toArgValPairs(&p).
+		ToIter().Collect()
+	test.ContainsError(ExpectedValueErr, err, t)
 }

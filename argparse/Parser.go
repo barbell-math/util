@@ -155,9 +155,10 @@ func (p *Parser) AddSubParsers(others ...*Parser) error {
 
 func (p *Parser) Parse(t tokenIter) error {
 	for _, subP := range p.subParsers {
-		for _, arg := range subP {
-			arg.reset()
+		for i, arg := range subP {
 			arg.setDefaultVal()
+			arg.reset(&arg)
+			subP[i] = arg
 		}
 	}
 	p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
@@ -170,7 +171,7 @@ func (p *Parser) Parse(t tokenIter) error {
 			index int,
 			val basic.Pair[*Arg, string],
 		) (iter.IteratorFeedback, error) {
-			if val.A.present && val.A.argType != MultiFlagArgType {
+			if _, ok := multiSpecificationArgTypes[val.A.argType]; !ok && val.A.present {
 				return iter.Break, customerr.Wrap(
 					ArgumentPassedMultipleTimesErr,
 					"'%s'", val.A.longFlag,

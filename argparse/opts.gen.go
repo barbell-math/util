@@ -18,56 +18,80 @@ func NewOpts[T any, U translators.Translater[T]]() *opts[T, U] {
 	}
 }
 
+// The type of argument. This value will affect how the parser expects
+// values, so make sure it is the right value. See [ArgType] for
+// descriptions of available types.
 func (o *opts[T, U]) SetArgType(v ArgType) *opts[T, U] {
 	o.argType = v
 	return o
 }
 
+// The short name to associate with the argument. These will usually
+// follow a form similar to '-t'.
 func (o *opts[T, U]) SetShortName(v byte) *opts[T, U] {
 	o.shortName = v
 	return o
 }
 
+// Defines if the argument is required or not.
 func (o *opts[T, U]) SetRequired(v bool) *opts[T, U] {
 	o.required = v
 	return o
 }
 
+// Sets the description that will be printed out on the help menu.
 func (o *opts[T, U]) SetDescription(v string) *opts[T, U] {
 	o.description = v
 	return o
 }
 
+// The default value that should be used if the argument is not supplied.
+// The default defaults to a zero-value initilized value.
 func (o *opts[T, U]) SetDefaultVal(v T) *opts[T, U] {
 	o.defaultVal = v
 	return o
 }
 
+// The translator value to use when parsing the cmd line argument's
+// value. Most translators are stateless, but some have state and hence
+// must be able to have there value explicitly set.
 func (o *opts[T, U]) SetTranslator(v U) *opts[T, U] {
 	o.translator = v
 	return o
 }
 
+// The type of argument. This value will affect how the parser expects
+// values, so make sure it is the right value. See [ArgType] for
+// descriptions of available types.
 func (o *opts[T, U]) GetArgType() ArgType {
 	return o.argType
 }
 
+// The short name to associate with the argument. These will usually
+// follow a form similar to '-t'.
 func (o *opts[T, U]) GetShortName() byte {
 	return o.shortName
 }
 
+// Defines if the argument is required or not.
 func (o *opts[T, U]) GetRequired() bool {
 	return o.required
 }
 
+// Sets the description that will be printed out on the help menu.
 func (o *opts[T, U]) GetDescription() string {
 	return o.description
 }
 
+// The default value that should be used if the argument is not supplied.
+// The default defaults to a zero-value initilized value.
 func (o *opts[T, U]) GetDefaultVal() T {
 	return o.defaultVal
 }
 
+// The translator value to use when parsing the cmd line argument's
+// value. Most translators are stateless, but some have state and hence
+// must be able to have there value explicitly set.
 func (o *opts[T, U]) GetTranslator() U {
 	return o.translator
 }

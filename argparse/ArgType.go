@@ -19,6 +19,10 @@ const (
 	// only be supplied once.
 	//gen:enum string ValueArgType
 	ValueArgType
+	// Represents a flag type that can accept many values as an argument and
+	// must only be supplied once. At least one argument must be supplied.
+	//gen:enum string MultiValueArgType
+	MultiValueArgType
 	// Represents a flag type that must not accept a value and must only be
 	// supplied once.
 	//gen:enum string FlagArgType
@@ -27,4 +31,14 @@ const (
 	// many times.
 	//gen:enum string MultiFlagArgType
 	MultiFlagArgType
+)
+
+var (
+	singleSpecificationArgTypes = map[ArgType]struct{}{
+		ValueArgType: struct{}{}, FlagArgType: struct{}{},
+	}
+
+	multiSpecificationArgTypes = map[ArgType]struct{}{
+		MultiValueArgType: struct{}{}, MultiFlagArgType: struct{}{},
+	}
 )
