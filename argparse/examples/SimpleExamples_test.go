@@ -182,8 +182,7 @@ func Example_ListArgument() {
 				widgets.BuiltinInt,
 			]{
 				ValueTranslator: translators.BuiltinInt{},
-			},
-		),
+			}),
 	)
 
 	parser, err := b.ToParser("Prog name", "Prog description")
@@ -227,8 +226,7 @@ func Example_ListArgument_AllowedValsSet() {
 				AllowedVals: containers.HashSetValInit[int, widgets.BuiltinInt](
 					1, 2, 3, 4, 5, 6,
 				),
-			},
-			),
+			}),
 	)
 
 	parser, err := b.ToParser("Prog name", "Prog description")

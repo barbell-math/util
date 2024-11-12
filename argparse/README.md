@@ -3,24 +3,22 @@
 A type safe, extensible CLI argument parsing utility package.
 
 https://github.com/barbell-math/util/blob/22385fc610ab0b22b8f16fc828ef3a43b300ceb9/argparse/examples/SimpleExamples_test.go#L47-L72
+<sup>Example usage of the argparse package</sup>
 
 ## Usage
 
-The general usage of this package is as follows:
+The above example shows the general usage of this package. In the example there
+are three main parts to consider:
 
-https://github.com/barbell-math/util/blob/4d4a582428ccf312f8b2faa016626d6f35246b53/argparse/examples/SimpleExamples_test.go#L18-L31
-<sup>Example usage of the argparse package</sup>
-
-In this example there are three main parts to consider:
-
-1. An `ArgBuilder` is created and it it populated with arguments. This stage is
-where the vast majority of your interaction with the package will take place.
+1. An `ArgBuilder` is created and it is populated with arguments. This stage is
+where the vast majority of your interaction with the package will take place,
+and is explained in more detail in the next section.
 1. The `ArgBuilder` makes a `Parser`. Optionally this is where subparsers could
 be added if you were using them.
 1. The `Parser` is then used to parse a slice of strings which is translated
 into a sequence of tokens.
 
-### Argument Builder
+## Argument Builder
 
 Primitive types are the most straight forward. Shown below is how to add an
 integer argument. The `translators.BuiltinInt` type is responsible for parsing
@@ -62,25 +60,39 @@ only be supplied once.
 may be supplied many times.
 
 The `ArgBuilder` also has several helper functions and translators for common
-CLI argument types.
+CLI argument types:
 
-1. To add a flag argument. This will return true if the flag is provided. It
-does accept any values.
+1. Flag arguments. This will return true if the flag is provided. It does accept
+any values.
 
 https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L92-L98
 
-2. To add a flag counter argument. This will return an integer equal to the
-number of times that the flag was provided. It does not accept any values.
+2. Flag counter argument. This will return an integer equal to the number of
+times that the flag was provided. It does not accept any values.
 
 https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L131-L136
 
-3. A list argument. This will build up a list of all the values that were
-provided with the argument. Many values can be provided with a single argument
-or many flags can be provided with a single argument, as shown in the example
-arguments below the argument example.
+3. List argument. This will build up a list of all the values that were provided
+with the argument. Many values can be provided with a single argument or many
+flags can be provided with a single argument, as shown in the example arguments
+below the argument example.
 
-https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L169-L186
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L171-L186
 https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L192
+
+4. List argument with a predefined set of allowed values. This will build up a
+list of all the values that were provided with the argument, provided that they
+are in the allowed list of values. Many values can be provided with a single
+argument or many flags can be provided with a single argument, as shown in the
+example arguments below the argument example.
+
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L211-L231
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L239
+
+5. Selector argument. This will accept a single value as long as that values is
+in the predefined set of allowed values.
+
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L258-L275
 
 ## Design
 
