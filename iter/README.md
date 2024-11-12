@@ -1,9 +1,9 @@
 # iter
 
-A generic lazy iterator framework library that respects errors as values with
+A generic lazy iterator framework package that respects errors as values with
 reverse message passing for resource management.
 
-https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/example_test.go#L28-L38
+https://github.com/barbell-math/util/blob/refactor/iter/example_test.go#L28-L38
 ```
 //Example Output:
 //Area is 1000.000000 Using step size: 0.000100
@@ -12,10 +12,10 @@ https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a36
 
 ## Design
 
-This library takes advantage of the fact that functions can have methods in go.
+This package takes advantage of the fact that functions can have methods in go.
 This allows an iterator to be defined as a simple function, as shown below.
 
-https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/Common.go#L14-L21
+https://github.com/barbell-math/util/blob/refactor/iter/Common.go#L14-L21
 <sup>The iter type defined in this package.</sup>
 
 Given this iterator type, it can have methods attached to it that can call on
@@ -28,8 +28,8 @@ There are three parts to any iterator chain, with the middle part being
 optional:
 
 1. Producer: The producer is responsible for creating a sequence of values to
-pass to the rest of the iterator stream. The source can be a slice, channel, or
-a single value.
+pass to the rest of the iterators. The source can be a slice, channel, or a
+single value.
 1. Intermediary: An Intermediary is responsible for taking it's parent iterators
 values, mutating and/or filtering them, and passing them down to it's child
 iterator.
@@ -130,38 +130,39 @@ The intermediaries and consumers can be further sub-categorized:
 intermediaries a it is common to use `Next` and for consumers it is common to
 use `ForEach`.
 
-https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/PseudoConsumer.go#L65-L77
+https://github.com/barbell-math/util/blob/refactor/iter/PseudoConsumer.go#L65-L77
 <sup>Example pseudo-consumer</sup>
 
-https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/PseudoIntermediary.go#L20-L35
+https://github.com/barbell-math/util/blob/refactor/iter/PseudoIntermediary.go#L20-L35
 <sup>Example pseudo-intermediary</sup>
 
 2. Non-Pseudo: Any iterator that is not expressed using another iterator. For
 examples refer to the `ForEach` and `Next` functions.
 
-If you are looking to extend this library and add more iterators, it is
-recommended that any new intermediary or consumer iterators are created
-_using the non-pseudo iterators_. This will reduce errors and time spent
-needlessly banging your head against a wall.
+> Tip:
+> If you are looking to extend this package and add more iterators, it is
+> recommended that any new intermediary or consumer iterators are created
+> _using the non-pseudo iterators_. This will reduce errors and time spent
+> needlessly banging your head against a wall.
 
 ## Benchmarking
 
-Obviously, there will be overhead when using this library instead of using plain
+Obviously, there will be overhead when using this package instead of using plain
 for loops. The `example_test.go` file not only showcases the example at the top
 of this readme, but contains benchmarks for three different scenarios. These
 scenarios are shown below for convenience.
 
 ##### Scenario 1: A 'typical' functional implementation
 
-https://github.com/barbell-math/util/blob/1c65f2c0538b4bc6c4c1344431b8bc97aed8ceee/iter/example_test.go#L28-L35
+https://github.com/barbell-math/util/blob/refactor/iter/example_test.go#L28-L35
 
 ##### Scenario 2: Another implementation using iterators
 
-https://github.com/barbell-math/util/blob/1c65f2c0538b4bc6c4c1344431b8bc97aed8ceee/iter/example_test.go#L50-L55
+https://github.com/barbell-math/util/blob/refactor/iter/example_test.go#L50-L55
 
 ##### Scenario 3: A basic for loop
 
-https://github.com/barbell-math/util/blob/1c65f2c0538b4bc6c4c1344431b8bc97aed8ceee/iter/example_test.go#L70-L73
+https://github.com/barbell-math/util/blob/refactor/iter/example_test.go#L70-L73
 
 The benchmarks (gathered from the go benchmark utility) for the scenarios with
 various step sizes are shown below. Make of these results as you will.
