@@ -31,6 +31,27 @@ func TestArgBuilderToParserDuplicateShortNames(t *testing.T) {
 	test.ContainsError(DuplicateShortNameErr, err, t)
 }
 
+func TestArgBuilderToParserMissingShortNames(t *testing.T) {
+	res := ""
+	b := ArgBuilder{}
+
+	AddArg[string, translators.BuiltinString](
+		&res,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString](),
+	)
+	AddArg[string, translators.BuiltinString](
+		&res,
+		&b,
+		"str2",
+		NewOpts[string, translators.BuiltinString](),
+	)
+
+	_, err := b.ToParser("", "")
+	test.Nil(err,t)
+}
+
 func TestArgBuilderToParserDuplicateLongNames(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}

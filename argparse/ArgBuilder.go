@@ -151,13 +151,15 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 	// maps containing pointers to the slice values.
 	rv := newParser(progName, progDesc, b.args, b.computedVals)
 	for i := 0; i < len(b.args); i++ {
-		if _, err := rv.shortArgs.Get(&b.args[i].shortFlag); err == nil {
-			return rv, customerr.AppendError(
-				ParserConfigErr,
-				customerr.Wrap(
-					DuplicateShortNameErr, "'%c'", b.args[i].shortFlag,
-				),
-			)
+		if b.args[i].shortFlag!=byte(0) {
+			if _, err := rv.shortArgs.Get(&b.args[i].shortFlag); err == nil {
+				return rv, customerr.AppendError(
+					ParserConfigErr,
+					customerr.Wrap(
+						DuplicateShortNameErr, "'%c'", b.args[i].shortFlag,
+					),
+				)
+			}
 		}
 		if _, err := rv.longArgs.Get(&b.args[i].longFlag); err == nil {
 			return rv, customerr.AppendError(
@@ -176,9 +178,11 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 			)
 		}
 
-		rv.shortArgs.Emplace(containerBasic.Pair[*byte, *shortArg]{
-			&b.args[i].shortFlag, (*shortArg)(&b.args[i]),
-		})
+		if b.args[i].shortFlag!=byte(0) {
+			rv.shortArgs.Emplace(containerBasic.Pair[*byte, *shortArg]{
+				&b.args[i].shortFlag, (*shortArg)(&b.args[i]),
+			})
+		}
 		rv.longArgs.Emplace(containerBasic.Pair[*string, *longArg]{
 			&b.args[i].longFlag, (*longArg)(&b.args[i]),
 		})
