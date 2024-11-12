@@ -183,7 +183,7 @@ func Example_ListArgument() {
 			]{
 				ValueTranslator: translators.BuiltinInt{},
 			},
-			),
+		),
 	)
 
 	parser, err := b.ToParser("Prog name", "Prog description")

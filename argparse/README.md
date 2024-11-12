@@ -20,10 +20,7 @@ be added if you were using them.
 1. The `Parser` is then used to parse a slice of strings which is translated
 into a sequence of tokens.
 
-Steps 2 and 3 are mostly self explanitory, but the options available as step 1
-need further explination.
-
-### Argument Types
+### Argument Builder
 
 Primitive types are the most straight forward. Shown below is how to add an
 integer argument. The `translators.BuiltinInt` type is responsible for parsing
@@ -55,7 +52,35 @@ are valid for the argument.
 
 The available argument types are as follows:
 
-1.
+1. `ValueArgType`: Represents a flag type that must accept a single value as an
+argument and must only be supplied once.
+1. `MultiValueArgType`: Represents a flag type that can accept many values as an
+argument and must only be supplied once. At least one argument must be supplied.
+1. `FlagArgType`: Represents a flag type that must not accept a value and must
+only be supplied once.
+1. `MultiFlagArgType`: Represents a flag type that must not accept a value and
+may be supplied many times.
+
+The `ArgBuilder` also has several helper functions and translators for common
+CLI argument types.
+
+1. To add a flag argument. This will return true if the flag is provided. It
+does accept any values.
+
+https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L92-L98
+
+2. To add a flag counter argument. This will return an integer equal to the
+number of times that the flag was provided. It does not accept any values.
+
+https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L131-L136
+
+3. A list argument. This will build up a list of all the values that were
+provided with the argument. Many values can be provided with a single argument
+or many flags can be provided with a single argument, as shown in the example
+arguments below the argument example.
+
+https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L169-L186
+https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L192
 
 ## Design
 
