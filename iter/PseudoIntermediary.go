@@ -14,7 +14,8 @@ func (i Iter[T]) Take(num int) Iter[T] {
 				return Continue, val, nil
 			}
 			return Break, val, nil
-		})
+		},
+	)
 }
 
 // This function is an intermediary.
@@ -30,7 +31,8 @@ func (i Iter[T]) TakeWhile(op func(val T) bool) Iter[T] {
 				return Continue, val, nil
 			}
 			return Break, val, nil
-		})
+		},
+	)
 }
 
 // This function is an intermediary.
@@ -51,7 +53,8 @@ func Map[T any, U any](
 	i Iter[T],
 	op func(index int, val T) (U, error),
 ) Iter[U] {
-	return Next(i,
+	return Next(
+		i,
 		func(index int, val T, status IteratorFeedback) (IteratorFeedback, U, error) {
 			if status == Break {
 				var tmp U
@@ -59,7 +62,8 @@ func Map[T any, U any](
 			}
 			tmp, err := op(index, val)
 			return Continue, tmp, err
-		})
+		},
+	)
 }
 
 // This function is an intermediary.
@@ -69,7 +73,8 @@ func Map[T any, U any](
 // iterator regardless of if it has fully consumed it's input stream of values.
 // ValToPntr will never be the cause of an error.
 func ValToPntr[T any](i Iter[T]) Iter[*T] {
-	return Next[T, *T](i,
+	return Next[T, *T](
+		i,
 		func(index int, val T, status IteratorFeedback) (IteratorFeedback, *T, error) {
 			if status == Break {
 				return Break, nil, nil
@@ -86,7 +91,8 @@ func ValToPntr[T any](i Iter[T]) Iter[*T] {
 // iterator regardless of if it has fully consumed it's input stream of values.
 // PntrToVal will never be the cause of an error.
 func PntrToVal[T any](i Iter[*T]) Iter[T] {
-	return Next[*T, T](i,
+	return Next[*T, T](
+		i,
 		func(index int, val *T, status IteratorFeedback) (IteratorFeedback, T, error) {
 			if status == Break {
 				var tmp T

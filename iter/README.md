@@ -133,10 +133,11 @@ use `ForEach`.
 https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/PseudoConsumer.go#L65-L77
 <sup>Example pseudo-consumer</sup>
 
-https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/PseudoIntermediary.go#L20-L34
+https://github.com/barbell-math/util/blob/c144f153bbfe907d10d57cc4b385f0f7749a3635/iter/PseudoIntermediary.go#L20-L35
 <sup>Example pseudo-intermediary</sup>
 
-1. Non-Pseudo: Any iterator that is not expressed using another iterator.
+2. Non-Pseudo: Any iterator that is not expressed using another iterator. For
+examples refer to the `ForEach` and `Next` functions.
 
 If you are looking to extend this library and add more iterators, it is
 recommended that any new intermediary or consumer iterators are created
@@ -145,43 +146,25 @@ needlessly banging your head against a wall.
 
 ## Benchmarking
 
-Obviously there will be overhead when using this library instead of using plain for loops. The ```example_test.go``` not only showcases the example at the top of this readme, but contains benchmarks for three different scenarios. These scenarios are shown below for convenience.
-
+Obviously, there will be overhead when using this library instead of using plain
+for loops. The `example_test.go` file not only showcases the example at the top
+of this readme, but contains benchmarks for three different scenarios. These
+scenarios are shown below for convenience.
 
 ##### Scenario 1: A 'typical' functional implementation
 
-```golang
-val,err:=sequenceGenerator(-100.0,100.0,step).Map(func(index int, val float64) (float64,error) {
-    height:=amp*math.Cos(2*math.Pi/period*(val-hShift))+vShift;
-    return height*step,nil;
-}).Reduce(0.0, func(accum *float64, iter float64) error {
-    *accum+=iter;
-    return nil;
-});
-```
+https://github.com/barbell-math/util/blob/1c65f2c0538b4bc6c4c1344431b8bc97aed8ceee/iter/example_test.go#L28-L35
 
 ##### Scenario 2: Another implementation using iterators
 
-```golang
-total:=0.0;
-err:=sequenceGenerator(-100.0,100.0,step).ForEach(func(index int, val float64) (IteratorFeedback,error) {
-    height:=amp*math.Cos(2*math.Pi/period*(val-hShift))+vShift;
-    total+=height*step;
-    return Continue,nil;
-});
-```
+https://github.com/barbell-math/util/blob/1c65f2c0538b4bc6c4c1344431b8bc97aed8ceee/iter/example_test.go#L50-L55
 
 ##### Scenario 3: A basic for loop
 
-```golang
-total:=0.0;
-for x:=-100.0; x<=100; x+=step {
-    height:=amp*math.Cos(2*math.Pi/period*(x-hShift))+vShift;
-    total+=height*step;
-}
-```
+https://github.com/barbell-math/util/blob/1c65f2c0538b4bc6c4c1344431b8bc97aed8ceee/iter/example_test.go#L70-L73
 
-The benchmarks (gathered from the go-lang benchmark utility) for the scenarios with various step sizes are shown below. Make of these results as you will.
+The benchmarks (gathered from the go benchmark utility) for the scenarios with
+various step sizes are shown below. Make of these results as you will.
 
 | Scenario | Step Size | Time |
 |----------|-----------|------|

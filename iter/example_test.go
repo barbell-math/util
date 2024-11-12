@@ -30,9 +30,9 @@ func testGeneratorIterator(step float64, output bool) func() {
 				height := amp*math.Cos(2*math.Pi/period*(val-hShift)) + vShift
 				return height * step, nil
 			}).Reduce(0.0, func(accum *float64, iter float64) error {
-				*accum += iter
-				return nil
-			})
+			*accum += iter
+			return nil
+		})
 		if output {
 			fmt.Printf("Area is: %f Using step size: %f\n", val, step)
 			fmt.Printf("Err is: %v\n", err)
