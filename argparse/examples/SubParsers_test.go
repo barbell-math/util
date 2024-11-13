@@ -36,7 +36,6 @@ func Example_SubParserSimple() {
 	err = parser.AddSubParsers(&subParser)
 	fmt.Println("Add Sub Parser error:", err)
 
-	// Long args with no associated values
 	args := []string{"--bool", "-i=3"}
 	err = parser.Parse(argparse.ArgvIterFromSlice(args).ToTokens())
 	fmt.Println("Parsing", args)

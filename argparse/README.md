@@ -88,13 +88,13 @@ are in the allowed list of values. Many values can be provided with a single
 argument or many flags can be provided with a single argument, as shown in the
 example arguments below the argument example.
 
-https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L211-L231
-https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L239
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L210-L230
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L238
 
-5. Selector argument. This will accept a single value as long as that values is
+5. Selector argument. This will accept a single value as long as that value is
 in the predefined set of allowed values.
 
-https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L258-L275
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L256-L274
 
 ## Argument Builder: Custom Types
 
@@ -107,11 +107,34 @@ as well as the
 
 To support a custom type the `Translate` method on the translator will simply
 need to return the custom type. Support for custom translators and types allows
-for a completely type safe translation of the cmd line arguments into values
-that your program can work with.
+for a completely type safe translation of the CLI arguments into values that
+your program can work with.
 
-## Computed Arguments
+## Argument Builder: Computed Arguments
 
+Computed arguments provide a way for the argument parser to set values that were
+not directly provided by the CLI, potentially computing values based on the
+provided CLI arguments. The example below shows how to add a computed argument
+to the parser.
+
+https://github.com/barbell-math/util/blob/d738c080f75b52bc3472e5258e1fe33b723ab7d6/argparse/examples/SimpleExamples_test.go#L315-L318
+
+Much like translators for arguments, computers are needed to set computed
+values. Also like translators, computers are expected to return a value, this
+time the value that is returned is the result of a computation rather than a
+translation. Yet another similarity is that computed arguments support custom
+types in all the same ways that translators do. For an example of how to
+implement a custom computer refer to the
+[custom computer example](./examples/CustomComputer_test.go).
+
+Computed arguments do have one advantage over normal (translated) arguments. All
+computed arguments are added to a tree like data structure following the same
+ordering that any sub-parsers were added in. Given this tree like data structure
+computed arguments are then evaulated bottom up, left to right. With this
+organized evaluation ordering it is possible to evauluate arbitrary expressions.
+This will likely never be useful and an argument could be made that this should
+never be done, but the capibility is there. For an example of this evaulation
+refer to the [sub-parsers examples](./examples/SubParsers_test.go).
 
 ## Design
 
