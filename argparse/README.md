@@ -18,7 +18,7 @@ be added if you were using them.
 1. The `Parser` is then used to parse a slice of strings which is translated
 into a sequence of tokens.
 
-## Argument Builder
+## Argument Builder: Primitive Types
 
 Primitive types are the most straight forward. Shown below is how to add an
 integer argument. The `translators.BuiltinInt` type is responsible for parsing
@@ -59,6 +59,8 @@ only be supplied once.
 1. `MultiFlagArgType`: Represents a flag type that must not accept a value and
 may be supplied many times.
 
+## Argument Builder: Out of the Box Argument Types
+
 The `ArgBuilder` also has several helper functions and translators for common
 CLI argument types:
 
@@ -78,7 +80,7 @@ flags can be provided with a single argument, as shown in the example arguments
 below the argument example.
 
 https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L171-L186
-https://github.com/barbell-math/util/blob/eac51e0e6c5bb37d6e8db26e13e7b4e31e76c475/argparse/examples/SimpleExamples_test.go#L192
+https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L192
 
 4. List argument with a predefined set of allowed values. This will build up a
 list of all the values that were provided with the argument, provided that they
@@ -93,6 +95,23 @@ https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd9309
 in the predefined set of allowed values.
 
 https://github.com/barbell-math/util/blob/6d29be63cbb049ae12b61a43efaab4d9cd930984/argparse/examples/SimpleExamples_test.go#L258-L275
+
+## Argument Builder: Custom Types
+
+Due to using generics, the argument builder can accept arguments of custom types
+as long as there is a translator for that type. For examples of how to implement
+translators refer to the
+[stateless translator example](./examples/CustomStatelessTranslator_test.go)
+as well as the 
+[stateful translator example](./examples/CustomStatefulTranslator_test.go).
+
+To support a custom type the `Translate` method on the translator will simply
+need to return the custom type. Support for custom translators and types allows
+for a completely type safe translation of the cmd line arguments into values
+that your program can work with.
+
+## Computed Arguments
+
 
 ## Design
 
