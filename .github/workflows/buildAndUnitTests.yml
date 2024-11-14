@@ -28,6 +28,7 @@ jobs:
 
     - name: Check Formatting
       run: |
+        go fmt ./...
         if read -r -n1 -d '' < <(go fmt ./...); then
           echo "Fix formatting to get a passing run!"
           exit 1

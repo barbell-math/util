@@ -138,9 +138,10 @@ refer to the [sub-parsers examples](./examples/SubParsers_test.go).
 
 ## Sub-Parsers
 
-Several different parsers can be combined into one parser. When adding one
-parser to another the parsers are added as child, or sub parsers, to the main
-parser. An examples of this are shown in the
+Several different parsers, each with there own set of arguments, can be
+separately built and then combined into one larger parser. When adding one
+parser to another the parsers are added as childen, or sub parsers, to the main
+parser. A couple examples of sub-parsers are shown in the
 [sub-parsers examples file](./examples/SubParsers_test.go). There are a couple
 rules that dictate what happens when sub-parsers are added:
 
