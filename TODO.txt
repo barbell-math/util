@@ -1,7 +1,18 @@
-// Set
-// Fix CSV
-// Static Vector (Array?) - no way to dynamically represent, probably no?
-// Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New
+// Remove all addressable operations - just store pntrs instead - moves responsibility to code author, but also removes foot gun. But what about vector?
+// Finish HashGraph
+// Make DFA use hash graph
+// Make dfa more robust - add capture groups [A-Z],[a-z],[0-9],[*]
+// Test dfa builder for |* errors and fam
+// Translate nfa to dfa
+// Make dfa statically storeable/loadable
+// Make prog to generate static dfa's
+// Go back to lexer
+
+// Static Vector (Array?) - no way to dynamically represent, probably no? - unless unsafe somehow???
+// Dynamic Deque - chunks? realloc based on f/b ratio, seed ratio with New, track f/b ratio with moving average (https://stackoverflow.com/questions/12636613/how-to-calculate-moving-average-without-keeping-the-count-and-data-total)
+// OrderedMap - rb tree?
+// OrderedSet - rb tree?
 // Tree, graph...
 // Precompiled nfa/dfa - use go:generate comments!
+// argparse
 // https://go.dev/doc/modules/publishing

@@ -1,9 +1,5 @@
-package reflect;
+package reflect
 
-import (
-    customerr "github.com/barbell-math/util/err"
-)
+import "errors"
 
-var InAddressableField,IsInAddressableField=customerr.ErrorFactory(
-    "The address could not be calculated of a field in the given value.",
-)
+var InAddressableField = errors.New("The supplied value or field is inaddressable.")

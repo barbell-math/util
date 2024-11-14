@@ -1,0 +1,82 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Mergegate
+
+on:
+  push:
+    branches: [ "main", "refactor" ]
+  pull_request:
+
+jobs:
+  fmtAndGeneratedCodeChecks:
+    name: Test on Go v${{ matrix.go_version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go_version: ['1.21', '1.22', '1.23']
+        os: [ubuntu-latest]
+        
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go v${{ matrix.go_version }}
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go_version }}
+
+    - name: Check Formatting
+      run: |
+        if read -r -n1 -d '' < <(go fmt ./...); then
+          echo "Fix formatting to get a passing run!"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Build Global Generator Programs
+      run: go build -o ./bin/ ./generators/...
+
+    - name: Clean All Generated Files
+      run: ./bin/clean
+
+    - name: Generate
+      run: go generate -v ./...
+
+    - name: Check Generated Code is the Same as Checked in Code
+      run: |
+        if [[ -z "$(git diff)" ]]; then
+          echo "No changes detected"
+        else
+          echo "Changes detected!"
+          echo "Fix generated code formatting to match what the generators produce!"
+          exit 1
+        fi
+      shell: bash
+
+  buildAndTest:
+    name: Test on Go v${{ matrix.go_version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go_version: ['1.21', '1.22', '1.23']
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go v${{ matrix.go_version }}
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go_version }}
+
+    - name: Build Global Generator Programs
+      run: go build -o ./bin/ ./generators/...
+
+    - name: Generate
+      run: go generate -v ./...
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...

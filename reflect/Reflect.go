@@ -1,12 +1,14 @@
-package reflect;
+package reflect
 
 import (
-    "reflect"
+	"reflect"
 )
 
 func GetErrorFromReflectValue(in *reflect.Value) error {
-    switch in.Interface().(type) {
-        case error: return in.Interface().(error);
-        default: return nil;
-    }
+	switch in.Interface().(type) {
+	case error:
+		return in.Interface().(error)
+	default:
+		return nil
+	}
 }
