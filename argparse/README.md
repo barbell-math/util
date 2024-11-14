@@ -80,7 +80,7 @@ flags can be provided with a single argument, as shown in the example arguments
 below the argument example.
 
 https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/argparse/examples/SimpleExamples_test.go#L171-L186
-https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/argparse/examples/SimpleExamples_test.go#L192
+https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/argparse/examples/SimpleExamples_test.go#L191
 
 4. List argument with a predefined set of allowed values. This will build up a
 list of all the values that were provided with the argument, provided that they
@@ -89,7 +89,7 @@ argument or many flags can be provided with a single argument, as shown in the
 example arguments below the argument example.
 
 https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/argparse/examples/SimpleExamples_test.go#L210-L230
-https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/argparse/examples/SimpleExamples_test.go#L238
+https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/argparse/examples/SimpleExamples_test.go#L237
 
 5. Selector argument. This will accept a single value as long as that value is
 in the predefined set of allowed values.

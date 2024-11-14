@@ -270,8 +270,7 @@ func Example_SelectorArgument() {
 				AllowedVals: containers.HashSetValInit[int, widgets.BuiltinInt](
 					1, 2, 3, 4, 5,
 				),
-			},
-			),
+			}),
 	)
 
 	parser, err := b.ToParser("Prog name", "Prog description")

@@ -3,7 +3,7 @@
 A generic lazy iterator framework package that respects errors as values with
 reverse message passing for resource management.
 
-https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/iter/example_test.go#L28-L38
+https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/iter/example_test.go#L28-L39
 ```
 //Example Output:
 //Area is 1000.000000 Using step size: 0.000100
@@ -15,7 +15,7 @@ https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2
 This package takes advantage of the fact that functions can have methods in go.
 This allows an iterator to be defined as a simple function, as shown below.
 
-https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/iter/Common.go#L14-L21
+https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/iter/Common.go#L14-L22
 <sup>The iter type defined in this package.</sup>
 
 Given this iterator type, it can have methods attached to it that can call on
@@ -133,7 +133,7 @@ use `ForEach`.
 https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/iter/PseudoConsumer.go#L65-L77
 <sup>Example pseudo-consumer</sup>
 
-https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/iter/PseudoIntermediary.go#L20-L35
+https://github.com/barbell-math/util/blob/54cea81ddd4f09b268ed26f0f847a6351d94d2a6/iter/PseudoIntermediary.go#L20-L36
 <sup>Example pseudo-intermediary</sup>
 
 2. Non-Pseudo: Any iterator that is not expressed using another iterator. For
