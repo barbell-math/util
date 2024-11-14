@@ -136,6 +136,25 @@ This will likely never be useful and an argument could be made that this should
 never be done, but the capibility is there. For an example of this evaulation
 refer to the [sub-parsers examples](./examples/SubParsers_test.go).
 
-## Design
+## Sub-Parsers
 
-## Benchmarking
+Several different parsers can be combined into one parser. When adding one
+parser to another the parsers are added as child, or sub parsers, to the main
+parser. An examples of this are shown in the
+[sub-parsers examples file](./examples/SubParsers_test.go). There are a couple
+rules that dictate what happens when sub-parsers are added:
+
+1. All non-computed arguments are added to one single global namespace. This
+means that all long argument and short argument names must be unique among all
+of the sub-parers.
+1. Computed arguments are added in a tree like data structure that mirrors the
+structure created by the function calls for adding sub-parsers. The advantage of
+this is explained in the previous section.
+
+There are several sub-parsers that are provided out-of-the-box for common CLI
+needs.
+
+1. Help: this adds the `-h` and `--help` flag arguments which when encountered
+will stop all further parsing and print the help menu.
+1. Verbosity: this adds the `-v` and `--verbose` flag counter arguments which
+can be used to set a verbosity level for a running application.
