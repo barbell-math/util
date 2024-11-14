@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  buildAndTest:
+  fmtAndGeneratedCodeChecks:
     name: Test on Go v${{ matrix.go_version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
