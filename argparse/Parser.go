@@ -160,11 +160,12 @@ func (p *Parser) AddSubParsers(others ...*Parser) error {
 // are as follows:
 //
 //  1. Consume the tokens and translate all received values, saving the results
+//
 // to the desired locations.
 //  2. Compute all computed arguments in a bottom-up, left-right fashion.
 //
 // If an error occurs in this process it will be returned wrapped in a top level
-// [ParsingErr]. The only exception to this will be the [HelpErr], which will 
+// [ParsingErr]. The only exception to this will be the [HelpErr], which will
 // stop all further parsing, print the help menu, and return. Any tokens that
 // were present before the help flag will be translated.
 func (p *Parser) Parse(t tokenIter) error {

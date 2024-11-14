@@ -1,7 +1,4 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Build and Unit Tests
+name: Fmt and Generated Code Checks
 
 on:
   push:
@@ -48,6 +45,8 @@ jobs:
         if [[ -z "$(git diff)" ]]; then
           echo "No changes detected"
         else
-          echo "Changes detected"
+          echo "Changes detected!"
+          echo "Fix generated code formatting to match what the generators produce!"
+          exit 1
         fi
       shell: bash

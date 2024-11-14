@@ -24,20 +24,20 @@ type (
 	}
 
 	ProgState struct {
-		fieldArgs []CommentArgs
+		fieldArgs           []CommentArgs
 		shortStructGenerics string
-		longStructGenerics string
-		_package  string
+		longStructGenerics  string
+		_package            string
 	}
 
 	TemplateVals struct {
-		GeneratorName  string
-		Package        string
-		Type           string
+		GeneratorName       string
+		Package             string
+		Type                string
 		ShortStructGenerics string
-		LongStructGenerics string
-		Imports        []string
-		IdentityFields []IdentityFields
+		LongStructGenerics  string
+		Imports             []string
+		IdentityFields      []IdentityFields
 	}
 	IdentityFields struct {
 		Name   string
@@ -163,7 +163,7 @@ func main() {
 		)
 		os.Exit(1)
 	}
-	if len(PROG_STATE.fieldArgs)==0 {
+	if len(PROG_STATE.fieldArgs) == 0 {
 		common.PrintRunningError(
 			"The found struct definition had no fields with an identity flag. At least one is required.",
 		)
@@ -171,11 +171,11 @@ func main() {
 	}
 
 	templateData := TemplateVals{
-		GeneratorName: os.Args[0],
-		Package:       PROG_STATE._package,
-		Type:          INLINE_ARGS.Type,
+		GeneratorName:       os.Args[0],
+		Package:             PROG_STATE._package,
+		Type:                INLINE_ARGS.Type,
 		ShortStructGenerics: PROG_STATE.shortStructGenerics,
-		LongStructGenerics: PROG_STATE.longStructGenerics,
+		LongStructGenerics:  PROG_STATE.longStructGenerics,
 	}
 	for _, fArgs := range PROG_STATE.fieldArgs {
 		if fArgs.WidgetPackage != "." {
@@ -225,15 +225,15 @@ func parseTypeSpec(
 		return false
 	}
 
-	if PROG_STATE.shortStructGenerics, err=common.GetShortGenericsString(
+	if PROG_STATE.shortStructGenerics, err = common.GetShortGenericsString(
 		fSet, srcFile, ts,
-	); err!=nil {
+	); err != nil {
 		common.PrintRunningError("could not get generic type: %w", err)
 		os.Exit(1)
 	}
-	if PROG_STATE.longStructGenerics, err=common.GetLongGenericsString(
+	if PROG_STATE.longStructGenerics, err = common.GetLongGenericsString(
 		fSet, srcFile, ts,
-	); err!=nil {
+	); err != nil {
 		common.PrintRunningError("could not get generic type: %w", err)
 		os.Exit(1)
 	}

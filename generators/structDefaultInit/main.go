@@ -22,13 +22,13 @@ type (
 	ProgState struct {
 		shortStructGenerics string
 		longStructGenerics  string
-		fieldSetters   []string
-		fieldGetters   []string
-		fieldDefaults  []DefaultInfo
-		fieldTypes     map[string]string
-		fieldComments  map[string]string
-		imports        map[string]struct{}
-		_package       string
+		fieldSetters        []string
+		fieldGetters        []string
+		fieldDefaults       []DefaultInfo
+		fieldTypes          map[string]string
+		fieldComments       map[string]string
+		imports             map[string]struct{}
+		_package            string
 	}
 	DefaultInfo struct {
 		name  string
@@ -236,15 +236,15 @@ func parseTypeSpec(
 			os.Exit(1)
 		}
 
-		if PROG_STATE.shortStructGenerics, err=common.GetShortGenericsString(
+		if PROG_STATE.shortStructGenerics, err = common.GetShortGenericsString(
 			fSet, srcFile, ts,
-		); err!=nil {
+		); err != nil {
 			common.PrintRunningError("could not get generic type: %w", err)
 			os.Exit(1)
 		}
-		if PROG_STATE.longStructGenerics, err=common.GetLongGenericsString(
+		if PROG_STATE.longStructGenerics, err = common.GetLongGenericsString(
 			fSet, srcFile, ts,
-		); err!=nil {
+		); err != nil {
 			common.PrintRunningError("could not get generic type: %w", err)
 			os.Exit(1)
 		}

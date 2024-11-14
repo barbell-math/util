@@ -220,7 +220,7 @@ func GetShortGenericsString(
 		return "", nil
 	}
 
-	names:=[]string{}
+	names := []string{}
 	for i := 0; i < len(ts.TypeParams.List); i++ {
 		names = append(names, ts.TypeParams.List[i].Names[0].Name)
 	}
@@ -237,12 +237,12 @@ func GetLongGenericsString(
 		return "", nil
 	}
 
-	names:=[]string{}
+	names := []string{}
 	for i := 0; i < len(ts.TypeParams.List); i++ {
 		names = append(names, ts.TypeParams.List[i].Names[0].Name)
 	}
 
-	types:=[]string{}
+	types := []string{}
 	for i := 0; i < len(ts.TypeParams.List); i++ {
 		t, err := GetSourceTextFromExpr(
 			fSet, srcFile,

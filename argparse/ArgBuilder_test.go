@@ -49,7 +49,7 @@ func TestArgBuilderToParserMissingShortNames(t *testing.T) {
 	)
 
 	_, err := b.ToParser("", "")
-	test.Nil(err,t)
+	test.Nil(err, t)
 }
 
 func TestArgBuilderToParserDuplicateLongNames(t *testing.T) {
