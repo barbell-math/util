@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/barbell-math/util/container/basic"
 	"github.com/barbell-math/util/container/containers"
@@ -30,6 +31,7 @@ func generateIntertwinedLogs(
 		cntr++
 		l1.Log(cntr, "L1 Line %d", cntr)
 		cntr++
+		time.Sleep(1*time.Microsecond)
 		l2.Log(cntr, "L2 Line %d", cntr)
 	}
 }
