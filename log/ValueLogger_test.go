@@ -17,7 +17,7 @@ import (
 
 func generateLog(l *ValueLogger[int], numLines int) {
 	for i := 0; i < numLines; i++ {
-		time.Sleep(1*time.Microsecond)
+		time.Sleep(1 * time.Microsecond)
 		l.Log(i, "Line %d", i)
 	}
 }
@@ -32,7 +32,7 @@ func generateIntertwinedLogs(
 		cntr++
 		l1.Log(cntr, "L1 Line %d", cntr)
 		cntr++
-		time.Sleep(1*time.Microsecond)
+		time.Sleep(1 * time.Microsecond)
 		l2.Log(cntr, "L2 Line %d", cntr)
 	}
 }
