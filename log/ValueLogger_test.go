@@ -17,6 +17,7 @@ import (
 
 func generateLog(l *ValueLogger[int], numLines int) {
 	for i := 0; i < numLines; i++ {
+		time.Sleep(1*time.Microsecond)
 		l.Log(i, "Line %d", i)
 	}
 }
