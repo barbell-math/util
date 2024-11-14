@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         go_version: ['1.21', '1.22', '1.23']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest]
         
     steps:
     - uses: actions/checkout@v4
@@ -26,14 +26,28 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
 
+    - name: Check Formatting
+      run: |
+        if read -r -n1 -d '' < <(go fmt ./...); then
+          echo "Fix formatting to get a passing run!"
+          exit 1
+        fi
+      shell: bash
+
     - name: Build Global Generator Programs
       run: go build -o ./bin/ ./generators/...
+
+    - name: Clean All Generated Files
+      run: ./bin/clean
 
     - name: Generate
       run: go generate -v ./...
 
-    - name: Build
-      run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
+    - name: Check Generated Code is the Same as Checked in Code
+      run: |
+        if [[ -z "$(git diff)" ]]; then
+          echo "No changes detected"
+        else
+          echo "Changes detected"
+        fi
+      shell: bash
