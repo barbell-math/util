@@ -10,7 +10,7 @@ import (
 	"go/token"
 	"os"
 
-	"github.com/barbell-math/util/src/generators/common"
+	"github.com/barbell-math/util/generators/common"
 )
 
 type (

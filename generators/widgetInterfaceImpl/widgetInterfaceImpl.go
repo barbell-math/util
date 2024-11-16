@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/barbell-math/util/src/generators/common"
+	"github.com/barbell-math/util/generators/common"
 )
 
 type (
