@@ -120,7 +120,7 @@ it's resource management once it's parent iterator is done until the consumer is
 reached. This allows for resources to be properly destroyed in a top-down
 fashion. This pattern of events is demonstrated in the image below.
 
-![Reverse Message Passing](../img/reverseMessagePassing.png)
+![Reverse Message Passing](../../img/reverseMessagePassing.png)
 
 ## Sudo Iterators
 
