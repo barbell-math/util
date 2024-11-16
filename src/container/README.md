@@ -41,12 +41,44 @@ The following containers are available in the `containers` package:
 All data structures in the `containers` package will implement one, if not
 several, of the interfaces listed below.
 
-| Name | Category(s) | Desc |
-|------|-------------|------|
+| Name   | Category |
+|--------|----------|
+| Set    | Static   |
+| Queue  | Static   |
+| Stack  | Static   |
+| Deque  | Static   |
+| Vector | Static   |
+| Map    | Dynamic  |
+| Set    | Dynamic  |
+| Queue  | Dynamic  |
+| Stack  | Dynamic  |
+| Deque  | Dynamic  |
+| Graph  | Dynamic  |
+| Vector | Dynamic  |
 
 Each of these interfaces have been established to provide consistency between
 the containers and allow for interface types to be passed in code rather than
 the explicit concrete container types, giving the code greater flexibility. Each
 of the interfaces has also been broken down into read only/write only parts. The
-intent of this was to allow for the mutibility and access of the containers to
-be controlled in any code that uses the interface values.
+intent of this is to allow for the mutibility and access of the containers to be
+controlled in any code that uses interface values.
+
+https://github.com/barbell-math/util/blob/7361529435cd2acae7580aa468436fec71b04ecf/src/container/staticContainers/Set.go#L5-L17
+<sup>Read-only static set interface.</sup>
+
+https://github.com/barbell-math/util/blob/7361529435cd2acae7580aa468436fec71b04ecf/src/container/staticContainers/Set.go#L19-L30
+<sup>Write-only static set interface.</sup>
+
+https://github.com/barbell-math/util/blob/7361529435cd2acae7580aa468436fec71b04ecf/src/container/staticContainers/Set.go#L32-L37
+<sup>Full static set interface.</sup>
+
+An example of using the interface types over the concrete types is shown in the
+`SlidingWindow` function implementation. The function expectes a container to be
+passed to it that implements _both_ the static queue and static vector
+interfaces and then it only returns the vector interface component of the same
+value. This was done because the sliding window operations require efficient
+queue operations, but all down stream iterators only need random access to the
+elements within the container and not access to any of the queue operations.
+
+https://github.com/barbell-math/util/blob/main/src/container/containers/Iterface.go#L22-L29
+<sup>The sliding window function definition.</sup>
