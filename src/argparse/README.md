@@ -115,7 +115,8 @@ to make the supplied file with the given file mode and permissions.
 
 https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L421-L431
 
-9. Mkdir argument.
+9. Mkdir argument. This will accept a single string value and will attempt to
+make the directory(s) that are denoted by the string value.
 
 https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L455-L472
 
@@ -142,7 +143,7 @@ not directly provided by the CLI, potentially computing values based on the
 provided CLI arguments. The example below shows how to add a computed argument
 to the parser.
 
-https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L314-L317
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L317-L320
 
 Much like translators for arguments, computers are needed to set computed
 values. Also like translators, computers are expected to return a value, this
