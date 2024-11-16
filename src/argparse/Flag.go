@@ -2,8 +2,8 @@ package argparse
 
 import "regexp"
 
-//go:generate ../bin/enum -type=flag -package=argparse
-//go:generate ../bin/passThroughWidget -type=tokenType
+//go:generate ../../bin/enum -type=flag -package=argparse
+//go:generate ../../bin/passThroughWidget -type=tokenType
 
 type (
 	// Used to represent the different formats of flags that the arg parser

@@ -7,7 +7,7 @@ import (
 	"github.com/barbell-math/util/src/widgets"
 )
 
-//go:generate ../bin/structDefaultInit -struct opts
+//go:generate ../../bin/structDefaultInit -struct opts
 
 type (
 	// The optional values that are associated with an argument.

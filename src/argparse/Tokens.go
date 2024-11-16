@@ -8,7 +8,7 @@ import (
 	"github.com/barbell-math/util/src/iter"
 )
 
-//go:generate ../bin/structBaseWidget -type=token
+//go:generate ../../bin/structBaseWidget -type=token
 
 type (
 	// Represents an sequence of strings that can be translated into a sequence

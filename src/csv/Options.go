@@ -1,8 +1,8 @@
 package csv
 
-//go:generate ../bin/enum -type=optionsFlag -package=csv
-//go:generate ../bin/flags -type=optionsFlag -package=csv
-//go:generate ../bin/structDefaultInit -struct=options
+//go:generate ../../bin/enum -type=optionsFlag -package=csv
+//go:generate ../../bin/flags -type=optionsFlag -package=csv
+//go:generate ../../bin/structDefaultInit -struct=options
 
 type (
 	//gen:enum unknownValue unknownOptionsFlag

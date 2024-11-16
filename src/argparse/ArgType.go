@@ -1,7 +1,7 @@
 package argparse
 
-//go:generate ../bin/enum -type=ArgType -package=argparse
-//go:generate ../bin/passThroughWidget -type=ArgType
+//go:generate ../../bin/enum -type=ArgType -package=argparse
+//go:generate ../../bin/passThroughWidget -type=ArgType
 
 type (
 	//gen:enum unknownValue UnknownArgType

@@ -8,9 +8,9 @@ import (
 	"github.com/barbell-math/util/src/widgets"
 )
 
-//go:generate ../bin/enum -type=optionsFlag -package=reflect
-//go:generate ../bin/flags -type=optionsFlag -package=reflect
-//go:generate ../bin/structDefaultInit -struct=structHashOpts
+//go:generate ../../bin/enum -type=optionsFlag -package=reflect
+//go:generate ../../bin/flags -type=optionsFlag -package=reflect
+//go:generate ../../bin/structDefaultInit -struct=structHashOpts
 
 type (
 	//gen:enum unknownValue unknownOptionsFlag
