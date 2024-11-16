@@ -12,9 +12,9 @@ import (
 	"github.com/barbell-math/util/src/widgets"
 )
 
-//go:generate ../../bin/passThroughWidget -type=edgeHash
-//go:generate ../../bin/passThroughWidget -type=vertexHash
-//go:generate ../../bin/passThroughWidget -type=graphLink
+//go:generate ../../../bin/passThroughWidget -type=edgeHash
+//go:generate ../../../bin/passThroughWidget -type=vertexHash
+//go:generate ../../../bin/passThroughWidget -type=graphLink
 
 type (
 	//gen:passThroughWidget widgetType Base
