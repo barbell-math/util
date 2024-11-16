@@ -90,16 +90,16 @@ func TestWrapAroundIntGetProperIndex(t *testing.T) {
 	test.Eq(wrapingIndex(4), w.GetProperIndex(9, 5), t)
 }
 
-//go:generate ../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Vector -genericDecl=[int] -factory=generateCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Vector -genericDecl=[int] -factory=generateSyncedCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Set -genericDecl=[int] -factory=generateCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Set -genericDecl=[int] -factory=generateSyncedCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Deque -genericDecl=[int] -factory=generateCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Deque -genericDecl=[int] -factory=generateSyncedCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Stack -genericDecl=[int] -factory=generateCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Stack -genericDecl=[int] -factory=generateSyncedCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Queue -genericDecl=[int] -factory=generateCircularBuffer
-//go:generate ../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Queue -genericDecl=[int] -factory=generateSyncedCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Vector -genericDecl=[int] -factory=generateCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Vector -genericDecl=[int] -factory=generateSyncedCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Set -genericDecl=[int] -factory=generateCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Set -genericDecl=[int] -factory=generateSyncedCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Deque -genericDecl=[int] -factory=generateCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Deque -genericDecl=[int] -factory=generateSyncedCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Stack -genericDecl=[int] -factory=generateCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Stack -genericDecl=[int] -factory=generateSyncedCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=CircularBuffer -category=static -interface=Queue -genericDecl=[int] -factory=generateCircularBuffer
+//go:generate ../../../bin/containerInterfaceTests -type=SyncedCircularBuffer -category=static -interface=Queue -genericDecl=[int] -factory=generateSyncedCircularBuffer
 
 func generateCircularBuffer(
 	capacity int,

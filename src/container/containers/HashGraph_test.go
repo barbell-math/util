@@ -7,8 +7,8 @@ import (
 	"github.com/barbell-math/util/src/widgets"
 )
 
-//go:generate ../../bin/containerInterfaceTests -type=HashGraph -category=dynamic -interface=DirectedGraph -genericDecl=[int,int] -factory=generateHashGraph
-//go:generate ../../bin/containerInterfaceTests -type=SyncedHashGraph -category=dynamic -interface=DirectedGraph -genericDecl=[int,int] -factory=generateSyncedHashGraph
+//go:generate ../../../bin/containerInterfaceTests -type=HashGraph -category=dynamic -interface=DirectedGraph -genericDecl=[int,int] -factory=generateHashGraph
+//go:generate ../../../bin/containerInterfaceTests -type=SyncedHashGraph -category=dynamic -interface=DirectedGraph -genericDecl=[int,int] -factory=generateSyncedHashGraph
 
 func generateHashGraph(
 	capacity int,
