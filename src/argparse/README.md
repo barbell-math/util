@@ -25,7 +25,7 @@ integer argument. The `translators.BuiltinInt` type is responsible for parsing
 an integer from the string value supplied by the CLI. Analgous types are
 available for all primitive types, all following the `Builtin<type>` format.
 
-https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L19-20
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L19-L20
 <sup>Integer argument</sup>
 
 The above example provides an argument with no options, meaning all the default
@@ -98,26 +98,26 @@ in the predefined set of allowed values. As with the list argument, the selector
 translator can work with any type as long as it has an underlying translator of
 it's own.
 
-https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L259-L279
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L259-L277
 
 6. File argument. This will accept a single string value and verify that the
 supplied string is a path that exists as a file.
 
-https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L361-366
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L361-L366
 
 7. Directory argument. This will accept a single string value and verify that
 the supplied string is a path that exists as a directory.
 
-https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L390-395
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L390-L395
 
 8. File open argument. This will accept a single string value and will attempt
 to make the supplied file with the given file mode and permissions.
 
-https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L421-431
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L421-L431
 
 9. Mkdir argument.
 
-https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L455-472
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/argparse/examples/SimpleExamples_test.go#L455-L472
 
 ## Argument Builder: Custom Types
 
