@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/barbell-math/util/generators/common"
+	"github.com/barbell-math/util/src/generators/common"
 )
 
 type (
@@ -127,14 +127,14 @@ return hash.Hash(0) `,
 		},
 		"complex64": {
 			ZeroValue: "0",
-			Imports:   []string{"github.com/barbell-math/util/math/basic"},
+			Imports:   []string{"github.com/barbell-math/util/src/math/basic"},
 			HashTempl: `return hash.Hash(basic.LossyConv[float32, int32](basic.RealPart[complex64, float32](*v))).
 	Combine(hash.Hash(basic.LossyConv[float32, int32](basic.ImaginaryPart[complex64, float32](*v))))
 `,
 		},
 		"complex128": {
 			ZeroValue: "0",
-			Imports:   []string{"github.com/barbell-math/util/math/basic"},
+			Imports:   []string{"github.com/barbell-math/util/src/math/basic"},
 			HashTempl: `return hash.Hash(basic.LossyConv[float64, int64](basic.RealPart[complex128, float64](*v))).
 	Combine(hash.Hash(basic.LossyConv[float64, int64](basic.ImaginaryPart[complex128, float64](*v))))
 `,
@@ -169,7 +169,7 @@ RANDOM_SEED_STRING maphash.Seed = maphash.MakeSeed()
 		map[string]string{
 			"imports": `
 import (
-	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/src/hash"
 	{{range .Imports}}
 		"{{ . }}"
 	{{end}}

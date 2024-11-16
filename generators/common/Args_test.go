@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/barbell-math/util/test"
+	"github.com/barbell-math/util/src/test"
 )
 
 func TestInlineArgsNonStruct(t *testing.T) {

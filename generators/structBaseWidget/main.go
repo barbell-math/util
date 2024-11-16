@@ -8,7 +8,7 @@ import (
 	"go/token"
 	"os"
 
-	"github.com/barbell-math/util/generators/common"
+	"github.com/barbell-math/util/src/generators/common"
 )
 
 type (
@@ -52,7 +52,7 @@ var (
 		map[string]string{
 			"imports": `
 import (
-	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/src/hash"
 	{{range .Imports}} "{{ . }}" {{end}}
 )
 `,

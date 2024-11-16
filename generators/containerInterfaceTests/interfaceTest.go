@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/barbell-math/util/generators/common"
+	"github.com/barbell-math/util/src/generators/common"
 )
 
 type (
@@ -80,8 +80,8 @@ package containers
 {{template "autoGenComment" .}}
 import (
 	"testing"
-	"github.com/barbell-math/util/container/tests"
-	"github.com/barbell-math/util/container/{{ .Cat }}Containers"
+	"github.com/barbell-math/util/src/container/tests"
+	"github.com/barbell-math/util/src/container/{{ .Cat }}Containers"
 )
 
 func {{ .Type }}To{{ .Interface }}InterfaceFactory(capacity int) {{ .Cat }}Containers.{{ .Interface }}{{ .GenericDecl }} {

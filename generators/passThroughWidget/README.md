@@ -45,7 +45,7 @@ specified, the following code will be generated:
 package <package>
 
 import (
-	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/src/hash"
 )
 
 // Returns true if l equals r. Uses the Eq operator provided by the

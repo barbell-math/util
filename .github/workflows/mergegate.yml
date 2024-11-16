@@ -5,7 +5,7 @@ name: Mergegate
 
 on:
   push:
-    branches: [ "main", "refactor" ]
+    branches: [ "main" ]
   pull_request:
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
       run: ./bin/clean
 
     - name: Generate
-      run: go generate -v ./...
+      run: go generate -v ./src/...
 
     - name: Check Generated Code is the Same as Checked in Code
       run: |
@@ -53,7 +53,7 @@ jobs:
         fi
       shell: bash
 
-  buildAndTest:
+  unitTests:
     name: Test on Go v${{ matrix.go_version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -73,10 +73,7 @@ jobs:
       run: go build -o ./bin/ ./generators/...
 
     - name: Generate
-      run: go generate -v ./...
-
-    - name: Build
-      run: go build -v ./...
+      run: go generate -v ./src/...
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v ./src/...

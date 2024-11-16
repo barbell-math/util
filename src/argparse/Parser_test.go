@@ -1,0 +1,491 @@
+package argparse
+
+import (
+	"errors"
+	"testing"
+
+	"github.com/barbell-math/util/src/argparse/computers"
+	"github.com/barbell-math/util/src/argparse/translators"
+	"github.com/barbell-math/util/src/container/containerTypes"
+	"github.com/barbell-math/util/src/iter"
+	"github.com/barbell-math/util/src/test"
+)
+
+func TestParserAddSubParsersEmptyParser(t *testing.T) {
+	res := struct{ S string }{}
+
+	b := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+	)
+	p1, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	p2, err := (&ArgBuilder{}).ToParser("", "")
+
+	err = p1.AddSubParsers(&p2)
+	test.Nil(err, t)
+	test.Eq(len(p1.subParsers), 1, t)
+	test.Eq(len(p1.subParsers[0]), 1, t)
+	test.Eq(p1.subParsers[0][0].longFlag, "str", t)
+}
+
+func TestParserAddSubParsersNonEmptyValid(t *testing.T) {
+	res := struct {
+		S string
+		I int
+	}{}
+
+	b := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+	)
+	p1, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p1.AddSubParsers(NewHelpParser(), NewVerbosityParser[int](&res.I))
+	test.Nil(err, t)
+	test.Eq(len(p1.subParsers), 3, t)
+	test.Eq(len(p1.subParsers[0]), 1, t)
+	test.Eq(len(p1.subParsers[1]), 1, t)
+	test.Eq(len(p1.subParsers[2]), 1, t)
+	test.Eq(p1.subParsers[0][0].longFlag, "str", t)
+	test.Eq(p1.subParsers[1][0].longFlag, "help", t)
+	test.Eq(p1.subParsers[2][0].longFlag, "verbose", t)
+}
+
+func TestParserAddSubParsersNonEmptyDuplicateLongNames(t *testing.T) {
+	res := struct {
+		S string
+		I int
+	}{}
+
+	b := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+	)
+	p1, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	b2 := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b2,
+		"str",
+		NewOpts[string, translators.BuiltinString]().SetShortName('S'),
+	)
+	p2, err := b2.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p1.AddSubParsers(&p2)
+	test.ContainsError(ParserCombinationErr, err, t)
+	test.ContainsError(DuplicateLongNameErr, err, t)
+	test.ContainsError(containerTypes.Duplicate, err, t)
+}
+
+func TestParserAddSubParsersNonEmptyDuplicateShortNames(t *testing.T) {
+	res := struct {
+		S string
+		I int
+	}{}
+
+	b := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+	)
+	p1, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	b2 := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b2,
+		"str2",
+		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+	)
+	p2, err := b2.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p1.AddSubParsers(&p2)
+	test.ContainsError(ParserCombinationErr, err, t)
+	test.ContainsError(DuplicateShortNameErr, err, t)
+	test.ContainsError(containerTypes.Duplicate, err, t)
+}
+
+func TestParserAddSubParsers(t *testing.T) {
+	res := struct {
+		A int
+		B int
+		C int
+		D int
+		E int
+		F int
+		G int
+	}{}
+
+	b1 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.A,
+		&b1,
+		"aa",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('a').
+			SetRequired(true),
+	)
+	p1, err := b1.ToParser("", "")
+	test.Nil(err, t)
+
+	b2 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.B,
+		&b2,
+		"bb",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('b').
+			SetRequired(true),
+	)
+	p2, err := b2.ToParser("", "")
+	test.Nil(err, t)
+
+	b3 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.C,
+		&b3,
+		"cc",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('c').
+			SetRequired(true),
+	)
+	p3, err := b3.ToParser("", "")
+	test.Nil(err, t)
+
+	b4 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.D,
+		&b4,
+		"dd",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('d').
+			SetRequired(true),
+	)
+	p4, err := b4.ToParser("", "")
+	test.Nil(err, t)
+
+	b5 := ArgBuilder{}
+	AddComputedArg[int, computers.Add[int]](
+		&res.E,
+		&b5,
+		computers.Add[int]{L: &res.A, R: &res.B},
+	)
+	p5, err := b5.ToParser("", "")
+	test.Nil(err, t)
+
+	b6 := ArgBuilder{}
+	AddComputedArg[int, computers.Sub[int]](
+		&res.F,
+		&b6,
+		computers.Sub[int]{L: &res.C, R: &res.D},
+	)
+	p6, err := b6.ToParser("", "")
+	test.Nil(err, t)
+
+	b7 := ArgBuilder{}
+	AddComputedArg[int, computers.Mul[int]](
+		&res.G,
+		&b7,
+		computers.Mul[int]{L: &res.E, R: &res.F},
+	)
+	p7, err := b7.ToParser("", "")
+	test.Nil(err, t)
+
+	p5.AddSubParsers(&p1, &p2)
+	p6.AddSubParsers(&p3, &p4)
+	p7.AddSubParsers(&p5, &p6)
+
+	longKeys, err := iter.PntrToVal[string](p7.longArgs.Keys()).Collect()
+	test.Nil(err, t)
+	test.SlicesMatchUnordered[string](
+		longKeys,
+		[]string{"aa", "bb", "cc", "dd"},
+		t,
+	)
+
+	shortKeys, err := iter.PntrToVal[byte](p7.shortArgs.Keys()).Collect()
+	test.Nil(err, t)
+	test.SlicesMatchUnordered[byte](
+		shortKeys,
+		[]byte{'a', 'b', 'c', 'd'},
+		t,
+	)
+}
+
+func TestParserParseDuplicateValArg(t *testing.T) {
+	res := struct{ S string }{}
+
+	b := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{"--str=123", "-s=456"}).ToTokens())
+	test.ContainsError(ParsingErr, err, t)
+	test.ContainsError(ArgumentPassedMultipleTimesErr, err, t)
+}
+
+func TestParserParseDuplicateFlagArg(t *testing.T) {
+	res := struct{ B bool }{}
+
+	b := ArgBuilder{}
+	AddFlag(
+		&res.B,
+		&b,
+		"bool",
+		NewOpts[bool, translators.Flag]().SetShortName('b'),
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{"--bool", "-b"}).ToTokens())
+	test.ContainsError(ParsingErr, err, t)
+	test.ContainsError(ArgumentPassedMultipleTimesErr, err, t)
+}
+
+func TestParserParseMissingRequiredArgs(t *testing.T) {
+	res := struct{ B bool }{}
+
+	b := ArgBuilder{}
+	AddFlag(
+		&res.B,
+		&b,
+		"bool",
+		NewOpts[bool, translators.Flag]().SetShortName('b').SetRequired(true),
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{}).ToTokens())
+	test.ContainsError(ParsingErr, err, t)
+	test.ContainsError(MissingRequiredArgErr, err, t)
+}
+
+func TestParserParseDefaultValue(t *testing.T) {
+	res := struct{ S string }{}
+
+	b := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString]().
+			SetShortName('s').
+			SetDefaultVal("default"),
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{}).ToTokens())
+	test.Nil(err, t)
+	test.Eq(res.S, "default", t)
+}
+
+func TestParserParseWithComputedArgumentErr(t *testing.T) {
+	res := struct {
+		L   int
+		R   int
+		Res int
+	}{}
+
+	b := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.L,
+		&b,
+		"left",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('l').
+			SetRequired(true),
+	)
+	AddArg[int, translators.BuiltinInt](
+		&res.R,
+		&b,
+		"right",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('r').
+			SetRequired(true),
+	)
+	AddComputedArg[int, computers.Stopper[int]](
+		&res.Res,
+		&b,
+		computers.Stopper[int]{Err: errors.New("ERROR")},
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{"-l=3", "-r=5"}).ToTokens())
+	test.ContainsError(ParsingErr, err, t)
+	test.ContainsError(ComputedArgumentErr, err, t)
+	test.Eq(res.L, 3, t)
+	test.Eq(res.R, 5, t)
+	test.Eq(res.Res, 0, t)
+}
+
+func TestParserParseWithComputedArgsSimple(t *testing.T) {
+	res := struct {
+		L   int
+		R   int
+		Res int
+	}{}
+
+	b := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.L,
+		&b,
+		"left",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('l').
+			SetRequired(true),
+	)
+	AddArg[int, translators.BuiltinInt](
+		&res.R,
+		&b,
+		"right",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('r').
+			SetRequired(true),
+	)
+	AddComputedArg[int, computers.Add[int]](
+		&res.Res,
+		&b,
+		computers.Add[int]{L: &res.L, R: &res.R},
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{"-l=3", "-r=5"}).ToTokens())
+	test.Eq(res.Res, 8, t)
+}
+
+func TestParserParseWithComputedArgsComplex(t *testing.T) {
+	res := struct {
+		A int
+		B int
+		C int
+		D int
+		E int
+		F int
+		G int
+	}{}
+
+	b1 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.A,
+		&b1,
+		"aa",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('a').
+			SetRequired(true),
+	)
+	p1, err := b1.ToParser("", "")
+	test.Nil(err, t)
+
+	b2 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.B,
+		&b2,
+		"bb",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('b').
+			SetRequired(true),
+	)
+	p2, err := b2.ToParser("", "")
+	test.Nil(err, t)
+
+	b3 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.C,
+		&b3,
+		"cc",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('c').
+			SetRequired(true),
+	)
+	p3, err := b3.ToParser("", "")
+	test.Nil(err, t)
+
+	b4 := ArgBuilder{}
+	AddArg[int, translators.BuiltinInt](
+		&res.D,
+		&b4,
+		"dd",
+		NewOpts[int, translators.BuiltinInt]().
+			SetShortName('d').
+			SetRequired(true),
+	)
+	p4, err := b4.ToParser("", "")
+	test.Nil(err, t)
+
+	b5 := ArgBuilder{}
+	AddComputedArg[int, computers.Add[int]](
+		&res.E,
+		&b5,
+		computers.Add[int]{L: &res.A, R: &res.B},
+	)
+	p5, err := b5.ToParser("", "")
+	test.Nil(err, t)
+
+	b6 := ArgBuilder{}
+	AddComputedArg[int, computers.Sub[int]](
+		&res.F,
+		&b6,
+		computers.Sub[int]{L: &res.C, R: &res.D},
+	)
+	p6, err := b6.ToParser("", "")
+	test.Nil(err, t)
+
+	b7 := ArgBuilder{}
+	AddComputedArg[int, computers.Mul[int]](
+		&res.G,
+		&b7,
+		computers.Mul[int]{L: &res.E, R: &res.F},
+	)
+	p7, err := b7.ToParser("", "")
+	test.Nil(err, t)
+
+	p5.AddSubParsers(&p1, &p2)
+	p6.AddSubParsers(&p3, &p4)
+	p7.AddSubParsers(&p5, &p6)
+
+	err = p7.Parse(ArgvIterFromSlice([]string{
+		"-a=3",
+		"-b=5",
+		"-c=7",
+		"-d=9",
+	}).ToTokens())
+	test.Nil(err, t)
+	test.Eq(res.A, 3, t)
+	test.Eq(res.B, 5, t)
+	test.Eq(res.C, 7, t)
+	test.Eq(res.D, 9, t)
+	test.Eq(res.E, 8, t)
+	test.Eq(res.F, -2, t)
+	test.Eq(res.G, -16, t)
+}
+
+// TODO - doc strings
+// TODO - readme with examples

@@ -55,7 +55,7 @@ package <package>
 import (
     <base type widget package 1>
     <base type widget package 2>
-	"github.com/barbell-math/util/hash"
+	"github.com/barbell-math/util/src/hash"
 )
 
 // Returns true if l equals r using the widgets associated with the following
