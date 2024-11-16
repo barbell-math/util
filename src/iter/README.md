@@ -3,7 +3,7 @@
 A generic lazy iterator framework package that respects errors as values with
 reverse message passing for resource management.
 
-https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45c2/src/iter/example_test.go#L28-L39
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/iter/example_test.go#L28-L39
 ```
 //Example Output:
 //Area is 1000.000000 Using step size: 0.000100
@@ -15,7 +15,7 @@ https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45
 This package takes advantage of the fact that functions can have methods in go.
 This allows an iterator to be defined as a simple function, as shown below.
 
-https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45c2/src/iter/Common.go#L14-L22
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/iter/Common.go#L14-L22
 <sup>The iter type defined in this package.</sup>
 
 Given this iterator type, it can have methods attached to it that can call on
@@ -130,10 +130,10 @@ The intermediaries and consumers can be further sub-categorized:
 intermediaries a it is common to use `Next` and for consumers it is common to
 use `ForEach`.
 
-https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45c2/src/iter/PseudoConsumer.go#L65-L77
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/iter/PseudoConsumer.go#L65-L77
 <sup>Example pseudo-consumer</sup>
 
-https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45c2/src/iter/PseudoIntermediary.go#L21-L36
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/iter/PseudoIntermediary.go#L21-L36
 <sup>Example pseudo-intermediary</sup>
 
 2. Non-Pseudo: Any iterator that is not expressed using another iterator. For
@@ -154,15 +154,15 @@ scenarios are shown below for convenience.
 
 ##### Scenario 1: An over the top implementation using iterators
 
-https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45c2/src/iter/example_test.go#L28-L38
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/iter/example_test.go#L28-L38
 
 ##### Scenario 2: Another implementation using iterators
 
-https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45c2/src/iter/example_test.go#L53-L59
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/iter/example_test.go#L53-L59
 
 ##### Scenario 3: A basic for loop
 
-https://github.com/barbell-math/util/blob/9c813447ec5365de91f0c28ab77c894e2b3f45c2/src/iter/example_test.go#L74-77
+https://github.com/barbell-math/util/blob/5397e7d922107a8ea096dae4dc16c8e721df216d/src/iter/example_test.go#L74-77
 
 The benchmarks (gathered from the go benchmark utility) for the scenarios with
 various step sizes are shown below. Make of these results as you will.
