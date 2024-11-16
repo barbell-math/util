@@ -24,7 +24,7 @@ type (
 		permissions fs.FileMode `default:"0644" setter:"t" getter:"t" import:"io/fs"`
 	}
 	// A translator that makes the supplied file.
-	OpenFile struct{
+	OpenFile struct {
 		// The flags used to determine the file mode. See [os.RDONLY] and
 		// friends.
 		flags int `default:"os.O_RDONLY" setter:"t" getter:"t" import:"os"`
@@ -35,8 +35,8 @@ type (
 )
 
 func (_ Dir) Translate(arg string) (string, error) {
-	info, err:=os.Stat(arg)
-	if err!=nil {
+	info, err := os.Stat(arg)
+	if err != nil {
 		return "", err
 	}
 	if !info.IsDir() {
@@ -58,8 +58,8 @@ func (m Mkdir) Reset() {
 }
 
 func (_ File) Translate(arg string) (string, error) {
-	info, err:=os.Stat(arg)
-	if err!=nil {
+	info, err := os.Stat(arg)
+	if err != nil {
 		return "", err
 	}
 	if !info.Mode().IsRegular() {
@@ -70,9 +70,9 @@ func (_ File) Translate(arg string) (string, error) {
 
 func (o OpenFile) Translate(arg string) (*os.File, error) {
 	// If the file is not being created check that it exists.
-	if o.flags | os.O_CREATE == 0 {
-		info, err:=os.Stat(arg)
-		if err!=nil {
+	if o.flags|os.O_CREATE == 0 {
+		info, err := os.Stat(arg)
+		if err != nil {
 			return nil, err
 		}
 		if info.Mode().IsRegular() {

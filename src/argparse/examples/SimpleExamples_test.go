@@ -437,7 +437,7 @@ func Example_OpenFileArgument() {
 	err = parser.Parse(argparse.ArgvIterFromSlice(args).ToTokens())
 	fmt.Println("Parsing", args)
 	fmt.Println(err)
-	stat, _:=vals.F.Stat()
+	stat, _ := vals.F.Stat()
 	fmt.Println(stat.Name())
 
 	// Output:

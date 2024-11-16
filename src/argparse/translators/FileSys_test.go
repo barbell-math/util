@@ -8,33 +8,33 @@ import (
 )
 
 func TestDir(t *testing.T) {
-	d:=Dir{}
-	_, err:=d.Translate("/non-existant-dir")
+	d := Dir{}
+	_, err := d.Translate("/non-existant-dir")
 	test.ContainsError(os.ErrNotExist, err, t)
 
-	p, err:=d.Translate(".")
+	p, err := d.Translate(".")
 	test.Nil(err, t)
 	test.Eq(p, ".", t)
 }
 
 func TestFile(t *testing.T) {
-	f:=File{}
-	_, err:=f.Translate("/non-existant-file")
+	f := File{}
+	_, err := f.Translate("/non-existant-file")
 	test.ContainsError(os.ErrNotExist, err, t)
 
-	p, err:=f.Translate("./FileSys_test.go")
+	p, err := f.Translate("./FileSys_test.go")
 	test.Nil(err, t)
 	test.Eq(p, "./FileSys_test.go", t)
 }
 
 func TestOpenFile(t *testing.T) {
-	f:=NewOpenFile().SetFlags(os.O_RDONLY)
-	fHandle, err:=f.Translate("/non-existant-file")
+	f := NewOpenFile().SetFlags(os.O_RDONLY)
+	fHandle, err := f.Translate("/non-existant-file")
 	test.ContainsError(os.ErrNotExist, err, t)
 	test.NilPntr[os.File](fHandle, t)
 
-	f=NewOpenFile().SetFlags(os.O_RDONLY)
-	fHandle, err=f.Translate("./FileSys_test.go")
+	f = NewOpenFile().SetFlags(os.O_RDONLY)
+	fHandle, err = f.Translate("./FileSys_test.go")
 	test.Nil(err, t)
 	test.NotNilPntr[os.File](fHandle, t)
 	fHandle.Close()
