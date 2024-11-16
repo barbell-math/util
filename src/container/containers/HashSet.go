@@ -11,7 +11,7 @@ import (
 	"github.com/barbell-math/util/src/widgets"
 )
 
-//go:generate ../../bin/passThroughWidget -type=HashSetHash
+//go:generate ../../../bin/passThroughWidget -type=HashSetHash
 
 type (
 	//gen:passThroughWidget widgetType Base
