@@ -4,9 +4,10 @@ matrix:
   - '**/*.go'
   filters:
   - pyspelling.filters.cpp:
-      comments: true
+      block_comments: true
+      line_comments: true
+      group_comments: true
       strings: true
-      directives: true
 
 - name: markdown
   sources:
