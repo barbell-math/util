@@ -2,6 +2,7 @@ package examples
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/barbell-math/util/src/argparse"
 	"github.com/barbell-math/util/src/argparse/computers"
@@ -253,6 +254,8 @@ func Example_SelectorArgument() {
 	}{}
 
 	b := argparse.ArgBuilder{}
+	// The SetTranslator method must be called because the Selector translator
+	// has state that needs to be initialized.
 	argparse.AddSelector[int, translators.BuiltinInt, widgets.BuiltinInt](
 		&vals.I, &b, "selector",
 		argparse.NewOpts[
@@ -347,4 +350,131 @@ func Example_ComputedArgument() {
 	//1
 	//3
 	//4
+}
+
+func Example_FileArgument() {
+	vals := struct {
+		F string
+	}{}
+
+	b := argparse.ArgBuilder{}
+	argparse.AddArg[string, translators.File](
+		&vals.F, &b, "file",
+		argparse.NewOpts[string, translators.File]().
+			SetShortName('f').
+			SetDescription("This is a file argument"),
+	)
+
+	parser, err := b.ToParser("Prog name", "Prog description")
+	fmt.Println("Parser error:", err)
+
+	args := []string{"--file=./SimpleExamples_test.go"}
+	err = parser.Parse(argparse.ArgvIterFromSlice(args).ToTokens())
+	fmt.Println("Parsing", args)
+	fmt.Println(err)
+	fmt.Println(vals.F)
+
+	// Output:
+	//Parser error: <nil>
+	//Parsing [--file=./SimpleExamples_test.go]
+	//<nil>
+	//./SimpleExamples_test.go
+}
+
+func Example_DirArgument() {
+	vals := struct {
+		D string
+	}{}
+
+	b := argparse.ArgBuilder{}
+	argparse.AddArg[string, translators.Dir](
+		&vals.D, &b, "dir",
+		argparse.NewOpts[string, translators.Dir]().
+			SetShortName('d').
+			SetDescription("This is a dir argument"),
+	)
+
+	parser, err := b.ToParser("Prog name", "Prog description")
+	fmt.Println("Parser error:", err)
+
+	args := []string{"--dir=."}
+	err = parser.Parse(argparse.ArgvIterFromSlice(args).ToTokens())
+	fmt.Println("Parsing", args)
+	fmt.Println(err)
+	fmt.Println(vals.D)
+
+	// Output:
+	//Parser error: <nil>
+	//Parsing [--dir=.]
+	//<nil>
+	//.
+}
+
+func Example_OpenFileArgument() {
+	vals := struct {
+		F *os.File
+	}{}
+
+	b := argparse.ArgBuilder{}
+	// The SetTranslator method must be called because the OpenFile translator
+	// has state that needs to be initialized.
+	argparse.AddArg[*os.File, *translators.OpenFile](
+		&vals.F, &b, "file",
+		argparse.NewOpts[*os.File, *translators.OpenFile]().
+			SetShortName('f').
+			SetDescription("This is a file argument").
+			SetTranslator(
+				translators.NewOpenFile().
+					SetFlags(os.O_CREATE).
+					SetPermissions(0777),
+			),
+	)
+
+	parser, err := b.ToParser("Prog name", "Prog description")
+	fmt.Println("Parser error:", err)
+
+	args := []string{"--file=./testData/test.txt"}
+	err = parser.Parse(argparse.ArgvIterFromSlice(args).ToTokens())
+	fmt.Println("Parsing", args)
+	fmt.Println(err)
+	stat, _:=vals.F.Stat()
+	fmt.Println(stat.Name())
+
+	// Output:
+	//Parser error: <nil>
+	//Parsing [--file=./testData/test.txt]
+	//<nil>
+	//test.txt
+}
+
+func Example_MkdirArgument() {
+	vals := struct {
+		D string
+	}{}
+
+	b := argparse.ArgBuilder{}
+	// The SetTranslator method must be called because the OpenFile translator
+	// has state that needs to be initialized.
+	argparse.AddArg[string, *translators.Mkdir](
+		&vals.D, &b, "dir",
+		argparse.NewOpts[string, *translators.Mkdir]().
+			SetShortName('d').
+			SetDescription("This is a mkdir argument").
+			SetTranslator(translators.NewMkdir().SetPermissions(0777)),
+	)
+
+	parser, err := b.ToParser("Prog name", "Prog description")
+	fmt.Println("Parser error:", err)
+
+	args := []string{"--dir=./testData/thisIsADir"}
+	err = parser.Parse(argparse.ArgvIterFromSlice(args).ToTokens())
+	fmt.Println("Parsing", args)
+	fmt.Println(err)
+	fmt.Println(vals.D)
+
+	// Output:
+	//Parser error: <nil>
+	//Parsing [--dir=./testData/thisIsADir]
+	//<nil>
+	//./testData/thisIsADir
 }

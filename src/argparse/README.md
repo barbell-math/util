@@ -62,7 +62,7 @@ may be supplied many times.
 ## Argument Builder: Out of the Box Argument Types
 
 The `ArgBuilder` also has several helper functions and translators for common
-CLI argument types:
+CLI argument types.
 
 1. Flag arguments. This will return true if the flag is provided. It does accept
 any values.
@@ -79,22 +79,45 @@ with the argument. Many values can be provided with a single argument or many
 flags can be provided with a single argument, as shown in the example arguments
 below the argument example.
 
-https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L171-L186
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L170-L187
 https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L191
 
 4. List argument with a predefined set of allowed values. This will build up a
 list of all the values that were provided with the argument, provided that they
 are in the allowed list of values. Many values can be provided with a single
 argument or many flags can be provided with a single argument, as shown in the
-example arguments below the argument example.
+example arguments below the argument example. Note that given the design of this
+translator the list can contain any type, as long as the underlying type has a
+translator of it's own.
 
-https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L210-L230
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L211-L231
 https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L237
 
 5. Selector argument. This will accept a single value as long as that value is
-in the predefined set of allowed values.
+in the predefined set of allowed values. As with the list argument, the selector
+translator can work with any type as long as it has an underlying translator of
+it's own.
 
-https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L256-L274
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L257-L277
+
+6. File argument. This will accept a single string value and verify that the
+supplied string is a path that exists as a file.
+
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L361-366
+
+7. Directory argument. This will accept a single string value and verify that
+the supplied string is a path that exists as a directory.
+
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L390-395
+
+8. File open argument. This will accept a single string value and will attempt
+to make the supplied file with the given file mode and permissions.
+
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L421-431
+
+9. Mkdir argument.
+
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/argparse/examples/SimpleExamples_test.go#L455-472
 
 ## Argument Builder: Custom Types
 
@@ -104,6 +127,8 @@ translators refer to the
 [stateless translator example](./examples/CustomStatelessTranslator_test.go)
 as well as the 
 [stateful translator example](./examples/CustomStatefulTranslator_test.go).
+Any custom types defined outside of this package will use the `AddArg` function
+to add arguments.
 
 To support a custom type the `Translate` method on the translator will simply
 need to return the custom type. Support for custom translators and types allows

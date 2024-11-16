@@ -161,6 +161,13 @@ func main() {
 		},
 	)
 
+	if !optionsStructFound {
+		common.PrintRunningError(
+			"The supplied type was not found or was not a struct but is required to be.",
+		)
+		os.Exit(1)
+	}
+
 	templateData := TemplateVals{
 		StructName:          INLINE_ARGS.Struct,
 		CapStructName:       strings.ToUpper(INLINE_ARGS.Struct[0:1]) + INLINE_ARGS.Struct[1:],

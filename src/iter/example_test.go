@@ -25,14 +25,17 @@ func testGeneratorIterator(step float64, output bool) func() {
 		period := 5.0
 		hShift := 5.0
 		vShift := 5.0
-		val, err := sequenceGenerator(-100.0, 100.0, step).
-			Map(func(index int, val float64) (float64, error) {
+		val, err := sequenceGenerator(-100.0, 100.0, step).Map(
+			func(index int, val float64) (float64, error) {
 				height := amp*math.Cos(2*math.Pi/period*(val-hShift)) + vShift
 				return height * step, nil
-			}).Reduce(0.0, func(accum *float64, iter float64) error {
-			*accum += iter
-			return nil
-		})
+			},
+		).Reduce(0.0,
+			func(accum *float64, iter float64) error {
+				*accum += iter
+				return nil
+			},
+		)
 		if output {
 			fmt.Printf("Area is: %f Using step size: %f\n", val, step)
 			fmt.Printf("Err is: %v\n", err)
@@ -47,12 +50,13 @@ func testGeneratorIterator2(step float64, output bool) func() {
 		hShift := 5.0
 		vShift := 5.0
 		total := 0.0
-		err := sequenceGenerator(-100.0, 100.0, step).
-			ForEach(func(index int, val float64) (IteratorFeedback, error) {
+		err := sequenceGenerator(-100.0, 100.0, step).ForEach(
+			func(index int, val float64) (IteratorFeedback, error) {
 				height := amp*math.Cos(2*math.Pi/period*(val-hShift)) + vShift
 				total += height * step
 				return Continue, nil
-			})
+			},
+		)
 		if output {
 			fmt.Printf("Area is: %f Using step size: %f\n", total, step)
 			fmt.Printf("Err is: %v\n", err)

@@ -133,7 +133,7 @@ use `ForEach`.
 https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/PseudoConsumer.go#L65-L77
 <sup>Example pseudo-consumer</sup>
 
-https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/PseudoIntermediary.go#L20-L36
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/PseudoIntermediary.go#L21-L36
 <sup>Example pseudo-intermediary</sup>
 
 2. Non-Pseudo: Any iterator that is not expressed using another iterator. For
@@ -152,35 +152,35 @@ for loops. The `example_test.go` file not only showcases the example at the top
 of this readme, but contains benchmarks for three different scenarios. These
 scenarios are shown below for convenience.
 
-##### Scenario 1: A 'typical' functional implementation
+##### Scenario 1: An over the top implementation using iterators
 
-https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/example_test.go#L28-L35
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/example_test.go#L28-L38
 
 ##### Scenario 2: Another implementation using iterators
 
-https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/example_test.go#L50-L55
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/example_test.go#L53-L59
 
 ##### Scenario 3: A basic for loop
 
-https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/example_test.go#L70-L73
+https://github.com/barbell-math/util/blob/436b7e550a6ca905f239473b22a093506eddd798/src/iter/example_test.go#L74-77
 
 The benchmarks (gathered from the go benchmark utility) for the scenarios with
 various step sizes are shown below. Make of these results as you will.
 
-| Scenario | Step Size | Time |
-|----------|-----------|------|
-| 1 | 1 | 7815 ns/op |
-| 2 | 1 | 5930 ns/op |
-| 3 | 1 | 3706 ns/op |
-| 1 | 0.1 | 84634 ns/op |
-| 2 | 0.1 | 59650 ns/op |
-| 3 | 0.1 | 34406 ns/op |
-| 1 | 0.01 | 765754 ns/op |
-| 2 | 0.01 | 576928 ns/op |
-| 3 | 0.01 | 352233 ns/op |
-| 1 | 0.001 | 7526192 ns/op |
-| 2 | 0.001 | 5810898 ns/op |
-| 3 | 0.001 | 3460169 ns/op |
-| 1 | 0.0001 | 73463321 ns/op |
-| 2 | 0.0001 | 57991047 ns/op |
-| 3 | 0.0001 | 34179406 ns/op |
+| Scenario | Step Size | Time           |
+|----------|-----------|----------------|
+| 1        | 1         | 7815 ns/op     |
+| 2        | 1         | 5930 ns/op     |
+| 3        | 1         | 3706 ns/op     |
+| 1        | 0.1       | 84634 ns/op    |
+| 2        | 0.1       | 59650 ns/op    |
+| 3        | 0.1       | 34406 ns/op    |
+| 1        | 0.01      | 765754 ns/op   |
+| 2        | 0.01      | 576928 ns/op   |
+| 3        | 0.01      | 352233 ns/op   |
+| 1        | 0.001     | 7526192 ns/op  |
+| 2        | 0.001     | 5810898 ns/op  |
+| 3        | 0.001     | 3460169 ns/op  |
+| 1        | 0.0001    | 73463321 ns/op |
+| 2        | 0.0001    | 57991047 ns/op |
+| 3        | 0.0001    | 34179406 ns/op |
