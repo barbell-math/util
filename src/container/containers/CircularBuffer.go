@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/barbell-math/util/src/container/basic"
@@ -1786,4 +1787,22 @@ func (_ *CircularBuffer[T, U]) Zero(other *CircularBuffer[T, U]) {
 // Internally this is equivalent to [SyncedCircularBuffer.Clear].
 func (_ *SyncedCircularBuffer[T, U]) Zero(other *SyncedCircularBuffer[T, U]) {
 	other.Clear()
+}
+
+// Implements the [fmt.Formatter] interface.
+func (c CircularBuffer[T, U]) Format(f fmt.State, verb rune) {
+	fmtStr:=string([]byte{'%', byte(verb)})
+	f.Write([]byte("circBuf["))
+	for i:=0; i<c.numElems; i++ {
+		fmt.Fprintf(f, fmtStr, c.vals[c.start.GetProperIndex(i, len(c.vals))])
+		if i+1<c.numElems {
+			f.Write([]byte{' '})
+		}
+	}
+	f.Write([]byte{']'})
+}
+
+// Implements the [fmt.Stringer] interface.
+func (c *CircularBuffer[T, U]) String() string {
+	return fmt.Sprintf("%v", c)
 }

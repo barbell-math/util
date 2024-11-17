@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/barbell-math/util/src/container/basic"
@@ -249,4 +250,17 @@ func TestCircularBufferZero(t *testing.T) {
 	test.Eq(0, v.numElems, t)
 	test.Eq(0, int(v.start), t)
 	test.SlicesMatch[string]([]string{"", "", "", "", ""}, v.vals, t)
+}
+
+func TestCircularBufferFormat(t *testing.T) {
+	v, _ := NewCircularBuffer[string, widgets.BuiltinString](5)
+	v.Append("a", "b", "c", "d")
+	test.Eq("circBuf[a b c d]", fmt.Sprintf("%v", v), t)
+	test.Eq("circBuf[a b c d]", fmt.Sprintf("%v", &v), t)
+}
+
+func TestCircularBufferString(t *testing.T) {
+	v, _ := NewCircularBuffer[string, widgets.BuiltinString](5)
+	v.Append("a", "b", "c", "d")
+	test.Eq("circBuf[a b c d]", fmt.Sprintf("%v", v), t)
 }

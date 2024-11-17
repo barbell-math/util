@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/barbell-math/util/src/container/basic"
@@ -764,4 +765,24 @@ func (_ *HashMap[K, V, KI, VI]) Zero(other *HashMap[K, V, KI, VI]) {
 // Internally this is equivalent to [SyncedHashMap.Clear].
 func (_ *SyncedHashMap[K, V, KI, VI]) Zero(other *SyncedHashMap[K, V, KI, VI]) {
 	other.Clear()
+}
+
+// Implements the [fmt.Formatter] interface.
+func (m HashMap[K, V, KI, VI]) Format(f fmt.State, verb rune) {
+	fmtStr:=string([]byte{'%', byte(verb), ':', '%', byte(verb)})
+	f.Write([]byte("hashMap["))
+	cntr:=0
+	for _, v:=range(m.internalHashMapImpl) {
+		fmt.Fprintf(f, fmtStr, v.A, v.B)
+		cntr++
+		if cntr<len(m.internalHashMapImpl) {
+			f.Write([]byte{' '})
+		}
+	}
+	f.Write([]byte{']'})
+}
+
+// Implements the [fmt.Stringer] interface.
+func (m *HashMap[K, V, KI, VI]) String() string {
+	return fmt.Sprintf("%v", m)
 }

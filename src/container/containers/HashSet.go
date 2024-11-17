@@ -2,7 +2,6 @@ package containers
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/barbell-math/util/src/container/containerTypes"
@@ -857,24 +856,22 @@ func (_ *SyncedHashSet[T, U]) Zero(other *SyncedHashSet[T, U]) {
 	other.Clear()
 }
 
-// Implements the fmt.Stringer interface
-func (h *HashSet[T, U]) String() string {
-	var sb strings.Builder
-	sb.WriteByte('{')
-
-	cntr := 0
-	for _, v := range h.internalHashSetImpl {
-		if stringer, ok := any(&v).(fmt.Stringer); ok {
-			sb.WriteString(fmt.Sprintf("%s", stringer))
-		} else {
-			sb.WriteString(fmt.Sprintf("%+v", v))
-		}
-		if cntr+1 < h.Length() {
-			sb.WriteString(", ")
-		}
+// Implements the [fmt.Formatter] interface.
+func (h HashSet[T, U]) Format(f fmt.State, verb rune) {
+	fmtStr:=string([]byte{'%', byte(verb)})
+	f.Write([]byte("hashSet["))
+	cntr:=0
+	for _, iterV:=range(h.internalHashSetImpl) {
+		fmt.Fprintf(f, fmtStr, iterV)
 		cntr++
+		if cntr<len(h.internalHashSetImpl) {
+			f.Write([]byte{' '})
+		}
 	}
+	f.Write([]byte{']'})
+}
 
-	sb.WriteByte('}')
-	return sb.String()
+// Implements the [fmt.Stringer] interface.
+func (h *HashSet[T, U]) String() string {
+	return fmt.Sprintf("%v", h)
 }

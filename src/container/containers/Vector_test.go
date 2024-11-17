@@ -45,7 +45,7 @@ func ExampleVector_typeCasting() {
 func ExampleVector_valueInitilizer() {
 	v := VectorValInit[string, widgets.BuiltinString]("one", "two", "three")
 	fmt.Println(v)
-	//Output: [one two three]
+	//Output: vec[one two three]
 }
 
 func TestVectorWidgetInterface(t *testing.T) {
@@ -112,4 +112,16 @@ func TestVectorZero(t *testing.T) {
 	v := Vector[int, widgets.BuiltinInt]{1, 2, 3}
 	v.Zero(&v)
 	test.SlicesMatch[int]([]int{}, v, t)
+}
+
+func TestVectorFormat(t *testing.T) {
+	v := Vector[int, widgets.BuiltinInt]{1, 2, 3}
+	test.Eq("vec[1 2 3]", fmt.Sprintf("%v", v), t)
+	test.Eq("vec[1 2 3]", fmt.Sprintf("%v", &v), t)
+	test.Eq("vec[1 10 11]", fmt.Sprintf("%b", v), t)
+}
+
+func TestVectorString(t *testing.T) {
+	v := Vector[int, widgets.BuiltinInt]{1, 2, 3}
+	test.Eq("vec[1 2 3]", v.String(), t)
 }

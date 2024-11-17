@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/barbell-math/util/src/container/basic"
@@ -1531,4 +1532,22 @@ func (_ *Vector[T, U]) Zero(other *Vector[T, U]) {
 // Internally this is equivalent to [SyncedVector.Clear].
 func (_ *SyncedVector[T, U]) Zero(other *SyncedVector[T, U]) {
 	other.Clear()
+}
+
+// Implements the [fmt.Formatter] interface.
+func (v Vector[T, U]) Format(f fmt.State, verb rune) {
+	fmtStr:=string([]byte{'%', byte(verb)})
+	f.Write([]byte("vec["))
+	for i, iterV:=range(v) {
+		fmt.Fprintf(f, fmtStr, iterV)
+		if i+1<len(v) {
+			f.Write([]byte{' '})
+		}
+	}
+	f.Write([]byte{']'})
+}
+
+// Implements the [fmt.Stringer] interface.
+func (v *Vector[T, U]) String() string {
+	return fmt.Sprintf("%v", v)
 }

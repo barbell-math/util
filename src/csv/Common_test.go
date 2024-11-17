@@ -362,28 +362,3 @@ func TestIntegrationTest(t *testing.T) {
 	test.Nil(err, t)
 	test.Eq(exp, res, t)
 }
-
-// func TestIntegratedTestQuotes(t *testing.T) {
-//     type Row struct {
-//         Str string
-//     }
-//     o:=NewOptions()
-//     res,err:=Flatten(
-//         FromStructs[Row](
-//             ToStructs[Row](
-//                 iter.SliceElems[[]string](
-//                     [][]string{
-//                         {"Str"},
-//                         {"hello world"},                // Normal str
-//                         {"\"hello world\""},            // Quotes will be removed
-//                         {"\"\"\"hello world\"\"\""},    // Quotes will be kept
-//
-//                     },
-//                     o,
-//                 )
-//             ),
-//             o
-//         ),
-//         o
-//     )
-// }

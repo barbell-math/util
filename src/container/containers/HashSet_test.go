@@ -1,6 +1,8 @@
 package containers
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/barbell-math/util/src/iter"
@@ -59,6 +61,38 @@ func TestHashSetZero(t *testing.T) {
 	test.Eq(0, s1.Length(), t)
 }
 
+func TestHashSetFormat(t *testing.T) {
+	s1, _ := NewHashSet[int, widgets.BuiltinInt](0)
+	s1.AppendUnique(1, 2, 3)
+	res:=fmt.Sprintf("%v", s1)
+	test.Eq(len("hashSet[1 2 3]"), len(res), t)
+	test.True(strings.Contains(res, "1"), t)
+	test.True(strings.Contains(res, "2"), t)
+	test.True(strings.Contains(res, "3"), t)
+
+	res=fmt.Sprintf("%v", &s1)
+	test.Eq(len("hashSet[1 2 3]"), len(res), t)
+	test.True(strings.Contains(res, "1"), t)
+	test.True(strings.Contains(res, "2"), t)
+	test.True(strings.Contains(res, "3"), t)
+
+	res=fmt.Sprintf("%b", &s1)
+	test.Eq(len("hashSet[1 10 11]"), len(res), t)
+	test.True(strings.Contains(res, "1"), t)
+	test.True(strings.Contains(res, "10"), t)
+	test.True(strings.Contains(res, "11"), t)
+}
+
+func TestHashSetString(t *testing.T) {
+	s1, _ := NewHashSet[int, widgets.BuiltinInt](0)
+	s1.AppendUnique(1, 2, 3)
+	res:=s1.String()
+	test.Eq(len("hashSet[1 2 3]"), len(res), t)
+	test.True(strings.Contains(res, "1"), t)
+	test.True(strings.Contains(res, "2"), t)
+	test.True(strings.Contains(res, "3"), t)
+}
+
 func popAndGetAffectedHashesHelper(
 	setVals iter.Iter[int],
 	popVal int,
@@ -79,6 +113,7 @@ func popAndGetAffectedHashesHelper(
 	s1.Pop(popVal)
 	test.MapsMatch[OldHashSetHash, NewHashSetHash](res, vals, t)
 }
+
 func TestGetHashesAffectedByPop(t *testing.T) {
 	initialMap := map[HashSetHash]int{}
 	for i := 0; i < 8; i++ {
