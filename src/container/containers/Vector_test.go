@@ -43,7 +43,7 @@ func ExampleVector_typeCasting() {
 }
 
 func ExampleVector_valueInitilizer() {
-	v:=VectorValInit[string, widgets.BuiltinString]("one", "two", "three")
+	v := VectorValInit[string, widgets.BuiltinString]("one", "two", "three")
 	fmt.Println(v)
 	//Output: [one two three]
 }

@@ -137,7 +137,7 @@ https://github.com/barbell-math/util/blob/6ec6db22ff664f7ccf10f4417b4a1fb80d1e97
 
 Due to this vectors can be type casted to and from a slice.
 
-https://github.com/barbell-math/util/blob/6ec6db22ff664f7ccf10f4417b4a1fb80d1e97a4/src/container/containers/Vector_test.go#L32-L41
+https://github.com/barbell-math/util/blob/6ec6db22ff664f7ccf10f4417b4a1fb80d1e97a4/src/container/containers/Vector_test.go#L33-L42
 <sup>Example of type casting a slice and vector.</sup>
 
 This is convenient for sure, but it allows for some other more interesting
@@ -207,4 +207,5 @@ of underlying data.
 
 ## Further Reading:
 
-1. [Widgets](./src/widgets/README.md)
+1. [Widgets](../widgets/README.md)
+1. [argparse](../argparse/README.md)
