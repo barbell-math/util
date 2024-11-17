@@ -44,10 +44,10 @@ There are four kinds of widgets, each with an associated interface:
 
 | Widget            | Associated Interface |
 |-------------------|----------------------|
-| Base              | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L8-L21 |
-| PartialOrder      | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L23-L31 |
-| Arith             | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L33-L61 |
-| PartialOrderArith | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L63-L70 |
+| Base              | https://github.com/barbell-math/util/blob/54112c5c3f04919e84cf583b531e7266fa948823/src/widgets/Common.go#L8-L21 |
+| PartialOrder      | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L23-L31 |
+| Arith             | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L33-L61 |
+| PartialOrderArith | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L63-L70 |
 
 The widgets interfaces are built off of each other, meaning that they can be
 down casted as needed.
@@ -70,7 +70,7 @@ following examples:
 
 1. Base widget example
 
-https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Examples_test.go#L9-L19
+https://github.com/barbell-math/util/blob/03fed1ba47c9d901ae66c53a1dce2ec2f0859866/src/widgets/Examples_test.go#L8-L18
 
 2. Partial order widget example
 
@@ -91,7 +91,7 @@ on itself. Doing so would violate the stateless nature that predicated the
 design of widgets. All values that are needed to perform the requested
 operations will be passed as arguments to the required methods.
 
-The example below shows how a custom type implementing the partial order widget
+The example below shows a custom type implementing the partial order widget
 interface on itself. Note how the method receivers are not used and the `_`
 character is used as the method receiver. This indicates that it should not be
 used and is a recommended pattern to follow.
@@ -106,7 +106,7 @@ were discussed in the previous section. Given this behavior, it is recommended
 that every custom type implements the largest allowable widget interface which
 allows it to be used in the greatest number of scenarios.
 
-https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/CustomWidget_test.go#L50-63
+https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/CustomWidget_test.go#L50-L63
 
 ## What About Pointers??
 
