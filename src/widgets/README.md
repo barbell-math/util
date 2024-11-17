@@ -123,7 +123,7 @@ underlying value. There are pointer widgets for each of the widget types.
 
 The example below shows how to use these pointer widgets.
 
-https://github.com/barbell-math/util/blob/4bcdf3bfe3c0c4f9abb35313fa4ed6a56157e234/src/widgets/CustomWidget_test.go#L43-L56
+https://github.com/barbell-math/util/blob/4bcdf3bfe3c0c4f9abb35313fa4ed6a56157e234/src/widgets/CustomWidget_test.go#L50-63
 
 ## Further Reading:
 
