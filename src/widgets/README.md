@@ -49,8 +49,9 @@ There are four kinds of widgets, each with an associated interface:
 | Arith             | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L33-L61 |
 | PartialOrderArith | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L63-L70 |
 
-Given these widget types, they have been defined to be used like the following:
+Given these widgets, they have been defined to be used like the following:
 
+https://github.com/barbell-math/util/blob/03fed1ba47c9d901ae66c53a1dce2ec2f0859866/src/widgets/Examples_test.go#L9-L19
 
 ## Further Reading:
 
