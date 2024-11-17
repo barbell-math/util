@@ -13,7 +13,7 @@ are three main parts to consider:
 1. An `ArgBuilder` is created and it is populated with arguments. This stage is
 where the vast majority of your interaction with the package will take place,
 and is explained in more detail in the next section.
-1. The `ArgBuilder` makes a `Parser`. Optionally this is where subparsers could
+1. The `ArgBuilder` makes a `Parser`. Optionally this is where sub parsers could
 be added if you were using them.
 1. The `Parser` is then used to parse a slice of strings which is translated
 into a sequence of tokens.
@@ -22,7 +22,7 @@ into a sequence of tokens.
 
 Primitive types are the most straight forward. Shown below is how to add an
 integer argument. The `translators.BuiltinInt` type is responsible for parsing
-an integer from the string value supplied by the CLI. Analgous types are
+an integer from the string value supplied by the CLI. Analogous types are
 available for all primitive types, all following the `Builtin<type>` format.
 
 https://github.com/barbell-math/util/blob/f6e85def6c5fa2ccd75b15c691c31e9b3a298e1d/src/argparse/examples/SimpleExamples_test.go#L19-L20
@@ -156,17 +156,17 @@ implement a custom computer refer to the
 Computed arguments do have one advantage over normal (translated) arguments. All
 computed arguments are added to a tree like data structure following the same
 ordering that any sub-parsers were added in. Given this tree like data structure
-computed arguments are then evaulated bottom up, left to right. With this
-organized evaluation ordering it is possible to evauluate arbitrary expressions.
+computed arguments are then evaluated bottom up, left to right. With this
+organized evaluation ordering it is possible to evaluate arbitrary expressions.
 This will likely never be useful and an argument could be made that this should
-never be done, but the capibility is there. For an example of this evaulation
+never be done, but the capability is there. For an example of this evaluation
 refer to the [sub-parsers examples](./examples/SubParsers_test.go).
 
 ## Sub-Parsers
 
 Several different parsers, each with there own set of arguments, can be
 separately built and then combined into one larger parser. When adding one
-parser to another the parsers are added as childen, or sub parsers, to the main
+parser to another the parsers are added as children, or sub parsers, to the main
 parser. A couple examples of sub-parsers are shown in the
 [sub-parsers examples file](./examples/SubParsers_test.go). There are a couple
 rules that dictate what happens when sub-parsers are added:
@@ -185,3 +185,7 @@ needs.
 will stop all further parsing and print the help menu.
 1. Verbosity: this adds the `-v` and `--verbose` flag counter arguments which
 can be used to set a verbosity level for a running application.
+
+## Further Reading:
+
+1. [Widgets](./src/widgets/README.md)

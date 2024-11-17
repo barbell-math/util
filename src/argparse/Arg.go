@@ -106,6 +106,7 @@ func newComputedArg[T any, U computers.Computer[T]](
 		reset: func() { computer.Reset() },
 	}
 }
+
 func (_ *shortArg) Eq(l *shortArg, r *shortArg) bool {
 	return l.shortFlag == r.shortFlag
 }

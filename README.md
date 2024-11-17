@@ -9,8 +9,9 @@ be given in one combined README. Please refer to each packages README for
 information about each sub-package:
 
 1. [Iterator framework](./src/iter/README.md)
-1. [Containers data structures](./src/container/README.md)
+1. [Containers (a.k.a. data structures)](./src/container/README.md)
 1. [CLI argument parser](./src/argparse/README.md)
+1. [Widgets](./src/widgets/README.md)
 
 ## Helpful Commands
 

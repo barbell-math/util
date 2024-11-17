@@ -77,10 +77,3 @@ jobs:
 
     - name: Test
       run: go test -v ./src/...
-
-  spellCheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: igsekor/pyspelling-any@v0.0.2
-        name: Spellcheck

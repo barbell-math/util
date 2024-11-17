@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/barbell-math/util/src/test"
@@ -39,6 +40,12 @@ func ExampleVector_typeCasting() {
 	s2 := make([]string, 4)
 	v2 := Vector[string, widgets.BuiltinString](s2)
 	_ = v2
+}
+
+func ExampleVector_valueInitilizer() {
+	v:=VectorValInit[string, widgets.BuiltinString]("one", "two", "three")
+	fmt.Println(v)
+	//Output: [one two three]
 }
 
 func TestVectorWidgetInterface(t *testing.T) {
