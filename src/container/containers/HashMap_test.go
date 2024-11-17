@@ -102,14 +102,14 @@ func TestHashMapFormat(t *testing.T) {
 		basic.Pair[int, string]{2, "two"},
 		basic.Pair[int, string]{3, "three"},
 	)
-	res:=fmt.Sprintf("%v", m1)
+	res := fmt.Sprintf("%v", m1)
 	test.Eq(len("hashMap[0:zero 1:one 2:two 3:three]"), len(res), t)
 	test.True(strings.Contains(res, "0:zero"), t)
 	test.True(strings.Contains(res, "1:one"), t)
 	test.True(strings.Contains(res, "2:two"), t)
 	test.True(strings.Contains(res, "3:three"), t)
 
-	res=fmt.Sprintf("%v", &m1)
+	res = fmt.Sprintf("%v", &m1)
 	test.Eq(len("hashMap[0:zero 1:one 2:two 3:three]"), len(res), t)
 	test.True(strings.Contains(res, "0:zero"), t)
 	test.True(strings.Contains(res, "1:one"), t)
@@ -125,7 +125,7 @@ func TestHashMapString(t *testing.T) {
 		basic.Pair[int, string]{2, "two"},
 		basic.Pair[int, string]{3, "three"},
 	)
-	res:=m1.String()
+	res := m1.String()
 	test.Eq(len("hashMap[0:zero 1:one 2:two 3:three]"), len(res), t)
 	test.True(strings.Contains(res, "0:zero"), t)
 	test.True(strings.Contains(res, "1:one"), t)

@@ -858,13 +858,13 @@ func (_ *SyncedHashSet[T, U]) Zero(other *SyncedHashSet[T, U]) {
 
 // Implements the [fmt.Formatter] interface.
 func (h HashSet[T, U]) Format(f fmt.State, verb rune) {
-	fmtStr:=string([]byte{'%', byte(verb)})
+	fmtStr := string([]byte{'%', byte(verb)})
 	f.Write([]byte("hashSet["))
-	cntr:=0
-	for _, iterV:=range(h.internalHashSetImpl) {
+	cntr := 0
+	for _, iterV := range h.internalHashSetImpl {
 		fmt.Fprintf(f, fmtStr, iterV)
 		cntr++
-		if cntr<len(h.internalHashSetImpl) {
+		if cntr < len(h.internalHashSetImpl) {
 			f.Write([]byte{' '})
 		}
 	}

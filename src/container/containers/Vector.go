@@ -1536,11 +1536,11 @@ func (_ *SyncedVector[T, U]) Zero(other *SyncedVector[T, U]) {
 
 // Implements the [fmt.Formatter] interface.
 func (v Vector[T, U]) Format(f fmt.State, verb rune) {
-	fmtStr:=string([]byte{'%', byte(verb)})
+	fmtStr := string([]byte{'%', byte(verb)})
 	f.Write([]byte("vec["))
-	for i, iterV:=range(v) {
+	for i, iterV := range v {
 		fmt.Fprintf(f, fmtStr, iterV)
-		if i+1<len(v) {
+		if i+1 < len(v) {
 			f.Write([]byte{' '})
 		}
 	}

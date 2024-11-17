@@ -64,19 +64,19 @@ func TestHashSetZero(t *testing.T) {
 func TestHashSetFormat(t *testing.T) {
 	s1, _ := NewHashSet[int, widgets.BuiltinInt](0)
 	s1.AppendUnique(1, 2, 3)
-	res:=fmt.Sprintf("%v", s1)
+	res := fmt.Sprintf("%v", s1)
 	test.Eq(len("hashSet[1 2 3]"), len(res), t)
 	test.True(strings.Contains(res, "1"), t)
 	test.True(strings.Contains(res, "2"), t)
 	test.True(strings.Contains(res, "3"), t)
 
-	res=fmt.Sprintf("%v", &s1)
+	res = fmt.Sprintf("%v", &s1)
 	test.Eq(len("hashSet[1 2 3]"), len(res), t)
 	test.True(strings.Contains(res, "1"), t)
 	test.True(strings.Contains(res, "2"), t)
 	test.True(strings.Contains(res, "3"), t)
 
-	res=fmt.Sprintf("%b", &s1)
+	res = fmt.Sprintf("%b", &s1)
 	test.Eq(len("hashSet[1 10 11]"), len(res), t)
 	test.True(strings.Contains(res, "1"), t)
 	test.True(strings.Contains(res, "10"), t)
@@ -86,7 +86,7 @@ func TestHashSetFormat(t *testing.T) {
 func TestHashSetString(t *testing.T) {
 	s1, _ := NewHashSet[int, widgets.BuiltinInt](0)
 	s1.AppendUnique(1, 2, 3)
-	res:=s1.String()
+	res := s1.String()
 	test.Eq(len("hashSet[1 2 3]"), len(res), t)
 	test.True(strings.Contains(res, "1"), t)
 	test.True(strings.Contains(res, "2"), t)

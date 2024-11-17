@@ -1791,11 +1791,11 @@ func (_ *SyncedCircularBuffer[T, U]) Zero(other *SyncedCircularBuffer[T, U]) {
 
 // Implements the [fmt.Formatter] interface.
 func (c CircularBuffer[T, U]) Format(f fmt.State, verb rune) {
-	fmtStr:=string([]byte{'%', byte(verb)})
+	fmtStr := string([]byte{'%', byte(verb)})
 	f.Write([]byte("circBuf["))
-	for i:=0; i<c.numElems; i++ {
+	for i := 0; i < c.numElems; i++ {
 		fmt.Fprintf(f, fmtStr, c.vals[c.start.GetProperIndex(i, len(c.vals))])
-		if i+1<c.numElems {
+		if i+1 < c.numElems {
 			f.Write([]byte{' '})
 		}
 	}

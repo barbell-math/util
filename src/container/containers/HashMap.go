@@ -769,13 +769,13 @@ func (_ *SyncedHashMap[K, V, KI, VI]) Zero(other *SyncedHashMap[K, V, KI, VI]) {
 
 // Implements the [fmt.Formatter] interface.
 func (m HashMap[K, V, KI, VI]) Format(f fmt.State, verb rune) {
-	fmtStr:=string([]byte{'%', byte(verb), ':', '%', byte(verb)})
+	fmtStr := string([]byte{'%', byte(verb), ':', '%', byte(verb)})
 	f.Write([]byte("hashMap["))
-	cntr:=0
-	for _, v:=range(m.internalHashMapImpl) {
+	cntr := 0
+	for _, v := range m.internalHashMapImpl {
 		fmt.Fprintf(f, fmtStr, v.A, v.B)
 		cntr++
-		if cntr<len(m.internalHashMapImpl) {
+		if cntr < len(m.internalHashMapImpl) {
 			f.Write([]byte{' '})
 		}
 	}
