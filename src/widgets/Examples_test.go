@@ -5,8 +5,8 @@ import (
 )
 
 func ExampleBase() {
-	v1, v2:=0, 1
-	w:=Base[int, BuiltinInt]{}
+	v1, v2 := 0, 1
+	w := Base[int, BuiltinInt]{}
 	fmt.Println("Equality:", w.Eq(&v1, &v2))
 	fmt.Println("Hash:", w.Hash(&v2))
 	w.Zero(&v2)
@@ -19,8 +19,8 @@ func ExampleBase() {
 }
 
 func ExamplePartialOrder() {
-	v1, v2:=0, 1
-	w:=PartialOrder[int, BuiltinInt]{}
+	v1, v2 := 0, 1
+	w := PartialOrder[int, BuiltinInt]{}
 	fmt.Println("Lt:", w.Lt(&v1, &v2))
 
 	//Output:
@@ -28,9 +28,9 @@ func ExamplePartialOrder() {
 }
 
 func ExampleArith() {
-	v1, v2:=0, -1
-	res:=0
-	w:=Arith[int, BuiltinInt]{}
+	v1, v2 := 0, -1
+	res := 0
+	w := Arith[int, BuiltinInt]{}
 	fmt.Println("ZeroVal:", w.ZeroVal())
 	fmt.Println("UnitVal:", w.UnitVal())
 	w.Neg(&v2)
