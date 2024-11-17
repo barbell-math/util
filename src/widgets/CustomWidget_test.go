@@ -12,24 +12,22 @@ type customWidget struct {
 	b float32
 }
 
-func (c *customWidget) Eq(l *customWidget, r *customWidget) bool {
+func (_ *customWidget) Eq(l *customWidget, r *customWidget) bool {
 	return l.a == r.a
 }
-func (c *customWidget) Lt(l *customWidget, r *customWidget) bool {
+func (_ *customWidget) Lt(l *customWidget, r *customWidget) bool {
 	return l.a < r.a
 }
-func (c *customWidget) Hash(v *customWidget) hash.Hash {
+func (_ *customWidget) Hash(v *customWidget) hash.Hash {
 	return hash.Hash(v.a)
 }
-func (c *customWidget) Zero(v *customWidget) {
+func (_ *customWidget) Zero(v *customWidget) {
 	*v = customWidget{}
 }
 
-func testCustomWidgetHelper(
-	v customWidget,
-	v2 customWidget,
-	t *testing.T,
-) {
+func TestCustomWidget(t *testing.T) {
+	v := customWidget{a: 10, b: 20}
+	v2 := customWidget{a: 9, b: 20}
 	w := PartialOrder[customWidget, *customWidget]{}
 	test.True(w.Eq(&v, &v), t)
 	test.False(w.Eq(&v, &v2), t)
@@ -39,11 +37,13 @@ func testCustomWidgetHelper(
 	test.True(w.Lt(&v2, &v), t)
 	test.Eq(hash.Hash(10), v.Hash(&v), t)
 	test.Eq(hash.Hash(9), v.Hash(&v2), t)
-}
-func TestCustomWidget(t *testing.T) {
-	v := customWidget{a: 10, b: 20}
+
 	v2 := customWidget{a: 9, b: 20}
-	testCustomWidgetHelper(v, v2, t)
+	w := Base[customWidget, *customWidget]{}
+	test.True(w.Eq(&v, &v), t)
+	test.False(w.Eq(&v, &v2), t)
+	test.Eq(hash.Hash(10), v.Hash(&v), t)
+	test.Eq(hash.Hash(9), v.Hash(&v2), t)
 }
 
 func TestCustomWidgetPntr(t *testing.T) {
