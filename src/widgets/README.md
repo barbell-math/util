@@ -11,7 +11,7 @@ to be supported. This includes any builtin types and builtin types cannot be
 modified with additional methods. For example, you cannot add a method to the
 builtin int type. The below code will not compile.
 
-```
+```golang
 func (i int) Eq(other int) bool { ... }
 ```
 
@@ -24,7 +24,7 @@ original type can be casted to and from freely? Because go forbids creating
 non-instantiated generic types. The code shown below tries to do this. If you
 try to compile this code it will fail.
 
-```
+```golang
 type Widget[T any] T
 ```
 
@@ -42,20 +42,15 @@ use of this idea (algorithims, generic code in general, ...).
 
 There are four kinds of widgets, each with an associated interface:
 
-| Widget | Interface |
-|--------|-----------|
-| Base   | https://github.com/barbell-math/util/blob/54112c5c3f04919e84cf583b531e7266fa948823/src/widgets/Common.go#L8-L21 |
+| Widget            | Associated Interface |
+|-------------------|----------------------|
+| Base              | https://github.com/barbell-math/util/blob/54112c5c3f04919e84cf583b531e7266fa948823/src/widgets/Common.go#L8-L21 |
+| PartialOrder      | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L23-L31 |
+| Arith             | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L33-L61 |
+| PartialOrderArith | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L63-L70 |
 
-1. Base: the base widget type that only provides equality, hashing, and zeroing methods.
-1. PartialOrder: an extension of the Base widget that adds comparison methods.
-1. Arith: an extenstion of the Base widget that add common arithmatic operations.
-1. PartialOrderArith: an extenstion of both the ParitialOrder and Arith widgets, combining all of there methods.
+Given these widget types, they have been defined to be used like the following:
 
-Each widget is associated with an interface.
-
-1. Base Widget
-
-2. 
 
 ## Further Reading:
 
