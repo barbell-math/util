@@ -44,10 +44,10 @@ There are four kinds of widgets, each with an associated interface:
 
 | Widget            | Associated Interface |
 |-------------------|----------------------|
-| Base              | https://github.com/barbell-math/util/blob/54112c5c3f04919e84cf583b531e7266fa948823/src/widgets/Common.go#L8-L21 |
-| PartialOrder      | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L23-L31 |
-| Arith             | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L33-L61 |
-| PartialOrderArith | https://github.com/barbell-math/util/blob/eaa36c190ebe2d5aefe6f27ec3c588f8ea68458b/src/widgets/Common.go#L63-L70 |
+| Base              | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L8-L21 |
+| PartialOrder      | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L23-L31 |
+| Arith             | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L33-L61 |
+| PartialOrderArith | https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Common.go#L63-L70 |
 
 The widgets interfaces are built off of each other, meaning that they can be
 down casted as needed.
@@ -70,7 +70,7 @@ following examples:
 
 1. Base widget example
 
-https://github.com/barbell-math/util/blob/03fed1ba47c9d901ae66c53a1dce2ec2f0859866/src/widgets/Examples_test.go#L9-L19
+https://github.com/barbell-math/util/blob/b49d7d40cf8df570522ac49ea0903c30d89cd990/src/widgets/Examples_test.go#L9-L19
 
 2. Partial order widget example
 
