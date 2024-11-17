@@ -35,15 +35,15 @@ func TestCustomWidget(t *testing.T) {
 	test.False(w.Lt(&v2, &v2), t)
 	test.False(w.Lt(&v, &v2), t)
 	test.True(w.Lt(&v2, &v), t)
-	test.Eq(hash.Hash(10), v.Hash(&v), t)
-	test.Eq(hash.Hash(9), v.Hash(&v2), t)
+	test.Eq(hash.Hash(10), w.Hash(&v), t)
+	test.Eq(hash.Hash(9), w.Hash(&v2), t)
 
-	v2 := customWidget{a: 9, b: 20}
-	w := Base[customWidget, *customWidget]{}
-	test.True(w.Eq(&v, &v), t)
-	test.False(w.Eq(&v, &v2), t)
-	test.Eq(hash.Hash(10), v.Hash(&v), t)
-	test.Eq(hash.Hash(9), v.Hash(&v2), t)
+	v2 = customWidget{a: 9, b: 20}
+	w2 := Base[customWidget, *customWidget]{}
+	test.True(w2.Eq(&v, &v), t)
+	test.False(w2.Eq(&v, &v2), t)
+	test.Eq(hash.Hash(10), w2.Hash(&v), t)
+	test.Eq(hash.Hash(9), w2.Hash(&v2), t)
 }
 
 func TestCustomWidgetPntr(t *testing.T) {
