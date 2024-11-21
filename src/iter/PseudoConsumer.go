@@ -31,7 +31,7 @@ func (i Iter[T]) ToChan(c chan T) {
 
 // This function is a Consumer.
 //
-// ToFile will take all the values from it's parent iterator and will write them
+// ToWriter will take all the values from it's parent iterator and will write them
 // to the specified writer. All values are written to the writer using the standard
 // fmt.Sprintf %v formatting directive. If you want a format other than that then
 // map the values to the formatted string before passing values to this iterator.

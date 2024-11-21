@@ -13,6 +13,16 @@ information about each sub-package:
 1. [CLI argument parser](./src/argparse/README.md)
 1. [Widgets](./src/widgets/README.md)
 
+## Code Generator Installation
+
+If your project would benifit from using the code generators defined in this
+utility library then you can install them using the command shown below. The
+generator executables will be placed in the `$GOPATH/bin` directory.
+
+```
+go install github.com/barbell-math/util/generators/...
+```
+
 ## Helpful Commands
 
 ### Building and Running Generators

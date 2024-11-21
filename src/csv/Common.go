@@ -102,6 +102,7 @@ func Parse(src string, opts *options) iter.Iter[[]string] {
 	} else {
 		return iter.ValElem([]string{}, err, 1)
 	}
+
 	return func(f iter.IteratorFeedback) ([]string, error, bool) {
 		if f == iter.Break || err != nil {
 			file.Close()

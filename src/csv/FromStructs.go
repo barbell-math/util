@@ -103,44 +103,37 @@ func FromStructs[R any](src iter.Iter[R], opts *options) iter.Iter[[]string] {
 }
 
 func getValAsString[R any](r *R, sIdx structIndex, opts *options) (string, error) {
+	fmtStr:="%v"
 	v := stdReflect.ValueOf(r).Elem().Field(int(sIdx))
-	var val stdReflect.Value
 	actualVal := v.Interface()
+
 	if v.Type() == stdReflect.TypeOf((*time.Time)(nil)).Elem() {
 		if actualVal.(time.Time).Equal(time.Time{}) && !opts.GetFlag(writeZeroValues) {
 			return "", nil
 		}
 		return v.Interface().(time.Time).Format(opts.dateTimeFormat), nil
 	}
+
+	zeroVal:=stdReflect.Zero(v.Type())
 	switch v.Kind() {
 	case stdReflect.Bool:
-		val = stdReflect.ValueOf(false)
-	case stdReflect.Uint:
-		val = stdReflect.ValueOf(uint(0))
-	case stdReflect.Uint8:
-		val = stdReflect.ValueOf(uint8(0))
-	case stdReflect.Uint16:
-		val = stdReflect.ValueOf(uint16(0))
-	case stdReflect.Uint32:
-		val = stdReflect.ValueOf(uint32(0))
-	case stdReflect.Uint64:
-		val = stdReflect.ValueOf(uint64(0))
-	case stdReflect.Int:
-		val = stdReflect.ValueOf(int(0))
-	case stdReflect.Int8:
-		val = stdReflect.ValueOf(int8(0))
-	case stdReflect.Int16:
-		val = stdReflect.ValueOf(int16(0))
-	case stdReflect.Int32:
-		val = stdReflect.ValueOf(int32(0))
+		fmtStr="%t"
+	case stdReflect.Uint: fallthrough
+	case stdReflect.Uint8: fallthrough
+	case stdReflect.Uint16: fallthrough
+	case stdReflect.Uint32: fallthrough
+	case stdReflect.Uint64: fallthrough
+	case stdReflect.Int: fallthrough
+	case stdReflect.Int8: fallthrough
+	case stdReflect.Int16: fallthrough
+	case stdReflect.Int32: fallthrough
 	case stdReflect.Int64:
-		val = stdReflect.ValueOf(int64(0))
-	case stdReflect.Float32:
-		val = stdReflect.ValueOf(float32(0))
+		fmtStr="%d"
+	case stdReflect.Float32: fallthrough
 	case stdReflect.Float64:
-		val = stdReflect.ValueOf(float64(0))
+		fmtStr="%f"
 	case stdReflect.String:
-		val = stdReflect.ValueOf("")
+		fmtStr="%s"
 		if len(actualVal.(string)) == 0 {
 			break
 		}
@@ -170,8 +163,8 @@ func getValAsString[R any](r *R, sIdx structIndex, opts *options) (string, error
 			stdReflect.TypeOf(r).Elem().Field(int(sIdx)).Name, v.Kind().String(),
 		)
 	}
-	if actualVal == val.Interface() && !opts.GetFlag(writeZeroValues) {
+	if actualVal == zeroVal.Interface() && !opts.GetFlag(writeZeroValues) {
 		return "", nil
 	}
-	return fmt.Sprintf("%v", actualVal), nil
+	return fmt.Sprintf(fmtStr, actualVal), nil
 }
