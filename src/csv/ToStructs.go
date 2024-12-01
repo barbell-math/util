@@ -120,46 +120,45 @@ func setStructValue[R any](
 	var err error = nil
 	f := stdReflect.ValueOf(row).Elem().Field(fieldIdx)
 	if f.IsValid() && f.CanSet() {
-		switch f.Interface().(type) {
-		case time.Time:
-			var tmp time.Time
+		if tmp, ok := f.Interface().(time.Time); ok {
 			tmp, err = time.Parse(opts.dateTimeFormat, val)
 			f.Set(stdReflect.ValueOf(tmp))
-		case bool:
+			return err
+		}
+
+		switch f.Kind() {
+		case stdReflect.Bool:
 			var tmp bool
 			tmp, err = strconv.ParseBool(val)
 			f.SetBool(tmp)
-		case uint:
+		case stdReflect.Uint:
 			err = setUint[uint](f, val)
-		case uint8:
+		case stdReflect.Uint8:
 			err = setUint[uint8](f, val)
-		case uint16:
+		case stdReflect.Uint16:
 			err = setUint[uint16](f, val)
-		case uint32:
+		case stdReflect.Uint32:
 			err = setUint[uint32](f, val)
-		case uint64:
+		case stdReflect.Uint64:
 			err = setUint[uint64](f, val)
-		case int:
+		case stdReflect.Int:
 			err = setInt[int](f, val)
-		case int8:
+		case stdReflect.Int8:
 			err = setInt[int8](f, val)
-		case int16:
+		case stdReflect.Int16:
 			err = setInt[int16](f, val)
-		case int32:
+		case stdReflect.Int32:
 			err = setInt[int32](f, val)
-		case int64:
+		case stdReflect.Int64:
 			err = setInt[int64](f, val)
-		case float32:
+		case stdReflect.Float32:
 			err = setFloat[float32](f, val)
-		case float64:
+		case stdReflect.Float64:
 			err = setFloat[float32](f, val)
-		case string:
+		case stdReflect.String:
 			f.SetString(val)
 		default:
-			err = customerr.Wrap(
-				customerr.UnsupportedType,
-				"'%s'", f.Kind().String(),
-			)
+			err = customerr.Wrap(customerr.UnsupportedType, "'%s'", f.Kind())
 		}
 	} else {
 		err = customerr.Wrap(
