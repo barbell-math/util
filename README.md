@@ -15,7 +15,7 @@ information about each sub-package:
 
 ## Code Generator Installation
 
-If your project would benifit from using the code generators defined in this
+If your project would benefit from using the code generators defined in this
 utility library then you can install them using the command shown below. The
 generator executables will be placed in the `$GOPATH/bin` directory.
 
@@ -25,7 +25,7 @@ go install github.com/barbell-math/util/generators/...
 
 ## Package Install
 
-If your project would benifit from using the this package directly as a library
+If your project would benefit from using the this package directly as a library
 then you can use the command shown below to add the library to your project.
 
 ```
