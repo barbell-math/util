@@ -23,6 +23,15 @@ generator executables will be placed in the `$GOPATH/bin` directory.
 go install github.com/barbell-math/util/generators/...
 ```
 
+## Package Install
+
+If your project would benifit from using the this package directly as a library
+then you can use the command shown below to add the library to your project.
+
+```
+go get github.com/barbell-math/util
+```
+
 ## Helpful Commands
 
 ### Building and Running Generators

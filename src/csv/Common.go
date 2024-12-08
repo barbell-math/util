@@ -83,7 +83,8 @@ func Flatten(elems iter.Iter[[]string], opts *options) iter.Iter[string] {
 				}
 			}
 			return iter.Continue, sb.String(), nil
-		})
+		},
+	)
 }
 
 // Parses the supplied csv file to produce a stream of string slices, which can

@@ -32,9 +32,9 @@ type (
 	graphImpl map[vertexHash]Vector[graphLink, *graphLink]
 
 	// This is used when only the vertex part of a graph edge is pertinent
-	vertexOnlyGraphLinkWidget graphLink
+	vertexOnlyGraphLinkWidget struct{}
 	// This is used when only the edge part of a graph edge is pertinent
-	edgeOnlyGraphLinkWidget graphLink
+	edgeOnlyGraphLinkWidget struct{}
 
 	internalHashGraphImpl[
 		V any,
@@ -105,23 +105,23 @@ const (
 	graphImplOffset uintptr = unsafe.Sizeof(graphImpl{})
 )
 
-func (_ *vertexOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
+func (_ vertexOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
 	return l.B.Eq(&l.B, &r.B)
 }
-func (_ *vertexOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
+func (_ vertexOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return other.B.Hash(&other.B)
 }
-func (_ *vertexOnlyGraphLinkWidget) Zero(other *graphLink) {
+func (_ vertexOnlyGraphLinkWidget) Zero(other *graphLink) {
 	*other = graphLink{}
 }
 
-func (_ *edgeOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
+func (_ edgeOnlyGraphLinkWidget) Eq(l *graphLink, r *graphLink) bool {
 	return l.A.Eq(&l.A, &r.A)
 }
-func (_ *edgeOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
+func (_ edgeOnlyGraphLinkWidget) Hash(other *graphLink) hash.Hash {
 	return other.A.Hash(&other.A)
 }
-func (_ *edgeOnlyGraphLinkWidget) Zero(other *graphLink) {
+func (_ edgeOnlyGraphLinkWidget) Zero(other *graphLink) {
 	*other = graphLink{}
 }
 
@@ -1289,7 +1289,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) DeleteLinksPntr(from *V, to *V) er
 		return getVertexError[V](to)
 	}
 
-	gNode := (Vector[graphLink, *vertexOnlyGraphLinkWidget])(
+	gNode := Vector[graphLink, vertexOnlyGraphLinkWidget](
 		([]graphLink)(g.graph[fromHash]),
 	)
 	g.numLinks -= gNode.Pop(graphLink{B: toHash})
@@ -1297,7 +1297,7 @@ func (g *internalHashGraphImpl[V, E, VI, EI]) DeleteLinksPntr(from *V, to *V) er
 	if len(gNode) == 0 {
 		delete(g.graph, fromHash)
 	} else {
-		g.graph[fromHash] = (Vector[graphLink, *graphLink])(([]graphLink)(gNode))
+		g.graph[fromHash] = Vector[graphLink, *graphLink](([]graphLink)(gNode))
 	}
 	return nil
 }
