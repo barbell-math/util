@@ -12,6 +12,7 @@ information about each sub-package:
 1. [Containers (a.k.a. data structures)](./src/container/README.md)
 1. [CLI argument parser](./src/argparse/README.md)
 1. [Widgets](./src/widgets/README.md)
+1. [Generators](./generators/README.md)
 
 ## Code Generator Installation
 
@@ -21,6 +22,13 @@ generator executables will be placed in the `$GOPATH/bin` directory.
 
 ```
 go install github.com/barbell-math/util/generators/...
+```
+
+To install a single generator rather than all of the use the command shown
+below.
+
+```
+go install github.com/barbell-math/util/generators/<generator name>
 ```
 
 ## Package Install
