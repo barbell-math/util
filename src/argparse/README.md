@@ -2,7 +2,7 @@
 
 A type safe, extensible CLI argument parsing utility package.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L48-L73
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L48-L73
 <sup>Example usage of the argparse package</sup>
 
 ## Usage
@@ -25,13 +25,13 @@ integer argument. The `translators.BuiltinInt` type is responsible for parsing
 an integer from the string value supplied by the CLI. Analogous types are
 available for all primitive types, all following the `Builtin<type>` format.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L19-L20
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L19-L20
 <sup>Integer argument</sup>
 
 The above example provides an argument with no options, meaning all the default
 options will be used. Shown below is how to provide your own set of options.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L54-L60
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L54-L60
 <sup>Integer argument with options</sup>
 
 The following options can be provided all through setter methods similar to the
@@ -67,20 +67,20 @@ CLI argument types.
 1. Flag arguments. This will return true if the flag is provided. It does accept
 any values.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L93-L99
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L93-L99
 
 2. Flag counter argument. This will return an integer equal to the number of
 times that the flag was provided. It does not accept any values.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L132-L137
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L132-L137
 
 3. List argument. This will build up a list of all the values that were provided
 with the argument. Many values can be provided with a single argument or many
 flags can be provided with a single argument, as shown in the example arguments
 below the argument example.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L170-L187
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L192
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L170-L187
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L192
 
 4. List argument with a predefined set of allowed values. This will build up a
 list of all the values that were provided with the argument, provided that they
@@ -90,35 +90,35 @@ example arguments below the argument example. Note that given the design of this
 translator the list can contain any type, as long as the underlying type has a
 translator of it's own.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L211-L231
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L238
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L211-L231
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L238
 
 5. Selector argument. This will accept a single value as long as that value is
 in the predefined set of allowed values. As with the list argument, the selector
 translator can work with any type as long as it has an underlying translator of
 it's own.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L259-L277
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L259-L277
 
 6. File argument. This will accept a single string value and verify that the
 supplied string is a path that exists as a file.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L361-L366
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L361-L366
 
 7. Directory argument. This will accept a single string value and verify that
 the supplied string is a path that exists as a directory.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L390-L395
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L390-L395
 
 8. File open argument. This will accept a single string value and will attempt
 to make the supplied file with the given file mode and permissions.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L421-L431
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L421-L431
 
 9. Mkdir argument. This will accept a single string value and will attempt to
 make the directory(s) that are denoted by the string value.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L456-L464
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L456-L464
 
 ## Argument Builder: Custom Types
 
@@ -143,7 +143,7 @@ not directly provided by the CLI, potentially computing values based on the
 provided CLI arguments. The example below shows how to add a computed argument
 to the parser.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/argparse/examples/SimpleExamples_test.go#L317-L320
+https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L317-L320
 
 Much like translators for arguments, computers are needed to set computed
 values. Also like translators, computers are expected to return a value, this
