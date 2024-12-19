@@ -7,7 +7,7 @@ features to the std lib.
 
 Supported Go versions: 1.21, 1.22, and 1.23
 
-The latest versions of windows, linux, and macos (as defined by github actions)
+The latest versions of windows, linux, and macos ([as defined by github actions](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories))
 are supported.
 
 ## Documentation
