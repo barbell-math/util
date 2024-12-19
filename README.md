@@ -1,6 +1,14 @@
 # util
 
-A golang utility library that aims to add useful features to the std lib.
+A [zero dependency](./go.mod) golang utility library that aims to add useful
+features to the std lib.
+
+## Supported Versions and OS's
+
+Supported Go versions: 1.21, 1.22, and 1.23
+
+The latest versions of windows, linux, and macos (as defined by github actions)
+are supported.
 
 ## Documentation
 

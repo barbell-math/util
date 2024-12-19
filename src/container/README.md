@@ -132,7 +132,7 @@ https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fca
 The `Vector` container is slightly different from the other containers. It is
 nothing more than a sub type of a slice.
 
-https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/container/containers/Vector.go#L15-L22
+https://github.com/barbell-math/util/blob/9948c0045f7246acb5c2827ea4b34cb4919fcae9/src/container/containers/Vector.go#L16-L23
 <sup>The `Vector` type definition.</sup>
 
 Due to this vectors can be type casted to and from a slice.
