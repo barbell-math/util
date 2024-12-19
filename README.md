@@ -3,7 +3,7 @@
 A [zero dependency](./go.mod) golang utility library that aims to add useful
 features to the std lib.
 
-## Supported Versions and OS's
+## Supported Go Versions and OS's
 
 Supported Go versions: 1.21, 1.22, and 1.23
 
@@ -32,7 +32,10 @@ generator executables will be placed in the `$GOPATH/bin` directory.
 go install github.com/barbell-math/util/generators/...
 ```
 
-To install a single generator rather than all of the use the command shown
+> Note: It is recommended to have the `$GOPATH/bin` directory in your path
+> environment variable to make the newly installed generators easier to run.
+
+To install a single generator rather than all of them use the command shown
 below.
 
 ```
