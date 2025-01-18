@@ -26,3 +26,6 @@ go.work.sum
 
 # Any vim config/session files.
 *.vim
+
+*.gen.go
+*.gen_test.go

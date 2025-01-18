@@ -292,6 +292,39 @@ func Example_SelectorArgument() {
 	//4
 }
 
+func Example_EnumSelectorArgument() {
+	vals := struct {
+		E testEnum
+	}{}
+
+	b := argparse.ArgBuilder{}
+	// The SetTranslator method must be called because the Selector translator
+	// has state that needs to be initialized.
+	argparse.AddEnum[testEnum, *testEnum](
+		&vals.E, &b, "selector",
+		argparse.NewOpts[testEnum, translators.Enum[testEnum, *testEnum]]().
+			SetShortName('s').
+			SetDescription("This is a enum selector argument"),
+	)
+
+	parser, err := b.ToParser("Prog name", "Prog description")
+	fmt.Println("Parser error:", err)
+
+	args := []string{"--selector=oneTestEnum"}
+	err = parser.Parse(argparse.ArgvIterFromSlice(args).ToTokens())
+	fmt.Println("Parsing", args)
+	fmt.Println(err)
+	fmt.Println(vals.E)
+	fmt.Printf("%d\n", vals.E)
+
+	// Output:
+	//Parser error: <nil>
+	//Parsing [--selector=oneTestEnum]
+	//<nil>
+	//oneTestEnum
+	//1
+}
+
 func Example_ComputedArgument() {
 	vals := struct {
 		I1  int

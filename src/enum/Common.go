@@ -3,11 +3,19 @@ package enum
 import "encoding/json"
 
 type (
-	Enum interface {
-		json.Marshaler
+	Pntr[E Value] interface {
+		*E
+		writeable
+	}
+
+	writeable interface {
 		json.Unmarshaler
-		Valid() bool
-		String() string
 		FromString(s string) error
+	}
+
+	Value interface {
+		json.Marshaler
+		Valid() error
+		String() string
 	}
 )
