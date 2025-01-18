@@ -486,6 +486,3 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Eq(res.F, -2, t)
 	test.Eq(res.G, -16, t)
 }
-
-// TODO - doc strings
-// TODO - readme with examples

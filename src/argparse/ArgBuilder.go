@@ -5,6 +5,7 @@ import (
 	"github.com/barbell-math/util/src/argparse/translators"
 	containerBasic "github.com/barbell-math/util/src/container/basic"
 	"github.com/barbell-math/util/src/customerr"
+	"github.com/barbell-math/util/src/enum"
 	mathBasic "github.com/barbell-math/util/src/math/basic"
 	"github.com/barbell-math/util/src/widgets"
 )
@@ -121,6 +122,24 @@ func AddSelector[T any, U translators.Translater[T], W widgets.BaseInterface[T]]
 	}
 	opts.argType = ValueArgType
 	AddArg[T, translators.Selector[T, U, W]](val, builder, longName, opts)
+}
+
+// Appends a enum selector to the supplied builder without performing any
+// validation of the argument or builder as a whole. Enum selector arguments
+// accept a value that must map to a valid enum value of the supplied enum
+// type.
+func AddEnum[E enum.Value, EP enum.Pntr[E]](
+	val *E,
+	builder *ArgBuilder,
+	longName string,
+	opts *opts[E, translators.Enum[E, EP]],
+) {
+	if opts == nil {
+		opts = NewOpts[E, translators.Enum[E, EP]]()
+	}
+	opts.argType = ValueArgType
+	opts.translator = translators.Enum[E, EP]{}
+	AddArg[E, translators.Enum[E, EP]](val, builder, longName, opts)
 }
 
 // Appends a computed argument to the supplied builder without performing any

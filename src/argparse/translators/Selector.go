@@ -7,6 +7,8 @@ import (
 )
 
 type (
+	// A translator that imposes a set of specific values on a cmd line
+	// argument.
 	Selector[T any, U Translater[T], W widgets.BaseInterface[T]] struct {
 		AllowedVals     containers.HashSet[T, W]
 		ValueTranslator Translater[T]
