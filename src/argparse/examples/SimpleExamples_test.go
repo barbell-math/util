@@ -6,6 +6,7 @@ import (
 
 	"github.com/barbell-math/util/src/argparse"
 	"github.com/barbell-math/util/src/argparse/computers"
+	testenum "github.com/barbell-math/util/src/argparse/testEnum"
 	"github.com/barbell-math/util/src/argparse/translators"
 	"github.com/barbell-math/util/src/container/containers"
 	"github.com/barbell-math/util/src/widgets"
@@ -294,15 +295,18 @@ func Example_SelectorArgument() {
 
 func Example_EnumSelectorArgument() {
 	vals := struct {
-		E testEnum
+		E testenum.TestEnum
 	}{}
 
 	b := argparse.ArgBuilder{}
 	// The SetTranslator method must be called because the Selector translator
 	// has state that needs to be initialized.
-	argparse.AddEnum[testEnum, *testEnum](
+	argparse.AddEnum[testenum.TestEnum, *testenum.TestEnum](
 		&vals.E, &b, "selector",
-		argparse.NewOpts[testEnum, translators.Enum[testEnum, *testEnum]]().
+		argparse.NewOpts[
+			testenum.TestEnum,
+			translators.Enum[testenum.TestEnum, *testenum.TestEnum],
+		]().
 			SetShortName('s').
 			SetDescription("This is a enum selector argument"),
 	)

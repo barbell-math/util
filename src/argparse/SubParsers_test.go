@@ -3,6 +3,7 @@ package argparse
 import (
 	"testing"
 
+	testenum "github.com/barbell-math/util/src/argparse/testEnum"
 	"github.com/barbell-math/util/src/argparse/translators"
 	"github.com/barbell-math/util/src/test"
 )
@@ -63,4 +64,35 @@ func TestVerbositySubParser(t *testing.T) {
 		ToTokens())
 	test.Nil(err, t)
 	test.Eq(res.I, 6, t)
+}
+
+func TestAppActionParser(t *testing.T) {
+	res := struct{ Action testenum.TestEnum }{}
+
+	p, err := (&ArgBuilder{}).ToParser("", "")
+	test.Nil(err, t)
+	err = p.AddSubParsers(
+		NewAppActionParser[testenum.TestEnum, *testenum.TestEnum](&res.Action),
+	)
+	test.Nil(err, t)
+
+	res.Action = testenum.UnknownTestEnum
+	err = p.Parse(ArgvIterFromSlice([]string{"-a", "asdf"}).ToTokens())
+	test.ContainsError(testenum.InvalidTestEnum, err, t)
+	test.Eq(testenum.UnknownTestEnum, res.Action, t)
+
+	res.Action = testenum.UnknownTestEnum
+	err = p.Parse(ArgvIterFromSlice([]string{"-a", "unknownTestEnum"}).ToTokens())
+	test.Nil(err, t)
+	test.Eq(testenum.UnknownTestEnum, res.Action, t)
+
+	res.Action = testenum.UnknownTestEnum
+	err = p.Parse(ArgvIterFromSlice([]string{"-a", "oneTestEnum"}).ToTokens())
+	test.Nil(err, t)
+	test.Eq(testenum.OneTestEnum, res.Action, t)
+
+	res.Action = testenum.UnknownTestEnum
+	err = p.Parse(ArgvIterFromSlice([]string{"-a", "twoTestEnum"}).ToTokens())
+	test.Nil(err, t)
+	test.Eq(testenum.TwoTestEnum, res.Action, t)
 }
