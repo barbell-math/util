@@ -2,7 +2,7 @@
 
 A type safe, extensible CLI argument parsing utility package.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L48-L73
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L48-L73
 <sup>Example usage of the argparse package</sup>
 
 ## Usage
@@ -25,13 +25,13 @@ integer argument. The `translators.BuiltinInt` type is responsible for parsing
 an integer from the string value supplied by the CLI. Analogous types are
 available for all primitive types, all following the `Builtin<type>` format.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L19-L20
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L19-L20
 <sup>Integer argument</sup>
 
 The above example provides an argument with no options, meaning all the default
 options will be used. Shown below is how to provide your own set of options.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L54-L60
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L54-L60
 <sup>Integer argument with options</sup>
 
 The following options can be provided all through setter methods similar to the
@@ -67,20 +67,20 @@ CLI argument types.
 1. Flag arguments. This will return true if the flag is provided. It does accept
 any values.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L93-L99
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L93-L99
 
 2. Flag counter argument. This will return an integer equal to the number of
 times that the flag was provided. It does not accept any values.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L132-L137
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L132-L137
 
 3. List argument. This will build up a list of all the values that were provided
 with the argument. Many values can be provided with a single argument or many
 flags can be provided with a single argument, as shown in the example arguments
 below the argument example.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L170-L187
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L192
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L170-L187
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L192
 
 4. List argument with a predefined set of allowed values. This will build up a
 list of all the values that were provided with the argument, provided that they
@@ -90,35 +90,35 @@ example arguments below the argument example. Note that given the design of this
 translator the list can contain any type, as long as the underlying type has a
 translator of it's own.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L211-L231
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L238
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L211-L231
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L238
 
 5. Selector argument. This will accept a single value as long as that value is
 in the predefined set of allowed values. As with the list argument, the selector
 translator can work with any type as long as it has an underlying translator of
 it's own.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L259-L277
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L259-L277
 
 6. File argument. This will accept a single string value and verify that the
 supplied string is a path that exists as a file.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L361-L366
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L361-L366
 
 7. Directory argument. This will accept a single string value and verify that
 the supplied string is a path that exists as a directory.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L390-L395
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L390-L395
 
 8. File open argument. This will accept a single string value and will attempt
 to make the supplied file with the given file mode and permissions.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L421-L431
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L421-L431
 
 9. Mkdir argument. This will accept a single string value and will attempt to
 make the directory(s) that are denoted by the string value.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L456-L464
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L456-L464
 
 ## Argument Builder: Custom Types
 
@@ -143,7 +143,7 @@ not directly provided by the CLI, potentially computing values based on the
 provided CLI arguments. The example below shows how to add a computed argument
 to the parser.
 
-https://github.com/barbell-math/util/blob/f17bbc754f085d072c37901371b220e47f649f69/src/argparse/examples/SimpleExamples_test.go#L317-L320
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/examples/SimpleExamples_test.go#L317-L320
 
 Much like translators for arguments, computers are needed to set computed
 values. Also like translators, computers are expected to return a value, this
@@ -185,6 +185,71 @@ needs.
 will stop all further parsing and print the help menu.
 1. Verbosity: this adds the `-v` and `--verbose` flag counter arguments which
 can be used to set a verbosity level for a running application.
+
+## Argument Config Files
+
+An argument config file format is provided out of the box for the case where the
+list of arguments a program needs gets very large. This argument config file
+provides a place to put arguments and allows for a basic form of grouping. The
+`--config` long argument name is a reserved name and will be available to every
+argparse parser. It is used to specify a path to an argument config file, as
+shown below.
+
+```
+# Both an equals sign and a space are allowed
+./<prog> --config /path/toFile
+./<prog> --config=/path/toFile
+```
+
+The format of the config file is best shown by example.
+
+https://github.com/barbell-math/util/blob/882944dd83939f87ddd6a16d51c552ef4f069864/src/argparse/testData/ValidConfigFile.txt#L1-L17
+<sup>An example argument config file</sup>
+
+The above config file is equivalent to the cmd shown below:
+
+```
+./<prog> --Name0 Value0 --Group1Group2Name1 Value1 --Group1Group2Group3Name2 Value2 --Group1Group2Name3 Value3 --Group1Name4 Value4 --Group1Name5 Value5 --Name6 Value6
+```
+
+There are several points of note:
+
+1. Notice how in the above example the group names get prepended to the argument
+names to create the final argument name. Nested group names are appended in
+the order they are nested.
+1. All names are expected to be valid long names that will be recognized by the
+argument parser after group names are done being prepended. Short names were
+disallowed to make things clearer in the config file. There is no sense in
+single letter names in a config file.
+1. Arguments will be parsed in the top down order they are given in the file
+regardless of how deeply nested they are. Duplicating single value arguments
+will result in an error. Duplicating multi value arguments will not result in an
+error.
+1. Many argument config files can be specified, though this is discouraged as
+it is easy to duplicate arguments between the files.
+1. Standard cmd line arguments can be used in conjunction with config files. As
+usual, if single value arguments are duplicated an error will be returned and if
+multi value arguments are duplicated no error will be returned.
+
+A more practical example of using a config file is shown using the [db] packages
+argparse interface. The below config file and cmd line arguments are equivalent.
+
+```
+# ./Config.txt
+db {
+    User <user>
+    EnvPswdVar <var>
+    NetLoc <url>
+    Port <port num>
+    Name <db name>
+}
+```
+
+```
+./<prog> --dbUser <user> --dbEnvPswdVar <var> --dbNetLoc <url> --dbPort <port num> --dbName <db name>
+# ... would be the same as ...
+./<prog> --config ./Config.txt
+```
 
 ## Further Reading:
 

@@ -44,13 +44,29 @@ const (
 	// Example: --time=10:00
 	//gen:enum string longEqualsFlag
 	longEqualsFlag
+	// Represents a config file flag with an equal sign. A config file flag
+	// will have a single value that is a path to a file that contains more
+	// arguments.
+	//
+	// Example: --config=/path/to/file
+	//gen:enum string configEqualsFileFlag
+	configEqualsFileFlag
+	// Represents a config file flag with an space. A config file flag
+	// will have a single value that is a path to a file that contains more
+	// arguments.
+	//
+	// Example: --config /path/to/file
+	//gen:enum string configSpaceFileFlag
+	configSpaceFileFlag
 )
 
 var (
 	regexes = map[flag]*regexp.Regexp{
-		shortSpaceFlag:  regexp.MustCompile("^-.*$"),
-		shortEqualsFlag: regexp.MustCompile("^-.*=.*$"),
-		longSpaceFlag:   regexp.MustCompile("^--.*$"),
-		longEqualsFlag:  regexp.MustCompile("^--.*=.*$"),
+		shortSpaceFlag:       regexp.MustCompile("^-.*$"),
+		shortEqualsFlag:      regexp.MustCompile("^-.*=.*$"),
+		longSpaceFlag:        regexp.MustCompile("^--.*$"),
+		longEqualsFlag:       regexp.MustCompile("^--.*=.*$"),
+		configEqualsFileFlag: regexp.MustCompile("^--config=.*$"),
+		configSpaceFileFlag:  regexp.MustCompile("^--config$"),
 	}
 )

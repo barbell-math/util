@@ -20,6 +20,9 @@ var (
 	EndOfTokenStreamErr            = errors.New("The end of the token stream was reached")
 	ArgumentPassedMultipleTimesErr = errors.New("Argument was passed multiple times but was expected only once")
 
+	ParserConfigFileErr       = errors.New("An error occurred parsing a parser config file")
+	ParserConfigFileSyntaxErr = errors.New("Syntax error")
+
 	ArgumentTranslationErr = errors.New("An error occurred translating the supplied argument")
 	MissingRequiredArgErr  = errors.New("Required argument missing")
 	ComputedArgumentErr    = errors.New("An error occurred calculating a computed argument")

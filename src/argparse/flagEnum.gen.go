@@ -14,6 +14,8 @@ var (
 		shortEqualsFlag,
 		longSpaceFlag,
 		longEqualsFlag,
+		configEqualsFileFlag,
+		configSpaceFileFlag,
 	}
 )
 
@@ -39,6 +41,12 @@ func (o flag) Valid() error {
 	case longEqualsFlag:
 		return nil
 
+	case configEqualsFileFlag:
+		return nil
+
+	case configSpaceFileFlag:
+		return nil
+
 	default:
 		return InvalidFlag
 	}
@@ -56,6 +64,10 @@ func (o flag) String() string {
 		return "longSpaceFlag"
 	case longEqualsFlag:
 		return "longEqualsFlag"
+	case configEqualsFileFlag:
+		return "configEqualsFileFlag"
+	case configSpaceFileFlag:
+		return "configSpaceFileFlag"
 
 	default:
 		return "unknownFlag"
@@ -79,6 +91,12 @@ func (o flag) MarshalJSON() ([]byte, error) {
 
 	case longEqualsFlag:
 		return []byte("longEqualsFlag"), nil
+
+	case configEqualsFileFlag:
+		return []byte("configEqualsFileFlag"), nil
+
+	case configSpaceFileFlag:
+		return []byte("configSpaceFileFlag"), nil
 
 	default:
 		return []byte("unknownFlag"), InvalidFlag
@@ -108,6 +126,14 @@ func (o *flag) FromString(s string) error {
 		*o = longEqualsFlag
 		return nil
 
+	case "configEqualsFileFlag":
+		*o = configEqualsFileFlag
+		return nil
+
+	case "configSpaceFileFlag":
+		*o = configSpaceFileFlag
+		return nil
+
 	default:
 		*o = unknownFlag
 		return fmt.Errorf("%w: %s", InvalidFlag, s)
@@ -135,6 +161,14 @@ func (o *flag) UnmarshalJSON(b []byte) error {
 
 	case "longEqualsFlag":
 		*o = longEqualsFlag
+		return nil
+
+	case "configEqualsFileFlag":
+		*o = configEqualsFileFlag
+		return nil
+
+	case "configSpaceFileFlag":
+		*o = configSpaceFileFlag
 		return nil
 
 	default:

@@ -1,6 +1,9 @@
 package argparse
 
 import (
+	"bufio"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/barbell-math/util/src/container/basic"
@@ -48,6 +51,7 @@ func (a argValPairs) ToIter() iter.Iter[basic.Pair[*Arg, string]] {
 // Translates the sequence of strings into tokens. No validation is done to
 // check that the stream of tokens is valid.
 func (a ArgvIter) ToTokens() tokenIter {
+	expectingConfig := false
 	tokens := []token{}
 
 	return func(f iter.IteratorFeedback) (token, error, bool) {
@@ -56,6 +60,7 @@ func (a ArgvIter) ToTokens() tokenIter {
 			return token{}, nil, false
 		}
 
+	iterStart:
 		if len(tokens) > 0 {
 			rv := tokens[len(tokens)-1]
 			tokens = tokens[:len(tokens)-1]
@@ -67,7 +72,30 @@ func (a ArgvIter) ToTokens() tokenIter {
 			return token{}, err, cont
 		}
 
-		if regexes[longEqualsFlag].MatchString(s) {
+		if expectingConfig {
+			configTokens, err := generateConfigFileTokens(s)
+			if err != nil {
+				return token{}, err, false
+			}
+			for i := len(configTokens) - 1; i >= 0; i-- {
+				tokens = append(tokens, configTokens[i])
+			}
+			expectingConfig = false
+			goto iterStart
+		} else if regexes[configEqualsFileFlag].MatchString(s) {
+			parts := strings.Split(s, "=")
+			configTokens, err := generateConfigFileTokens(parts[1])
+			if err != nil {
+				return token{}, err, false
+			}
+			for i := len(configTokens) - 1; i >= 0; i-- {
+				tokens = append(tokens, configTokens[i])
+			}
+			goto iterStart
+		} else if regexes[configSpaceFileFlag].MatchString(s) {
+			expectingConfig = true
+			goto iterStart
+		} else if regexes[longEqualsFlag].MatchString(s) {
 			parts := strings.Split(s, "=")
 			tokens = append(tokens, token{
 				value: strings.TrimSpace(parts[1]),
@@ -114,6 +142,97 @@ func (a ArgvIter) ToTokens() tokenIter {
 			}, nil, true
 		}
 	}
+}
+
+// Responsible for parsing a parser config file and returning the set of tokens
+// that are represented in the file.
+func generateConfigFileTokens(file string) ([]token, error) {
+	wrapErr := func(err error) error {
+		return customerr.AppendError(
+			customerr.Wrap(ParserConfigFileErr, "File: %s", file),
+			err,
+		)
+	}
+
+	rv := []token{}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return rv, wrapErr(err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	cntr := 0
+	names := []string{}
+	curName := ""
+	for scanner.Scan() {
+		line := strings.SplitN(strings.TrimSpace(scanner.Text()), " ", 2)
+		for i, l := range line {
+			line[i] = strings.TrimSpace(l)
+		}
+
+		if len(line) != 2 && (len(line) == 1 && line[0] != "}") {
+			return rv, wrapErr(customerr.WrapValueList(
+				ParserConfigFileSyntaxErr,
+				fmt.Sprintf("Syntax error on line %d. Expected one of the following formats", cntr+1),
+				[]customerr.WrapListVal{
+					customerr.WrapListVal{
+						ItemName: "Argument definition",
+						Item:     "'<name> <value>'",
+					},
+					customerr.WrapListVal{
+						ItemName: "Argument group definition",
+						Item:     "'<name> {'",
+					},
+					customerr.WrapListVal{
+						ItemName: "Argument group definition close",
+						Item:     "'}'",
+					},
+					customerr.WrapListVal{
+						ItemName: "Got",
+						Item:     line,
+					},
+					customerr.WrapListVal{
+						ItemName: "Note",
+						Item:     "leading white space on a line and white space inside a value are ignored but otherwise matters",
+					},
+				},
+			))
+		}
+
+		if line[0] == "}" {
+			if len(names) == 0 {
+				return rv, wrapErr(customerr.Wrap(
+					ParserConfigFileSyntaxErr,
+					"To many closing brackets. Noticed on line: %d",
+					cntr+1,
+				))
+			}
+			names = names[0 : len(names)-1]
+			curName = strings.Join(names, "")
+		} else if line[1] == "{" {
+			names = append(names, line[0])
+			curName = strings.Join(names, "")
+		} else {
+			rv = append(
+				rv,
+				token{value: curName + line[0], _type: longFlagToken},
+				token{value: line[1], _type: valueToken},
+			)
+		}
+
+		cntr++
+	}
+	if len(names) > 0 {
+		return rv, wrapErr(customerr.Wrap(
+			ParserConfigFileSyntaxErr,
+			"Not enough closing brackets. Noticed at EOF.",
+		))
+	}
+
+	return rv, nil
+
 }
 
 // Takes a sequence of tokens and turns it into a sequence of argument -> value
