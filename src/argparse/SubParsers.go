@@ -65,3 +65,5 @@ func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](val *E) *Parser {
 	rv, _ := b.ToParser("", "")
 	return &rv
 }
+
+// func NewDBParser()

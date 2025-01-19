@@ -187,6 +187,15 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 			)
 		}
 
+		if b.args[i].longFlag == "config" {
+			return rv, customerr.AppendError(
+				ParserConfigErr,
+				customerr.Wrap(
+					ReservedLongNameErr,
+					"'config' is reserved for specifying argument config files",
+				),
+			)
+		}
 		if len(b.args[i].longFlag) < 2 {
 			return rv, customerr.AppendError(
 				ParserConfigErr,

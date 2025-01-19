@@ -76,6 +76,23 @@ func TestArgBuilderToParserDuplicateLongNames(t *testing.T) {
 	test.ContainsError(DuplicateLongNameErr, err, t)
 }
 
+func TestArgBuilderToParserInvalidConfigLongName(t *testing.T) {
+	res := ""
+	b := ArgBuilder{}
+
+	AddArg[string, translators.BuiltinString](
+		&res,
+		&b,
+		"config",
+		NewOpts[string, translators.BuiltinString]().
+			SetShortName('c'),
+	)
+
+	_, err := b.ToParser("", "")
+	test.ContainsError(ParserConfigErr, err, t)
+	test.ContainsError(ReservedLongNameErr, err, t)
+}
+
 func TestArgBuilderToParserValidArgBuilder(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
