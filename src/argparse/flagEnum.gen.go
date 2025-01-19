@@ -67,7 +67,7 @@ func (o flag) String() string {
 	case configEqualsFileFlag:
 		return "configEqualsFileFlag"
 	case configSpaceFileFlag:
-		return "configEqualsFileFlag"
+		return "configSpaceFileFlag"
 
 	default:
 		return "unknownFlag"
@@ -96,7 +96,7 @@ func (o flag) MarshalJSON() ([]byte, error) {
 		return []byte("configEqualsFileFlag"), nil
 
 	case configSpaceFileFlag:
-		return []byte("configEqualsFileFlag"), nil
+		return []byte("configSpaceFileFlag"), nil
 
 	default:
 		return []byte("unknownFlag"), InvalidFlag
@@ -130,7 +130,7 @@ func (o *flag) FromString(s string) error {
 		*o = configEqualsFileFlag
 		return nil
 
-	case "configEqualsFileFlag":
+	case "configSpaceFileFlag":
 		*o = configSpaceFileFlag
 		return nil
 
@@ -167,7 +167,7 @@ func (o *flag) UnmarshalJSON(b []byte) error {
 		*o = configEqualsFileFlag
 		return nil
 
-	case "configEqualsFileFlag":
+	case "configSpaceFileFlag":
 		*o = configSpaceFileFlag
 		return nil
 
