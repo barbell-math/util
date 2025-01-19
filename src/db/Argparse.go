@@ -21,7 +21,7 @@ type (
 
 const (
 	// A flag that will be set to one if the dbUser arg is required.
-	UserRequired RequiredArgs = iota
+	UserRequired RequiredArgs = 1 << iota
 	// A flag that will be set to one if the dbEnvPswdVar arg is required.
 	EnvPswdVarRequired
 	// A flag that will be set to one if the dbNetLoc arg is required.
