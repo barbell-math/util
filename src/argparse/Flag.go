@@ -56,7 +56,7 @@ const (
 	// arguments.
 	//
 	// Example: --config /path/to/file
-	//gen:enum string configEqualsFileFlag
+	//gen:enum string configSpaceFileFlag
 	configSpaceFileFlag
 )
 
