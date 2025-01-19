@@ -188,12 +188,12 @@ can be used to set a verbosity level for a running application.
 
 ## Argument Config Files
 
-In case the list of arguments that a program needs gets very large an argument
-config file format is provided out of the box. This argument config file
-provides a place to put arguments and allows for a basic form of grouping.
-The `--config` long argument name is a reserved name and will be available to
-every argparse parser. It is used to specify a path to an argument config file,
-as shown below.
+An argument config file format is provided out of the box for the case where the
+list of arguments a program needs gets very large. This argument config file
+provides a place to put arguments and allows for a basic form of grouping. The
+`--config` long argument name is a reserved name and will be available to every
+argparse parser. It is used to specify a path to an argument config file, as
+shown below.
 
 ```
 # Both an equals sign and a space are allowed
@@ -204,7 +204,7 @@ as shown below.
 The format of the config file is best shown by example.
 
 https://github.com/barbell-math/util/blob/0d92df9eb0c4fbc9393871c6b2b6cb22969c2c60/src/argparse/testData/ValidConfigFile.txt#L1-L17
-<An example argument config file>
+<sup>An example argument config file</sup>
 
 The above config file is equivalent to the cmd shown below:
 
