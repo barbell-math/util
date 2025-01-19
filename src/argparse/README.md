@@ -186,6 +186,71 @@ will stop all further parsing and print the help menu.
 1. Verbosity: this adds the `-v` and `--verbose` flag counter arguments which
 can be used to set a verbosity level for a running application.
 
+## Argument Config Files
+
+In case the list of arguments that a program needs gets very large an argument
+config file format is provided out of the box. This argument config file
+provides a place to put arguments and allows for a basic form of grouping.
+The `--config` long argument name is a reserved name and will be available to
+every argparse parser. It is used to specify a path to an argument config file,
+as shown below.
+
+```
+# Both an equals sign and a space are allowed
+./<prog> --config /path/toFile
+./<prog> --config=/path/toFile
+```
+
+The format of the config file is best shown by example.
+
+https://github.com/barbell-math/util/blob/0d92df9eb0c4fbc9393871c6b2b6cb22969c2c60/src/argparse/testData/ValidConfigFile.txt#L1-L17
+<An example argument config file>
+
+The above config file is equivalent to the cmd shown below:
+
+```
+./<prog> --Name0 Value0 --Group1Group2Name1 Value1 --Group1Group2Group3Name2 Value2 --Group1Group2Name3 Value3 --Group1Name4 Value4 --Group1Name5 Value5 --Name6 Value6
+```
+
+There are several points of note:
+
+1. Notice how in the above example the group names get prepended to the argument
+names to create the final argument name. Nested group names are appended in
+the order they are nested.
+1. All names are expected to be valid long names that will be recognized by the
+argument parser after group names are done being prepended. Short names were
+disallowed to make things clearer in the config file. There is no sense in
+single letter names in a config file.
+1. Arguments will be parsed in the top down order they are given in the file
+regardless of how deeply nested they are. Duplicating single value arguments
+will result in an error. Duplicating multi value arguments will not result in an
+error.
+1. Many argument config files can be specified, though this is discouraged as
+it is easy to duplicate arguments between the files.
+1. Standard cmd line arguments can be used in conjunction with config files. As
+usual, if single value arguments are duplicated an error will be returned and if
+multi value arguments are duplicated no error will be returned.
+
+A more practical example of using a config file is shown using the [db] packages
+argparse interface. The below config file and cmd line arguments are equivalent.
+
+```
+# ./Config.txt
+db {
+    User <user>
+    EnvPswdVar <var>
+    NetLoc <url>
+    Port <port num>
+    Name <db name>
+}
+```
+
+```
+./<prog> --dbUser <user> --dbEnvPswdVar <var> --dbNetLoc <url> --dbPort <port num> --dbName <db name>
+# ... would be the same as ...
+./<prog> --config ./Config.txt
+```
+
 ## Further Reading:
 
 1. [Widgets](./src/widgets/README.md)

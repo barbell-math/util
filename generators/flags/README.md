@@ -26,17 +26,15 @@ definitions will comprise the flags set of values. The ```flags``` program
 does not perform any value checking - it is up to the user and compiler to
 guarintee that there are no duplicate values in the flag definitions. (This
 could be a feature or a bug, depends on how you look at it.) With each constant
-declaration there will be a couple more arguments in the doc string of the value
-, as shown in the example below.
+declaration there will be a couple more arguments in the doc string of the value,
+as shown in the example below.
 
 ```
 const (
     //gen:flags noSetter
-    //gen:flags string <flag value 1 string>
     <flag value 1> <flag type>=<value 1>
 
     // This is a comment
-    //gen:flags string <flag value 2 string>
     <flag value 2> <flag type>=<value 2>
 
     //gen:flags noSetter
@@ -71,7 +69,6 @@ func (o <flag type>) GetFlag(flag <flag type>) bool {
 }
 
 // This is a comment
-//gen:flags string <flag value 2 string>
 func (o <flag type>) <flag value 1>(b bool) <flag type> {
     if b {
         o |= <flag value 1>

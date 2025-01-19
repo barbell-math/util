@@ -144,6 +144,8 @@ func (a ArgvIter) ToTokens() tokenIter {
 	}
 }
 
+// Responsible for parsing a parser config file and returning the set of tokens
+// that are represented in the file.
 func generateConfigFileTokens(file string) ([]token, error) {
 	wrapErr := func(err error) error {
 		return customerr.AppendError(
