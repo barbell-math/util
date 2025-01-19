@@ -9,20 +9,20 @@ import (
 var (
 	InvalidTestEnum            = errors.New("Invalid TestEnum")
 	TEST_ENUM       []TestEnum = []TestEnum{
-		UnknownTestEnum,
+		UnknownAppAction,
 		AppActionOne,
 		AppActionTwo,
 	}
 )
 
 func NewTestEnum() TestEnum {
-	return UnknownTestEnum
+	return UnknownAppAction
 }
 
 func (o TestEnum) Valid() error {
 	switch o {
 
-	case UnknownTestEnum:
+	case UnknownAppAction:
 		return nil
 
 	case AppActionOne:
@@ -38,23 +38,23 @@ func (o TestEnum) Valid() error {
 
 func (o TestEnum) String() string {
 	switch o {
-	case UnknownTestEnum:
-		return "unknownTestEnum"
+	case UnknownAppAction:
+		return "UnknownAppAction"
 	case AppActionOne:
 		return "AppActionOne"
 	case AppActionTwo:
 		return "AppActionTwo"
 
 	default:
-		return "unknownTestEnum"
+		return "UnknownAppAction"
 	}
 }
 
 func (o TestEnum) MarshalJSON() ([]byte, error) {
 	switch o {
 
-	case UnknownTestEnum:
-		return []byte("unknownTestEnum"), nil
+	case UnknownAppAction:
+		return []byte("UnknownAppAction"), nil
 
 	case AppActionOne:
 		return []byte("AppActionOne"), nil
@@ -63,15 +63,15 @@ func (o TestEnum) MarshalJSON() ([]byte, error) {
 		return []byte("AppActionTwo"), nil
 
 	default:
-		return []byte("unknownTestEnum"), InvalidTestEnum
+		return []byte("UnknownAppAction"), InvalidTestEnum
 	}
 }
 
 func (o *TestEnum) FromString(s string) error {
 	switch s {
 
-	case "unknownTestEnum":
-		*o = UnknownTestEnum
+	case "UnknownAppAction":
+		*o = UnknownAppAction
 		return nil
 
 	case "AppActionOne":
@@ -83,7 +83,7 @@ func (o *TestEnum) FromString(s string) error {
 		return nil
 
 	default:
-		*o = UnknownTestEnum
+		*o = UnknownAppAction
 		return fmt.Errorf("%w: %s", InvalidTestEnum, s)
 	}
 }
@@ -91,8 +91,8 @@ func (o *TestEnum) FromString(s string) error {
 func (o *TestEnum) UnmarshalJSON(b []byte) error {
 	switch string(b) {
 
-	case "unknownTestEnum":
-		*o = UnknownTestEnum
+	case "UnknownAppAction":
+		*o = UnknownAppAction
 		return nil
 
 	case "AppActionOne":
@@ -104,7 +104,7 @@ func (o *TestEnum) UnmarshalJSON(b []byte) error {
 		return nil
 
 	default:
-		*o = UnknownTestEnum
+		*o = UnknownAppAction
 		return fmt.Errorf("%w: %s", InvalidTestEnum, string(b))
 	}
 }

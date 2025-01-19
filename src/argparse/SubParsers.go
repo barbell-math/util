@@ -2,7 +2,6 @@ package argparse
 
 import (
 	"github.com/barbell-math/util/src/argparse/translators"
-	"github.com/barbell-math/util/src/enum"
 	"github.com/barbell-math/util/src/math/basic"
 )
 
@@ -41,26 +40,6 @@ func NewVerbosityParser[T basic.Int | basic.Uint](val *T) *Parser {
 			SetRequired(false).
 			SetDescription("Sets the verbosity level. Specify multiple times to increase.").
 			SetTranslator(&translators.FlagCntr[T]{}),
-	)
-	rv, _ := b.ToParser("", "")
-	return &rv
-}
-
-// Creates a parser that has -a and --action falgs. These flags will be used to
-// set an enum value that should be use to tell your application what action it
-// needs to perform.
-func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](val *E) *Parser {
-	b := ArgBuilder{}
-	AddEnum(
-		val,
-		&b,
-		"action",
-		NewOpts[E, translators.Enum[E, EP]]().
-			SetArgType(ValueArgType).
-			SetShortName('a').
-			SetRequired(true).
-			SetDescription("The action that the application should perform.").
-			SetTranslator(translators.Enum[E, EP]{}),
 	)
 	rv, _ := b.ToParser("", "")
 	return &rv
