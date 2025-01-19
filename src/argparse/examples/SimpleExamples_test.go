@@ -299,8 +299,6 @@ func Example_EnumSelectorArgument() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	// The SetTranslator method must be called because the Selector translator
-	// has state that needs to be initialized.
 	argparse.AddEnum[testenum.TestEnum, *testenum.TestEnum](
 		&vals.E, &b, "selector",
 		argparse.NewOpts[
