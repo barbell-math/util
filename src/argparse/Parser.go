@@ -262,7 +262,11 @@ func (p *Parser) Help() string {
 	sb.WriteByte('\n')
 	sb.WriteByte('\n')
 
-	p.longArgs.Vals().ForEach(
+	args, _ := p.longArgs.Vals().Collect()
+	sort.Slice(args, func(i, j int) bool {
+		return args[i].longFlag < args[j].longFlag
+	})
+	iter.SliceElems(args).ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
 			if val.shortFlag != byte(0) {
 				sb.WriteString("-")
