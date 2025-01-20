@@ -9,16 +9,18 @@ import (
 // Creates a parser that has -a and --action falgs. These flags will be used to
 // set an enum value that should be use to tell your application what action it
 // needs to perform.
-func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](val *E) *argparse.Parser {
+func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
+	val *E,
+	defaultVal E,
+) *argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddEnum(
-		val,
-		&b,
-		"action",
+		val, &b, "action",
 		argparse.NewOpts[E, translators.Enum[E, EP]]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('a').
-			SetRequired(true).
+			SetRequired(false).
+			SetDefaultVal(defaultVal).
 			SetDescription("The action that the application should perform.").
 			SetTranslator(translators.Enum[E, EP]{}),
 	)

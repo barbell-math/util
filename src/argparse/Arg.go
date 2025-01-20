@@ -1,6 +1,8 @@
 package argparse
 
 import (
+	"fmt"
+
 	"github.com/barbell-math/util/src/argparse/computers"
 	"github.com/barbell-math/util/src/argparse/translators"
 	"github.com/barbell-math/util/src/hash"
@@ -35,15 +37,16 @@ type (
 	// Represents a single argument from the cmd line interface and all the
 	// options associated with it.
 	Arg struct {
-		setVal        func(a *Arg, arg string) error
-		setDefaultVal func()
-		reset         func(a *Arg)
-		shortFlag     byte
-		longFlag      string
-		argType       ArgType
-		present       bool
-		required      bool
-		description   string
+		setVal          func(a *Arg, arg string) error
+		setDefaultVal   func()
+		defaultValAsStr func() (string, bool)
+		reset           func(a *Arg)
+		shortFlag       byte
+		longFlag        string
+		argType         ArgType
+		present         bool
+		required        bool
+		description     string
 	}
 
 	// Represents an argument value that is computed from other arguments rather
@@ -76,6 +79,12 @@ func newArg[T any, U translators.Translater[T]](
 		},
 		setDefaultVal: func() {
 			*val = opts.defaultVal
+		},
+		defaultValAsStr: func() (string, bool) {
+			if opts.argType != FlagArgType && !opts.required {
+				return fmt.Sprint(opts.defaultVal), true
+			}
+			return "", false
 		},
 		reset: func(a *Arg) {
 			opts.translator.Reset()

@@ -262,12 +262,18 @@ func (p *Parser) Help() string {
 	sb.WriteByte('\n')
 	sb.WriteByte('\n')
 
-	p.longArgs.Vals().ForEach(
+	args, _ := p.longArgs.Vals().Collect()
+	sort.Slice(args, func(i, j int) bool {
+		return args[i].longFlag < args[j].longFlag
+	})
+	iter.SliceElems(args).ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
 			if val.shortFlag != byte(0) {
 				sb.WriteString("-")
 				sb.WriteByte(val.shortFlag)
 				sb.WriteString("  ")
+			} else {
+				sb.WriteString("    ")
 			}
 			sb.WriteString("--")
 			sb.WriteString(val.longFlag)
@@ -282,8 +288,14 @@ func (p *Parser) Help() string {
 				sb.WriteString("             ")
 			}
 
+			fullDescription := val.description
+			if defaultStr, ok := val.defaultValAsStr(); ok {
+				fullDescription = fmt.Sprintf(
+					"(Default: %s) %s", defaultStr, val.description,
+				)
+			}
 			cntr := 0
-			for _, s := range strings.Split(val.description, " ") {
+			for _, s := range strings.Split(fullDescription, " ") {
 				if cntr+len(s) > helpDescriptionWidth {
 					sb.WriteByte('\n')
 					for i := 0; i < len(*longestArg)+21; i++ {
