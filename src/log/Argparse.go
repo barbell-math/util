@@ -44,9 +44,7 @@ func NewVerbosityParser[T basic.Int | basic.Uint](
 ) *argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddArg[T, *translators.LimitedFlagCntr[T]](
-		val,
-		&b,
-		"verbose",
+		val, &b, "verbose",
 		argparse.NewOpts[T, *translators.LimitedFlagCntr[T]]().
 			SetArgType(argparse.MultiFlagArgType).
 			SetShortName('v').
