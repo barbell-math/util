@@ -15,9 +15,7 @@ func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
 ) *argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddEnum(
-		val,
-		&b,
-		"action",
+		val, &b, "action",
 		argparse.NewOpts[E, translators.Enum[E, EP]]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('a').
