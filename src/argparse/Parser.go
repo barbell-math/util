@@ -268,6 +268,8 @@ func (p *Parser) Help() string {
 				sb.WriteString("-")
 				sb.WriteByte(val.shortFlag)
 				sb.WriteString("  ")
+			} else {
+				sb.WriteString("    ")
 			}
 			sb.WriteString("--")
 			sb.WriteString(val.longFlag)
