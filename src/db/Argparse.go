@@ -51,7 +51,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 			SetArgType(argparse.ValueArgType).
 			SetShortName('u').
 			SetRequired(reqArgs.GetFlag(UserRequired)).
-			SetDescription("The user to use when accessing the database"),
+			SetDescription("The user to use when accessing the database."),
 	)
 	argparse.AddArg[string, translators.BuiltinString](
 		&a.EnvPswdVar,
@@ -61,7 +61,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 			SetArgType(argparse.ValueArgType).
 			SetShortName('p').
 			SetRequired(reqArgs.GetFlag(EnvPswdVarRequired)).
-			SetDescription("The environment variable to look up when getting the password to access the database"),
+			SetDescription("The environment variable to use to look up the password to access the database."),
 	)
 	argparse.AddArg[string, translators.BuiltinString](
 		&a.NetLoc,
@@ -70,7 +70,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		argparse.NewOpts[string, translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
 			SetRequired(reqArgs.GetFlag(NetLocRequired)).
-			SetDescription("The network path to use when connecting to the database"),
+			SetDescription("The network path to use when connecting to the database."),
 	)
 	argparse.AddArg[uint16, translators.BuiltinUint16](
 		&a.Port,
@@ -79,7 +79,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		argparse.NewOpts[uint16, translators.BuiltinUint16]().
 			SetArgType(argparse.ValueArgType).
 			SetRequired(reqArgs.GetFlag(PortRequired)).
-			SetDescription("The port to use when connecting to the database"),
+			SetDescription("The port to use when connecting to the database."),
 	)
 	argparse.AddArg[string, translators.BuiltinString](
 		&a.DBName,
@@ -88,7 +88,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		argparse.NewOpts[string, translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
 			SetRequired(reqArgs.GetFlag(DBNameRequired)).
-			SetDescription("The name of the database to connect to"),
+			SetDescription("The name of the database to connect to."),
 	)
 	rv, _ := b.ToParser("", "")
 	return &rv

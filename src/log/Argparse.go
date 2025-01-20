@@ -8,6 +8,13 @@ import (
 	"github.com/barbell-math/util/src/math/basic"
 )
 
+type (
+	VerbosityTranslator[T basic.Int | basic.Uint] struct {
+		translators.FlagCntr[T]
+		MaxCnt T
+	}
+)
+
 // Creates a parser that has the --logFile flag. This flag will be used to
 // specify a single log file. The argument parser will return an open file
 // handle to the file for future writing.
@@ -30,18 +37,23 @@ func NewSingleLogFileParser(f *os.File) *argparse.Parser {
 // Creates a parser that has -v and --verbose flags. These flags can be
 // supplied many times and the total count of the number of times the argument
 // was supplied will be placed in val.
-func NewVerbosityParser[T basic.Int | basic.Uint](val *T) *argparse.Parser {
+func NewVerbosityParser[T basic.Int | basic.Uint](
+	val *T,
+	defaultVal T,
+	maxLevel T,
+) *argparse.Parser {
 	b := argparse.ArgBuilder{}
-	argparse.AddFlagCntr[T](
+	argparse.AddArg[T, *translators.LimitedFlagCntr[T]](
 		val,
 		&b,
 		"verbose",
-		argparse.NewOpts[T, *translators.FlagCntr[T]]().
+		argparse.NewOpts[T, *translators.LimitedFlagCntr[T]]().
 			SetArgType(argparse.MultiFlagArgType).
 			SetShortName('v').
 			SetRequired(false).
+			SetDefaultVal(defaultVal).
 			SetDescription("Sets the verbosity level. Specify multiple times to increase.").
-			SetTranslator(&translators.FlagCntr[T]{}),
+			SetTranslator(&translators.LimitedFlagCntr[T]{MaxTimes: maxLevel}),
 	)
 	rv, _ := b.ToParser("", "")
 	return &rv

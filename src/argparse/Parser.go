@@ -288,8 +288,14 @@ func (p *Parser) Help() string {
 				sb.WriteString("             ")
 			}
 
+			fullDescription := val.description
+			if defaultStr, ok := val.defaultValAsStr(); ok {
+				fullDescription = fmt.Sprintf(
+					"(Default: %s) %s", defaultStr, val.description,
+				)
+			}
 			cntr := 0
-			for _, s := range strings.Split(val.description, " ") {
+			for _, s := range strings.Split(fullDescription, " ") {
 				if cntr+len(s) > helpDescriptionWidth {
 					sb.WriteByte('\n')
 					for i := 0; i < len(*longestArg)+21; i++ {
