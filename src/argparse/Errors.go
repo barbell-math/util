@@ -24,7 +24,7 @@ var (
 	ParserConfigFileSyntaxErr = errors.New("Syntax error")
 
 	ArgumentTranslationErr = errors.New("An error occurred translating the supplied argument")
-	MissingRequiredArgErr  = errors.New("Required argument missing")
+	MissingRequiredArgErr  = errors.New("Required argument(s) missing")
 	ComputedArgumentErr    = errors.New("An error occurred calculating a computed argument")
 
 	// The error returned when the help menu is displayed, indicating that the
