@@ -21,7 +21,7 @@ func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
 		argparse.NewOpts[E, translators.Enum[E, EP]]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('a').
-			SetRequired(true).
+			SetRequired(false).
 			SetDefaultVal(defaultVal).
 			SetDescription("The action that the application should perform.").
 			SetTranslator(translators.Enum[E, EP]{}),

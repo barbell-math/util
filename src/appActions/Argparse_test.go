@@ -14,9 +14,16 @@ func TestAppActionParser(t *testing.T) {
 	p, err := (&argparse.ArgBuilder{}).ToParser("", "")
 	test.Nil(err, t)
 	err = p.AddSubParsers(
-		NewAppActionParser[testenum.TestEnum, *testenum.TestEnum](&res.Action),
+		NewAppActionParser[testenum.TestEnum, *testenum.TestEnum](
+			&res.Action, testenum.UnknownAppAction,
+		),
 	)
 	test.Nil(err, t)
+
+	res.Action = testenum.TestEnum(-1)
+	err = p.Parse(argparse.ArgvIterFromSlice([]string{}).ToTokens())
+	test.Nil(err, t)
+	test.Eq(testenum.UnknownAppAction, res.Action, t)
 
 	res.Action = testenum.UnknownAppAction
 	err = p.Parse(argparse.ArgvIterFromSlice([]string{"-a", "asdf"}).ToTokens())
