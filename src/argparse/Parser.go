@@ -3,6 +3,7 @@ package argparse
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/barbell-math/util/src/container/basic"
@@ -212,17 +213,23 @@ func (p *Parser) Parse(t tokenIter) error {
 		return customerr.AppendError(ParsingErr, err)
 	}
 
-	if err := p.requiredArgs.Vals().ForEach(
+	missingRequiredArgs := []string{}
+	p.requiredArgs.Vals().ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
 			if !val.present {
-				return iter.Break, customerr.Wrap(
-					MissingRequiredArgErr, "'%s'", val.longFlag,
-				)
+				missingRequiredArgs = append(missingRequiredArgs, val.longFlag)
 			}
 			return iter.Continue, nil
 		},
-	); err != nil {
-		return customerr.AppendError(ParsingErr, err)
+	)
+	if len(missingRequiredArgs) > 0 {
+		sort.Strings(missingRequiredArgs)
+		return customerr.AppendError(
+			ParsingErr,
+			customerr.Wrap(
+				MissingRequiredArgErr, "Missing: %s", missingRequiredArgs,
+			),
+		)
 	}
 
 	if err := p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
