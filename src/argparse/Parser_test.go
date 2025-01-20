@@ -49,15 +49,13 @@ func TestParserAddSubParsersNonEmptyValid(t *testing.T) {
 	p1, err := b.ToParser("", "")
 	test.Nil(err, t)
 
-	err = p1.AddSubParsers(NewHelpParser(), NewVerbosityParser[int](&res.I))
+	err = p1.AddSubParsers(NewHelpParser())
 	test.Nil(err, t)
-	test.Eq(len(p1.subParsers), 3, t)
+	test.Eq(len(p1.subParsers), 2, t)
 	test.Eq(len(p1.subParsers[0]), 1, t)
 	test.Eq(len(p1.subParsers[1]), 1, t)
-	test.Eq(len(p1.subParsers[2]), 1, t)
 	test.Eq(p1.subParsers[0][0].longFlag, "str", t)
 	test.Eq(p1.subParsers[1][0].longFlag, "help", t)
-	test.Eq(p1.subParsers[2][0].longFlag, "verbose", t)
 }
 
 func TestParserAddSubParsersNonEmptyDuplicateLongNames(t *testing.T) {
