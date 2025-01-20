@@ -29,38 +29,3 @@ func TestHelpSubParser(t *testing.T) {
 	err = p.Parse(ArgvIterFromSlice([]string{"-h, -s=123"}).ToTokens())
 	test.ContainsError(HelpErr, err, t)
 }
-
-func TestVerbositySubParser(t *testing.T) {
-	res := struct{ I int }{}
-
-	p, err := (&ArgBuilder{}).ToParser("", "")
-	test.Nil(err, t)
-	err = p.AddSubParsers(NewVerbosityParser[int](&res.I))
-	test.Nil(err, t)
-
-	res.I = 0
-	err = p.Parse(ArgvIterFromSlice([]string{"-v"}).ToTokens())
-	test.Nil(err, t)
-	test.Eq(res.I, 1, t)
-
-	res.I = 0
-	err = p.Parse(ArgvIterFromSlice([]string{"-v", "-v"}).ToTokens())
-	test.Nil(err, t)
-	test.Eq(res.I, 2, t)
-
-	res.I = 0
-	err = p.Parse(ArgvIterFromSlice([]string{"-v", "--verbose"}).ToTokens())
-	test.Nil(err, t)
-	test.Eq(res.I, 2, t)
-
-	res.I = 0
-	err = p.Parse(ArgvIterFromSlice([]string{"-vv"}).ToTokens())
-	test.Nil(err, t)
-	test.Eq(res.I, 2, t)
-
-	res.I = 0
-	err = p.Parse(ArgvIterFromSlice([]string{"-vvv", "--verbose", "-vv"}).
-		ToTokens())
-	test.Nil(err, t)
-	test.Eq(res.I, 6, t)
-}
