@@ -41,7 +41,10 @@ const (
 //	--dbNetLoc
 //	--dbPort
 //	--dbName
-func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
+func (a *ArgparseVals) GetParser(
+	reqArgs RequiredArgs,
+	defaults ArgparseVals,
+) *argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddArg[string, translators.BuiltinString](
 		&a.User,
@@ -50,6 +53,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		argparse.NewOpts[string, translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('u').
+			SetDefaultVal(defaults.User).
 			SetRequired(reqArgs.GetFlag(UserRequired)).
 			SetDescription("The user to use when accessing the database."),
 	)
@@ -60,6 +64,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		argparse.NewOpts[string, translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('p').
+			SetDefaultVal(defaults.EnvPswdVar).
 			SetRequired(reqArgs.GetFlag(EnvPswdVarRequired)).
 			SetDescription("The environment variable to use to look up the password to access the database."),
 	)
@@ -69,6 +74,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		"dbNetLoc",
 		argparse.NewOpts[string, translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
+			SetDefaultVal(defaults.NetLoc).
 			SetRequired(reqArgs.GetFlag(NetLocRequired)).
 			SetDescription("The network path to use when connecting to the database."),
 	)
@@ -78,6 +84,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		"dbPort",
 		argparse.NewOpts[uint16, translators.BuiltinUint16]().
 			SetArgType(argparse.ValueArgType).
+			SetDefaultVal(defaults.Port).
 			SetRequired(reqArgs.GetFlag(PortRequired)).
 			SetDescription("The port to use when connecting to the database."),
 	)
@@ -87,6 +94,7 @@ func (a *ArgparseVals) GetParser(reqArgs RequiredArgs) *argparse.Parser {
 		"dbName",
 		argparse.NewOpts[string, translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
+			SetDefaultVal(defaults.DBName).
 			SetRequired(reqArgs.GetFlag(DBNameRequired)).
 			SetDescription("The name of the database to connect to."),
 	)
