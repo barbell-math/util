@@ -10,6 +10,7 @@ import (
 	"github.com/barbell-math/util/src/container/containers"
 	"github.com/barbell-math/util/src/customerr"
 	"github.com/barbell-math/util/src/iter"
+	"github.com/barbell-math/util/src/strops"
 	"github.com/barbell-math/util/src/widgets"
 )
 
@@ -289,16 +290,72 @@ func (p *Parser) checkConditionallyRequiredArgsProvided() error {
 	return customerr.AppendError(errs...)
 }
 
+const (
+	shortValIdx int = iota
+	longValIdx
+	reqiredIdx
+	defaultIdx
+	condReqIdx
+	descIdx
+)
+
 // Returns a string representing the help menu.
 func (p *Parser) Help() string {
-	start := ""
-	longestArg, _ := p.longArgs.Keys().Reduce(
-		&start,
-		func(accum **string, iter *string) error {
-			if len(*iter) > len(**accum) {
-				*accum = iter
+	tableHeaders := [6]string{
+		"", "", "",
+		"Default Val", "Conditionally Reqs", "Description",
+	}
+
+	longestArg := 0
+	longestConditionallyRequiredArg := len(tableHeaders[condReqIdx])
+	p.longArgs.Vals().ForEach(
+		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			if len(val.longFlag) > longestArg {
+				longestArg = len(val.longFlag)
 			}
-			return nil
+			for _, condArg := range val.allConditionalArgs() {
+				if len(condArg) > longestConditionallyRequiredArg {
+					longestConditionallyRequiredArg = len(condArg)
+				}
+			}
+			return iter.Continue, nil
+		},
+	)
+
+	table := make([][6]string, p.longArgs.Length()+1)
+	colWidths := [6]int{
+		2,
+		longestArg + 2,
+		len("(req.)"),
+		15,
+		longestConditionallyRequiredArg,
+		80,
+	}
+	fmtDirectives := [6]string{}
+	args, _ := p.longArgs.Vals().Collect()
+
+	for i := 0; i < len(colWidths); i++ {
+		fmtDirectives[i] = fmt.Sprintf("%%-%ds ", colWidths[i])
+	}
+	sort.Slice(args, func(i, j int) bool {
+		return args[i].longFlag < args[j].longFlag
+	})
+
+	table[0] = tableHeaders
+	iter.SliceElems(args).ForEach(
+		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			if val.shortFlag != byte(0) {
+				table[index+1][0] = fmt.Sprintf("-%c", val.shortFlag)
+			}
+			table[index+1][1] = fmt.Sprintf("--%s", val.longFlag)
+			if val.required {
+				table[index+1][2] = "(req.)"
+			}
+			table[index+1][3], _ = val.defaultValAsStr()
+			table[index+1][4] = strings.Join(val.allConditionalArgs(), " ")
+			table[index+1][5] = val.description
+
+			return iter.Continue, nil
 		},
 	)
 
@@ -310,55 +367,34 @@ func (p *Parser) Help() string {
 	sb.WriteByte('\n')
 	sb.WriteByte('\n')
 
-	args, _ := p.longArgs.Vals().Collect()
-	sort.Slice(args, func(i, j int) bool {
-		return args[i].longFlag < args[j].longFlag
-	})
-	iter.SliceElems(args).ForEach(
-		func(index int, val *longArg) (iter.IteratorFeedback, error) {
-			if val.shortFlag != byte(0) {
-				sb.WriteString("-")
-				sb.WriteByte(val.shortFlag)
-				sb.WriteString("  ")
-			} else {
-				sb.WriteString("    ")
-			}
-			sb.WriteString("--")
-			sb.WriteString(val.longFlag)
-			for i := 0; i < len(*longestArg)-len(val.longFlag); i++ {
-				sb.WriteByte(' ')
-			}
-			sb.WriteString(" ")
+	for _, row := range table {
+		splitRow := [6][]string{}
+		for j, _ := range splitRow {
+			splitRow[j] = strops.WordWrapLines(row[j], colWidths[j])
+		}
 
-			if val.required {
-				sb.WriteString(" (required)  ")
-			} else {
-				sb.WriteString("             ")
-			}
-
-			fullDescription := val.description
-			if defaultStr, ok := val.defaultValAsStr(); ok {
-				fullDescription = fmt.Sprintf(
-					"(Default: %s) %s", defaultStr, val.description,
-				)
-			}
-			cntr := 0
-			for _, s := range strings.Split(fullDescription, " ") {
-				if cntr+len(s) > helpDescriptionWidth {
-					sb.WriteByte('\n')
-					for i := 0; i < len(*longestArg)+21; i++ {
-						sb.WriteByte(' ')
-					}
-					cntr = 0
+		for lineCntr := 0; ; lineCntr++ {
+			somethingToPrint := false
+			for j := 0; j < len(splitRow) && !somethingToPrint; j++ {
+				if len(splitRow[j]) > lineCntr {
+					somethingToPrint = true
 				}
-				sb.WriteString(s)
-				sb.WriteString(" ")
-				cntr += len(s) + 1
+			}
+			if !somethingToPrint {
+				break
+			}
+			for j := 0; j < len(splitRow); j++ {
+				if len(splitRow[j]) > lineCntr {
+					sb.WriteString(fmt.Sprintf(
+						fmtDirectives[j], splitRow[j][lineCntr],
+					))
+				} else {
+					sb.WriteString(fmt.Sprintf(fmtDirectives[j], ""))
+				}
 			}
 			sb.WriteByte('\n')
-			return iter.Continue, nil
-		},
-	)
+		}
+	}
 
 	return sb.String()
 }
