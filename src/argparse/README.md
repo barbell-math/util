@@ -156,6 +156,39 @@ argument.
 To accommodate for this, this package provides the ability to conditionally
 require arguments based an another argument. An example of this is shown below.
 
+https://github.com/barbell-math/util/blob/eda13dba87f33a7611746199043400e25ac280fa/src/argparse/examples/ConditionallyRequiredArgs_test.go#L30-L43
+
+In the above example the `uint` argument expects that if it is provided that the
+`int` and `float` arguments are also provided. However, if the `uint` argument
+is not provided then the `int` and `float` arguments do not have to be provided.
+Hence, the `uint` argument conditionally requires the `int` and `float`
+arguments.
+
+The example below shows how to add conditional arguments based on the value of
+the argument that is being added. It is very similar, the only difference is the
+`ArgSupplied` function was swapped for a closure provided by the `ArgEquals`
+function.
+
+https://github.com/barbell-math/util/blob/eda13dba87f33a7611746199043400e25ac280fa/src/argparse/examples/ConditionallyRequiredArgs_test.go#L114-L129
+
+The previous two examples only had one conditionality rule, but a list of rules
+can be provided. This allows different sets of arguments to be conditionally
+required based on differing requirements (i.e. different enum values.) If
+multiple conditionality rules are found to match then the resulting required
+argument set will be the union of the required argument sets from all the
+matching rules.
+
+> Gotcha!
+> Combining default values and conditionally required arguments can sometimes
+> lead to seemingly weird behavior. Remember this: if a default value was
+> provided then that value will be used when evaluating the argument
+> conditionality rules. As such, if a default value matches a rule then the
+> arguments specified by that rule will be required. This may seem weird but
+> again referring to the motivating example of having an enum value control
+> program behavior, it is perfectly reasonable to set a default action. That
+> default action should still impose the argument conditionality as if it were
+> provided on the CMD line.
+
 ## Argument Builder: Computed Arguments
 
 Computed arguments provide a way for the argument parser to set values that were

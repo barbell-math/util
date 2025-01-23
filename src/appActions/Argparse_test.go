@@ -15,7 +15,9 @@ func TestAppActionParser(t *testing.T) {
 	test.Nil(err, t)
 	err = p.AddSubParsers(
 		NewAppActionParser[testenum.TestEnum, *testenum.TestEnum](
-			&res.Action, testenum.UnknownAppAction,
+			&res.Action,
+			testenum.UnknownAppAction,
+			[]argparse.ArgConditionality[testenum.TestEnum]{},
 		),
 	)
 	test.Nil(err, t)
