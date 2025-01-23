@@ -10,12 +10,13 @@ import (
 	"github.com/barbell-math/util/src/container/containers"
 	"github.com/barbell-math/util/src/customerr"
 	"github.com/barbell-math/util/src/iter"
+	"github.com/barbell-math/util/src/strops"
 	"github.com/barbell-math/util/src/widgets"
 )
 
 type (
 	computedArgsTree struct {
-		compedArgs    []ComputedArg
+		compedArgs    []computedArg
 		subCompedArgs []computedArgsTree
 	}
 
@@ -27,7 +28,7 @@ type (
 		progDesc string
 
 		numArgs      int
-		subParsers   [][]Arg
+		subParsers   [][]arg
 		compedArgs   computedArgsTree
 		requiredArgs containers.HashMap[
 			*string,
@@ -55,7 +56,7 @@ const (
 )
 
 func (c *computedArgsTree) leftRightRootTraversal(
-	op func(c *ComputedArg) error,
+	op func(c *computedArg) error,
 ) error {
 	if len(c.subCompedArgs) > 0 {
 		for _, v := range c.subCompedArgs {
@@ -75,14 +76,14 @@ func (c *computedArgsTree) leftRightRootTraversal(
 func newParser(
 	progName string,
 	progDesc string,
-	args []Arg,
-	computedArgs []ComputedArg,
+	args []arg,
+	computedArgs []computedArg,
 ) Parser {
 	rv := Parser{
 		progName:   progName,
 		progDesc:   progDesc,
 		numArgs:    len(args) + len(computedArgs),
-		subParsers: [][]Arg{args},
+		subParsers: [][]arg{args},
 		compedArgs: computedArgsTree{compedArgs: computedArgs},
 	}
 	rv.requiredArgs, _ = containers.NewHashMap[
@@ -106,20 +107,20 @@ func newParser(
 	return rv
 }
 
-func (p *Parser) getShortArg(b byte) (*Arg, error) {
+func (p *Parser) getShortArg(b byte) (*arg, error) {
 	a, err := p.shortArgs.Get(&b)
 	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedShortArgErr, "Argument: '%c'", b)
 	}
-	return (*Arg)(a), nil
+	return (*arg)(a), nil
 }
 
-func (p *Parser) getLongArg(s string) (*Arg, error) {
+func (p *Parser) getLongArg(s string) (*arg, error) {
 	a, err := p.longArgs.Get(&s)
 	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedLongArgErr, "Argument: '%s'", s)
 	}
-	return (*Arg)(a), nil
+	return (*arg)(a), nil
 }
 
 // Adds sub-parsers to the current parser. All arguments are placed in a global
@@ -177,7 +178,7 @@ func (p *Parser) Parse(t tokenIter) error {
 			subP[i] = arg
 		}
 	}
-	p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
+	p.compedArgs.leftRightRootTraversal(func(c *computedArg) error {
 		c.reset()
 		return nil
 	})
@@ -185,7 +186,7 @@ func (p *Parser) Parse(t tokenIter) error {
 	if err := t.toArgValPairs(p).ToIter().ForEach(
 		func(
 			index int,
-			val basic.Pair[*Arg, string],
+			val basic.Pair[*arg, string],
 		) (iter.IteratorFeedback, error) {
 			if _, ok := multiSpecificationArgTypes[val.A.argType]; !ok && val.A.present {
 				return iter.Break, customerr.Wrap(
@@ -213,6 +214,23 @@ func (p *Parser) Parse(t tokenIter) error {
 		return customerr.AppendError(ParsingErr, err)
 	}
 
+	if err := p.checkRequiredArgsProvided(); err != nil {
+		return customerr.AppendError(ParsingErr, err)
+	}
+	if err := p.checkConditionallyRequiredArgsProvided(); err != nil {
+		return customerr.AppendError(ParsingErr, err)
+	}
+
+	if err := p.compedArgs.leftRightRootTraversal(func(c *computedArg) error {
+		return c.setVal()
+	}); err != nil {
+		return customerr.AppendError(ParsingErr, ComputedArgumentErr, err)
+	}
+
+	return nil
+}
+
+func (p *Parser) checkRequiredArgsProvided() error {
 	missingRequiredArgs := []string{}
 	p.requiredArgs.Vals().ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
@@ -224,93 +242,131 @@ func (p *Parser) Parse(t tokenIter) error {
 	)
 	if len(missingRequiredArgs) > 0 {
 		sort.Strings(missingRequiredArgs)
-		return customerr.AppendError(
-			ParsingErr,
-			customerr.Wrap(
-				MissingRequiredArgErr, "Missing: %s", missingRequiredArgs,
-			),
+		return customerr.Wrap(
+			MissingRequiredArgErr, "Missing: %s", missingRequiredArgs,
 		)
 	}
-
-	if err := p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
-		return c.setVal()
-	}); err != nil {
-		return customerr.AppendError(ParsingErr, ComputedArgumentErr, err)
-	}
-
 	return nil
 }
 
-// Returns a string representing the help menu.
-func (p *Parser) Help() string {
-	start := ""
-	longestArg, _ := p.longArgs.Keys().Reduce(
-		&start,
-		func(accum **string, iter *string) error {
-			if len(*iter) > len(**accum) {
-				*accum = iter
+func (p *Parser) checkConditionallyRequiredArgsProvided() error {
+	// maps requiree to required
+	missingRequiredArgs := map[string][]string{}
+	p.longArgs.Vals().ForEach(
+		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			if !val.present && !val.defaultProvided {
+				return iter.Continue, nil
 			}
-			return nil
+			for _, condArg := range val.conditionallyRequires() {
+				if iterArg, _ := p.longArgs.Get(&condArg); !iterArg.present {
+					if _, ok := missingRequiredArgs[val.longFlag]; !ok {
+						missingRequiredArgs[val.longFlag] = []string{}
+					}
+					missingRequiredArgs[val.longFlag] = append(
+						missingRequiredArgs[val.longFlag],
+						condArg,
+					)
+				}
+			}
+			return iter.Continue, nil
 		},
 	)
 
-	var sb strings.Builder
-	sb.WriteString(p.progName)
-	sb.WriteString(": HELP ME!\n")
-	sb.WriteString("Description: ")
-	sb.WriteString(p.progDesc)
-	sb.WriteByte('\n')
-	sb.WriteByte('\n')
+	if len(missingRequiredArgs) == 0 {
+		return nil
+	}
+
+	keys := []string{}
+	for k, _ := range missingRequiredArgs {
+		keys = append(keys, string(k))
+	}
+	sort.Strings(keys)
+
+	errs := make([]error, len(keys))
+	for i, k := range keys {
+		errs[i] = customerr.Wrap(
+			MissingConditionallyRequiredArgErr,
+			"Given the value of '%s' the following args are required: %v",
+			k, missingRequiredArgs[k],
+		)
+	}
+	return customerr.AppendError(errs...)
+}
+
+const (
+	shortValIdx int = iota
+	longValIdx
+	reqiredIdx
+	defaultIdx
+	condReqIdx
+	descIdx
+	reqMarking string = "(req.)"
+)
+
+// Returns a string representing the help menu.
+func (p *Parser) Help() string {
+	tableHeaders := [6]string{
+		"", "", "",
+		"Default Val", "Conditionally Reqs", "Description",
+	}
+	longestArg := 0
+	longestConditionallyRequiredArg := len(tableHeaders[condReqIdx])
+	p.longArgs.Vals().ForEach(
+		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			if len(val.longFlag) > longestArg {
+				longestArg = len(val.longFlag)
+			}
+			for _, condArg := range val.allConditionalArgs() {
+				if len(condArg) > longestConditionallyRequiredArg {
+					longestConditionallyRequiredArg = len(condArg)
+				}
+			}
+			return iter.Continue, nil
+		},
+	)
+
+	colWidths := [6]int{
+		2,
+		longestArg + 2,
+		len(reqMarking),
+		15,
+		longestConditionallyRequiredArg,
+		80,
+	}
 
 	args, _ := p.longArgs.Vals().Collect()
 	sort.Slice(args, func(i, j int) bool {
 		return args[i].longFlag < args[j].longFlag
 	})
+
+	table := make([][]string, p.longArgs.Length()+1)
+	table[0] = tableHeaders[:]
 	iter.SliceElems(args).ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			table[index+1] = make([]string, 6)
 			if val.shortFlag != byte(0) {
-				sb.WriteString("-")
-				sb.WriteByte(val.shortFlag)
-				sb.WriteString("  ")
-			} else {
-				sb.WriteString("    ")
+				table[index+1][0] = fmt.Sprintf("-%c", val.shortFlag)
 			}
-			sb.WriteString("--")
-			sb.WriteString(val.longFlag)
-			for i := 0; i < len(*longestArg)-len(val.longFlag); i++ {
-				sb.WriteByte(' ')
-			}
-			sb.WriteString(" ")
-
+			table[index+1][1] = fmt.Sprintf("--%s", val.longFlag)
 			if val.required {
-				sb.WriteString(" (required)  ")
-			} else {
-				sb.WriteString("             ")
+				table[index+1][2] = reqMarking
 			}
+			table[index+1][3], _ = val.defaultValAsStr()
+			table[index+1][4] = strings.Join(val.allConditionalArgs(), " ")
+			table[index+1][5] = val.description
 
-			fullDescription := val.description
-			if defaultStr, ok := val.defaultValAsStr(); ok {
-				fullDescription = fmt.Sprintf(
-					"(Default: %s) %s", defaultStr, val.description,
-				)
-			}
-			cntr := 0
-			for _, s := range strings.Split(fullDescription, " ") {
-				if cntr+len(s) > helpDescriptionWidth {
-					sb.WriteByte('\n')
-					for i := 0; i < len(*longestArg)+21; i++ {
-						sb.WriteByte(' ')
-					}
-					cntr = 0
-				}
-				sb.WriteString(s)
-				sb.WriteString(" ")
-				cntr += len(s) + 1
-			}
-			sb.WriteByte('\n')
 			return iter.Continue, nil
 		},
 	)
 
+	var sb strings.Builder
+	sb.WriteString(p.progName)
+	sb.WriteString(": HELP ME(nu)!\n")
+	sb.WriteString("Description: ")
+	sb.WriteString(p.progDesc)
+	sb.WriteByte('\n')
+	sb.WriteByte('\n')
+	// Intentionally ignored err. Left for debugging purposes
+	_ = strops.WriteTable(&sb, table, colWidths[:])
 	return sb.String()
 }

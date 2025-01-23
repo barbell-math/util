@@ -4,9 +4,9 @@ A package that provides several code generators that are meant to be used with
 the rest of the code in the [src dir](../src/) and any projects that use this
 utility package as a library.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/reflect/StructHash.go#L11-L13
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/reflect/StructHash.go#L16-L18
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/reflect/StructHash.go#L24-L78
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/reflect/StructHash.go#L11-L13
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/reflect/StructHash.go#L16-L18
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/reflect/StructHash.go#L24-L78
 
 ## Code Generator Installation
 

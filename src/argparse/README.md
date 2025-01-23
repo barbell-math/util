@@ -2,7 +2,7 @@
 
 A type safe, extensible CLI argument parsing utility package.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L49-L74
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L49-L74
 <sup>Example usage of the argparse package</sup>
 
 ## Usage
@@ -25,13 +25,13 @@ integer argument. The `translators.BuiltinInt` type is responsible for parsing
 an integer from the string value supplied by the CLI. Analogous types are
 available for all primitive types, all following the `Builtin<type>` format.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L20-L21
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L20-L21
 <sup>Integer argument</sup>
 
 The above example provides an argument with no options, meaning all the default
 options will be used. Shown below is how to provide your own set of options.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L55-L61
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L55-L61
 <sup>Integer argument with options</sup>
 
 The following options can be provided all through setter methods similar to the
@@ -47,13 +47,15 @@ provided on the CLI.
 string to the appropriately typed value.
 1. `argType`: The type of argument. This value tells the parser what semantics
 are valid for the argument.
+1. `conditionallyRequired`: A way to conditionally require other arguments. See
+the Argument Conditionally section for a more in dept explanation.
 
 The available argument types are as follows:
 
 1. `ValueArgType`: Represents a flag type that must accept a single value as an
 argument and must only be supplied once.
 1. `MultiValueArgType`: Represents a flag type that can accept many values as an
-argument and must only be supplied once. At least one argument must be supplied.
+argument. At least one argument must be supplied.
 1. `FlagArgType`: Represents a flag type that must not accept a value and must
 only be supplied once.
 1. `MultiFlagArgType`: Represents a flag type that must not accept a value and
@@ -67,64 +69,63 @@ CLI argument types.
 1. Flag arguments. This will return true if the flag is provided. It does accept
 any values.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L94-L100
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L94-L100
 
 2. Flag counter argument. This will return an integer equal to the number of
 times that the flag was provided. It does not accept any values.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L133-L138
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L133-L138
 
 3. List argument. This will build up a list of all the values that were provided
 with the argument. Many values can be provided with a single argument or many
 flags can be provided with a single argument, as shown in the example arguments
-below the argument example.
+below the argument example.The `ListValue` translator can work with any type as
+long as it has a translator.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L171-L188
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L193
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L171-L188
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L193
 
 4. List argument with a predefined set of allowed values. This will build up a
 list of all the values that were provided with the argument, provided that they
 are in the allowed list of values. Many values can be provided with a single
 argument or many flags can be provided with a single argument, as shown in the
-example arguments below the argument example. Note that given the design of this
-translator the list can contain any type, as long as the underlying type has a
-translator of it's own.
+example arguments below the argument example. The `ListValue` translator can
+work with any type as long as it has a translator.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L212-L232
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L239
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L212-L232
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L239
 
 5. Selector argument. This will accept a single value as long as that value is
-in the predefined set of allowed values. As with the list argument, the selector
-translator can work with any type as long as it has an underlying translator of
-it's own.
+in the predefined set of allowed values. The `Selector` translator can work with
+any type as long as it has a translator.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L260-L278
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L258-L278
 
 6. File argument. This will accept a single string value and verify that the
 supplied string is a path that exists as a file.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L398-L403
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L396-L401
 
 7. Directory argument. This will accept a single string value and verify that
 the supplied string is a path that exists as a directory.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L427-L432
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L425-L430
 
 8. File open argument. This will accept a single string value and will attempt
 to make the supplied file with the given file mode and permissions.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L456-L468
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L454-L466
 
 9. Mkdir argument. This will accept a single string value and will attempt to
 make the directory(s) that are denoted by the string value.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L493-L501
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L491-L499
 
 10. Enum argument. This will accept a single string value and will attempt to
 translate it to the underlying enum value given the enum type it was supplied
 with through the generic parameters.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L302-L312
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L302-L310
 
 
 ## Argument Builder: Custom Types
@@ -143,6 +144,52 @@ need to return the custom type. Support for custom translators and types allows
 for a completely type safe translation of the CLI arguments into values that
 your program can work with.
 
+## Argument Conditionality
+
+In some circumstances it is not enough to simply set arguments as either
+required or not. Sometimes certain arguments should be required if another
+argument is supplied, or if another argument is a specific value. A motivating
+example of this kind of scenario would be an enum argument that defines what
+action your program should take. It is reasonable that your program would
+require different arguments depending on the value supplied to this enum
+argument.
+
+To accommodate for this, this package provides the ability to conditionally
+require arguments based an another argument. An example of this is shown below.
+
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/ConditionallyRequiredArgs_test.go#L30-L44
+
+In the above example the `uint` argument expects that if it is provided that the
+`int` and `float` arguments are also provided. However, if the `uint` argument
+is not provided then the `int` and `float` arguments do not have to be provided.
+Hence, the `uint` argument conditionally requires the `int` and `float`
+arguments.
+
+The example below shows how to add conditional arguments based on the value of
+the argument that is being added. It is very similar, the only difference is the
+`ArgSupplied` function was swapped for a closure provided by the `ArgEquals`
+function.
+
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/ConditionallyRequiredArgs_test.go#L114-L129
+
+The previous two examples only had one conditionality rule, but a list of rules
+can be provided. This allows different sets of arguments to be conditionally
+required based on differing requirements (i.e. different enum values.) If
+multiple conditionality rules are found to match then the resulting required
+argument set will be the union of the required argument sets from all the
+matching rules.
+
+> Gotcha!
+> Combining default values and conditionally required arguments can sometimes
+> lead to seemingly weird behavior. Remember this: if a default value was
+> provided then that value will be used when evaluating the argument
+> conditionality rules. As such, if a default value matches a rule then the
+> arguments specified by that rule will be required. This may seem weird but
+> again referring to the motivating example of having an enum value control
+> program behavior, it is perfectly reasonable to set a default action. That
+> default action should still impose the argument conditionality as if it were
+> provided on the CMD line.
+
 ## Argument Builder: Computed Arguments
 
 Computed arguments provide a way for the argument parser to set values that were
@@ -150,7 +197,7 @@ not directly provided by the CLI, potentially computing values based on the
 provided CLI arguments. The example below shows how to add a computed argument
 to the parser.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L354-L357
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/examples/SimpleExamples_test.go#L352-L355
 
 Much like translators for arguments, computers are needed to set computed
 values. Also like translators, computers are expected to return a value, this
@@ -190,8 +237,6 @@ needs.
 
 1. Help: this adds the `-h` and `--help` flag arguments which when encountered
 will stop all further parsing and print the help menu.
-1. Verbosity: this adds the `-v` and `--verbose` flag counter arguments which
-can be used to set a verbosity level for a running application.
 
 ## Argument Config Files
 
@@ -210,7 +255,7 @@ shown below.
 
 The format of the config file is best shown by example.
 
-https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/testData/ValidConfigFile.txt#L1-L17
+https://github.com/barbell-math/util/blob/b090b1f16af25be86e3e7a64fe5d54b6a141a5a1/src/argparse/testData/ValidConfigFile.txt#L1-L17
 <sup>An example argument config file</sup>
 
 The above config file is equivalent to the cmd shown below:
@@ -238,7 +283,7 @@ it is easy to duplicate arguments between the files.
 usual, if single value arguments are duplicated an error will be returned and if
 multi value arguments are duplicated no error will be returned.
 
-A more practical example of using a config file is shown using the [db] packages
+A more practical example of using a config file is shown using the `db` packages
 argparse interface. The below config file and cmd line arguments are equivalent.
 
 ```
@@ -257,6 +302,40 @@ db {
 # ... would be the same as ...
 ./<prog> --config ./Config.txt
 ```
+
+## Motivation for Making this Package
+
+Other CMD line argument parsers exist. However none of them did what I wanted.
+What I wanted was two fold:
+
+1. A type safe parser that uses generics. No `Parse[Int|Bool|Float]` nonsense.
+The type should be provided through generics. This opens the door to support
+custom types rather than only supporting the types builtin to the language. So
+ideally, the argument parser is extensible enough to support custom types.
+1. An argument parser that _fully_ validates and sets up the state of my
+program. This point requires more explanation.
+
+Most other argument parsers provide basic validation of CMD line arguments by
+attempting to coerce the value to a native type in the language, but what if I
+wanted to do something outside of just parsing an integer? What if I wanted to
+do something as simple as make sure that integer is within a predefined range?
+That would require additional validation logic _after_ the argument parser
+supposedly finished validating the input. That additional setup should be able
+to be performed by the argument parser.
+
+There is another concern of fully setting the applications state. A motivating
+example is a database connection. The CMD line arguments define the connection
+parameters, why does more work need to be done _after_ the argument parser is
+already done creating values to finalize the applications state? Instead, have
+the argument parser be smart enough to be able to create the database connection
+once it is done parsing all of the supplied arguments.
+
+By making an argument parser that is extensible enough to _fully_ validate and
+_fully_ set the applications state it becomes easier to reason about the
+programs execution. The argument parser will either succeed and you will know
+that your application will be good to immediately start running with _zero_
+additional logic or it will fail and your program will exit before even
+starting.
 
 ## Further Reading:
 

@@ -12,6 +12,7 @@ import (
 func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
 	val *E,
 	defaultVal E,
+	conditionalArgs []argparse.ArgConditionality[E],
 ) *argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddEnum(

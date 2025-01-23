@@ -18,7 +18,7 @@ type (
 	// of tokens.
 	ArgvIter    iter.Iter[string]
 	tokenIter   iter.Iter[token]
-	argValPairs iter.Iter[basic.Pair[*Arg, string]]
+	argValPairs iter.Iter[basic.Pair[*arg, string]]
 
 	token struct {
 		//gen:structBaseWidget identity
@@ -44,8 +44,8 @@ func (t tokenIter) ToIter() iter.Iter[token] {
 	return iter.Iter[token](t)
 }
 
-func (a argValPairs) ToIter() iter.Iter[basic.Pair[*Arg, string]] {
-	return iter.Iter[basic.Pair[*Arg, string]](a)
+func (a argValPairs) ToIter() iter.Iter[basic.Pair[*arg, string]] {
+	return iter.Iter[basic.Pair[*arg, string]](a)
 }
 
 // Translates the sequence of strings into tokens. No validation is done to
@@ -240,7 +240,7 @@ func generateConfigFileTokens(file string) ([]token, error) {
 // the type of each token and the placement of each token.
 func (t tokenIter) toArgValPairs(p *Parser) argValPairs {
 	multiValue := false
-	var multiValueToken *Arg = nil
+	var multiValueToken *arg = nil
 
 	getExpectedValue := func(f iter.IteratorFeedback) (string, error) {
 		iterToken, err, cont := t(f)
@@ -262,17 +262,17 @@ func (t tokenIter) toArgValPairs(p *Parser) argValPairs {
 		return iterToken.value, nil
 	}
 
-	return func(f iter.IteratorFeedback) (basic.Pair[*Arg, string], error, bool) {
+	return func(f iter.IteratorFeedback) (basic.Pair[*arg, string], error, bool) {
 		if f == iter.Break {
-			return basic.Pair[*Arg, string]{}, nil, false
+			return basic.Pair[*arg, string]{}, nil, false
 		}
 
-		rv := basic.Pair[*Arg, string]{}
+		rv := basic.Pair[*arg, string]{}
 		iterToken, err, cont := token{}, error(nil), true
 
 		iterToken, err, cont = t(f)
 		if err != nil || !cont {
-			return basic.Pair[*Arg, string]{}, err, cont
+			return basic.Pair[*arg, string]{}, err, cont
 		}
 
 		switch iterToken._type {
