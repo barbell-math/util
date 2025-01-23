@@ -156,7 +156,7 @@ argument.
 To accommodate for this, this package provides the ability to conditionally
 require arguments based an another argument. An example of this is shown below.
 
-https://github.com/barbell-math/util/blob/eda13dba87f33a7611746199043400e25ac280fa/src/argparse/examples/ConditionallyRequiredArgs_test.go#L30-L43
+https://github.com/barbell-math/util/blob/eda13dba87f33a7611746199043400e25ac280fa/src/argparse/examples/ConditionallyRequiredArgs_test.go#L30-L44
 
 In the above example the `uint` argument expects that if it is provided that the
 `int` and `float` arguments are also provided. However, if the `uint` argument
@@ -303,6 +303,40 @@ db {
 # ... would be the same as ...
 ./<prog> --config ./Config.txt
 ```
+
+## Motivation for Making this Package
+
+Other CMD line argument parsers exist. However none of them did what I wanted.
+What I wanted was two fold:
+
+1. A type safe parser that use generics. No `Parse[Int|Bool|Float]` nonsense.
+The type should be provided through generics. This opens the door to support
+custom types rather than only supporting the types builtin to the language. So
+ideally, the argument parser is extensible enough to support custom types.
+1. An argument parser that _fully_ validates and sets up the state of my
+program. This point requires more explanation.
+
+Most other argument parsers provide basic validation of CMD line arguments by
+attempting to coerce the value to a native type in the language, but what if I
+wanted to do something outside of just parsing an integer? What if I wanted to
+do something as simple as make sure that integer is within a predefined range?
+That would require additional validation logic _after_ the argument parser
+supposedly finished validating the input. That additional setup should be able
+to be performed by the argument parser.
+
+There is another concern of fully setting the applications state. A motivating
+example is a database connection. The CMD line arguments define the connection
+parameters, why does more work need to be done _after_ the argument parser is
+already done creating values to finalize the applications state? Instead, have
+the argument parser be smart enough to be able to create the database connection
+once it is done parsing all of the supplied arguments.
+
+By making an argument parser that is extensible enough to _fully_ validate and
+_fully_ set the applications state it becomes easier to reason about the
+programs execution. The argument parser will either succeed and you will know
+that your application will be good to immediately start running with _zero_
+additional logic or it will fail and your program will exit before even
+starting.
 
 ## Further Reading:
 
