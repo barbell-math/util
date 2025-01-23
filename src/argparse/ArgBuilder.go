@@ -13,8 +13,8 @@ import (
 type (
 	// Used to create a list of arguments that are then used to build the parser.
 	ArgBuilder struct {
-		args         []Arg
-		computedVals []ComputedArg
+		args         []arg
+		computedVals []computedArg
 	}
 )
 
@@ -218,6 +218,21 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 			rv.requiredArgs.Emplace(containerBasic.Pair[*string, *longArg]{
 				&b.args[i].longFlag, (*longArg)(&b.args[i]),
 			})
+		}
+	}
+
+	for i := 0; i < len(b.args); i++ {
+		allConditionallyRequiredArgs := b.args[i].allConditionalArgs()
+		for _, conditionalArg := range allConditionallyRequiredArgs {
+			if _, err := rv.longArgs.Get(&conditionalArg); err != nil {
+				return rv, customerr.AppendError(
+					ParserConfigErr,
+					customerr.Wrap(
+						UnrecognizedConditionallyRequiredArgErr,
+						"Argument: %s", conditionalArg,
+					),
+				)
+			}
 		}
 	}
 

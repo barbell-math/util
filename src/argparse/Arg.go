@@ -12,6 +12,18 @@ import (
 //go:generate ../../bin/structDefaultInit -struct opts
 
 type (
+	// A function type that defines when conditional args should be enforced.
+	// The value supplied to the function will be the translated value that was
+	// supplied on the cmd line.
+	ArgConditional[T any] func(v T) bool
+
+	// Defines which arguments are conditionally required as well as when they
+	// are required.
+	ArgConditionality[T any] struct {
+		Requires []string
+		When     ArgConditional[T]
+	}
+
 	// The optional values that are associated with an argument.
 	opts[T any, U translators.Translater[T]] struct {
 		// The type of argument. This value will affect how the parser expects
@@ -23,10 +35,13 @@ type (
 		shortName byte `default:"byte(0)" setter:"t" getter:"t"`
 		// Defines if the argument is required or not.
 		required bool `default:"false" setter:"t" getter:"t"`
+		// The list of arguments that must also be provided if this argument is
+		// provided. All arguments provided are expected to be long names.
+		conditionallyRequired []ArgConditionality[T] `default:"[]ArgConditionality[T]{}" setter:"t" getter:"t"`
 		// Sets the description that will be printed out on the help menu.
 		description string `default:"\"\"" setter:"t" getter:"t"`
 		// The default value that should be used if the argument is not supplied.
-		// The default defaults to a zero-value initilized value.
+		// The default defaults to a zero-value initialized value.
 		defaultVal T `default:"generics.ZeroVal[T]()" setter:"t" getter:"t" import:"github.com/barbell-math/util/src/generics"`
 		// The translator value to use when parsing the cmd line argument's
 		// value. Most translators are stateless, but some have state and hence
@@ -36,39 +51,53 @@ type (
 
 	// Represents a single argument from the cmd line interface and all the
 	// options associated with it.
-	Arg struct {
-		setVal          func(a *Arg, arg string) error
-		setDefaultVal   func()
-		defaultValAsStr func() (string, bool)
-		reset           func(a *Arg)
-		shortFlag       byte
-		longFlag        string
-		argType         ArgType
-		present         bool
-		required        bool
-		description     string
+	arg struct {
+		setVal                func(a *arg, arg string) error
+		setDefaultVal         func()
+		defaultValAsStr       func() (string, bool)
+		reset                 func(a *arg)
+		conditionallyRequires func() []string
+		allConditionalArgs    func() []string
+		shortFlag             byte
+		longFlag              string
+		description           string
+		argType               ArgType
+		present               bool
+		required              bool
 	}
 
 	// Represents an argument value that is computed from other arguments rather
 	// than being supplied on the cmd line interface.
-	ComputedArg struct {
+	computedArg struct {
 		setVal func() error
 		reset  func()
 	}
 
 	// Used when only the shortName field of an Arg is important
-	shortArg Arg
+	shortArg arg
 	// Used when only the longName field of an Arg is important
-	longArg Arg
+	longArg arg
 )
+
+// A helper function that is intended to be used with the 'When' field of the
+// [ArgConditionality] struct.
+func ArgSupplied[T any](v T) bool { return true }
+
+// A helper function that is intended to be used with the 'When' field of the
+// [ArgConditionality] struct.
+func ArgEquals[T comparable](val T) ArgConditional[T] {
+	return func(v T) bool {
+		return val == v
+	}
+}
 
 func newArg[T any, U translators.Translater[T]](
 	val *T,
 	longName string,
 	opts *opts[T, U],
-) Arg {
-	return Arg{
-		setVal: func(a *Arg, arg string) error {
+) arg {
+	return arg{
+		setVal: func(a *arg, arg string) error {
 			v, err := opts.translator.Translate(arg)
 			if err != nil {
 				return err
@@ -86,9 +115,27 @@ func newArg[T any, U translators.Translater[T]](
 			}
 			return "", false
 		},
-		reset: func(a *Arg) {
+		reset: func(a *arg) {
 			opts.translator.Reset()
 			a.present = false
+		},
+		conditionallyRequires: func() []string {
+			rv := []string{}
+			for _, v := range opts.conditionallyRequired {
+				// Explicit copy of val here. It is not intended to be modified
+				// by the when function.
+				if v.When(*val) {
+					rv = append(rv, v.Requires...)
+				}
+			}
+			return rv
+		},
+		allConditionalArgs: func() []string {
+			rv := []string{}
+			for _, v := range opts.conditionallyRequired {
+				rv = append(rv, v.Requires...)
+			}
+			return rv
 		},
 		argType:     opts.argType,
 		required:    opts.required,
@@ -102,8 +149,8 @@ func newArg[T any, U translators.Translater[T]](
 func newComputedArg[T any, U computers.Computer[T]](
 	val *T,
 	computer U,
-) ComputedArg {
-	return ComputedArg{
+) computedArg {
+	return computedArg{
 		setVal: func() error {
 			v, err := computer.ComputeVals()
 			if err != nil {

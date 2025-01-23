@@ -484,3 +484,50 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Eq(res.F, -2, t)
 	test.Eq(res.G, -16, t)
 }
+
+func TestParserParseConditionallyRequiredArguments(t *testing.T) {
+	res := struct {
+		S1 string
+		S2 string
+	}{}
+
+	b := ArgBuilder{}
+	AddArg[string, translators.BuiltinString](
+		&res.S1,
+		&b,
+		"str1",
+		NewOpts[string, translators.BuiltinString]().
+			SetConditionallyRequired([]ArgConditionality[string]{
+				ArgConditionality[string]{
+					Requires: []string{"str2"},
+					When:     ArgEquals[string]("foo"),
+				},
+			}),
+	)
+	AddArg[string, translators.BuiltinString](
+		&res.S2,
+		&b,
+		"str2",
+		NewOpts[string, translators.BuiltinString]().SetDefaultVal("foobar"),
+	)
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{"--str1=bar"}).ToTokens())
+	test.Nil(err, t)
+	test.Eq("bar", res.S1, t)
+	test.Eq("foobar", res.S2, t)
+
+	res.S1 = ""
+	res.S2 = ""
+	err = p.Parse(ArgvIterFromSlice([]string{"--str1=foo"}).ToTokens())
+	test.ContainsError(ParsingErr, err, t)
+	test.ContainsError(MissingConditionallyRequiredArgErr, err, t)
+
+	res.S1 = ""
+	res.S2 = ""
+	err = p.Parse(ArgvIterFromSlice([]string{"--str1=foo", "--str2=asdf"}).ToTokens())
+	test.Nil(err, t)
+	test.Eq("foo", res.S1, t)
+	test.Eq("asdf", res.S2, t)
+}

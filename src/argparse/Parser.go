@@ -15,7 +15,7 @@ import (
 
 type (
 	computedArgsTree struct {
-		compedArgs    []ComputedArg
+		compedArgs    []computedArg
 		subCompedArgs []computedArgsTree
 	}
 
@@ -27,7 +27,7 @@ type (
 		progDesc string
 
 		numArgs      int
-		subParsers   [][]Arg
+		subParsers   [][]arg
 		compedArgs   computedArgsTree
 		requiredArgs containers.HashMap[
 			*string,
@@ -55,7 +55,7 @@ const (
 )
 
 func (c *computedArgsTree) leftRightRootTraversal(
-	op func(c *ComputedArg) error,
+	op func(c *computedArg) error,
 ) error {
 	if len(c.subCompedArgs) > 0 {
 		for _, v := range c.subCompedArgs {
@@ -75,14 +75,14 @@ func (c *computedArgsTree) leftRightRootTraversal(
 func newParser(
 	progName string,
 	progDesc string,
-	args []Arg,
-	computedArgs []ComputedArg,
+	args []arg,
+	computedArgs []computedArg,
 ) Parser {
 	rv := Parser{
 		progName:   progName,
 		progDesc:   progDesc,
 		numArgs:    len(args) + len(computedArgs),
-		subParsers: [][]Arg{args},
+		subParsers: [][]arg{args},
 		compedArgs: computedArgsTree{compedArgs: computedArgs},
 	}
 	rv.requiredArgs, _ = containers.NewHashMap[
@@ -106,20 +106,20 @@ func newParser(
 	return rv
 }
 
-func (p *Parser) getShortArg(b byte) (*Arg, error) {
+func (p *Parser) getShortArg(b byte) (*arg, error) {
 	a, err := p.shortArgs.Get(&b)
 	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedShortArgErr, "Argument: '%c'", b)
 	}
-	return (*Arg)(a), nil
+	return (*arg)(a), nil
 }
 
-func (p *Parser) getLongArg(s string) (*Arg, error) {
+func (p *Parser) getLongArg(s string) (*arg, error) {
 	a, err := p.longArgs.Get(&s)
 	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedLongArgErr, "Argument: '%s'", s)
 	}
-	return (*Arg)(a), nil
+	return (*arg)(a), nil
 }
 
 // Adds sub-parsers to the current parser. All arguments are placed in a global
@@ -177,7 +177,7 @@ func (p *Parser) Parse(t tokenIter) error {
 			subP[i] = arg
 		}
 	}
-	p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
+	p.compedArgs.leftRightRootTraversal(func(c *computedArg) error {
 		c.reset()
 		return nil
 	})
@@ -185,7 +185,7 @@ func (p *Parser) Parse(t tokenIter) error {
 	if err := t.toArgValPairs(p).ToIter().ForEach(
 		func(
 			index int,
-			val basic.Pair[*Arg, string],
+			val basic.Pair[*arg, string],
 		) (iter.IteratorFeedback, error) {
 			if _, ok := multiSpecificationArgTypes[val.A.argType]; !ok && val.A.present {
 				return iter.Break, customerr.Wrap(
@@ -213,6 +213,23 @@ func (p *Parser) Parse(t tokenIter) error {
 		return customerr.AppendError(ParsingErr, err)
 	}
 
+	if err := p.checkRequiredArgsProvided(); err != nil {
+		return customerr.AppendError(ParsingErr, err)
+	}
+	if err := p.checkConditionallyRequiredArgsProvided(); err != nil {
+		return customerr.AppendError(ParsingErr, err)
+	}
+
+	if err := p.compedArgs.leftRightRootTraversal(func(c *computedArg) error {
+		return c.setVal()
+	}); err != nil {
+		return customerr.AppendError(ParsingErr, ComputedArgumentErr, err)
+	}
+
+	return nil
+}
+
+func (p *Parser) checkRequiredArgsProvided() error {
 	missingRequiredArgs := []string{}
 	p.requiredArgs.Vals().ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
@@ -224,21 +241,52 @@ func (p *Parser) Parse(t tokenIter) error {
 	)
 	if len(missingRequiredArgs) > 0 {
 		sort.Strings(missingRequiredArgs)
-		return customerr.AppendError(
-			ParsingErr,
-			customerr.Wrap(
-				MissingRequiredArgErr, "Missing: %s", missingRequiredArgs,
-			),
+		return customerr.Wrap(
+			MissingRequiredArgErr, "Missing: %s", missingRequiredArgs,
 		)
 	}
+	return nil
+}
 
-	if err := p.compedArgs.leftRightRootTraversal(func(c *ComputedArg) error {
-		return c.setVal()
-	}); err != nil {
-		return customerr.AppendError(ParsingErr, ComputedArgumentErr, err)
+func (p *Parser) checkConditionallyRequiredArgsProvided() error {
+	// maps requiree to required
+	missingRequiredArgs := map[string][]string{}
+	p.longArgs.Vals().ForEach(
+		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			for _, condArg := range val.conditionallyRequires() {
+				if iterArg, _ := p.longArgs.Get(&condArg); !iterArg.present {
+					if _, ok := missingRequiredArgs[val.longFlag]; !ok {
+						missingRequiredArgs[val.longFlag] = []string{}
+					}
+					missingRequiredArgs[val.longFlag] = append(
+						missingRequiredArgs[val.longFlag],
+						condArg,
+					)
+				}
+			}
+			return iter.Continue, nil
+		},
+	)
+
+	if len(missingRequiredArgs) == 0 {
+		return nil
 	}
 
-	return nil
+	keys := []string{}
+	for k, _ := range missingRequiredArgs {
+		keys = append(keys, string(k))
+	}
+	sort.Strings(keys)
+
+	errs := make([]error, len(keys))
+	for i, k := range keys {
+		errs[i] = customerr.Wrap(
+			MissingConditionallyRequiredArgErr,
+			"Given the value of '%s' the following args are required: %v",
+			k, missingRequiredArgs[k],
+		)
+	}
+	return customerr.AppendError(errs...)
 }
 
 // Returns a string representing the help menu.

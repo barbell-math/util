@@ -9,12 +9,13 @@ import (
 // Returns a new opts struct initialized with the default values.
 func NewOpts[T any, U translators.Translater[T]]() *opts[T, U] {
 	return &opts[T, U]{
-		argType:     ValueArgType,
-		shortName:   byte(0),
-		required:    false,
-		description: "",
-		defaultVal:  generics.ZeroVal[T](),
-		translator:  generics.ZeroVal[U](),
+		argType:               ValueArgType,
+		shortName:             byte(0),
+		required:              false,
+		conditionallyRequired: []ArgConditionality[T]{},
+		description:           "",
+		defaultVal:            generics.ZeroVal[T](),
+		translator:            generics.ZeroVal[U](),
 	}
 }
 
@@ -39,6 +40,13 @@ func (o *opts[T, U]) SetRequired(v bool) *opts[T, U] {
 	return o
 }
 
+// The list of arguments that must also be provided if this argument is
+// provided. All arguments provided are expected to be long names.
+func (o *opts[T, U]) SetConditionallyRequired(v []ArgConditionality[T]) *opts[T, U] {
+	o.conditionallyRequired = v
+	return o
+}
+
 // Sets the description that will be printed out on the help menu.
 func (o *opts[T, U]) SetDescription(v string) *opts[T, U] {
 	o.description = v
@@ -46,7 +54,7 @@ func (o *opts[T, U]) SetDescription(v string) *opts[T, U] {
 }
 
 // The default value that should be used if the argument is not supplied.
-// The default defaults to a zero-value initilized value.
+// The default defaults to a zero-value initialized value.
 func (o *opts[T, U]) SetDefaultVal(v T) *opts[T, U] {
 	o.defaultVal = v
 	return o
@@ -78,13 +86,19 @@ func (o *opts[T, U]) GetRequired() bool {
 	return o.required
 }
 
+// The list of arguments that must also be provided if this argument is
+// provided. All arguments provided are expected to be long names.
+func (o *opts[T, U]) GetConditionallyRequired() []ArgConditionality[T] {
+	return o.conditionallyRequired
+}
+
 // Sets the description that will be printed out on the help menu.
 func (o *opts[T, U]) GetDescription() string {
 	return o.description
 }
 
 // The default value that should be used if the argument is not supplied.
-// The default defaults to a zero-value initilized value.
+// The default defaults to a zero-value initialized value.
 func (o *opts[T, U]) GetDefaultVal() T {
 	return o.defaultVal
 }
