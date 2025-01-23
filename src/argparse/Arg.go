@@ -42,7 +42,8 @@ type (
 		description string `default:"\"\"" setter:"t" getter:"t"`
 		// The default value that should be used if the argument is not supplied.
 		// The default defaults to a zero-value initialized value.
-		defaultVal T `default:"generics.ZeroVal[T]()" setter:"t" getter:"t" import:"github.com/barbell-math/util/src/generics"`
+		defaultVal         T    `default:"generics.ZeroVal[T]()" setter:"f" getter:"t" import:"github.com/barbell-math/util/src/generics"`
+		defaultValProvided bool `default:"false" setter:"f" getter:"f"`
 		// The translator value to use when parsing the cmd line argument's
 		// value. Most translators are stateless, but some have state and hence
 		// must be able to have there value explicitly set.
@@ -64,6 +65,7 @@ type (
 		argType               ArgType
 		present               bool
 		required              bool
+		defaultProvided       bool
 	}
 
 	// Represents an argument value that is computed from other arguments rather
@@ -89,6 +91,14 @@ func ArgEquals[T comparable](val T) ArgConditional[T] {
 	return func(v T) bool {
 		return val == v
 	}
+}
+
+// The default value that should be used if the argument is not supplied.
+// The default defaults to a zero-value initialized value.
+func (o *opts[T, U]) SetDefaultVal(v T) *opts[T, U] {
+	o.defaultVal = v
+	o.defaultValProvided = true
+	return o
 }
 
 func newArg[T any, U translators.Translater[T]](
@@ -137,12 +147,13 @@ func newArg[T any, U translators.Translater[T]](
 			}
 			return rv
 		},
-		argType:     opts.argType,
-		required:    opts.required,
-		description: opts.description,
-		shortFlag:   opts.shortName,
-		longFlag:    longName,
-		present:     false,
+		argType:         opts.argType,
+		required:        opts.required,
+		description:     opts.description,
+		shortFlag:       opts.shortName,
+		longFlag:        longName,
+		present:         false,
+		defaultProvided: opts.defaultValProvided,
 	}
 }
 

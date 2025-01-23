@@ -143,6 +143,19 @@ need to return the custom type. Support for custom translators and types allows
 for a completely type safe translation of the CLI arguments into values that
 your program can work with.
 
+## Argument Conditionality
+
+In some circumstances it is not enough to simply set arguments as either
+required or not. Sometimes certain arguments should be required if another
+argument is supplied, or if another argument is a specific value. A motivating
+example of this kind of scenario would be an enum argument that defines what
+action your program should take. It is reasonable that your program would
+require different arguments depending on the value supplied to this enum
+argument.
+
+To accommodate for this, this package provides the ability to conditionally
+require arguments based an another argument. An example of this is shown below.
+
 ## Argument Builder: Computed Arguments
 
 Computed arguments provide a way for the argument parser to set values that were

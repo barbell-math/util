@@ -15,6 +15,7 @@ func NewOpts[T any, U translators.Translater[T]]() *opts[T, U] {
 		conditionallyRequired: []ArgConditionality[T]{},
 		description:           "",
 		defaultVal:            generics.ZeroVal[T](),
+		defaultValProvided:    false,
 		translator:            generics.ZeroVal[U](),
 	}
 }
@@ -50,13 +51,6 @@ func (o *opts[T, U]) SetConditionallyRequired(v []ArgConditionality[T]) *opts[T,
 // Sets the description that will be printed out on the help menu.
 func (o *opts[T, U]) SetDescription(v string) *opts[T, U] {
 	o.description = v
-	return o
-}
-
-// The default value that should be used if the argument is not supplied.
-// The default defaults to a zero-value initialized value.
-func (o *opts[T, U]) SetDefaultVal(v T) *opts[T, U] {
-	o.defaultVal = v
 	return o
 }
 

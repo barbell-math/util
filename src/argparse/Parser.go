@@ -254,6 +254,9 @@ func (p *Parser) checkConditionallyRequiredArgsProvided() error {
 	missingRequiredArgs := map[string][]string{}
 	p.longArgs.Vals().ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			if !val.present && !val.defaultProvided {
+				return iter.Continue, nil
+			}
 			for _, condArg := range val.conditionallyRequires() {
 				if iterArg, _ := p.longArgs.Get(&condArg); !iterArg.present {
 					if _, ok := missingRequiredArgs[val.longFlag]; !ok {

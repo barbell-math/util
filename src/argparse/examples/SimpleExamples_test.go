@@ -64,7 +64,7 @@ func Example_ValueArgument_WithOptions() {
 		argparse.NewOpts[uint, translators.BuiltinUint]().
 			SetShortName('u').
 			SetDefaultVal(3).
-			SetDescription("This is an integer"),
+			SetDescription("This is an unsigned integer"),
 	)
 
 	parser, err := b.ToParser("Prog name", "Prog description")
