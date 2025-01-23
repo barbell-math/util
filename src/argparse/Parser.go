@@ -297,6 +297,7 @@ const (
 	defaultIdx
 	condReqIdx
 	descIdx
+	reqMarking string = "(req.)"
 )
 
 // Returns a string representing the help menu.
@@ -305,7 +306,6 @@ func (p *Parser) Help() string {
 		"", "", "",
 		"Default Val", "Conditionally Reqs", "Description",
 	}
-
 	longestArg := 0
 	longestConditionallyRequiredArg := len(tableHeaders[condReqIdx])
 	p.longArgs.Vals().ForEach(
@@ -325,14 +325,10 @@ func (p *Parser) Help() string {
 	colWidths := [6]int{
 		2,
 		longestArg + 2,
-		len("(req.)"),
+		len(reqMarking),
 		15,
 		longestConditionallyRequiredArg,
 		80,
-	}
-	fmtDirectives := [6]string{}
-	for i := 0; i < len(colWidths); i++ {
-		fmtDirectives[i] = fmt.Sprintf("%%-%ds ", colWidths[i])
 	}
 
 	args, _ := p.longArgs.Vals().Collect()
@@ -340,16 +336,17 @@ func (p *Parser) Help() string {
 		return args[i].longFlag < args[j].longFlag
 	})
 
-	table := make([][6]string, p.longArgs.Length()+1)
-	table[0] = tableHeaders
+	table := make([][]string, p.longArgs.Length()+1)
+	table[0] = tableHeaders[:]
 	iter.SliceElems(args).ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			table[index+1] = make([]string, 6)
 			if val.shortFlag != byte(0) {
 				table[index+1][0] = fmt.Sprintf("-%c", val.shortFlag)
 			}
 			table[index+1][1] = fmt.Sprintf("--%s", val.longFlag)
 			if val.required {
-				table[index+1][2] = "(req.)"
+				table[index+1][2] = reqMarking
 			}
 			table[index+1][3], _ = val.defaultValAsStr()
 			table[index+1][4] = strings.Join(val.allConditionalArgs(), " ")
@@ -361,40 +358,12 @@ func (p *Parser) Help() string {
 
 	var sb strings.Builder
 	sb.WriteString(p.progName)
-	sb.WriteString(": HELP ME!\n")
+	sb.WriteString(": HELP ME(nu)!\n")
 	sb.WriteString("Description: ")
 	sb.WriteString(p.progDesc)
 	sb.WriteByte('\n')
 	sb.WriteByte('\n')
-
-	for _, row := range table {
-		splitRow := [6][]string{}
-		for j, _ := range splitRow {
-			splitRow[j] = strops.WordWrapLines(row[j], colWidths[j])
-		}
-
-		for lineCntr := 0; ; lineCntr++ {
-			somethingToPrint := false
-			for j := 0; j < len(splitRow) && !somethingToPrint; j++ {
-				if len(splitRow[j]) > lineCntr {
-					somethingToPrint = true
-				}
-			}
-			if !somethingToPrint {
-				break
-			}
-			for j := 0; j < len(splitRow); j++ {
-				if len(splitRow[j]) > lineCntr {
-					sb.WriteString(fmt.Sprintf(
-						fmtDirectives[j], splitRow[j][lineCntr],
-					))
-				} else {
-					sb.WriteString(fmt.Sprintf(fmtDirectives[j], ""))
-				}
-			}
-			sb.WriteByte('\n')
-		}
-	}
-
+	// Intentionally ignored err. Left for debugging purposes
+	_ = strops.WriteTable(&sb, table, colWidths[:])
 	return sb.String()
 }
