@@ -47,13 +47,15 @@ provided on the CLI.
 string to the appropriately typed value.
 1. `argType`: The type of argument. This value tells the parser what semantics
 are valid for the argument.
+1. `conditionallyRequired`: A way to conditionally require other arguments. See
+the Argument Conditionally section for a more in dept explanation.
 
 The available argument types are as follows:
 
 1. `ValueArgType`: Represents a flag type that must accept a single value as an
 argument and must only be supplied once.
 1. `MultiValueArgType`: Represents a flag type that can accept many values as an
-argument and must only be supplied once. At least one argument must be supplied.
+argument. At least one argument must be supplied.
 1. `FlagArgType`: Represents a flag type that must not accept a value and must
 only be supplied once.
 1. `MultiFlagArgType`: Represents a flag type that must not accept a value and
@@ -77,7 +79,8 @@ https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a
 3. List argument. This will build up a list of all the values that were provided
 with the argument. Many values can be provided with a single argument or many
 flags can be provided with a single argument, as shown in the example arguments
-below the argument example.
+below the argument example.The `ListValue` translator can work with any type as
+long as it has a translator.
 
 https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L171-L188
 https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L193
@@ -86,17 +89,15 @@ https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a
 list of all the values that were provided with the argument, provided that they
 are in the allowed list of values. Many values can be provided with a single
 argument or many flags can be provided with a single argument, as shown in the
-example arguments below the argument example. Note that given the design of this
-translator the list can contain any type, as long as the underlying type has a
-translator of it's own.
+example arguments below the argument example. The `ListValue` translator can
+work with any type as long as it has a translator.
 
 https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L212-L232
 https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L239
 
 5. Selector argument. This will accept a single value as long as that value is
-in the predefined set of allowed values. As with the list argument, the selector
-translator can work with any type as long as it has an underlying translator of
-it's own.
+in the predefined set of allowed values. The `Selector` translator can work with
+any type as long as it has a translator.
 
 https://github.com/barbell-math/util/blob/d4b081dad4b35c30ca0bb67e6ed603ca04059a3b/src/argparse/examples/SimpleExamples_test.go#L260-L278
 
@@ -236,8 +237,6 @@ needs.
 
 1. Help: this adds the `-h` and `--help` flag arguments which when encountered
 will stop all further parsing and print the help menu.
-1. Verbosity: this adds the `-v` and `--verbose` flag counter arguments which
-can be used to set a verbosity level for a running application.
 
 ## Argument Config Files
 
@@ -284,7 +283,7 @@ it is easy to duplicate arguments between the files.
 usual, if single value arguments are duplicated an error will be returned and if
 multi value arguments are duplicated no error will be returned.
 
-A more practical example of using a config file is shown using the [db] packages
+A more practical example of using a config file is shown using the `db` packages
 argparse interface. The below config file and cmd line arguments are equivalent.
 
 ```
@@ -309,7 +308,7 @@ db {
 Other CMD line argument parsers exist. However none of them did what I wanted.
 What I wanted was two fold:
 
-1. A type safe parser that use generics. No `Parse[Int|Bool|Float]` nonsense.
+1. A type safe parser that uses generics. No `Parse[Int|Bool|Float]` nonsense.
 The type should be provided through generics. This opens the door to support
 custom types rather than only supporting the types builtin to the language. So
 ideally, the argument parser is extensible enough to support custom types.
