@@ -322,7 +322,6 @@ func (p *Parser) Help() string {
 		},
 	)
 
-	table := make([][6]string, p.longArgs.Length()+1)
 	colWidths := [6]int{
 		2,
 		longestArg + 2,
@@ -332,15 +331,16 @@ func (p *Parser) Help() string {
 		80,
 	}
 	fmtDirectives := [6]string{}
-	args, _ := p.longArgs.Vals().Collect()
-
 	for i := 0; i < len(colWidths); i++ {
 		fmtDirectives[i] = fmt.Sprintf("%%-%ds ", colWidths[i])
 	}
+
+	args, _ := p.longArgs.Vals().Collect()
 	sort.Slice(args, func(i, j int) bool {
 		return args[i].longFlag < args[j].longFlag
 	})
 
+	table := make([][6]string, p.longArgs.Length()+1)
 	table[0] = tableHeaders
 	iter.SliceElems(args).ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
