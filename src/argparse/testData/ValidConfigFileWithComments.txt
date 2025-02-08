@@ -1,0 +1,21 @@
+// Comment #0
+Name0 Value0
+// Comment #1
+Group1 {
+	Group2 {
+		Name1 Value1
+		// Comment #2
+		Group3 {
+			Name2 Value2
+		}
+		Name3 Value3
+		Group4 {
+			Group5 {
+			}
+		}
+	}
+	Name4 Value4
+	Name5 Value5
+}
+Name6 Value6
+// Comment #2

@@ -132,26 +132,3 @@ func TestArgBuilderLongNameToShort(t *testing.T) {
 	test.ContainsError(ParserConfigErr, err, t)
 	test.ContainsError(LongNameToShortErr, err, t)
 }
-
-func TestArgBuilderUnrecognizedConditionallyRequiredArg(t *testing.T) {
-	res := ""
-	b := ArgBuilder{}
-
-	AddArg[string, translators.BuiltinString](
-		&res,
-		&b,
-		"str",
-		NewOpts[string, translators.BuiltinString]().
-			SetShortName('t').
-			SetConditionallyRequired([]ArgConditionality[string]{
-				ArgConditionality[string]{
-					Requires: []string{"foo"},
-					When:     ArgSupplied[string],
-				},
-			}),
-	)
-
-	_, err := b.ToParser("", "")
-	test.ContainsError(ParserConfigErr, err, t)
-	test.ContainsError(UnrecognizedConditionallyRequiredArgErr, err, t)
-}

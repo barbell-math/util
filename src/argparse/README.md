@@ -303,6 +303,16 @@ db {
 ./<prog> --config ./Config.txt
 ```
 
+> Comments: The config file format also supports comments. Comments start with
+> `//` and _must be on a line of their own_. Comments placed at the end of a
+> line will be considered to be part of the arguments value. This was done
+> because there is no way to reliably differentiate between a value and comment.
+> A value can be anything, so there is no sequence of characters that could
+> always define the start of a comment.
+
+> Blank lines: Blank lines will be ignored. Feel free to add them as needed to
+> increase the readability of your config files.
+
 ## Motivation for Making this Package
 
 Other CMD line argument parsers exist. However none of them did what I wanted.

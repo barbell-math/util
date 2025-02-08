@@ -6,7 +6,7 @@ import (
 
 // Creates a parser that will display the help menu when either -h or --help are
 // supplied.
-func NewHelpParser() *Parser {
+func NewHelpParser() Parser {
 	res := struct{}{}
 	b := ArgBuilder{}
 	AddArg[struct{}, translators.Stopper[struct{}]](
@@ -20,6 +20,9 @@ func NewHelpParser() *Parser {
 			SetDescription("Prints this help menu.").
 			SetTranslator(translators.Stopper[struct{}]{Err: HelpErr}),
 	)
-	rv, _ := b.ToParser("", "")
-	return &rv
+	rv, err := b.ToParser("", "")
+	if err != nil {
+		panic(err)
+	}
+	return rv
 }

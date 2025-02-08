@@ -17,12 +17,12 @@ func (o RequiredArgs) UserRequired(b bool) RequiredArgs {
 	return o
 }
 
-// A flag that will be set to one if the dbEnvPswdVar arg is required.
-func (o RequiredArgs) EnvPswdVarRequired(b bool) RequiredArgs {
+// A flag that will be set to one if the dbPswd arg is required.
+func (o RequiredArgs) PswdRequired(b bool) RequiredArgs {
 	if b {
-		o |= EnvPswdVarRequired
+		o |= PswdRequired
 	} else {
-		o &= ^EnvPswdVarRequired
+		o &= ^PswdRequired
 	}
 	return o
 }

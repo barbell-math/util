@@ -18,7 +18,7 @@ type (
 // Creates a parser that has the --logFile flag. This flag will be used to
 // specify a single log file. The argument parser will return an open file
 // handle to the file for future writing.
-func NewSingleLogFileParser(f *os.File) *argparse.Parser {
+func NewSingleLogFileParser(f *os.File) argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddArg[*os.File, *translators.OpenFile](
 		&f, &b, "logFile",
@@ -30,8 +30,11 @@ func NewSingleLogFileParser(f *os.File) *argparse.Parser {
 					SetPermissions(0777),
 			),
 	)
-	rv, _ := b.ToParser("", "")
-	return &rv
+	rv, err := b.ToParser("", "")
+	if err != nil {
+		panic(err)
+	}
+	return rv
 }
 
 // Creates a parser that has -v and --verbose flags. These flags can be
@@ -41,7 +44,7 @@ func NewVerbosityParser[T basic.Int | basic.Uint](
 	val *T,
 	defaultVal T,
 	maxLevel T,
-) *argparse.Parser {
+) argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddArg[T, *translators.LimitedFlagCntr[T]](
 		val, &b, "verbose",
@@ -53,6 +56,9 @@ func NewVerbosityParser[T basic.Int | basic.Uint](
 			SetDescription("Sets the verbosity level. Specify multiple times to increase.").
 			SetTranslator(&translators.LimitedFlagCntr[T]{MaxTimes: maxLevel}),
 	)
-	rv, _ := b.ToParser("", "")
-	return &rv
+	rv, err := b.ToParser("", "")
+	if err != nil {
+		panic(err)
+	}
+	return rv
 }

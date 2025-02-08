@@ -127,7 +127,7 @@ func (p *Parser) getLongArg(s string) (*arg, error) {
 // namespace and must be unique. No long or short names can collide. All
 // computed args are added to a tree like data structure, which is used to
 // maintain the desired bottom up order of execution for computed arguments.
-func (p *Parser) AddSubParsers(others ...*Parser) error {
+func (p *Parser) AddSubParsers(others ...Parser) error {
 	for _, otherP := range others {
 		if otherP.numArgs > 0 {
 			p.subParsers = append(p.subParsers, otherP.subParsers...)
@@ -171,6 +171,12 @@ func (p *Parser) AddSubParsers(others ...*Parser) error {
 // stop all further parsing, print the help menu, and return. Any tokens that
 // were present before the help flag will be translated.
 func (p *Parser) Parse(t tokenIter) error {
+	// check the parser state
+	if err := p.checkConditionalRequiredArgsExist(); err != nil {
+		return err
+	}
+
+	// reset the parser state
 	for _, subP := range p.subParsers {
 		for i, arg := range subP {
 			arg.setDefaultVal()
@@ -183,6 +189,7 @@ func (p *Parser) Parse(t tokenIter) error {
 		return nil
 	})
 
+	// compute the parsers new state
 	if err := t.toArgValPairs(p).ToIter().ForEach(
 		func(
 			index int,
@@ -214,6 +221,7 @@ func (p *Parser) Parse(t tokenIter) error {
 		return customerr.AppendError(ParsingErr, err)
 	}
 
+	// validate the parsers new state
 	if err := p.checkRequiredArgsProvided(); err != nil {
 		return customerr.AppendError(ParsingErr, err)
 	}
@@ -221,6 +229,7 @@ func (p *Parser) Parse(t tokenIter) error {
 		return customerr.AppendError(ParsingErr, err)
 	}
 
+	// run all computer arguments to finalize state
 	if err := p.compedArgs.leftRightRootTraversal(func(c *computedArg) error {
 		return c.setVal()
 	}); err != nil {
@@ -228,6 +237,26 @@ func (p *Parser) Parse(t tokenIter) error {
 	}
 
 	return nil
+}
+
+func (p *Parser) checkConditionalRequiredArgsExist() error {
+	return p.longArgs.Vals().ForEach(
+		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			allConditionallyRequiredArgs := val.allConditionalArgs()
+			for _, conditionalArg := range allConditionallyRequiredArgs {
+				if _, err := p.longArgs.Get(&conditionalArg); err != nil {
+					return iter.Break, customerr.AppendError(
+						ParserConfigErr,
+						customerr.Wrap(
+							UnrecognizedConditionallyRequiredArgErr,
+							"Argument: %s", conditionalArg,
+						),
+					)
+				}
+			}
+			return iter.Continue, nil
+		},
+	)
 }
 
 func (p *Parser) checkRequiredArgsProvided() error {
@@ -330,7 +359,7 @@ func (p *Parser) Help() string {
 		longestArg + 2,
 		len(reqMarking),
 		15,
-		longestConditionallyRequiredArg,
+		longestConditionallyRequiredArg + 2,
 		80,
 	}
 
@@ -343,6 +372,11 @@ func (p *Parser) Help() string {
 	table[0] = tableHeaders[:]
 	iter.SliceElems(args).ForEach(
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
+			conditionalArgs := val.allConditionalArgs()
+			for i, v := range conditionalArgs {
+				conditionalArgs[i] = "--" + v
+			}
+
 			table[index+1] = make([]string, 6)
 			if val.shortFlag != byte(0) {
 				table[index+1][0] = fmt.Sprintf("-%c", val.shortFlag)
@@ -352,7 +386,7 @@ func (p *Parser) Help() string {
 				table[index+1][2] = reqMarking
 			}
 			table[index+1][3], _ = val.defaultValAsStr()
-			table[index+1][4] = strings.Join(val.allConditionalArgs(), " ")
+			table[index+1][4] = strings.Join(conditionalArgs, " ")
 			table[index+1][5] = val.description
 
 			return iter.Continue, nil
