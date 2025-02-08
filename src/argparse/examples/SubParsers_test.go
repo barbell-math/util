@@ -33,7 +33,7 @@ func Example_SubParserSimple() {
 	)
 	parser, err := b2.ToParser("Prog name", "Prog description")
 	fmt.Println("Parser error:", err)
-	err = parser.AddSubParsers(&subParser)
+	err = parser.AddSubParsers(subParser)
 	fmt.Println("Add Sub Parser error:", err)
 
 	args := []string{"--bool", "-i=3"}
@@ -139,9 +139,9 @@ func Example_SubParserComplex() {
 	)
 	p7, _ := b7.ToParser("", "")
 
-	p5.AddSubParsers(&p1, &p2)
-	p6.AddSubParsers(&p3, &p4)
-	p7.AddSubParsers(&p5, &p6)
+	p5.AddSubParsers(p1, p2)
+	p6.AddSubParsers(p3, p4)
+	p7.AddSubParsers(p5, p6)
 
 	args := []string{
 		"-a=3",

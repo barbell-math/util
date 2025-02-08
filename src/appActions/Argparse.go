@@ -13,7 +13,7 @@ func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
 	val *E,
 	defaultVal E,
 	conditionalArgs []argparse.ArgConditionality[E],
-) *argparse.Parser {
+) argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddEnum(
 		val, &b, "action",
@@ -23,8 +23,12 @@ func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
 			SetRequired(false).
 			SetDefaultVal(defaultVal).
 			SetDescription("The action that the application should perform.").
-			SetTranslator(translators.Enum[E, EP]{}),
+			SetTranslator(translators.Enum[E, EP]{}).
+			SetConditionallyRequired(conditionalArgs),
 	)
-	rv, _ := b.ToParser("", "")
-	return &rv
+	rv, err := b.ToParser("", "")
+	if err != nil {
+		panic(err)
+	}
+	return rv
 }

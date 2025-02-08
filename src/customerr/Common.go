@@ -42,6 +42,17 @@ func Assert(op func() error) {
 
 // Wraps an error with a predetermined format, as shown below.
 //
+//	<wrapped information>
+//	  |- <original error>
+//
+// This allows for consistent error formatting.
+func InverseWrap(origErr error, fmtStr string, vals ...any) error {
+	fmtStrWithErr := fmt.Sprintf("%s\n  |- %%w", fmtStr)
+	return fmt.Errorf(fmtStrWithErr, append(vals, origErr)...)
+}
+
+// Wraps an error with a predetermined format, as shown below.
+//
 //	<original error>
 //	  |- <wrapped information>
 //

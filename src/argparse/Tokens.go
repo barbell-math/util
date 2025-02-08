@@ -167,12 +167,18 @@ func generateConfigFileTokens(file string) ([]token, error) {
 	names := []string{}
 	curName := ""
 	for scanner.Scan() {
-		line := strings.SplitN(strings.TrimSpace(scanner.Text()), " ", 2)
-		for i, l := range line {
-			line[i] = strings.TrimSpace(l)
+		trimmedLine := strings.TrimSpace(scanner.Text())
+
+		if (len(trimmedLine) >= 2 && trimmedLine[0:2] == "//") || len(trimmedLine) == 0 {
+			continue
 		}
 
-		if len(line) != 2 && (len(line) == 1 && line[0] != "}") {
+		splitLine := strings.SplitN(trimmedLine, " ", 2)
+		for i, l := range splitLine {
+			splitLine[i] = strings.TrimSpace(l)
+		}
+
+		if len(splitLine) != 2 && (len(splitLine) == 1 && splitLine[0] != "}") {
 			return rv, wrapErr(customerr.WrapValueList(
 				ParserConfigFileSyntaxErr,
 				fmt.Sprintf("Syntax error on line %d. Expected one of the following formats", cntr+1),
@@ -182,7 +188,7 @@ func generateConfigFileTokens(file string) ([]token, error) {
 						Item:     "'<name> <value>'",
 					},
 					customerr.WrapListVal{
-						ItemName: "Argument group definition",
+						ItemName: "Argument group definition open",
 						Item:     "'<name> {'",
 					},
 					customerr.WrapListVal{
@@ -191,7 +197,7 @@ func generateConfigFileTokens(file string) ([]token, error) {
 					},
 					customerr.WrapListVal{
 						ItemName: "Got",
-						Item:     line,
+						Item:     splitLine,
 					},
 					customerr.WrapListVal{
 						ItemName: "Note",
@@ -201,7 +207,7 @@ func generateConfigFileTokens(file string) ([]token, error) {
 			))
 		}
 
-		if line[0] == "}" {
+		if splitLine[0] == "}" {
 			if len(names) == 0 {
 				return rv, wrapErr(customerr.Wrap(
 					ParserConfigFileSyntaxErr,
@@ -211,14 +217,14 @@ func generateConfigFileTokens(file string) ([]token, error) {
 			}
 			names = names[0 : len(names)-1]
 			curName = strings.Join(names, "")
-		} else if line[1] == "{" {
-			names = append(names, line[0])
+		} else if splitLine[1] == "{" {
+			names = append(names, splitLine[0])
 			curName = strings.Join(names, "")
 		} else {
 			rv = append(
 				rv,
-				token{value: curName + line[0], _type: longFlagToken},
-				token{value: line[1], _type: valueToken},
+				token{value: curName + splitLine[0], _type: longFlagToken},
+				token{value: splitLine[1], _type: valueToken},
 			)
 		}
 
@@ -232,7 +238,6 @@ func generateConfigFileTokens(file string) ([]token, error) {
 	}
 
 	return rv, nil
-
 }
 
 // Takes a sequence of tokens and turns it into a sequence of argument -> value

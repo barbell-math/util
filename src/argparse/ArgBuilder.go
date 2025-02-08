@@ -221,20 +221,5 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 		}
 	}
 
-	for i := 0; i < len(b.args); i++ {
-		allConditionallyRequiredArgs := b.args[i].allConditionalArgs()
-		for _, conditionalArg := range allConditionallyRequiredArgs {
-			if _, err := rv.longArgs.Get(&conditionalArg); err != nil {
-				return rv, customerr.AppendError(
-					ParserConfigErr,
-					customerr.Wrap(
-						UnrecognizedConditionallyRequiredArgErr,
-						"Argument: %s", conditionalArg,
-					),
-				)
-			}
-		}
-	}
-
 	return rv, nil
 }

@@ -11,19 +11,19 @@ type (
 	// A bit flag that is used to set which arguments are required
 	RequiredArgs int
 	ArgparseVals struct {
-		User       string
-		EnvPswdVar string
-		NetLoc     string
-		Port       uint16
-		DBName     string
+		User   string
+		Pswd   string
+		NetLoc string
+		Port   uint16
+		DBName string
 	}
 )
 
 const (
 	// A flag that will be set to one if the dbUser arg is required.
 	UserRequired RequiredArgs = 1 << iota
-	// A flag that will be set to one if the dbEnvPswdVar arg is required.
-	EnvPswdVarRequired
+	// A flag that will be set to one if the dbPswd arg is required.
+	PswdRequired
 	// A flag that will be set to one if the dbNetLoc arg is required.
 	NetLocRequired
 	// A flag that will be set to one if the dbPort arg is required.
@@ -44,7 +44,7 @@ const (
 func (a *ArgparseVals) GetParser(
 	reqArgs RequiredArgs,
 	defaults ArgparseVals,
-) *argparse.Parser {
+) argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddArg[string, translators.BuiltinString](
 		&a.User,
@@ -57,15 +57,15 @@ func (a *ArgparseVals) GetParser(
 			SetRequired(reqArgs.GetFlag(UserRequired)).
 			SetDescription("The user to use when accessing the database."),
 	)
-	argparse.AddArg[string, translators.BuiltinString](
-		&a.EnvPswdVar,
+	argparse.AddArg[string, translators.EnvVar](
+		&a.Pswd,
 		&b,
-		"dbEnvPswdVar",
-		argparse.NewOpts[string, translators.BuiltinString]().
+		"dbPswd",
+		argparse.NewOpts[string, translators.EnvVar]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('p').
-			SetDefaultVal(defaults.EnvPswdVar).
-			SetRequired(reqArgs.GetFlag(EnvPswdVarRequired)).
+			SetDefaultVal(defaults.Pswd).
+			SetRequired(reqArgs.GetFlag(PswdRequired)).
 			SetDescription("The environment variable to use to look up the password to access the database."),
 	)
 	argparse.AddArg[string, translators.BuiltinString](
@@ -98,6 +98,9 @@ func (a *ArgparseVals) GetParser(
 			SetRequired(reqArgs.GetFlag(DBNameRequired)).
 			SetDescription("The name of the database to connect to."),
 	)
-	rv, _ := b.ToParser("", "")
-	return &rv
+	rv, err := b.ToParser("", "")
+	if err != nil {
+		panic(err)
+	}
+	return rv
 }

@@ -73,6 +73,20 @@ func Eq(l any, r any, t *testing.T) {
 	}
 }
 
+func EqOneOf(r []any, l any, t *testing.T) {
+	for _, rVal := range r {
+		if l == rVal {
+			return
+		}
+	}
+	_, f, line, _ := runtime.Caller(1)
+	FormatError(
+		l, r,
+		"The supplied value is not in the supplied slice.",
+		f, line, t,
+	)
+}
+
 func FloatEq[T ~float32 | float64](l T, r T, eps T, t *testing.T) {
 	if l-r > eps {
 		_, f, line, _ := runtime.Caller(1)

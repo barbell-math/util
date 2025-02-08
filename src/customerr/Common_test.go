@@ -26,6 +26,11 @@ func TestAssert(t *testing.T) {
 	)
 }
 
+func TestInverseWrap(t *testing.T) {
+	e := InverseWrap(ValOutsideRange, "%d", 100)
+	test.Eq(fmt.Sprintf("100\n  |- %s", ValOutsideRange.Error()), e.Error(), t)
+}
+
 func TestWrap(t *testing.T) {
 	e := Wrap(ValOutsideRange, "%d", 100)
 	test.Eq(fmt.Sprintf("%s\n  |- 100", ValOutsideRange.Error()), e.Error(), t)

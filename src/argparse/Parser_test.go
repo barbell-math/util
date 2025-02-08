@@ -26,7 +26,7 @@ func TestParserAddSubParsersEmptyParser(t *testing.T) {
 
 	p2, err := (&ArgBuilder{}).ToParser("", "")
 
-	err = p1.AddSubParsers(&p2)
+	err = p1.AddSubParsers(p2)
 	test.Nil(err, t)
 	test.Eq(len(p1.subParsers), 1, t)
 	test.Eq(len(p1.subParsers[0]), 1, t)
@@ -84,7 +84,7 @@ func TestParserAddSubParsersNonEmptyDuplicateLongNames(t *testing.T) {
 	p2, err := b2.ToParser("", "")
 	test.Nil(err, t)
 
-	err = p1.AddSubParsers(&p2)
+	err = p1.AddSubParsers(p2)
 	test.ContainsError(ParserCombinationErr, err, t)
 	test.ContainsError(DuplicateLongNameErr, err, t)
 	test.ContainsError(containerTypes.Duplicate, err, t)
@@ -116,7 +116,7 @@ func TestParserAddSubParsersNonEmptyDuplicateShortNames(t *testing.T) {
 	p2, err := b2.ToParser("", "")
 	test.Nil(err, t)
 
-	err = p1.AddSubParsers(&p2)
+	err = p1.AddSubParsers(p2)
 	test.ContainsError(ParserCombinationErr, err, t)
 	test.ContainsError(DuplicateShortNameErr, err, t)
 	test.ContainsError(containerTypes.Duplicate, err, t)
@@ -208,9 +208,9 @@ func TestParserAddSubParsers(t *testing.T) {
 	p7, err := b7.ToParser("", "")
 	test.Nil(err, t)
 
-	p5.AddSubParsers(&p1, &p2)
-	p6.AddSubParsers(&p3, &p4)
-	p7.AddSubParsers(&p5, &p6)
+	p5.AddSubParsers(p1, p2)
+	p6.AddSubParsers(p3, p4)
+	p7.AddSubParsers(p5, p6)
 
 	longKeys, err := iter.PntrToVal[string](p7.longArgs.Keys()).Collect()
 	test.Nil(err, t)
@@ -465,9 +465,9 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	p7, err := b7.ToParser("", "")
 	test.Nil(err, t)
 
-	p5.AddSubParsers(&p1, &p2)
-	p6.AddSubParsers(&p3, &p4)
-	p7.AddSubParsers(&p5, &p6)
+	p5.AddSubParsers(p1, p2)
+	p6.AddSubParsers(p3, p4)
+	p7.AddSubParsers(p5, p6)
 
 	err = p7.Parse(ArgvIterFromSlice([]string{
 		"-a=3",
@@ -535,6 +535,32 @@ func TestParserParseConditionallyRequiredArguments(t *testing.T) {
 	test.Nil(err, t)
 	test.Eq("foo", res.S1, t)
 	test.Eq("asdf", res.S2, t)
+}
+
+func TestParserParseUnrecognizedConditionallyRequiredArg(t *testing.T) {
+	res := ""
+	b := ArgBuilder{}
+
+	AddArg[string, translators.BuiltinString](
+		&res,
+		&b,
+		"str",
+		NewOpts[string, translators.BuiltinString]().
+			SetShortName('t').
+			SetConditionallyRequired([]ArgConditionality[string]{
+				ArgConditionality[string]{
+					Requires: []string{"foo"},
+					When:     ArgSupplied[string],
+				},
+			}),
+	)
+
+	p, err := b.ToParser("", "")
+	test.Nil(err, t)
+
+	err = p.Parse(ArgvIterFromSlice([]string{}).ToTokens())
+	test.ContainsError(ParserConfigErr, err, t)
+	test.ContainsError(UnrecognizedConditionallyRequiredArgErr, err, t)
 }
 
 func TestParserParseConditionallyRequiredArgumentsWithDefaults(t *testing.T) {

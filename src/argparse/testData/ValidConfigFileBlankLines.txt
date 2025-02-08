@@ -1,0 +1,28 @@
+
+Name0 Value0
+
+Group1 {
+
+	Group2 {
+	
+		Name1 Value1
+		
+		Group3 {
+			
+			Name2 Value2
+		}
+		
+		Name3 Value3
+
+		Group4 {
+		
+			Group5 {
+			
+			}
+		}
+	}
+	
+	Name4 Value4
+	Name5 Value5
+}
+Name6 Value6
