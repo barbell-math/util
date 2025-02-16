@@ -119,6 +119,11 @@ func (o *{{ .EnumType }}) FromString(s string) error {
 	}
 }
 `,
+			"valueFunc": `
+func (o {{ .EnumType }}) Value() {{ .EnumType }} {
+	return o
+}
+`,
 			"defaultFunc": `
 func New{{ .CapEnumType }}() {{ .EnumType }} {
 	return {{ .Default }}
@@ -141,6 +146,7 @@ var (
 )
 
 {{template "defaultFunc" .}}
+{{template "valueFunc" .}}
 {{template "validFunc" .}}
 {{template "stringFunc" .}}
 {{template "marshalJSONFunc" .}}

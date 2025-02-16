@@ -7,6 +7,15 @@ import (
 	"github.com/barbell-math/util/src/customerr"
 )
 
+type (
+	// Options that define how to print a table in the [WriteTable] func.
+	WriteTableOpts struct {
+		ColWidths     []int
+		ColSeparators []bool
+		RowSeparators bool
+	}
+)
+
 // Breaks a body of text into separate lines that are no longer than maxLen.
 // Line splits are made on word (a.k.a. white space delimited) boundaries.
 func WordWrapLines(text string, maxLen int) []string {
@@ -36,27 +45,60 @@ func WordWrapLines(text string, maxLen int) []string {
 
 // Writes a table to the supplied string builder given the supplied data and
 // column widths. All data within the rows will be split using [WordWrapLines].
-func WriteTable(sb *strings.Builder, table [][]string, colWidths []int) error {
+func WriteTable(
+	sb *strings.Builder,
+	table [][]string,
+	opts WriteTableOpts,
+) error {
 	if len(table) == 0 {
 		return nil
 	}
-	if len(table[0]) != len(colWidths) {
+	if len(table[0]) != len(opts.ColWidths) {
 		return customerr.Wrap(
 			customerr.DimensionsDoNotAgree,
-			"The number of columns in the table (%d) does not equal the number of elems in the colWidths slice (%d)",
-			len(table[0]), len(colWidths),
+			"The number of columns in the table (%d) does not equal the number of elems in the ColWidths slice (%d)",
+			len(table[0]), len(opts.ColWidths),
+		)
+	}
+	if len(table[0])+1 != len(opts.ColSeparators) {
+		return customerr.Wrap(
+			customerr.DimensionsDoNotAgree,
+			"The number of columns in the table plus one (%d) does not equal the number of elems in the ColSeparators slice (%d)",
+			len(table[0])+1, len(opts.ColSeparators),
 		)
 	}
 
-	fmtDirectives := make([]string, len(colWidths))
-	for i := 0; i < len(colWidths); i++ {
-		fmtDirectives[i] = fmt.Sprintf("%%-%ds ", colWidths[i])
+	fmtDirectives := make([]string, len(opts.ColWidths))
+	rowSeparators := make([]string, len(opts.ColWidths))
+	for i := 0; i < len(opts.ColWidths); i++ {
+		leadingColSeparator := opts.ColSeparators[i]
+		trailingColSeparator := false
+		if i+1 == len(opts.ColWidths) {
+			trailingColSeparator = opts.ColSeparators[i+1]
+		}
+
+		if leadingColSeparator && trailingColSeparator {
+			fmtDirectives[i] = fmt.Sprintf("| %%-%ds |", opts.ColWidths[i])
+			rowSeparators[i] = fmt.Sprintf(
+				"|-%s-|", strings.Repeat("-", opts.ColWidths[i]),
+			)
+		} else if leadingColSeparator {
+			fmtDirectives[i] = fmt.Sprintf("| %%-%ds ", opts.ColWidths[i])
+			rowSeparators[i] = fmt.Sprintf(
+				"|-%s-", strings.Repeat("-", opts.ColWidths[i]),
+			)
+		} else {
+			fmtDirectives[i] = fmt.Sprintf("%%-%ds ", opts.ColWidths[i])
+			rowSeparators[i] = fmt.Sprintf(
+				"-%s", strings.Repeat("-", opts.ColWidths[i]),
+			)
+		}
 	}
 
-	splitRow := make([][]string, len(colWidths))
+	splitRow := make([][]string, len(opts.ColWidths))
 	for _, row := range table {
 		for j, _ := range splitRow {
-			splitRow[j] = WordWrapLines(row[j], colWidths[j])
+			splitRow[j] = WordWrapLines(row[j], opts.ColWidths[j])
 		}
 
 		for lineCntr := 0; ; lineCntr++ {
@@ -80,6 +122,11 @@ func WriteTable(sb *strings.Builder, table [][]string, colWidths []int) error {
 			}
 			sb.WriteByte('\n')
 		}
+
+		for j := 0; j < len(splitRow) && opts.RowSeparators; j++ {
+			sb.WriteString(rowSeparators[j])
+		}
+		sb.WriteByte('\n')
 	}
 
 	return nil

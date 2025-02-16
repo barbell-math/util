@@ -338,31 +338,16 @@ func (p *Parser) Help() string {
 		"", "", "",
 		"Default Val", "Conditionally Reqs", "Description",
 	}
-	longestArg := 0
-	longestConditionallyRequiredArg := len(tableHeaders[condReqIdx])
-	p.longArgs.Vals().ForEach(
-		func(index int, val *longArg) (iter.IteratorFeedback, error) {
-			if len(val.longFlag) > longestArg {
-				longestArg = len(val.longFlag)
-			}
-			for _, condArg := range val.allConditionalArgs() {
-				if len(condArg) > longestConditionallyRequiredArg {
-					longestConditionallyRequiredArg = len(condArg)
-				}
-			}
-			return iter.Continue, nil
-		},
-	)
-
 	colWidths := [6]int{
 		2,
-		longestArg + 2,
+		0,
 		len(reqMarking),
-		15,
-		longestConditionallyRequiredArg + 2,
+		len(tableHeaders[defaultIdx]),
+		len(tableHeaders[condReqIdx]),
 		80,
 	}
 
+	// Sorts args alhpabetically
 	args, _ := p.longArgs.Vals().Collect()
 	sort.Slice(args, func(i, j int) bool {
 		return args[i].longFlag < args[j].longFlag
@@ -375,6 +360,15 @@ func (p *Parser) Help() string {
 			conditionalArgs := val.allConditionalArgs()
 			for i, v := range conditionalArgs {
 				conditionalArgs[i] = "--" + v
+			}
+
+			if len(val.longFlag) > colWidths[longValIdx]+2 {
+				colWidths[longValIdx] = len(val.longFlag) + 2
+			}
+			for _, condArg := range val.allConditionalArgs() {
+				if len(condArg) > colWidths[condReqIdx]+2 {
+					colWidths[condReqIdx] = len(condArg) + 2
+				}
 			}
 
 			table[index+1] = make([]string, 6)
@@ -401,6 +395,10 @@ func (p *Parser) Help() string {
 	sb.WriteByte('\n')
 	sb.WriteByte('\n')
 	// Intentionally ignored err. Left for debugging purposes
-	_ = strops.WriteTable(&sb, table, colWidths[:])
+	_ = strops.WriteTable(&sb, table, strops.WriteTableOpts{
+		ColWidths:     colWidths[:],
+		ColSeparators: []bool{false, false, false, true, true, true, true},
+		RowSeparators: true,
+	})
 	return sb.String()
 }

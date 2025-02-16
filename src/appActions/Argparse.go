@@ -6,6 +6,10 @@ import (
 	"github.com/barbell-math/util/src/enum"
 )
 
+const (
+	ActionArg string = "action"
+)
+
 // Creates a parser that has -a and --action falgs. These flags will be used to
 // set an enum value that should be use to tell your application what action it
 // needs to perform.
@@ -16,7 +20,7 @@ func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
 ) argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddEnum(
-		val, &b, "action",
+		val, &b, ActionArg,
 		argparse.NewOpts[E, translators.Enum[E, EP]]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('a').
