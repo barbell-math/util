@@ -1,6 +1,8 @@
 package containers
 
 import (
+	"fmt"
+
 	"github.com/barbell-math/util/src/container/basic"
 	"github.com/barbell-math/util/src/container/containerTypes"
 	"github.com/barbell-math/util/src/container/dynamicContainers"
@@ -35,9 +37,15 @@ func MapDisjointKeyedUnion[K any, V any](
 	return r.Keys().ForEach(
 		func(index int, key K) (iter.IteratorFeedback, error) {
 			if _, err := l.Get(key); err == nil {
-				return iter.Break, customerr.Wrap(
-					containerTypes.Duplicate, "%+v", key,
-				)
+				if stringer, ok := any(key).(fmt.Stringer); ok {
+					return iter.Break, customerr.Wrap(
+						containerTypes.Duplicate, stringer.String(),
+					)
+				} else {
+					return iter.Break, customerr.Wrap(
+						containerTypes.Duplicate, "%+v", key,
+					)
+				}
 			}
 			val, _ := r.Get(key)
 			l.Emplace(basic.Pair[K, V]{key, val})

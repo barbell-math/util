@@ -15,13 +15,18 @@ type (
 	}
 )
 
+const (
+	LogFileArg string = "logFile"
+	VerboseArg string = "verbose"
+)
+
 // Creates a parser that has the --logFile flag. This flag will be used to
 // specify a single log file. The argument parser will return an open file
 // handle to the file for future writing.
 func NewSingleLogFileParser(f *os.File) argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddArg[*os.File, *translators.OpenFile](
-		&f, &b, "logFile",
+		&f, &b, LogFileArg,
 		argparse.NewOpts[*os.File, *translators.OpenFile]().
 			SetDescription("The file to send all log messages to").
 			SetTranslator(
@@ -47,7 +52,7 @@ func NewVerbosityParser[T basic.Int | basic.Uint](
 ) argparse.Parser {
 	b := argparse.ArgBuilder{}
 	argparse.AddArg[T, *translators.LimitedFlagCntr[T]](
-		val, &b, "verbose",
+		val, &b, VerboseArg,
 		argparse.NewOpts[T, *translators.LimitedFlagCntr[T]]().
 			SetArgType(argparse.MultiFlagArgType).
 			SetShortName('v').

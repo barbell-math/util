@@ -20,6 +20,10 @@ func NewTokenType() tokenType {
 	return unknownTokenType
 }
 
+func (o tokenType) Value() tokenType {
+	return o
+}
+
 func (o tokenType) Valid() error {
 	switch o {
 

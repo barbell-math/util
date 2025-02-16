@@ -31,21 +31,21 @@ type (
 		subParsers   [][]arg
 		compedArgs   computedArgsTree
 		requiredArgs containers.HashMap[
-			*string,
+			string,
 			*longArg,
-			widgets.BasePntr[string, widgets.BuiltinString],
+			widgets.BuiltinString,
 			widgets.BasePntr[longArg, *longArg],
 		]
 		shortArgs containers.HashMap[
-			*byte,
+			byte,
 			*shortArg,
-			widgets.BasePntr[byte, widgets.BuiltinByte],
+			widgets.BuiltinByte,
 			widgets.BasePntr[shortArg, *shortArg],
 		]
 		longArgs containers.HashMap[
-			*string,
+			string,
 			*longArg,
-			widgets.BasePntr[string, widgets.BuiltinString],
+			widgets.BuiltinString,
 			widgets.BasePntr[longArg, *longArg],
 		]
 	}
@@ -87,28 +87,28 @@ func newParser(
 		compedArgs: computedArgsTree{compedArgs: computedArgs},
 	}
 	rv.requiredArgs, _ = containers.NewHashMap[
-		*string,
+		string,
 		*longArg,
-		widgets.BasePntr[string, widgets.BuiltinString],
+		widgets.BuiltinString,
 		widgets.BasePntr[longArg, *longArg],
 	](len(args))
 	rv.shortArgs, _ = containers.NewHashMap[
-		*byte,
+		byte,
 		*shortArg,
-		widgets.BasePntr[byte, widgets.BuiltinByte],
+		widgets.BuiltinByte,
 		widgets.BasePntr[shortArg, *shortArg],
 	](len(args))
 	rv.longArgs, _ = containers.NewHashMap[
-		*string,
+		string,
 		*longArg,
-		widgets.BasePntr[string, widgets.BuiltinString],
+		widgets.BuiltinString,
 		widgets.BasePntr[longArg, *longArg],
 	](len(args))
 	return rv
 }
 
 func (p *Parser) getShortArg(b byte) (*arg, error) {
-	a, err := p.shortArgs.Get(&b)
+	a, err := p.shortArgs.Get(b)
 	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedShortArgErr, "Argument: '%c'", b)
 	}
@@ -116,7 +116,7 @@ func (p *Parser) getShortArg(b byte) (*arg, error) {
 }
 
 func (p *Parser) getLongArg(s string) (*arg, error) {
-	a, err := p.longArgs.Get(&s)
+	a, err := p.longArgs.Get(s)
 	if err != nil {
 		return nil, customerr.Wrap(UnrecognizedLongArgErr, "Argument: '%s'", s)
 	}
@@ -131,14 +131,14 @@ func (p *Parser) AddSubParsers(others ...Parser) error {
 	for _, otherP := range others {
 		if otherP.numArgs > 0 {
 			p.subParsers = append(p.subParsers, otherP.subParsers...)
-			if err := containers.MapDisjointKeyedUnion[*byte, *shortArg](
+			if err := containers.MapDisjointKeyedUnion[byte, *shortArg](
 				&p.shortArgs, &otherP.shortArgs,
 			); err != nil {
 				return customerr.AppendError(
 					ParserCombinationErr, DuplicateShortNameErr, err,
 				)
 			}
-			if err := containers.MapDisjointKeyedUnion[*string, *longArg](
+			if err := containers.MapDisjointKeyedUnion[string, *longArg](
 				&p.longArgs, &otherP.longArgs,
 			); err != nil {
 				return customerr.AppendError(
@@ -146,7 +146,7 @@ func (p *Parser) AddSubParsers(others ...Parser) error {
 				)
 			}
 			// Required args are a subset of longArgs, no need to check for dups
-			containers.MapKeyedUnion[*string, *longArg](
+			containers.MapKeyedUnion[string, *longArg](
 				&p.requiredArgs, &otherP.requiredArgs,
 			)
 			p.compedArgs.subCompedArgs = append(
@@ -244,7 +244,7 @@ func (p *Parser) checkConditionalRequiredArgsExist() error {
 		func(index int, val *longArg) (iter.IteratorFeedback, error) {
 			allConditionallyRequiredArgs := val.allConditionalArgs()
 			for _, conditionalArg := range allConditionallyRequiredArgs {
-				if _, err := p.longArgs.Get(&conditionalArg); err != nil {
+				if _, err := p.longArgs.Get(conditionalArg); err != nil {
 					return iter.Break, customerr.AppendError(
 						ParserConfigErr,
 						customerr.Wrap(
@@ -287,7 +287,7 @@ func (p *Parser) checkConditionallyRequiredArgsProvided() error {
 				return iter.Continue, nil
 			}
 			for _, condArg := range val.conditionallyRequires() {
-				if iterArg, _ := p.longArgs.Get(&condArg); !iterArg.present {
+				if iterArg, _ := p.longArgs.Get(condArg); !iterArg.present {
 					if _, ok := missingRequiredArgs[val.longFlag]; !ok {
 						missingRequiredArgs[val.longFlag] = []string{}
 					}
@@ -338,31 +338,16 @@ func (p *Parser) Help() string {
 		"", "", "",
 		"Default Val", "Conditionally Reqs", "Description",
 	}
-	longestArg := 0
-	longestConditionallyRequiredArg := len(tableHeaders[condReqIdx])
-	p.longArgs.Vals().ForEach(
-		func(index int, val *longArg) (iter.IteratorFeedback, error) {
-			if len(val.longFlag) > longestArg {
-				longestArg = len(val.longFlag)
-			}
-			for _, condArg := range val.allConditionalArgs() {
-				if len(condArg) > longestConditionallyRequiredArg {
-					longestConditionallyRequiredArg = len(condArg)
-				}
-			}
-			return iter.Continue, nil
-		},
-	)
-
 	colWidths := [6]int{
 		2,
-		longestArg + 2,
+		0,
 		len(reqMarking),
-		15,
-		longestConditionallyRequiredArg + 2,
+		len(tableHeaders[defaultIdx]),
+		len(tableHeaders[condReqIdx]),
 		80,
 	}
 
+	// Sorts args alhpabetically
 	args, _ := p.longArgs.Vals().Collect()
 	sort.Slice(args, func(i, j int) bool {
 		return args[i].longFlag < args[j].longFlag
@@ -375,6 +360,15 @@ func (p *Parser) Help() string {
 			conditionalArgs := val.allConditionalArgs()
 			for i, v := range conditionalArgs {
 				conditionalArgs[i] = "--" + v
+			}
+
+			if len(val.longFlag) > colWidths[longValIdx]+2 {
+				colWidths[longValIdx] = len(val.longFlag) + 2
+			}
+			for _, condArg := range val.allConditionalArgs() {
+				if len(condArg) > colWidths[condReqIdx]+2 {
+					colWidths[condReqIdx] = len(condArg) + 2
+				}
 			}
 
 			table[index+1] = make([]string, 6)
@@ -401,6 +395,10 @@ func (p *Parser) Help() string {
 	sb.WriteByte('\n')
 	sb.WriteByte('\n')
 	// Intentionally ignored err. Left for debugging purposes
-	_ = strops.WriteTable(&sb, table, colWidths[:])
+	_ = strops.WriteTable(&sb, table, strops.WriteTableOpts{
+		ColWidths:     colWidths[:],
+		ColSeparators: []bool{false, false, false, true, true, true, true},
+		RowSeparators: true,
+	})
 	return sb.String()
 }

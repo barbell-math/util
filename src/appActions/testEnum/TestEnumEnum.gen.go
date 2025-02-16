@@ -19,6 +19,10 @@ func NewTestEnum() TestEnum {
 	return UnknownAppAction
 }
 
+func (o TestEnum) Value() TestEnum {
+	return o
+}
+
 func (o TestEnum) Valid() error {
 	switch o {
 
