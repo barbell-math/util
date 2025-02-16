@@ -14,28 +14,39 @@ type (
 		// Used by: [Parse], [Flatten], [FromStructs]
 		//
 		// Default: See the [NewOptionsFlag] function.
-		optionsFlag `default:"NewOptionsFlag()" setter:"t" getter:"f"`
+		//gen:structDefaultInit default NewOptionsFlag()
+		//gen:structDefaultInit setter
+		optionsFlag
 
 		// Description: determines what character is considered to be a comment
 		//
 		// Used by: [Parse]
 		//
 		// Default: '#'
-		comment rune `default:"'#'" setter:"t" getter:"t"`
+		//gen:structDefaultInit default '#'
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		comment rune
 		// Description: determines what character is considered to be the
 		// delimiter that separates fields
 		//
 		// Used by: [Parse], [Flatten]
 		//
 		// Default: ','
-		delimiter rune `default:"','" setter:"t" getter:"t"`
+		//gen:structDefaultInit default ','
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		delimiter rune
 		// Description: set to the desired struct tag name to use when mapping
 		// values to the appropriate fields in the struct
 		//
 		// Used by: [ToStructs], [FromStructs]
 		//
 		// Default: "csv"
-		structTagName string `default:"\"csv\"" setter:"t" getter:"t"`
+		//gen:structDefaultInit default "csv"
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		structTagName string
 		// Description: the date time format to use when attempting to parse. No
 		// correctness checking is performed on the date time format string. Any
 		// errors from incorrect date time formats will become apparent when
@@ -44,7 +55,11 @@ type (
 		// Used by: [ToStructs], [FromStructs]
 		//
 		// Default: [time.DateTime]
-		dateTimeFormat string `default:"time.DateTime" import:"time" setter:"t" getter:"t"`
+		//gen:structDefaultInit default time.DateTime
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		//gen:structDefaultInit imports time
+		dateTimeFormat string
 		// Description: the list of headers to use should you want them to be
 		// different from the options supplied by the struct field names or
 		// tag names.
@@ -52,7 +67,9 @@ type (
 		// Used by: [FromStructs]
 		//
 		// Default: true
-		headers []string `default:"[]string{}" setter:"f" getter:"t"`
+		//gen:structDefaultInit default []string{}
+		//gen:structDefaultInit getter
+		headers []string
 	}
 )
 

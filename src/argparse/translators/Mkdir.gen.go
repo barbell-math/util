@@ -14,6 +14,11 @@ func NewMkdir() *Mkdir {
 
 // The permissions used to create all dirs and sub-dirs. See
 // [os.MkdirAll] for reference.
+//
+//gen:structDefaultInit default 0644
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports io/fs
 func (o *Mkdir) SetPermissions(v fs.FileMode) *Mkdir {
 	o.permissions = v
 	return o
@@ -21,6 +26,11 @@ func (o *Mkdir) SetPermissions(v fs.FileMode) *Mkdir {
 
 // The permissions used to create all dirs and sub-dirs. See
 // [os.MkdirAll] for reference.
+//
+//gen:structDefaultInit default 0644
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports io/fs
 func (o *Mkdir) GetPermissions() fs.FileMode {
 	return o.permissions
 }

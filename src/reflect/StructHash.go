@@ -17,7 +17,10 @@ type (
 	//gen:enum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs | followInterfaces | recurseStructs
 	optionsFlag    int
 	structHashOpts struct {
-		optionsFlag `default:"NewOptionsFlag()" setter:"t" getter:"f"`
+		//gen:structDefaultInit default NewOptionsFlag()
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		optionsFlag
 	}
 )
 

@@ -21,16 +21,28 @@ type (
 	Mkdir struct {
 		// The permissions used to create all dirs and sub-dirs. See
 		// [os.MkdirAll] for reference.
-		permissions fs.FileMode `default:"0644" setter:"t" getter:"t" import:"io/fs"`
+		//gen:structDefaultInit default 0644
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		//gen:structDefaultInit imports io/fs
+		permissions fs.FileMode
 	}
 	// A translator that makes the supplied file.
 	OpenFile struct {
 		// The flags used to determine the file mode. See [os.RDONLY] and
 		// friends.
-		flags int `default:"os.O_RDONLY" setter:"t" getter:"t" import:"os"`
+		//gen:structDefaultInit default os.O_RDONLY
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		//gen:structDefaultInit imports os
+		flags int
 		// The permissions used to open the file with. See [os.OpenFile] for
 		// reference.
-		permissions fs.FileMode `default:"0644" setter:"t" getter:"t" import:"io/fs"`
+		//gen:structDefaultInit default 0644
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		//gen:structDefaultInit imports io/fs
+		permissions fs.FileMode
 	}
 )
 

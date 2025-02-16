@@ -10,7 +10,17 @@ func NewStructHashOpts() *structHashOpts {
 	}
 }
 
+//gen:structDefaultInit default NewOptionsFlag()
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
 func (o *structHashOpts) SetOptionsFlag(v optionsFlag) *structHashOpts {
 	o.optionsFlag = v
 	return o
+}
+
+//gen:structDefaultInit default NewOptionsFlag()
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+func (o *structHashOpts) GetOptionsFlag() optionsFlag {
+	return o.optionsFlag
 }
