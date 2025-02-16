@@ -63,7 +63,10 @@ import (
 			"eqFunc": `
 // Returns true if l equals r. Uses the Eq operator provided by the 
 // {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType }}) Eq(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {
+func (_ *{{ .AliasType }}) Eq(
+	l *{{ .AliasType }},
+	r *{{ .AliasType }},
+) bool {
 	var tmp {{ .BaseTypeWidget }}
 	return tmp.Eq((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))
 }
@@ -71,7 +74,10 @@ func (_ *{{ .AliasType }}) Eq(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {
 			"ltFunc": `
 // Returns true if l is less than r. Uses the Lt operator provided by the 
 // {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType }}) Lt(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {
+func (_ *{{ .AliasType }}) Lt(
+	l *{{ .AliasType }},
+	r *{{ .AliasType }},
+) bool {
 	var tmp {{ .BaseTypeWidget }}
 	return tmp.Lt((*{{ .BaseType }})(l), (*{{ .BaseType }})(r))
 }
@@ -79,7 +85,9 @@ func (_ *{{ .AliasType }}) Lt(l *{{ .AliasType }}, r *{{ .AliasType }}) bool {
 			"hashFunc": `
 // Returns a hash to represent other. The hash that is returned will be supplied
 // by the {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType }}) Hash(other *{{ .AliasType }}) hash.Hash {
+func (_ *{{ .AliasType }}) Hash(
+	other *{{ .AliasType }},
+) hash.Hash {
 	var tmp {{ .BaseTypeWidget }}
 	return tmp.Hash((*{{ .BaseType }})(other))
 }
@@ -87,7 +95,9 @@ func (_ *{{ .AliasType }}) Hash(other *{{ .AliasType }}) hash.Hash {
 			"zeroFunc": `
 // Zeros the supplied value. The operation that is performed will be determined
 // by the {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType }}) Zero(other *{{ .AliasType }}) {
+func (_ *{{ .AliasType }}) Zero(
+	other *{{ .AliasType }},
+) {
 	var tmp {{ .BaseTypeWidget }}
 	tmp.Zero((*{{ .BaseType }})(other))
 }
@@ -111,57 +121,75 @@ func (_ *{{ .AliasType }}) UnitVal() {{ .AliasType }} {
 			"negFunc": `
 // Negates the value that is supplied to it. The value that is returned will be
 // determined by the {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType }}) Neg(v *{{ .AliasType }}) {{ .AliasType }} {
+func (_ *{{ .AliasType }}) Neg(
+	v *{{ .AliasType }},
+) {
 	var tmp {{ .BaseTypeWidget }}
-	return ({{ .AliasType }})(tmp.Neg((*{{ .BaseTypeWidget }})(v)))
+	tmp.Neg((*{{ .BaseType }})(v))
 }
 `,
 			"addFunc": `
 // Adds l and r and places the results in res. The value that is returned will
 // be determined by the {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType}}) Add(res *{{ .AliasType }}, l *{{ .AliasType }}, r *{{ .AliasType }}) {
+func (_ *{{ .AliasType}}) Add(
+	res *{{ .AliasType }},
+	l *{{ .AliasType }},
+	r *{{ .AliasType }},
+) {
 	var tmp {{ .BaseTypeWidget }}
-	return ({{ .AliasType }})(tmp.Add(
-		(*{{ .BaseTypeWidget }})(res),
-		(*{{ .BaseTypeWidget }})(l),
-		(*{{ .BaseTypeWidget }})(r),
-	))
+	tmp.Add(
+		(*{{ .BaseType }})(res),
+		(*{{ .BaseType }})(l),
+		(*{{ .BaseType }})(r),
+	)
 }
 `,
 			"subFunc": `
 // Subtracts l and r and places the results in res. The value that is returned
 // will be determined by the {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType}}) Sub(res *{{ .AliasType }}, l *{{ .AliasType }}, r *{{ .AliasType }}) {
+func (_ *{{ .AliasType}}) Sub(
+	res *{{ .AliasType }},
+	l *{{ .AliasType }},
+	r *{{ .AliasType }},
+) {
 	var tmp {{ .BaseTypeWidget }}
-	return ({{ .AliasType }})(tmp.Sub(
-		(*{{ .BaseTypeWidget }})(res),
-		(*{{ .BaseTypeWidget }})(l),
-		(*{{ .BaseTypeWidget }})(r),
-	))
+	tmp.Sub(
+		(*{{ .BaseType }})(res),
+		(*{{ .BaseType }})(l),
+		(*{{ .BaseType }})(r),
+	)
 }
 `,
 			"mulFunc": `
 // Multiplys l and r and places the results in res. The value that is returned
 // will be determined by the {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType}}) Mul(res *{{ .AliasType }}, l *{{ .AliasType }}, r *{{ .AliasType }}) {
+func (_ *{{ .AliasType}}) Mul(
+	res *{{ .AliasType }},
+	l *{{ .AliasType }},
+	r *{{ .AliasType }},
+) {
 	var tmp {{ .BaseTypeWidget }}
-	return ({{ .AliasType }})(tmp.Mul(
-		(*{{ .BaseTypeWidget }})(res),
-		(*{{ .BaseTypeWidget }})(l),
-		(*{{ .BaseTypeWidget }})(r),
-	))
+	tmp.Mul(
+		(*{{ .BaseType }})(res),
+		(*{{ .BaseType }})(l),
+		(*{{ .BaseType }})(r),
+	)
 }
 `,
 			"divFunc": `
 // Divides l and r and places the results in res. The value that is returned
 // will be determined by the {{ .BaseTypeWidget }} widget internally.
-func (_ *{{ .AliasType}}) Div(res *{{ .AliasType }}, l *{{ .AliasType }}, r *{{ .AliasType }}) {
+func (_ *{{ .AliasType}}) Div(
+	res *{{ .AliasType }},
+	l *{{ .AliasType }},
+	r *{{ .AliasType }},
+) {
 	var tmp {{ .BaseTypeWidget }}
-	return ({{ .AliasType }})(tmp.Div(
-		(*{{ .BaseTypeWidget }})(res),
-		(*{{ .BaseTypeWidget }})(l),
-		(*{{ .BaseTypeWidget }})(r),
-	))
+	tmp.Div(
+		(*{{ .BaseType }})(res),
+		(*{{ .BaseType }})(l),
+		(*{{ .BaseType }})(r),
+	)
 }
 `,
 			"partialOrderArithFile": `

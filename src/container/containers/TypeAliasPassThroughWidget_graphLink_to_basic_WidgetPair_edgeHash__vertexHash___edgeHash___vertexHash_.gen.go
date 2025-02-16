@@ -9,21 +9,28 @@ import (
 
 // Returns true if l equals r. Uses the Eq operator provided by the
 // basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash] widget internally.
-func (_ *graphLink) Eq(l *graphLink, r *graphLink) bool {
+func (_ *graphLink) Eq(
+	l *graphLink,
+	r *graphLink,
+) bool {
 	var tmp basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	return tmp.Eq((*basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash])(l), (*basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash])(r))
 }
 
 // Returns a hash to represent other. The hash that is returned will be supplied
 // by the basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash] widget internally.
-func (_ *graphLink) Hash(other *graphLink) hash.Hash {
+func (_ *graphLink) Hash(
+	other *graphLink,
+) hash.Hash {
 	var tmp basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	return tmp.Hash((*basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash])(other))
 }
 
 // Zeros the supplied value. The operation that is performed will be determined
 // by the basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash] widget internally.
-func (_ *graphLink) Zero(other *graphLink) {
+func (_ *graphLink) Zero(
+	other *graphLink,
+) {
 	var tmp basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash]
 	tmp.Zero((*basic.WidgetPair[edgeHash, vertexHash, *edgeHash, *vertexHash])(other))
 }

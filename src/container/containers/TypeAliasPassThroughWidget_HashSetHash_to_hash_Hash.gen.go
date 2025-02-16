@@ -9,21 +9,28 @@ import (
 
 // Returns true if l equals r. Uses the Eq operator provided by the
 // widgets.BuiltinHash widget internally.
-func (_ *HashSetHash) Eq(l *HashSetHash, r *HashSetHash) bool {
+func (_ *HashSetHash) Eq(
+	l *HashSetHash,
+	r *HashSetHash,
+) bool {
 	var tmp widgets.BuiltinHash
 	return tmp.Eq((*hash.Hash)(l), (*hash.Hash)(r))
 }
 
 // Returns a hash to represent other. The hash that is returned will be supplied
 // by the widgets.BuiltinHash widget internally.
-func (_ *HashSetHash) Hash(other *HashSetHash) hash.Hash {
+func (_ *HashSetHash) Hash(
+	other *HashSetHash,
+) hash.Hash {
 	var tmp widgets.BuiltinHash
 	return tmp.Hash((*hash.Hash)(other))
 }
 
 // Zeros the supplied value. The operation that is performed will be determined
 // by the widgets.BuiltinHash widget internally.
-func (_ *HashSetHash) Zero(other *HashSetHash) {
+func (_ *HashSetHash) Zero(
+	other *HashSetHash,
+) {
 	var tmp widgets.BuiltinHash
 	tmp.Zero((*hash.Hash)(other))
 }
