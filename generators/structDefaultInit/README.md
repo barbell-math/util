@@ -50,7 +50,7 @@ the generated code file. This is useful when the default value is derived from a
 value in an external package. Every import will be automatically wrapped in
 quotes.
 
-given the example used throughout this file, with the information from the 
+Given the example used throughout this file, with the information from the 
 inline arguments and the struct tags the following code will be generated:
 
 ```
