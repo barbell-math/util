@@ -23,6 +23,10 @@ func NewOptionsFlag() optionsFlag {
 	return includeMapVals | includeArrayVals | includeSliceVals | followPntrs | followInterfaces | recurseStructs
 }
 
+func (o optionsFlag) Value() optionsFlag {
+	return o
+}
+
 func (o optionsFlag) Valid() error {
 	switch o {
 

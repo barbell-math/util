@@ -23,6 +23,10 @@ func NewOptionsFlag() optionsFlag {
 	return 0 | hasHeaders | useStructTags | writeHeaders
 }
 
+func (o optionsFlag) Value() optionsFlag {
+	return o
+}
+
 func (o optionsFlag) Valid() error {
 	switch o {
 

@@ -23,6 +23,10 @@ func NewFlag() flag {
 	return unknownFlag
 }
 
+func (o flag) Value() flag {
+	return o
+}
+
 func (o flag) Valid() error {
 	switch o {
 

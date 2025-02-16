@@ -21,6 +21,10 @@ func NewArgType() ArgType {
 	return UnknownArgType
 }
 
+func (o ArgType) Value() ArgType {
+	return o
+}
+
 func (o ArgType) Valid() error {
 	switch o {
 
