@@ -183,6 +183,9 @@ func (_ *shortArg) Hash(other *shortArg) hash.Hash {
 func (_ *shortArg) Zero(other *shortArg) {
 	// intentional noop
 }
+func (s *shortArg) String() string {
+	return string(s.shortFlag)
+}
 
 func (_ *longArg) Eq(l *longArg, r *longArg) bool {
 	return l.longFlag == r.longFlag
@@ -193,4 +196,7 @@ func (_ *longArg) Hash(other *longArg) hash.Hash {
 }
 func (_ *longArg) Zero(other *longArg) {
 	// intentional noop
+}
+func (l *longArg) String() string {
+	return l.longFlag
 }

@@ -171,7 +171,7 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 	rv := newParser(progName, progDesc, b.args, b.computedVals)
 	for i := 0; i < len(b.args); i++ {
 		if b.args[i].shortFlag != byte(0) {
-			if _, err := rv.shortArgs.Get(&b.args[i].shortFlag); err == nil {
+			if _, err := rv.shortArgs.Get(b.args[i].shortFlag); err == nil {
 				return rv, customerr.AppendError(
 					ParserConfigErr,
 					customerr.Wrap(
@@ -180,7 +180,7 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 				)
 			}
 		}
-		if _, err := rv.longArgs.Get(&b.args[i].longFlag); err == nil {
+		if _, err := rv.longArgs.Get(b.args[i].longFlag); err == nil {
 			return rv, customerr.AppendError(
 				ParserConfigErr,
 				customerr.Wrap(DuplicateLongNameErr, "'%s'", b.args[i].longFlag),
@@ -207,16 +207,16 @@ func (b *ArgBuilder) ToParser(progName string, progDesc string) (Parser, error) 
 		}
 
 		if b.args[i].shortFlag != byte(0) {
-			rv.shortArgs.Emplace(containerBasic.Pair[*byte, *shortArg]{
-				&b.args[i].shortFlag, (*shortArg)(&b.args[i]),
+			rv.shortArgs.Emplace(containerBasic.Pair[byte, *shortArg]{
+				b.args[i].shortFlag, (*shortArg)(&b.args[i]),
 			})
 		}
-		rv.longArgs.Emplace(containerBasic.Pair[*string, *longArg]{
-			&b.args[i].longFlag, (*longArg)(&b.args[i]),
+		rv.longArgs.Emplace(containerBasic.Pair[string, *longArg]{
+			b.args[i].longFlag, (*longArg)(&b.args[i]),
 		})
 		if b.args[i].required {
-			rv.requiredArgs.Emplace(containerBasic.Pair[*string, *longArg]{
-				&b.args[i].longFlag, (*longArg)(&b.args[i]),
+			rv.requiredArgs.Emplace(containerBasic.Pair[string, *longArg]{
+				b.args[i].longFlag, (*longArg)(&b.args[i]),
 			})
 		}
 	}

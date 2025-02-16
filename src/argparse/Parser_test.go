@@ -2,12 +2,12 @@ package argparse
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/barbell-math/util/src/argparse/computers"
 	"github.com/barbell-math/util/src/argparse/translators"
 	"github.com/barbell-math/util/src/container/containerTypes"
-	"github.com/barbell-math/util/src/iter"
 	"github.com/barbell-math/util/src/test"
 )
 
@@ -88,6 +88,8 @@ func TestParserAddSubParsersNonEmptyDuplicateLongNames(t *testing.T) {
 	test.ContainsError(ParserCombinationErr, err, t)
 	test.ContainsError(DuplicateLongNameErr, err, t)
 	test.ContainsError(containerTypes.Duplicate, err, t)
+
+	fmt.Println(err)
 }
 
 func TestParserAddSubParsersNonEmptyDuplicateShortNames(t *testing.T) {
@@ -212,7 +214,7 @@ func TestParserAddSubParsers(t *testing.T) {
 	p6.AddSubParsers(p3, p4)
 	p7.AddSubParsers(p5, p6)
 
-	longKeys, err := iter.PntrToVal[string](p7.longArgs.Keys()).Collect()
+	longKeys, err := p7.longArgs.Keys().Collect()
 	test.Nil(err, t)
 	test.SlicesMatchUnordered[string](
 		longKeys,
@@ -220,7 +222,7 @@ func TestParserAddSubParsers(t *testing.T) {
 		t,
 	)
 
-	shortKeys, err := iter.PntrToVal[byte](p7.shortArgs.Keys()).Collect()
+	shortKeys, err := p7.shortArgs.Keys().Collect()
 	test.Nil(err, t)
 	test.SlicesMatchUnordered[byte](
 		shortKeys,
