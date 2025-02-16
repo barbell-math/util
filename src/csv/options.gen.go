@@ -22,6 +22,9 @@ func NewOptions() *options {
 // Used by: [Parse], [Flatten], [FromStructs]
 //
 // Default: See the [NewOptionsFlag] function.
+//
+//gen:structDefaultInit default NewOptionsFlag()
+//gen:structDefaultInit setter
 func (o *options) SetOptionsFlag(v optionsFlag) *options {
 	o.optionsFlag = v
 	return o
@@ -32,6 +35,10 @@ func (o *options) SetOptionsFlag(v optionsFlag) *options {
 // Used by: [Parse]
 //
 // Default: '#'
+//
+//gen:structDefaultInit default '#'
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
 func (o *options) SetComment(v rune) *options {
 	o.comment = v
 	return o
@@ -43,6 +50,10 @@ func (o *options) SetComment(v rune) *options {
 // Used by: [Parse], [Flatten]
 //
 // Default: ','
+//
+//gen:structDefaultInit default ','
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
 func (o *options) SetDelimiter(v rune) *options {
 	o.delimiter = v
 	return o
@@ -54,6 +65,10 @@ func (o *options) SetDelimiter(v rune) *options {
 // Used by: [ToStructs], [FromStructs]
 //
 // Default: "csv"
+//
+//gen:structDefaultInit default "csv"
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
 func (o *options) SetStructTagName(v string) *options {
 	o.structTagName = v
 	return o
@@ -67,6 +82,11 @@ func (o *options) SetStructTagName(v string) *options {
 // Used by: [ToStructs], [FromStructs]
 //
 // Default: [time.DateTime]
+//
+//gen:structDefaultInit default time.DateTime
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports time
 func (o *options) SetDateTimeFormat(v string) *options {
 	o.dateTimeFormat = v
 	return o
@@ -77,6 +97,10 @@ func (o *options) SetDateTimeFormat(v string) *options {
 // Used by: [Parse]
 //
 // Default: '#'
+//
+//gen:structDefaultInit default '#'
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
 func (o *options) GetComment() rune {
 	return o.comment
 }
@@ -87,6 +111,10 @@ func (o *options) GetComment() rune {
 // Used by: [Parse], [Flatten]
 //
 // Default: ','
+//
+//gen:structDefaultInit default ','
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
 func (o *options) GetDelimiter() rune {
 	return o.delimiter
 }
@@ -97,6 +125,10 @@ func (o *options) GetDelimiter() rune {
 // Used by: [ToStructs], [FromStructs]
 //
 // Default: "csv"
+//
+//gen:structDefaultInit default "csv"
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
 func (o *options) GetStructTagName() string {
 	return o.structTagName
 }
@@ -109,6 +141,11 @@ func (o *options) GetStructTagName() string {
 // Used by: [ToStructs], [FromStructs]
 //
 // Default: [time.DateTime]
+//
+//gen:structDefaultInit default time.DateTime
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports time
 func (o *options) GetDateTimeFormat() string {
 	return o.dateTimeFormat
 }
@@ -120,6 +157,9 @@ func (o *options) GetDateTimeFormat() string {
 // Used by: [FromStructs]
 //
 // Default: true
+//
+//gen:structDefaultInit default []string{}
+//gen:structDefaultInit getter
 func (o *options) GetHeaders() []string {
 	return o.headers
 }

@@ -29,25 +29,48 @@ type (
 		// The type of argument. This value will affect how the parser expects
 		// values, so make sure it is the right value. See [ArgType] for
 		// descriptions of available types.
-		argType ArgType `default:"ValueArgType" setter:"t" getter:"t"`
+		//gen:structDefaultInit default ValueArgType
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		argType ArgType
 		// The short name to associate with the argument. These will usually
 		// follow a form similar to '-t'.
-		shortName byte `default:"byte(0)" setter:"t" getter:"t"`
+		//gen:structDefaultInit default byte(0)
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		shortName byte
 		// Defines if the argument is required or not.
-		required bool `default:"false" setter:"t" getter:"t"`
+		//gen:structDefaultInit default false
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		required bool
 		// The list of arguments that must also be provided if this argument is
 		// provided. All arguments provided are expected to be long names.
-		conditionallyRequired []ArgConditionality[T] `default:"[]ArgConditionality[T]{}" setter:"t" getter:"t"`
+		//gen:structDefaultInit default []ArgConditionality[T]{}
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		conditionallyRequired []ArgConditionality[T]
 		// Sets the description that will be printed out on the help menu.
-		description string `default:"\"\"" setter:"t" getter:"t"`
+		//gen:structDefaultInit default ""
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		description string
 		// The default value that should be used if the argument is not supplied.
 		// The default defaults to a zero-value initialized value.
-		defaultVal         T    `default:"generics.ZeroVal[T]()" setter:"f" getter:"t" import:"github.com/barbell-math/util/src/generics"`
-		defaultValProvided bool `default:"false" setter:"f" getter:"f"`
+		//gen:structDefaultInit default generics.ZeroVal[T]()
+		//gen:structDefaultInit getter
+		//gen:structDefaultInit imports github.com/barbell-math/util/src/generics
+		defaultVal T
+		//gen:structDefaultInit default false
+		defaultValProvided bool
 		// The translator value to use when parsing the cmd line argument's
 		// value. Most translators are stateless, but some have state and hence
 		// must be able to have there value explicitly set.
-		translator U `default:"generics.ZeroVal[U]()" setter:"t" getter:"t" import:"github.com/barbell-math/util/src/generics github.com/barbell-math/util/src/argparse/translators"`
+		//gen:structDefaultInit default generics.ZeroVal[U]()
+		//gen:structDefaultInit setter
+		//gen:structDefaultInit getter
+		//gen:structDefaultInit imports github.com/barbell-math/util/src/generics github.com/barbell-math/util/src/argparse/translators
+		translator U
 	}
 
 	// Represents a single argument from the cmd line interface and all the

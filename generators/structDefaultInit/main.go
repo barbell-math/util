@@ -6,8 +6,6 @@ import (
 	"go/ast"
 	"go/token"
 	"os"
-	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/barbell-math/util/generators/common"
@@ -17,6 +15,12 @@ type (
 	InlineArgs struct {
 		Struct   string `required:"t" help:"The struct type to generate code for."`
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
+	}
+	StructFieldArgs struct {
+		Default string `required:"t" help:"The default value for this field. Must be valid go syntax."`
+		Setter  bool   `required:"f" default:"f" help:"Controls if a setter is added for this field."`
+		Getter  bool   `required:"f" default:"f" help:"Controls if a getter is added for this field."`
+		Imports string `required:"f" default:"" help:"A space separated list of packages to import"`
 	}
 
 	ProgState struct {
@@ -298,14 +302,17 @@ func setFieldVals(
 			}
 		}
 
-		rawFieldTag, err := common.GetSourceTextFromExpr(fSet, srcFile, field.Tag)
+		commentArgs, err := common.GetDocArgVals(fSet, srcFile, field.Doc)
 		if err != nil {
-			common.PrintRunningError(
-				"could not get struct field tag: %w",
-				err,
-			)
+			common.PrintRunningError("%s", err)
 			os.Exit(1)
 		}
+		structArgs := StructFieldArgs{}
+		if err := common.CommentArgs(&structArgs, commentArgs); err != nil {
+			common.PrintRunningError("%s", err)
+			os.Exit(1)
+		}
+
 		fieldType, err := common.GetSourceTextFromExpr(fSet, srcFile, field.Type)
 		if err != nil {
 			common.PrintRunningError(
@@ -326,51 +333,29 @@ func setFieldVals(
 		PROG_STATE.fieldTypes[fieldName] = fieldType
 		PROG_STATE.fieldComments[fieldName] = fieldComment
 
-		// Remove the ticks
-		tags := reflect.StructTag(rawFieldTag[1 : len(rawFieldTag)-1])
-
-		if _default, ok := tags.Lookup("default"); !ok {
-			common.PrintRunningError("all struct field tags must have a default value")
-			os.Exit(1)
-		} else if _default == "" {
-			common.PrintRunningError("the default tag must not be an empty value")
+		if structArgs.Default == "" {
+			common.PrintRunningError("the default value must not be an empty value")
 			os.Exit(1)
 		} else {
 			PROG_STATE.fieldDefaults = append(
 				PROG_STATE.fieldDefaults,
 				DefaultInfo{
 					name:  fieldName,
-					value: _default,
+					value: structArgs.Default,
 				},
 			)
 		}
 
-		if auto, ok := tags.Lookup("setter"); !ok {
-			common.PrintRunningError("all field tags the must have a setter entry")
-			os.Exit(1)
-		} else {
-			if b, err := strconv.ParseBool(auto); err != nil {
-				common.PrintRunningError("the setter tag must be a bool type: %w", err)
-				os.Exit(1)
-			} else if b {
-				PROG_STATE.fieldSetters = append(PROG_STATE.fieldSetters, fieldName)
-			}
+		if structArgs.Setter {
+			PROG_STATE.fieldSetters = append(PROG_STATE.fieldSetters, fieldName)
 		}
 
-		if auto, ok := tags.Lookup("getter"); !ok {
-			common.PrintRunningError("all field tags the must have a getter entry")
-			os.Exit(1)
-		} else {
-			if b, err := strconv.ParseBool(auto); err != nil {
-				common.PrintRunningError("the getter tag must be a bool type: %w", err)
-				os.Exit(1)
-			} else if b {
-				PROG_STATE.fieldGetters = append(PROG_STATE.fieldGetters, fieldName)
-			}
+		if structArgs.Getter {
+			PROG_STATE.fieldGetters = append(PROG_STATE.fieldGetters, fieldName)
 		}
 
-		if _import, ok := tags.Lookup("import"); ok {
-			for _, i := range strings.Split(_import, " ") {
+		if len(structArgs.Imports) > 0 {
+			for _, i := range strings.Split(structArgs.Imports, " ") {
 				PROG_STATE.imports[i] = struct{}{}
 			}
 		}

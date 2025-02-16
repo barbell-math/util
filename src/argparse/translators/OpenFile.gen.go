@@ -16,6 +16,11 @@ func NewOpenFile() *OpenFile {
 
 // The flags used to determine the file mode. See [os.RDONLY] and
 // friends.
+//
+//gen:structDefaultInit default os.O_RDONLY
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports os
 func (o *OpenFile) SetFlags(v int) *OpenFile {
 	o.flags = v
 	return o
@@ -23,6 +28,11 @@ func (o *OpenFile) SetFlags(v int) *OpenFile {
 
 // The permissions used to open the file with. See [os.OpenFile] for
 // reference.
+//
+//gen:structDefaultInit default 0644
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports io/fs
 func (o *OpenFile) SetPermissions(v fs.FileMode) *OpenFile {
 	o.permissions = v
 	return o
@@ -30,12 +40,22 @@ func (o *OpenFile) SetPermissions(v fs.FileMode) *OpenFile {
 
 // The flags used to determine the file mode. See [os.RDONLY] and
 // friends.
+//
+//gen:structDefaultInit default os.O_RDONLY
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports os
 func (o *OpenFile) GetFlags() int {
 	return o.flags
 }
 
 // The permissions used to open the file with. See [os.OpenFile] for
 // reference.
+//
+//gen:structDefaultInit default 0644
+//gen:structDefaultInit setter
+//gen:structDefaultInit getter
+//gen:structDefaultInit imports io/fs
 func (o *OpenFile) GetPermissions() fs.FileMode {
 	return o.permissions
 }
