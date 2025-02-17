@@ -6,8 +6,8 @@ import (
 )
 
 // Returns a new structDefaultInitTest struct initialized with the default values.
-func NewStructDefaultInitTest() *structDefaultInitTest {
-	return &structDefaultInitTest{
+func NewStructDefaultInitTest() structDefaultInitTest {
+	return structDefaultInitTest{
 		field1: 3,
 		field2: structDefaultInitTest{},
 		field3: 3,

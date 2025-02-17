@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"os"
@@ -16,6 +17,9 @@ type (
 		Struct   string `required:"t" help:"The struct type to generate code for."`
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
+	StructArgs struct {
+		NewReturns string `required:"t" help:"Controls if the new function for the struct returns a pointer or value."`
+	}
 	StructFieldArgs struct {
 		Default       string `required:"t" help:"The default value for this field. Must be valid go syntax."`
 		Setter        bool   `required:"f" default:"f" help:"Controls if a setter is added for this field."`
@@ -27,6 +31,7 @@ type (
 	ProgState struct {
 		shortStructGenerics string
 		longStructGenerics  string
+		newReturns          string
 		fieldSetters        []string
 		fieldGetters        []string
 		fieldPointerSetters []string
@@ -47,6 +52,8 @@ type (
 		ShortStructGenerics       string
 		LongStructGenerics        string
 		Package                   string
+		NewRet                    string
+		NewRetVal                 string
 		StructFieldSetters        []StructFieldTemplateVals
 		StructFieldGetters        []StructFieldTemplateVals
 		StructFieldPointerSetters []StructFieldTemplateVals
@@ -111,8 +118,8 @@ func (o *{{ .StructName }}{{ .ShortStructGenerics }}) Get{{ .CapStructField }}()
 `,
 			"newFunc": `
 // Returns a new {{ .StructName }} struct initialized with the default values.
-func New{{ .CapStructName }}{{ .LongStructGenerics }}() *{{ .StructName }}{{ .ShortStructGenerics }} {
-	return &{{ .StructName }}{{ .ShortStructGenerics }} {
+func New{{ .CapStructName }}{{ .LongStructGenerics }}() {{ .NewRet }}{{ .ShortStructGenerics }} {
+	return {{ .NewRetVal }}{{ .ShortStructGenerics }} {
 		{{range .StructFieldDefaults}} {{template "defaultValueInit" .}} {{end}}
 	}
 }
@@ -197,6 +204,13 @@ func main() {
 		StructFieldDefaults:       make([]StructDefaultTemplateVals, len(PROG_STATE.fieldDefaults)),
 		GeneratorName:             os.Args[0],
 	}
+	if PROG_STATE.newReturns == "val" {
+		templateData.NewRet = INLINE_ARGS.Struct
+		templateData.NewRetVal = INLINE_ARGS.Struct
+	} else if PROG_STATE.newReturns == "pntr" {
+		templateData.NewRet = fmt.Sprintf("*%s", INLINE_ARGS.Struct)
+		templateData.NewRetVal = fmt.Sprintf("&%s", INLINE_ARGS.Struct)
+	}
 
 	for k, _ := range PROG_STATE.imports {
 		templateData.Imports = append(templateData.Imports, k)
@@ -265,8 +279,23 @@ func parseTypeSpec(
 		return false
 	}
 
-	var err error
 	if st, ok := ts.Type.(*ast.StructType); ok && ts.Name.Name == INLINE_ARGS.Struct {
+		commentArgs, err := common.GetDocArgVals(fSet, srcFile, ts.Doc)
+		if err != nil {
+			common.PrintRunningError("%s", err)
+			os.Exit(1)
+		}
+		structArgs := StructArgs{}
+		if err := common.CommentArgs(&structArgs, commentArgs); err != nil {
+			common.PrintRunningError("%s", err)
+			os.Exit(1)
+		}
+		PROG_STATE.newReturns = structArgs.NewReturns
+		if PROG_STATE.newReturns != "pntr" && PROG_STATE.newReturns != "val" {
+			common.PrintRunningError("The newReturns argument must be either 'pntr' or 'val'")
+			os.Exit(1)
+		}
+
 		if st.Fields.List == nil {
 			common.PrintRunningError("The supplied options struct has no fields.")
 			os.Exit(1)

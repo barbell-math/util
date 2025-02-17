@@ -6,8 +6,8 @@ import (
 )
 
 // Returns a new Mkdir struct initialized with the default values.
-func NewMkdir() *Mkdir {
-	return &Mkdir{
+func NewMkdir() Mkdir {
+	return Mkdir{
 		permissions: 0644,
 	}
 }

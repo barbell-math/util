@@ -6,8 +6,8 @@ import (
 )
 
 // Returns a new genericStructDefaultInitTest struct initialized with the default values.
-func NewGenericStructDefaultInitTest[T ~int, U any]() *genericStructDefaultInitTest[T, U] {
-	return &genericStructDefaultInitTest[T, U]{
+func NewGenericStructDefaultInitTest[T ~int, U any]() genericStructDefaultInitTest[T, U] {
+	return genericStructDefaultInitTest[T, U]{
 		field1: generics.ZeroVal[T](),
 		field2: generics.ZeroVal[U](),
 	}

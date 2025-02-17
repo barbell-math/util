@@ -25,6 +25,7 @@ type (
 	}
 
 	// The optional values that are associated with an argument.
+	//gen:structDefaultInit newReturns pntr
 	opts[T any, U translators.Translater[T]] struct {
 		// The type of argument. This value will affect how the parser expects
 		// values, so make sure it is the right value. See [ArgType] for

@@ -15,6 +15,7 @@ import (
 type (
 	//gen:enum unknownValue unknownOptionsFlag
 	//gen:enum default includeMapVals | includeArrayVals | includeSliceVals | followPntrs | followInterfaces | recurseStructs
+	//gen:structDefaultInit newReturns pntr
 	optionsFlag    int
 	structHashOpts struct {
 		//gen:structDefaultInit default NewOptionsFlag()
