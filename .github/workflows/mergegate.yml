@@ -40,7 +40,7 @@ jobs:
       run: ./bin/clean
 
     - name: Generate
-      run: go generate -v ./src/...
+      run: go generate -v ./...
 
     - name: Check Generated Code is the Same as Checked in Code
       run: |

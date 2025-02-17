@@ -9,21 +9,28 @@ import (
 
 // Returns true if l equals r. Uses the Eq operator provided by the
 // widgets.BuiltinInt widget internally.
-func (_ *ArgType) Eq(l *ArgType, r *ArgType) bool {
+func (_ *ArgType) Eq(
+	l *ArgType,
+	r *ArgType,
+) bool {
 	var tmp widgets.BuiltinInt
 	return tmp.Eq((*int)(l), (*int)(r))
 }
 
 // Returns a hash to represent other. The hash that is returned will be supplied
 // by the widgets.BuiltinInt widget internally.
-func (_ *ArgType) Hash(other *ArgType) hash.Hash {
+func (_ *ArgType) Hash(
+	other *ArgType,
+) hash.Hash {
 	var tmp widgets.BuiltinInt
 	return tmp.Hash((*int)(other))
 }
 
 // Zeros the supplied value. The operation that is performed will be determined
 // by the widgets.BuiltinInt widget internally.
-func (_ *ArgType) Zero(other *ArgType) {
+func (_ *ArgType) Zero(
+	other *ArgType,
+) {
 	var tmp widgets.BuiltinInt
 	tmp.Zero((*int)(other))
 }
