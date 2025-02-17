@@ -17,10 +17,11 @@ type (
 		ShowInfo bool   `required:"f" default:"t" help:"Show debug info."`
 	}
 	StructFieldArgs struct {
-		Default string `required:"t" help:"The default value for this field. Must be valid go syntax."`
-		Setter  bool   `required:"f" default:"f" help:"Controls if a setter is added for this field."`
-		Getter  bool   `required:"f" default:"f" help:"Controls if a getter is added for this field."`
-		Imports string `required:"f" default:"" help:"A space separated list of packages to import"`
+		Default       string `required:"t" help:"The default value for this field. Must be valid go syntax."`
+		Setter        bool   `required:"f" default:"f" help:"Controls if a setter is added for this field."`
+		Getter        bool   `required:"f" default:"f" help:"Controls if a getter is added for this field."`
+		PointerSetter bool   `required:"f" default:"f" help:"Controls if a setter is added for the pointers underlying value for this field."`
+		Imports       string `required:"f" default:"" help:"A space separated list of packages to import"`
 	}
 
 	ProgState struct {
@@ -28,6 +29,7 @@ type (
 		longStructGenerics  string
 		fieldSetters        []string
 		fieldGetters        []string
+		fieldPointerSetters []string
 		fieldDefaults       []DefaultInfo
 		fieldTypes          map[string]string
 		fieldComments       map[string]string
@@ -40,16 +42,17 @@ type (
 	}
 
 	TemplateVals struct {
-		StructName          string
-		CapStructName       string
-		ShortStructGenerics string
-		LongStructGenerics  string
-		Package             string
-		StructFieldSetters  []StructFieldTemplateVals
-		StructFieldGetters  []StructFieldTemplateVals
-		StructFieldDefaults []StructDefaultTemplateVals
-		Imports             []string
-		GeneratorName       string
+		StructName                string
+		CapStructName             string
+		ShortStructGenerics       string
+		LongStructGenerics        string
+		Package                   string
+		StructFieldSetters        []StructFieldTemplateVals
+		StructFieldGetters        []StructFieldTemplateVals
+		StructFieldPointerSetters []StructFieldTemplateVals
+		StructFieldDefaults       []StructDefaultTemplateVals
+		Imports                   []string
+		GeneratorName             string
 	}
 	EnumFlagTemplateVals struct {
 		StructName  string
@@ -91,6 +94,13 @@ func (o *{{ .StructName }}{{ .ShortStructGenerics }}) Set{{ .CapStructField }}(v
 	return o
 }
 `,
+			"structFieldPointerSetter": `
+{{ .Comment }}
+func (o *{{ .StructName }}{{ .ShortStructGenerics }}) Set{{ .CapStructField }}PntrVal(v {{ .FieldType }}) *{{ .StructName }}{{ .ShortStructGenerics }} {
+	*o.{{ .StructField }} = *v
+	return o
+}
+`,
 			"structFieldGetter": `
 {{ .Comment }}
 func (o *{{ .StructName }}{{ .ShortStructGenerics }}) Get{{ .CapStructField }}() {{ .FieldType }} {
@@ -119,6 +129,9 @@ import (
 {{template "newFunc" .}}
 {{range .StructFieldSetters}}
 	{{template "structFieldSetter" .}}
+{{end}}
+{{range .StructFieldPointerSetters}}
+	{{template "structFieldPointerSetter" .}}
 {{end}}
 {{range .StructFieldGetters}}
 	{{template "structFieldGetter" .}}
@@ -173,15 +186,16 @@ func main() {
 	}
 
 	templateData := TemplateVals{
-		StructName:          INLINE_ARGS.Struct,
-		CapStructName:       strings.ToUpper(INLINE_ARGS.Struct[0:1]) + INLINE_ARGS.Struct[1:],
-		ShortStructGenerics: PROG_STATE.shortStructGenerics,
-		LongStructGenerics:  PROG_STATE.longStructGenerics,
-		Package:             PROG_STATE._package,
-		StructFieldSetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldSetters)),
-		StructFieldGetters:  make([]StructFieldTemplateVals, len(PROG_STATE.fieldGetters)),
-		StructFieldDefaults: make([]StructDefaultTemplateVals, len(PROG_STATE.fieldDefaults)),
-		GeneratorName:       os.Args[0],
+		StructName:                INLINE_ARGS.Struct,
+		CapStructName:             strings.ToUpper(INLINE_ARGS.Struct[0:1]) + INLINE_ARGS.Struct[1:],
+		ShortStructGenerics:       PROG_STATE.shortStructGenerics,
+		LongStructGenerics:        PROG_STATE.longStructGenerics,
+		Package:                   PROG_STATE._package,
+		StructFieldSetters:        make([]StructFieldTemplateVals, len(PROG_STATE.fieldSetters)),
+		StructFieldPointerSetters: make([]StructFieldTemplateVals, len(PROG_STATE.fieldPointerSetters)),
+		StructFieldGetters:        make([]StructFieldTemplateVals, len(PROG_STATE.fieldGetters)),
+		StructFieldDefaults:       make([]StructDefaultTemplateVals, len(PROG_STATE.fieldDefaults)),
+		GeneratorName:             os.Args[0],
 	}
 
 	for k, _ := range PROG_STATE.imports {
@@ -202,6 +216,17 @@ func main() {
 	for i, v := range PROG_STATE.fieldGetters {
 		capStructField := strings.ToUpper(v[0:1]) + v[1:]
 		templateData.StructFieldGetters[i] = StructFieldTemplateVals{
+			StructName:          INLINE_ARGS.Struct,
+			CapStructField:      capStructField,
+			ShortStructGenerics: templateData.ShortStructGenerics,
+			StructField:         v,
+			FieldType:           PROG_STATE.fieldTypes[v],
+			Comment:             PROG_STATE.fieldComments[v],
+		}
+	}
+	for i, v := range PROG_STATE.fieldPointerSetters {
+		capStructField := strings.ToUpper(v[0:1]) + v[1:]
+		templateData.StructFieldPointerSetters[i] = StructFieldTemplateVals{
 			StructName:          INLINE_ARGS.Struct,
 			CapStructField:      capStructField,
 			ShortStructGenerics: templateData.ShortStructGenerics,
@@ -349,9 +374,11 @@ func setFieldVals(
 		if structArgs.Setter {
 			PROG_STATE.fieldSetters = append(PROG_STATE.fieldSetters, fieldName)
 		}
-
 		if structArgs.Getter {
 			PROG_STATE.fieldGetters = append(PROG_STATE.fieldGetters, fieldName)
+		}
+		if structArgs.PointerSetter {
+			PROG_STATE.fieldPointerSetters = append(PROG_STATE.fieldPointerSetters, fieldName)
 		}
 
 		if len(structArgs.Imports) > 0 {

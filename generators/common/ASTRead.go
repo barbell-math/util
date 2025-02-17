@@ -127,7 +127,7 @@ func GetDocArgVals(
 	}
 
 	progPrefix := fmt.Sprintf(
-		"//%s:%s",
+		"//%s:%s ",
 		GeneratorCommentPrefix, GetProgName(os.Args),
 	)
 
