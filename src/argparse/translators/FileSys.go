@@ -18,7 +18,7 @@ type (
 
 	// A translator that makes the supplied directory along with all necessary
 	// parent directories.
-	//gen:structDefaultInit newReturns val
+	//gen:structDefaultInit newReturns pntr
 	Mkdir struct {
 		// The permissions used to create all dirs and sub-dirs. See
 		// [os.MkdirAll] for reference.
@@ -29,7 +29,7 @@ type (
 		permissions fs.FileMode
 	}
 	// A translator that makes the supplied file.
-	//gen:structDefaultInit newReturns val
+	//gen:structDefaultInit newReturns pntr
 	OpenFile struct {
 		// The flags used to determine the file mode. See [os.RDONLY] and
 		// friends.
