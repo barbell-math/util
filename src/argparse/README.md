@@ -83,7 +83,7 @@ below the argument example.The `ListValue` translator can work with any type as
 long as it has a translator.
 
 https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/argparse/examples/SimpleExamples_test.go#L171-L187
-https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/argparse/examples/SimpleExamples_test.go#L192
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/argparse/examples/SimpleExamples_test.go#L190
 
 4. List argument with a predefined set of allowed values. This will build up a
 list of all the values that were provided with the argument, provided that they
