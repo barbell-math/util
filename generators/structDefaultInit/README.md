@@ -19,6 +19,7 @@ Before going over the code this is generated, the code below shows the expected
 struct format:
 
 ```
+//gen:structDefaultInit newReturns [val | pntr]
 type <struct type> struct {
     // This is an example embeded field - they are supported
     //gen:structDefaultInit default <default value 1>
@@ -40,7 +41,13 @@ type <struct type> struct {
 }
 ```
 
-The following comment arguments are supported:
+The following comment arguments are supported for the struct definition:
+
+1. newReturns (string) (required): whether or not the generated new function for
+the associated struct returns a pointer to the associated struct or the
+associated struct as a value.
+
+The following comment arguments are supported for each field:
 
 1. default (string) (required): the value that the field should be initialized 
 with. This value is treated as a string, meaning whatever text is in the string

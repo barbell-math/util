@@ -8,7 +8,8 @@ type (
 	//gen:enum unknownValue unknownOptionsFlag
 	//gen:enum default 0 | hasHeaders | useStructTags | writeHeaders
 	optionsFlag int
-	options     struct {
+	//gen:structDefaultInit newReturns pntr
+	options struct {
 		// Description: boolean options encoded in a bit flag enum.
 		//
 		// Used by: [Parse], [Flatten], [FromStructs]

@@ -5,8 +5,10 @@ import "fmt"
 //go:generate ../../bin/structDefaultInit -struct=structDefaultInitTest
 //go:generate ../../bin/structDefaultInit -struct=genericStructDefaultInitTest
 //go:generate ../../bin/structDefaultInit -struct=pointerStructDefaultInitTest
+//go:generate ../../bin/structDefaultInit -struct=newPointerStructDefaultInitTest
 
 type (
+	//gen:structDefaultInit newReturns val
 	structDefaultInitTest struct {
 		// Tests setting the default value
 		//gen:structDefaultInit default 3
@@ -37,6 +39,7 @@ type (
 		field5 *int
 	}
 
+	//gen:structDefaultInit newReturns val
 	genericStructDefaultInitTest[T ~int, U any] struct {
 		// Tests setting a generic default value
 		//gen:structDefaultInit default generics.ZeroVal[T]()
@@ -51,6 +54,7 @@ type (
 		field2 U
 	}
 
+	//gen:structDefaultInit newReturns val
 	pointerStructDefaultInitTest struct {
 		// Tests adding a pointer setter method to a pointer field
 		//gen:structDefaultInit default nil
@@ -58,6 +62,14 @@ type (
 		//gen:structDefaultInit setter
 		//gen:structDefaultInit pointerSetter
 		field1 *int
+	}
+
+	//gen:structDefaultInit newReturns pntr
+	newPointerStructDefaultInitTest struct {
+		//gen:structDefaultInit default 1
+		//gen:structDefaultInit getter
+		//gen:structDefaultInit setter
+		field1 int
 	}
 )
 

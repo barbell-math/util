@@ -4,8 +4,8 @@ package generatortests
 import ()
 
 // Returns a new pointerStructDefaultInitTest struct initialized with the default values.
-func NewPointerStructDefaultInitTest() *pointerStructDefaultInitTest {
-	return &pointerStructDefaultInitTest{
+func NewPointerStructDefaultInitTest() pointerStructDefaultInitTest {
+	return pointerStructDefaultInitTest{
 		field1: nil,
 	}
 }
