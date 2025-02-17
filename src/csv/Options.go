@@ -107,7 +107,7 @@ const (
 	// Default: true
 	//gen:enum string writeHeaders
 	writeHeaders
-	//gen:flags	noSetter
+	//gen:flags noSetter
 	//gen:enum string headersSupplied
 	headersSupplied
 	// Description: whether or not to write zero-values to the csv file. If false,
@@ -118,7 +118,7 @@ const (
 	// Default: false
 	//gen:enum string writeZeroValues
 	writeZeroValues
-	//gen:flags	noSetter
+	//gen:flags noSetter
 	//gen:enum string unknownOptionsFlag
 	unknownOptionsFlag
 )
