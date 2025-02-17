@@ -47,7 +47,7 @@ type (
 		required bool
 		// The list of arguments that must also be provided if this argument is
 		// provided. All arguments provided are expected to be long names.
-		//gen:structDefaultInit default []ArgConditionality[T]{}
+		//gen:structDefaultInit default []ArgConditionality[U]{}
 		//gen:structDefaultInit setter
 		//gen:structDefaultInit getter
 		conditionallyRequired []ArgConditionality[U]
@@ -58,7 +58,7 @@ type (
 		description string
 		// The default value that should be used if the argument is not supplied.
 		// The default defaults to a zero-value initialized value.
-		//gen:structDefaultInit default generics.ZeroVal[T]()
+		//gen:structDefaultInit default generics.ZeroVal[U]()
 		//gen:structDefaultInit getter
 		//gen:structDefaultInit imports github.com/barbell-math/util/src/generics
 		defaultVal U
@@ -67,7 +67,7 @@ type (
 		// The translator value to use when parsing the cmd line argument's
 		// value. Most translators are stateless, but some have state and hence
 		// must be able to have there value explicitly set.
-		//gen:structDefaultInit default generics.ZeroVal[U]()
+		//gen:structDefaultInit default generics.ZeroVal[T]()
 		//gen:structDefaultInit setter
 		//gen:structDefaultInit getter
 		//gen:structDefaultInit imports github.com/barbell-math/util/src/generics github.com/barbell-math/util/src/argparse/translators

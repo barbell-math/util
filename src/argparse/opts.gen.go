@@ -56,7 +56,7 @@ func (o *opts[T, U]) SetRequired(v bool) *opts[T, U] {
 // The list of arguments that must also be provided if this argument is
 // provided. All arguments provided are expected to be long names.
 //
-//gen:structDefaultInit default []ArgConditionality[T]{}
+//gen:structDefaultInit default []ArgConditionality[U]{}
 //gen:structDefaultInit setter
 //gen:structDefaultInit getter
 func (o *opts[T, U]) SetConditionallyRequired(v []ArgConditionality[U]) *opts[T, U] {
@@ -78,7 +78,7 @@ func (o *opts[T, U]) SetDescription(v string) *opts[T, U] {
 // value. Most translators are stateless, but some have state and hence
 // must be able to have there value explicitly set.
 //
-//gen:structDefaultInit default generics.ZeroVal[U]()
+//gen:structDefaultInit default generics.ZeroVal[T]()
 //gen:structDefaultInit setter
 //gen:structDefaultInit getter
 //gen:structDefaultInit imports github.com/barbell-math/util/src/generics github.com/barbell-math/util/src/argparse/translators
@@ -120,7 +120,7 @@ func (o *opts[T, U]) GetRequired() bool {
 // The list of arguments that must also be provided if this argument is
 // provided. All arguments provided are expected to be long names.
 //
-//gen:structDefaultInit default []ArgConditionality[T]{}
+//gen:structDefaultInit default []ArgConditionality[U]{}
 //gen:structDefaultInit setter
 //gen:structDefaultInit getter
 func (o *opts[T, U]) GetConditionallyRequired() []ArgConditionality[U] {
@@ -139,7 +139,7 @@ func (o *opts[T, U]) GetDescription() string {
 // The default value that should be used if the argument is not supplied.
 // The default defaults to a zero-value initialized value.
 //
-//gen:structDefaultInit default generics.ZeroVal[T]()
+//gen:structDefaultInit default generics.ZeroVal[U]()
 //gen:structDefaultInit getter
 //gen:structDefaultInit imports github.com/barbell-math/util/src/generics
 func (o *opts[T, U]) GetDefaultVal() U {
@@ -150,7 +150,7 @@ func (o *opts[T, U]) GetDefaultVal() U {
 // value. Most translators are stateless, but some have state and hence
 // must be able to have there value explicitly set.
 //
-//gen:structDefaultInit default generics.ZeroVal[U]()
+//gen:structDefaultInit default generics.ZeroVal[T]()
 //gen:structDefaultInit setter
 //gen:structDefaultInit getter
 //gen:structDefaultInit imports github.com/barbell-math/util/src/generics github.com/barbell-math/util/src/argparse/translators
