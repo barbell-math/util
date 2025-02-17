@@ -7,10 +7,10 @@ import (
 type (
 	// A translator that forces a value to be a valid enum value for the given
 	// enum type.
-	Enum[E enum.Value, EP enum.Pntr[E]] struct{}
+	Enum[EP enum.Pntr[E], E enum.Value] struct{}
 )
 
-func (_ Enum[E, EP]) Translate(arg string) (E, error) {
+func (_ Enum[EP, E]) Translate(arg string) (E, error) {
 	var rv E
 	var ei EP
 	ei = &rv

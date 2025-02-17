@@ -10,7 +10,7 @@ import (
 )
 
 func TestSelectorPassing(t *testing.T) {
-	l := Selector[int, BuiltinInt, widgets.BuiltinInt]{
+	l := Selector[BuiltinInt, widgets.BuiltinInt, int]{
 		ValueTranslator: BuiltinInt{Base: 10},
 		AllowedVals:     containers.HashSetValInit[int, widgets.BuiltinInt](1),
 	}
@@ -21,7 +21,7 @@ func TestSelectorPassing(t *testing.T) {
 }
 
 func TestSelectorFailing(t *testing.T) {
-	l := Selector[int, BuiltinInt, widgets.BuiltinInt]{
+	l := Selector[BuiltinInt, widgets.BuiltinInt, int]{
 		ValueTranslator: BuiltinInt{Base: 10},
 		AllowedVals:     containers.HashSetValInit[int, widgets.BuiltinInt](1, 2, 3),
 	}

@@ -15,21 +15,21 @@ func Example_ConditionallyRequiredArgument_BasedOnExistance() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I, &b, "int",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('i').
 			SetDescription("This is an integer"),
 	)
-	argparse.AddArg[float32, translators.BuiltinFloat32](
+	argparse.AddArg[translators.BuiltinFloat32](
 		&vals.F, &b, "float",
-		argparse.NewOpts[float32, translators.BuiltinFloat32]().
+		argparse.NewOpts[translators.BuiltinFloat32]().
 			SetShortName('f').
 			SetDescription("This is a float"),
 	)
-	argparse.AddArg[uint, translators.BuiltinUint](
+	argparse.AddArg[translators.BuiltinUint](
 		&vals.U, &b, "uint",
-		argparse.NewOpts[uint, translators.BuiltinUint]().
+		argparse.NewOpts[translators.BuiltinUint]().
 			SetShortName('u').
 			SetDescription("This is an unsigned integer").
 			// The ArgConditionallity struct specifies that if the uint argument
@@ -99,21 +99,21 @@ func Example_ConditionallyRequiredArgument_BasedOnValue() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I, &b, "int",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('i').
 			SetDescription("This is an integer"),
 	)
-	argparse.AddArg[float32, translators.BuiltinFloat32](
+	argparse.AddArg[translators.BuiltinFloat32](
 		&vals.F, &b, "float",
-		argparse.NewOpts[float32, translators.BuiltinFloat32]().
+		argparse.NewOpts[translators.BuiltinFloat32]().
 			SetShortName('f').
 			SetDescription("This is a float"),
 	)
-	argparse.AddArg[uint, translators.BuiltinUint](
+	argparse.AddArg[translators.BuiltinUint](
 		&vals.U, &b, "uint",
-		argparse.NewOpts[uint, translators.BuiltinUint]().
+		argparse.NewOpts[translators.BuiltinUint]().
 			SetShortName('u').
 			SetDefaultVal(3).
 			SetDescription("This is an unsigned integer").

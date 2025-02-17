@@ -52,43 +52,43 @@ func (a *ArgparseVals) GetParser(
 	defaults ArgparseVals,
 ) argparse.Parser {
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[string, translators.BuiltinString](
+	argparse.AddArg[translators.BuiltinString](
 		&a.User, &b, DBUserArg,
-		argparse.NewOpts[string, translators.BuiltinString]().
+		argparse.NewOpts[translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('u').
 			SetDefaultVal(defaults.User).
 			SetRequired(reqArgs.GetFlag(UserRequired)).
 			SetDescription("The user to use when accessing the database."),
 	)
-	argparse.AddArg[string, translators.EnvVar](
+	argparse.AddArg[translators.EnvVar](
 		&a.Pswd, &b, DBPswdArg,
-		argparse.NewOpts[string, translators.EnvVar]().
+		argparse.NewOpts[translators.EnvVar]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('p').
 			SetDefaultVal(defaults.Pswd).
 			SetRequired(reqArgs.GetFlag(PswdRequired)).
 			SetDescription("The environment variable to use to look up the password to access the database."),
 	)
-	argparse.AddArg[string, translators.BuiltinString](
+	argparse.AddArg[translators.BuiltinString](
 		&a.NetLoc, &b, DBNetLocArg,
-		argparse.NewOpts[string, translators.BuiltinString]().
+		argparse.NewOpts[translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
 			SetDefaultVal(defaults.NetLoc).
 			SetRequired(reqArgs.GetFlag(NetLocRequired)).
 			SetDescription("The network path to use when connecting to the database."),
 	)
-	argparse.AddArg[uint16, translators.BuiltinUint16](
+	argparse.AddArg[translators.BuiltinUint16](
 		&a.Port, &b, DBPortArg,
-		argparse.NewOpts[uint16, translators.BuiltinUint16]().
+		argparse.NewOpts[translators.BuiltinUint16]().
 			SetArgType(argparse.ValueArgType).
 			SetDefaultVal(defaults.Port).
 			SetRequired(reqArgs.GetFlag(PortRequired)).
 			SetDescription("The port to use when connecting to the database."),
 	)
-	argparse.AddArg[string, translators.BuiltinString](
+	argparse.AddArg[translators.BuiltinString](
 		&a.DBName, &b, DBNameArg,
-		argparse.NewOpts[string, translators.BuiltinString]().
+		argparse.NewOpts[translators.BuiltinString]().
 			SetArgType(argparse.ValueArgType).
 			SetDefaultVal(defaults.DBName).
 			SetRequired(reqArgs.GetFlag(DBNameRequired)).

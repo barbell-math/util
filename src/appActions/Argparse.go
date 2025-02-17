@@ -13,7 +13,7 @@ const (
 // Creates a parser that has -a and --action falgs. These flags will be used to
 // set an enum value that should be use to tell your application what action it
 // needs to perform.
-func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
+func NewAppActionParser[EP enum.Pntr[E], E enum.Value](
 	val *E,
 	defaultVal E,
 	conditionalArgs []argparse.ArgConditionality[E],
@@ -21,13 +21,13 @@ func NewAppActionParser[E enum.Value, EP enum.Pntr[E]](
 	b := argparse.ArgBuilder{}
 	argparse.AddEnum(
 		val, &b, ActionArg,
-		argparse.NewOpts[E, translators.Enum[E, EP]]().
+		argparse.NewOpts[translators.Enum[EP, E]]().
 			SetArgType(argparse.ValueArgType).
 			SetShortName('a').
 			SetRequired(false).
 			SetDefaultVal(defaultVal).
 			SetDescription("The action that the application should perform.").
-			SetTranslator(translators.Enum[E, EP]{}).
+			SetTranslator(translators.Enum[EP, E]{}).
 			SetConditionallyRequired(conditionalArgs),
 	)
 	rv, err := b.ToParser("", "")

@@ -15,29 +15,29 @@ func TestHelpSubParser(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s').
 			SetDescription("this is a long description that needs to break 80 characters to I can see how the split works").
 			SetDefaultVal("default").
 			SetRequired(true),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str1",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetDescription("this is a long description that needs to break 80 characters to I can see how the split works").
 			SetDefaultVal("default"),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str2",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetDescription("this is a long description that needs to break 80 characters to I can see how the split works").
 			SetDefaultVal("default").
 			SetConditionallyRequired([]ArgConditionality[string]{

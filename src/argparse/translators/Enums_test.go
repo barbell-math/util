@@ -8,7 +8,7 @@ import (
 )
 
 func TestEnum(t *testing.T) {
-	e := Enum[testenum.TestEnum, *testenum.TestEnum]{}
+	e := Enum[*testenum.TestEnum, testenum.TestEnum]{}
 
 	v, err := e.Translate("asdf")
 	test.Eq(v, testenum.UnknownTestEnum, t)

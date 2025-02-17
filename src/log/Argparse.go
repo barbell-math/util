@@ -25,9 +25,9 @@ const (
 // handle to the file for future writing.
 func NewSingleLogFileParser(f *os.File) argparse.Parser {
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[*os.File, *translators.OpenFile](
+	argparse.AddArg[*translators.OpenFile](
 		&f, &b, LogFileArg,
-		argparse.NewOpts[*os.File, *translators.OpenFile]().
+		argparse.NewOpts[*translators.OpenFile]().
 			SetDescription("The file to send all log messages to").
 			SetTranslator(
 				translators.NewOpenFile().
@@ -51,9 +51,9 @@ func NewVerbosityParser[T basic.Int | basic.Uint](
 	maxLevel T,
 ) argparse.Parser {
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[T, *translators.LimitedFlagCntr[T]](
+	argparse.AddArg[*translators.LimitedFlagCntr[T]](
 		val, &b, VerboseArg,
-		argparse.NewOpts[T, *translators.LimitedFlagCntr[T]]().
+		argparse.NewOpts[*translators.LimitedFlagCntr[T]]().
 			SetArgType(argparse.MultiFlagArgType).
 			SetShortName('v').
 			SetRequired(false).

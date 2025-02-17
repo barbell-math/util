@@ -54,9 +54,9 @@ func Example_CustomTranslator_Stateful() {
 	b := argparse.ArgBuilder{}
 	// The call to SetTranslator is mandatory in this case because the sequence
 	// counter translator has state that needs to be initialized.
-	argparse.AddArg[[]string, *SequenceCounter](
+	argparse.AddArg[*SequenceCounter](
 		&vals.S, &b, "str",
-		argparse.NewOpts[[]string, *SequenceCounter]().
+		argparse.NewOpts[*SequenceCounter]().
 			SetShortName('s').
 			SetRequired(true).
 			SetArgType(argparse.MultiValueArgType).

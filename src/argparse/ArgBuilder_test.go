@@ -11,18 +11,18 @@ func TestArgBuilderToParserDuplicateShortNames(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
 
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str2",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 
@@ -35,17 +35,17 @@ func TestArgBuilderToParserMissingShortNames(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
 
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString](),
+		NewOpts[translators.BuiltinString](),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str2",
-		NewOpts[string, translators.BuiltinString](),
+		NewOpts[translators.BuiltinString](),
 	)
 
 	_, err := b.ToParser("", "")
@@ -56,18 +56,18 @@ func TestArgBuilderToParserDuplicateLongNames(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
 
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('t'),
 	)
 
@@ -80,11 +80,11 @@ func TestArgBuilderToParserInvalidConfigLongName(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
 
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"config",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('c'),
 	)
 
@@ -97,18 +97,18 @@ func TestArgBuilderToParserValidArgBuilder(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
 
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str2",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('t'),
 	)
 
@@ -120,11 +120,11 @@ func TestArgBuilderLongNameToShort(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
 
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"s",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('t'),
 	)
 

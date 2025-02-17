@@ -9,13 +9,13 @@ import (
 type (
 	// A translator that imposes a set of specific values on a cmd line
 	// argument.
-	Selector[T any, U Translater[T], W widgets.BaseInterface[T]] struct {
-		AllowedVals     containers.HashSet[T, W]
-		ValueTranslator Translater[T]
+	Selector[T Translater[U], W widgets.BaseInterface[U], U any] struct {
+		AllowedVals     containers.HashSet[U, W]
+		ValueTranslator Translater[U]
 	}
 )
 
-func (s Selector[T, U, W]) Translate(arg string) (T, error) {
+func (s Selector[T, W, U]) Translate(arg string) (U, error) {
 	rv, err := s.ValueTranslator.Translate(arg)
 	if err != nil {
 		return rv, err
@@ -36,6 +36,6 @@ func (s Selector[T, U, W]) Translate(arg string) (T, error) {
 	return rv, nil
 }
 
-func (s Selector[T, U, W]) Reset() {
+func (s Selector[T, W, U]) Reset() {
 	s.ValueTranslator.Reset()
 }

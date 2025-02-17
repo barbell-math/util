@@ -26,7 +26,7 @@ type (
 
 	// The optional values that are associated with an argument.
 	//gen:structDefaultInit newReturns pntr
-	opts[T any, U translators.Translater[T]] struct {
+	opts[T translators.Translater[U], U any] struct {
 		// The type of argument. This value will affect how the parser expects
 		// values, so make sure it is the right value. See [ArgType] for
 		// descriptions of available types.
@@ -47,10 +47,10 @@ type (
 		required bool
 		// The list of arguments that must also be provided if this argument is
 		// provided. All arguments provided are expected to be long names.
-		//gen:structDefaultInit default []ArgConditionality[T]{}
+		//gen:structDefaultInit default []ArgConditionality[U]{}
 		//gen:structDefaultInit setter
 		//gen:structDefaultInit getter
-		conditionallyRequired []ArgConditionality[T]
+		conditionallyRequired []ArgConditionality[U]
 		// Sets the description that will be printed out on the help menu.
 		//gen:structDefaultInit default ""
 		//gen:structDefaultInit setter
@@ -58,20 +58,20 @@ type (
 		description string
 		// The default value that should be used if the argument is not supplied.
 		// The default defaults to a zero-value initialized value.
-		//gen:structDefaultInit default generics.ZeroVal[T]()
+		//gen:structDefaultInit default generics.ZeroVal[U]()
 		//gen:structDefaultInit getter
 		//gen:structDefaultInit imports github.com/barbell-math/util/src/generics
-		defaultVal T
+		defaultVal U
 		//gen:structDefaultInit default false
 		defaultValProvided bool
 		// The translator value to use when parsing the cmd line argument's
 		// value. Most translators are stateless, but some have state and hence
 		// must be able to have there value explicitly set.
-		//gen:structDefaultInit default generics.ZeroVal[U]()
+		//gen:structDefaultInit default generics.ZeroVal[T]()
 		//gen:structDefaultInit setter
 		//gen:structDefaultInit getter
 		//gen:structDefaultInit imports github.com/barbell-math/util/src/generics github.com/barbell-math/util/src/argparse/translators
-		translator U
+		translator T
 	}
 
 	// Represents a single argument from the cmd line interface and all the
@@ -119,14 +119,14 @@ func ArgEquals[T comparable](val T) ArgConditional[T] {
 
 // The default value that should be used if the argument is not supplied.
 // The default defaults to a zero-value initialized value.
-func (o *opts[T, U]) SetDefaultVal(v T) *opts[T, U] {
+func (o *opts[T, U]) SetDefaultVal(v U) *opts[T, U] {
 	o.defaultVal = v
 	o.defaultValProvided = true
 	return o
 }
 
-func newArg[T any, U translators.Translater[T]](
-	val *T,
+func newArg[T translators.Translater[U], U any](
+	val *U,
 	longName string,
 	opts *opts[T, U],
 ) arg {
@@ -181,9 +181,9 @@ func newArg[T any, U translators.Translater[T]](
 	}
 }
 
-func newComputedArg[T any, U computers.Computer[T]](
-	val *T,
-	computer U,
+func newComputedArg[T computers.Computer[U], U any](
+	val *U,
+	computer T,
 ) computedArg {
 	return computedArg{
 		setVal: func() error {
