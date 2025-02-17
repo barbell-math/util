@@ -19,7 +19,7 @@ func TestGeneratedCodeMatchesExpected(t *testing.T) {
 	test.Nil(cmd.Run(), t)
 
 	generatedFiles, _ := filepath.Glob("./*.gen.go")
-	expFiles, _ := filepath.Glob("./exp/*.gen.go")
+	expFiles, _ := filepath.Glob("./exp/*.gen.go.exp")
 
 	slices.Sort[[]string](generatedFiles)
 	slices.Sort[[]string](expFiles)
@@ -27,7 +27,7 @@ func TestGeneratedCodeMatchesExpected(t *testing.T) {
 		slices.EqualFunc[[]string](
 			generatedFiles, expFiles,
 			func(gen string, exp string) bool {
-				return fmt.Sprintf("exp/%s", gen) == exp
+				return fmt.Sprintf("exp/%s.exp", gen) == exp
 			},
 		),
 		t,
