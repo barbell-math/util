@@ -62,13 +62,13 @@ of the interfaces has also been broken down into read only/write only parts. The
 intent of this is to allow for the mutability and access of the containers to be
 controlled in any code that uses interface values.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/staticContainers/Set.go#L5-L17
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/staticContainers/Set.go#L5-L17
 <sup>Read-only static set interface.</sup>
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/staticContainers/Set.go#L19-L30
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/staticContainers/Set.go#L19-L30
 <sup>Write-only static set interface.</sup>
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/staticContainers/Set.go#L32-L37
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/staticContainers/Set.go#L32-L37
 <sup>Full static set interface.</sup>
 
 An example of using the interface types over the concrete types is shown in the
@@ -79,7 +79,7 @@ value. This was done because the sliding window operations require efficient
 queue operations, but all down stream iterators only need random access to the
 elements within the container and not access to any of the queue operations.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/containers/Iterface.go#L22-L29
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/containers/Iterface.go#L22-L29
 <sup>The sliding window function definition.</sup>
 
 ## Addressability
@@ -124,7 +124,7 @@ container from a static list of values then the value initializers can be used.
 The value initializers will take a sequence of varargs and return a container
 initialized and containing those values.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/containers/Vector_test.go#L46-L48
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/containers/Vector_test.go#L46-L48
 <sup>Value initializer example with a Vector.</sup>
 
 ## Vector: The Special Case
@@ -132,12 +132,12 @@ https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da104
 The `Vector` container is slightly different from the other containers. It is
 nothing more than a sub type of a slice.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/containers/Vector.go#L16-L23
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/containers/Vector.go#L16-L23
 <sup>The `Vector` type definition.</sup>
 
 Due to this vectors can be type casted to and from a slice.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/containers/Vector_test.go#L33-L42
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/containers/Vector_test.go#L33-L42
 <sup>Example of type casting a slice and vector.</sup>
 
 This is convenient for sure, but it allows for some other more interesting
@@ -150,7 +150,7 @@ depending on the equality operation defined by the different widget types. This
 is actually used in the `HashGraph` implementation. Shown below are two sub
 types of the underlying `graphLink` type.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/containers/HashGraph.go#L34-L37
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/containers/HashGraph.go#L34-L37
 
 As explained in the comments, each sub type is used in different scenarios
 depending on what part of the `graphLink` is relevant. Each of these sub types
@@ -158,14 +158,14 @@ implements the `BaseWidget` interface as shown below. Notice how the equality
 and hash operations depend on different attributes from the underlying
 `graphLink` type.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/containers/HashGraph.go#L108-L126
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/containers/HashGraph.go#L108-L126
 
 Given these two types the code later is able to type cast a
 `Vector[graphLink, *graphLink]` to `[]graphLink` and then to 
 `Vector[graphLink, *vertexOnlyGraphLink]`. This changes the underlying equality
 function, which is then subsequently used by the `Pop` method on the vector.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/container/containers/HashGraph.go#L1292-L1295
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/container/containers/HashGraph.go#L1292-L1295
 
 Kinda cool if you ask me.
 
@@ -183,24 +183,24 @@ A similar idea to the previous section is sub typing pointers. The `argparse`
 package uses this concept. If you look at the `argparse.Parser` type definition
 you will see the following containers being used.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/argparse/Parser.go#L37-L48
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/argparse/Parser.go#L37-L48
 
 These containers hold `*shortArg` and `*longArg` values. However, if you look at
 the definition of those types you will find thy are sub types of `*Arg`.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/argparse/Arg.go#L56-L59
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/argparse/Arg.go#L56-L59
 
 Similar to the previous section the only difference between these sub types are
 the attributes of the `Arg` type that define equality and hashing.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/argparse/Arg.go#L110-L129
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/argparse/Arg.go#L110-L129
 
 So, what you end up with are two separate `HashMap`'s that point to the same set
 of underlying values. The only difference is how those hash maps _view_ the
 underlying values. To add the same value to both hash maps one simply has to
 type cast a `*Arg` as shown below.
 
-https://github.com/barbell-math/util/blob/23d18a281acb287fe6253b150bae98433da10419/src/argparse/ArgBuilder.go#L181-L188
+https://github.com/barbell-math/util/blob/268ed2b9941d535decf206ee4e49b2442bba1262/src/argparse/ArgBuilder.go#L181-L188
 
 This design pattern provides a simple way to create many indexes on a single set
 of underlying data.
