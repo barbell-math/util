@@ -1,6 +1,6 @@
-package tests
+package generatortests
 
-//go:generate ../../bin/flags -type=optionsFlag -package=tests
+//go:generate ../../bin/flags -type=optionsFlag -package=generatortests
 
 type (
 	optionsFlag int

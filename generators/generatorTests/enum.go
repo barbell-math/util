@@ -1,6 +1,6 @@
-package tests
+package generatortests
 
-//go:generate ../../bin/enum -type=tokenType -package=tests
+//go:generate ../../bin/enum -type=tokenType -package=generatortests
 
 type (
 	//gen:enum unknownValue unknownTokenType

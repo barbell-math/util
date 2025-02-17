@@ -1,4 +1,4 @@
-package tests
+package generatortests
 
 //go:generate ../../bin/passThroughWidget -type=PassThroughWidgetBaseTest
 //go:generate ../../bin/passThroughWidget -type=PassThroughWidgetPartialOrderTest

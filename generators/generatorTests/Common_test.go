@@ -1,4 +1,4 @@
-package tests
+package generatortests
 
 import (
 	"bytes"
@@ -40,6 +40,8 @@ func TestGeneratedCodeMatchesExpected(t *testing.T) {
 		test.Nil(err, t)
 		expFileContents, err := os.ReadFile(iterExpFile)
 		test.Nil(err, t)
+
+		t.Logf("Testing file: %s == %s\n", iterExpFile, iterGenFile)
 		test.True(bytes.Equal(genFileContents, expFileContents), t)
 	}
 }
