@@ -7,8 +7,8 @@ import (
 )
 
 // Returns a new OpenFile struct initialized with the default values.
-func NewOpenFile() OpenFile {
-	return OpenFile{
+func NewOpenFile() *OpenFile {
+	return &OpenFile{
 		flags:       os.O_RDONLY,
 		permissions: 0644,
 	}
