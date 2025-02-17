@@ -33,6 +33,10 @@ type <struct type> struct {
     //gen:structDefaultInit setter
     //gen:structDefaultInit imports <imported package 1> <imported package2>
     <field 3> <field 3 type>
+
+    //gen:structDefaultInit default <default value 3>
+    //gen:structDefaultInit pointerSetter
+    <field 4> *<field 4 type>
 }
 ```
 
@@ -41,8 +45,12 @@ The following comment arguments are supported:
 1. default (string) (required): the value that the field should be initialized 
 with. This value is treated as a string, meaning whatever text is in the string
 will be what is placed in the generated code. Expressions are not evaluated.
-1. setter (bool) (required): true to make a setter function for this field,
+1. setter (bool) (optional): true to make a setter function for this field,
 false to not add one
+1. pointerSetter (bool) (optional): true to make a pointer setter function for
+this field, false to not add one. A pointer setter will assume that the
+associated field is a pointer to an underlying value and will set the pointers
+underlying value rather than the pointer itself.
 1. getter (bool) (required): true to make a getter function for this field,
 false to not add one
 1. imports (string) (optional): a space separated list of imports to include in 
@@ -67,6 +75,7 @@ func new<struct type>() <struct type> {
         <field 1>: <default value 1>,
         <field 2>: <default value 2>,
         <field 3>: <default value 3>,
+        <field 4>: <default value 4>,
     }
 }
 
@@ -75,7 +84,7 @@ func new<struct type>() <struct type> {
 //gen:structDefaultInit default <default value 2>
 //gen:structDefaultInit setter
 //gen:structDefaultInit getter
-func (o *<struct type>) <field 2>(v <field 2 type>) *<struct type> {
+func (o *<struct type>) Set<field 2>(v <field 2 type>) *<struct type> {
     o.<field 2>=v
     return o
 }
@@ -85,15 +94,22 @@ func (o *<struct type>) <field 2>(v <field 2 type>) *<struct type> {
 //gen:structDefaultInit default <default value 2>
 //gen:structDefaultInit setter
 //gen:structDefaultInit getter
-func (o *<struct type>) get<field 2>() *<field 2 type> {
+func (o *<struct type>) Get<field 2>() *<field 2 type> {
     return o.<field 2>
 }
 
 //gen:structDefaultInit default <default value 3>
 //gen:structDefaultInit setter
 //gen:structDefaultInit imports <imported package 1> <imported package2>
-func (o *<struct type>) <field 3>(v <field 3 type>) *<struct type> {
+func (o *<struct type>) Set<field 3>(v <field 3 type>) *<struct type> {
     o.<field 3>=v
+    return o
+}
+
+//gen:structDefaultInit default <default value 3>
+//gen:structDefaultInit pointerSetter
+func (o *<struct type>) Set<field 4>PntrVal(v *<field 4 type>) *<struct type> {
+    *o.<field 4>=*v
     return o
 }
 ```
@@ -103,6 +119,8 @@ At a high level the following code is generated:
 1. A ```New<struct type>``` function. This function will return a new struct
 with the default values that were specified in the struct tags.
 1. Setter functions for any fields that had the setter tag set to true.
+1. Pointer setter functions for any fields that had the pointer setter tag set
+to true.
 1. Getter functions for any fields that had the getter tag set to true.
 1. Every getter and setter function will have the same doc string comment as
 the comment that was on the associated struct field.
