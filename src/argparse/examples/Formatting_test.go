@@ -14,15 +14,15 @@ func Example_LongArgFormats() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I, &b, "int",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('i').
 			SetDescription("This is an integer"),
 	)
 	argparse.AddFlag(
 		&vals.B, &b, "bool",
-		argparse.NewOpts[bool, translators.Flag]().
+		argparse.NewOpts[translators.Flag]().
 			SetShortName('b').
 			SetDescription("This is a flag argument"),
 	)
@@ -73,27 +73,27 @@ func Example_ShortArgFormats() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I, &b, "int",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('i').
 			SetDescription("This is an integer"),
 	)
 	argparse.AddFlag(
 		&vals.B1, &b, "b1",
-		argparse.NewOpts[bool, translators.Flag]().
+		argparse.NewOpts[translators.Flag]().
 			SetShortName('1').
 			SetDescription("This is a flag argument"),
 	)
 	argparse.AddFlag(
 		&vals.B2, &b, "b2",
-		argparse.NewOpts[bool, translators.Flag]().
+		argparse.NewOpts[translators.Flag]().
 			SetShortName('2').
 			SetDescription("This is a flag argument"),
 	)
 	argparse.AddFlag(
 		&vals.B3, &b, "b3",
-		argparse.NewOpts[bool, translators.Flag]().
+		argparse.NewOpts[translators.Flag]().
 			SetShortName('3').
 			SetDescription("This is a flag argument"),
 	)

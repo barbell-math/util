@@ -10,7 +10,7 @@ import (
 )
 
 func TestListValuesNilAllowedVals(t *testing.T) {
-	l := ListValues[int, BuiltinInt, widgets.BuiltinInt]{
+	l := ListValues[BuiltinInt, widgets.BuiltinInt, int]{
 		ValueTranslator: BuiltinInt{Base: 10},
 	}
 
@@ -20,7 +20,7 @@ func TestListValuesNilAllowedVals(t *testing.T) {
 }
 
 func TestListValuesAllowedValsPassing(t *testing.T) {
-	l := ListValues[int, BuiltinInt, widgets.BuiltinInt]{
+	l := ListValues[BuiltinInt, widgets.BuiltinInt, int]{
 		ValueTranslator: BuiltinInt{Base: 10},
 		AllowedVals:     containers.HashSetValInit[int, widgets.BuiltinInt](1),
 	}
@@ -31,7 +31,7 @@ func TestListValuesAllowedValsPassing(t *testing.T) {
 }
 
 func TestListValuesAllowedValsFailing(t *testing.T) {
-	l := ListValues[int, BuiltinInt, widgets.BuiltinInt]{
+	l := ListValues[BuiltinInt, widgets.BuiltinInt, int]{
 		ValueTranslator: BuiltinInt{Base: 10},
 		AllowedVals:     containers.HashSetValInit[int, widgets.BuiltinInt](1, 2, 3),
 	}

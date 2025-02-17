@@ -8,14 +8,14 @@ import (
 
 type (
 	// A translator that collects all supplied values into a slice.
-	ListValues[T any, U Translater[T], W widgets.BaseInterface[T]] struct {
-		vals            []T
-		ValueTranslator U
-		AllowedVals     containers.HashSet[T, W]
+	ListValues[T Translater[U], W widgets.BaseInterface[U], U any] struct {
+		vals            []U
+		ValueTranslator T
+		AllowedVals     containers.HashSet[U, W]
 	}
 )
 
-func (l *ListValues[T, U, W]) Translate(arg string) ([]T, error) {
+func (l *ListValues[T, W, U]) Translate(arg string) ([]U, error) {
 	v, err := l.ValueTranslator.Translate(arg)
 	if err != nil {
 		return l.vals, err
@@ -37,7 +37,7 @@ func (l *ListValues[T, U, W]) Translate(arg string) ([]T, error) {
 	return l.vals, nil
 }
 
-func (l *ListValues[T, U, W]) Reset() {
+func (l *ListValues[T, W, U]) Reset() {
 	l.ValueTranslator.Reset()
-	l.vals = []T{}
+	l.vals = []U{}
 }

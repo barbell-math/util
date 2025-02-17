@@ -136,11 +136,11 @@ func TestToArgValPairsInvalidTokenType(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+		NewOpts[translators.BuiltinString]().SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -155,11 +155,11 @@ func TestToArgValPairsExpectedArgument(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
@@ -176,11 +176,11 @@ func TestToArgValPairsUnrecognizedShortFlag(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
@@ -203,11 +203,11 @@ func TestToArgValPairsUnrecognizedLongFlag(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
@@ -236,11 +236,11 @@ func TestToArgValPairsInvalidArgType(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetArgType(ArgType(-1)).
 			SetShortName('s'),
 	)
@@ -258,11 +258,11 @@ func TestToArgValPairsEndOfTokenStream(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
@@ -280,11 +280,11 @@ func TestToArgValPairsExpectedValue(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
@@ -319,11 +319,11 @@ func TestToArgValPairsPassingShortFlag(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
@@ -354,11 +354,11 @@ func TestToArgValPairsPassingLongFlag(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
@@ -393,7 +393,7 @@ func TestToArgValPairsArgumentOnFlag(t *testing.T) {
 		&res.B,
 		&b,
 		"bool",
-		NewOpts[bool, translators.Flag]().SetShortName('b'),
+		NewOpts[translators.Flag]().SetShortName('b'),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -419,7 +419,7 @@ func TestToArgValPairsArgumentOnFlagCntr(t *testing.T) {
 		&res.I,
 		&b,
 		"int",
-		NewOpts[int, *translators.FlagCntr[int]]().SetShortName('i'),
+		NewOpts[*translators.FlagCntr[int]]().SetShortName('i'),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -448,13 +448,13 @@ func TestToArgValPairsCombinedValueArgsPassing(t *testing.T) {
 		&res.B,
 		&b,
 		"bool",
-		NewOpts[bool, translators.Flag]().SetShortName('b'),
+		NewOpts[translators.Flag]().SetShortName('b'),
 	)
 	AddFlagCntr[int](
 		&res.I,
 		&b,
 		"int",
-		NewOpts[int, *translators.FlagCntr[int]]().SetShortName('i'),
+		NewOpts[*translators.FlagCntr[int]]().SetShortName('i'),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -483,13 +483,13 @@ func TestToArgValPairsCombinedValueArgsPassingWithLongArg(t *testing.T) {
 		&res.B,
 		&b,
 		"bool",
-		NewOpts[bool, translators.Flag]().SetShortName('b'),
+		NewOpts[translators.Flag]().SetShortName('b'),
 	)
 	AddFlagCntr[int](
 		&res.I,
 		&b,
 		"int",
-		NewOpts[int, *translators.FlagCntr[int]]().SetShortName('i'),
+		NewOpts[*translators.FlagCntr[int]]().SetShortName('i'),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -511,19 +511,16 @@ func TestToArgValPairsMultiArgPassing(t *testing.T) {
 	res := struct{ S []int }{}
 
 	b := ArgBuilder{}
-	AddListArg[int, translators.BuiltinInt](
+	AddListArg[translators.BuiltinInt, widgets.BuiltinInt](
 		&res.S,
 		&b,
 		"list",
-		NewOpts[
-			[]int,
-			*translators.ListValues[int, translators.BuiltinInt, widgets.BuiltinInt],
-		]().
+		NewOpts[*translators.ListValues[translators.BuiltinInt, widgets.BuiltinInt, int]]().
 			SetShortName('l').
 			SetTranslator(&translators.ListValues[
-				int,
 				translators.BuiltinInt,
 				widgets.BuiltinInt,
+				int,
 			]{
 				ValueTranslator: translators.BuiltinInt{Base: 10},
 			}),
@@ -588,19 +585,16 @@ func TestToArgValPairsMultiArgMissingValue(t *testing.T) {
 	res := struct{ S []int }{}
 
 	b := ArgBuilder{}
-	AddListArg[int, translators.BuiltinInt, widgets.BuiltinInt](
+	AddListArg[translators.BuiltinInt, widgets.BuiltinInt](
 		&res.S,
 		&b,
 		"list",
-		NewOpts[
-			[]int,
-			*translators.ListValues[int, translators.BuiltinInt, widgets.BuiltinInt],
-		]().
+		NewOpts[*translators.ListValues[translators.BuiltinInt, widgets.BuiltinInt, int]]().
 			SetShortName('l').
 			SetTranslator(&translators.ListValues[
-				int,
 				translators.BuiltinInt,
 				widgets.BuiltinInt,
+				int,
 			]{
 				ValueTranslator: translators.BuiltinInt{Base: 10},
 			}),

@@ -23,8 +23,8 @@ type (
 //
 // If opts is Nil then the opts will be populated with the default values from
 // calling NewOpts.
-func AddArg[T any, U translators.Translater[T]](
-	val *T,
+func AddArg[T translators.Translater[U], U any](
+	val *U,
 	builder *ArgBuilder,
 	longName string,
 	opts *opts[T, U],
@@ -47,13 +47,13 @@ func AddFlag(
 	val *bool,
 	builder *ArgBuilder,
 	longName string,
-	opts *opts[bool, translators.Flag],
+	opts *opts[translators.Flag, bool],
 ) {
 	if opts == nil {
-		opts = NewOpts[bool, translators.Flag]()
+		opts = NewOpts[translators.Flag]()
 	}
 	opts.argType = FlagArgType
-	AddArg[bool, translators.Flag](val, builder, longName, opts)
+	AddArg[translators.Flag](val, builder, longName, opts)
 }
 
 // Appends a flag counter argument to the supplied builder without performing
@@ -72,14 +72,14 @@ func AddFlagCntr[T mathBasic.Int | mathBasic.Uint](
 	val *T,
 	builder *ArgBuilder,
 	longName string,
-	opts *opts[T, *translators.FlagCntr[T]],
+	opts *opts[*translators.FlagCntr[T], T],
 ) {
 	if opts == nil {
-		opts = NewOpts[T, *translators.FlagCntr[T]]()
+		opts = NewOpts[*translators.FlagCntr[T], T]()
 	}
 	opts.argType = MultiFlagArgType
 	opts.translator = &translators.FlagCntr[T]{}
-	AddArg[T, *translators.FlagCntr[T]](val, builder, longName, opts)
+	AddArg[*translators.FlagCntr[T]](val, builder, longName, opts)
 }
 
 // Appends a list argument to the supplied builder without performing any
@@ -90,17 +90,17 @@ func AddFlagCntr[T mathBasic.Int | mathBasic.Uint](
 //
 // If opts is Nil then the opts will be populated with the default values from
 // calling NewOpts.
-func AddListArg[T any, U translators.Translater[T], W widgets.BaseInterface[T]](
-	val *[]T,
+func AddListArg[T translators.Translater[U], W widgets.BaseInterface[U], U any](
+	val *[]U,
 	builder *ArgBuilder,
 	longName string,
-	opts *opts[[]T, *translators.ListValues[T, U, W]],
+	opts *opts[*translators.ListValues[T, W, U], []U],
 ) {
 	if opts == nil {
-		opts = NewOpts[[]T, *translators.ListValues[T, U, W]]()
+		opts = NewOpts[*translators.ListValues[T, W, U], []U]()
 	}
 	opts.argType = MultiValueArgType
-	AddArg[[]T, *translators.ListValues[T, U, W]](val, builder, longName, opts)
+	AddArg[*translators.ListValues[T, W, U]](val, builder, longName, opts)
 }
 
 // Appends a selector argument to the supplied builder without performing any
@@ -111,43 +111,43 @@ func AddListArg[T any, U translators.Translater[T], W widgets.BaseInterface[T]](
 //
 // If opts is Nil then the opts will be populated with the default values from
 // calling NewOpts.
-func AddSelector[T any, U translators.Translater[T], W widgets.BaseInterface[T]](
-	val *T,
+func AddSelector[T translators.Translater[U], W widgets.BaseInterface[U], U any](
+	val *U,
 	builder *ArgBuilder,
 	longName string,
-	opts *opts[T, translators.Selector[T, U, W]],
+	opts *opts[translators.Selector[T, W, U], U],
 ) {
 	if opts == nil {
-		opts = NewOpts[T, translators.Selector[T, U, W]]()
+		opts = NewOpts[translators.Selector[T, W, U], U]()
 	}
 	opts.argType = ValueArgType
-	AddArg[T, translators.Selector[T, U, W]](val, builder, longName, opts)
+	AddArg[translators.Selector[T, W, U]](val, builder, longName, opts)
 }
 
 // Appends a enum selector to the supplied builder without performing any
 // validation of the argument or builder as a whole. Enum selector arguments
 // accept a value that must map to a valid enum value of the supplied enum
 // type.
-func AddEnum[E enum.Value, EP enum.Pntr[E]](
+func AddEnum[EP enum.Pntr[E], E enum.Value](
 	val *E,
 	builder *ArgBuilder,
 	longName string,
-	opts *opts[E, translators.Enum[E, EP]],
+	opts *opts[translators.Enum[EP, E], E],
 ) {
 	if opts == nil {
-		opts = NewOpts[E, translators.Enum[E, EP]]()
+		opts = NewOpts[translators.Enum[EP, E]]()
 	}
 	opts.argType = ValueArgType
-	opts.translator = translators.Enum[E, EP]{}
-	AddArg[E, translators.Enum[E, EP]](val, builder, longName, opts)
+	opts.translator = translators.Enum[EP, E]{}
+	AddArg[translators.Enum[EP, E]](val, builder, longName, opts)
 }
 
 // Appends a computed argument to the supplied builder without performing any
 // validation of computation of the argument or builder as a whole.
-func AddComputedArg[T any, U computers.Computer[T]](
-	val *T,
+func AddComputedArg[T computers.Computer[U], U any](
+	val *U,
 	builder *ArgBuilder,
-	computer U,
+	computer T,
 ) {
 	builder.computedVals = append(
 		builder.computedVals,

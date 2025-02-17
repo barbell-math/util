@@ -9,11 +9,11 @@ import (
 func NewHelpParser() Parser {
 	res := struct{}{}
 	b := ArgBuilder{}
-	AddArg[struct{}, translators.Stopper[struct{}]](
+	AddArg[translators.Stopper[struct{}]](
 		&res,
 		&b,
 		"help",
-		NewOpts[struct{}, translators.Stopper[struct{}]]().
+		NewOpts[translators.Stopper[struct{}]]().
 			SetArgType(FlagArgType).
 			SetShortName('h').
 			SetRequired(false).

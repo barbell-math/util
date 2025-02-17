@@ -47,19 +47,19 @@ func Example_CustomComputer() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[string, translators.BuiltinString](
+	argparse.AddArg[translators.BuiltinString](
 		&vals.S1, &b, "str1",
-		argparse.NewOpts[string, translators.BuiltinString]().
+		argparse.NewOpts[translators.BuiltinString]().
 			SetShortName('1').
 			SetRequired(true),
 	)
-	argparse.AddArg[string, translators.BuiltinString](
+	argparse.AddArg[translators.BuiltinString](
 		&vals.S2, &b, "str2",
-		argparse.NewOpts[string, translators.BuiltinString]().
+		argparse.NewOpts[translators.BuiltinString]().
 			SetShortName('2').
 			SetRequired(true),
 	)
-	argparse.AddComputedArg[string, StrWeaver](
+	argparse.AddComputedArg[StrWeaver](
 		&vals.Res, &b, StrWeaver{
 			S1: &vals.S1,
 			S2: &vals.S2,

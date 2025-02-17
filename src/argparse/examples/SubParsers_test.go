@@ -15,9 +15,9 @@ func Example_SubParserSimple() {
 	}{}
 
 	b1 := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I, &b1, "int",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('i').
 			SetDescription("This is an integer"),
 	)
@@ -27,7 +27,7 @@ func Example_SubParserSimple() {
 	b2 := argparse.ArgBuilder{}
 	argparse.AddFlag(
 		&vals.B, &b2, "bool",
-		argparse.NewOpts[bool, translators.Flag]().
+		argparse.NewOpts[translators.Flag]().
 			SetShortName('b').
 			SetDescription("This is a flag argument"),
 	)
@@ -72,51 +72,51 @@ func Example_SubParserComplex() {
 	}{}
 
 	b1 := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&res.A,
 		&b1,
 		"aa",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('a').
 			SetRequired(true),
 	)
 	p1, _ := b1.ToParser("", "")
 
 	b2 := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&res.B,
 		&b2,
 		"bb",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('b').
 			SetRequired(true),
 	)
 	p2, _ := b2.ToParser("", "")
 
 	b3 := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&res.C,
 		&b3,
 		"cc",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('c').
 			SetRequired(true),
 	)
 	p3, _ := b3.ToParser("", "")
 
 	b4 := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&res.D,
 		&b4,
 		"dd",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('d').
 			SetRequired(true),
 	)
 	p4, _ := b4.ToParser("", "")
 
 	b5 := argparse.ArgBuilder{}
-	argparse.AddComputedArg[int, computers.Add[int]](
+	argparse.AddComputedArg[computers.Add[int]](
 		&res.E,
 		&b5,
 		computers.Add[int]{L: &res.A, R: &res.B},
@@ -124,7 +124,7 @@ func Example_SubParserComplex() {
 	p5, _ := b5.ToParser("", "")
 
 	b6 := argparse.ArgBuilder{}
-	argparse.AddComputedArg[int, computers.Sub[int]](
+	argparse.AddComputedArg[computers.Sub[int]](
 		&res.F,
 		&b6,
 		computers.Sub[int]{L: &res.C, R: &res.D},
@@ -132,7 +132,7 @@ func Example_SubParserComplex() {
 	p6, _ := b6.ToParser("", "")
 
 	b7 := argparse.ArgBuilder{}
-	argparse.AddComputedArg[int, computers.Mul[int]](
+	argparse.AddComputedArg[computers.Mul[int]](
 		&res.G,
 		&b7,
 		computers.Mul[int]{L: &res.E, R: &res.F},

@@ -32,9 +32,9 @@ func Example_CustomTranslator_Stateless() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[string, Reverser](
+	argparse.AddArg[Reverser](
 		&vals.S, &b, "str",
-		argparse.NewOpts[string, Reverser]().
+		argparse.NewOpts[Reverser]().
 			SetShortName('s').
 			SetRequired(true),
 	)

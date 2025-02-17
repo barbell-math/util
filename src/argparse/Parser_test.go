@@ -15,11 +15,11 @@ func TestParserAddSubParsersEmptyParser(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+		NewOpts[translators.BuiltinString]().SetShortName('s'),
 	)
 	p1, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -40,11 +40,11 @@ func TestParserAddSubParsersNonEmptyValid(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+		NewOpts[translators.BuiltinString]().SetShortName('s'),
 	)
 	p1, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -65,21 +65,21 @@ func TestParserAddSubParsersNonEmptyDuplicateLongNames(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+		NewOpts[translators.BuiltinString]().SetShortName('s'),
 	)
 	p1, err := b.ToParser("", "")
 	test.Nil(err, t)
 
 	b2 := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b2,
 		"str",
-		NewOpts[string, translators.BuiltinString]().SetShortName('S'),
+		NewOpts[translators.BuiltinString]().SetShortName('S'),
 	)
 	p2, err := b2.ToParser("", "")
 	test.Nil(err, t)
@@ -99,21 +99,21 @@ func TestParserAddSubParsersNonEmptyDuplicateShortNames(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+		NewOpts[translators.BuiltinString]().SetShortName('s'),
 	)
 	p1, err := b.ToParser("", "")
 	test.Nil(err, t)
 
 	b2 := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b2,
 		"str2",
-		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+		NewOpts[translators.BuiltinString]().SetShortName('s'),
 	)
 	p2, err := b2.ToParser("", "")
 	test.Nil(err, t)
@@ -136,11 +136,11 @@ func TestParserAddSubParsers(t *testing.T) {
 	}{}
 
 	b1 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.A,
 		&b1,
 		"aa",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('a').
 			SetRequired(true),
 	)
@@ -148,11 +148,11 @@ func TestParserAddSubParsers(t *testing.T) {
 	test.Nil(err, t)
 
 	b2 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.B,
 		&b2,
 		"bb",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('b').
 			SetRequired(true),
 	)
@@ -160,11 +160,11 @@ func TestParserAddSubParsers(t *testing.T) {
 	test.Nil(err, t)
 
 	b3 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.C,
 		&b3,
 		"cc",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('c').
 			SetRequired(true),
 	)
@@ -172,11 +172,11 @@ func TestParserAddSubParsers(t *testing.T) {
 	test.Nil(err, t)
 
 	b4 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.D,
 		&b4,
 		"dd",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('d').
 			SetRequired(true),
 	)
@@ -184,7 +184,7 @@ func TestParserAddSubParsers(t *testing.T) {
 	test.Nil(err, t)
 
 	b5 := ArgBuilder{}
-	AddComputedArg[int, computers.Add[int]](
+	AddComputedArg[computers.Add[int]](
 		&res.E,
 		&b5,
 		computers.Add[int]{L: &res.A, R: &res.B},
@@ -193,7 +193,7 @@ func TestParserAddSubParsers(t *testing.T) {
 	test.Nil(err, t)
 
 	b6 := ArgBuilder{}
-	AddComputedArg[int, computers.Sub[int]](
+	AddComputedArg[computers.Sub[int]](
 		&res.F,
 		&b6,
 		computers.Sub[int]{L: &res.C, R: &res.D},
@@ -202,7 +202,7 @@ func TestParserAddSubParsers(t *testing.T) {
 	test.Nil(err, t)
 
 	b7 := ArgBuilder{}
-	AddComputedArg[int, computers.Mul[int]](
+	AddComputedArg[computers.Mul[int]](
 		&res.G,
 		&b7,
 		computers.Mul[int]{L: &res.E, R: &res.F},
@@ -235,11 +235,11 @@ func TestParserParseDuplicateValArg(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().SetShortName('s'),
+		NewOpts[translators.BuiltinString]().SetShortName('s'),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -257,7 +257,7 @@ func TestParserParseDuplicateFlagArg(t *testing.T) {
 		&res.B,
 		&b,
 		"bool",
-		NewOpts[bool, translators.Flag]().SetShortName('b'),
+		NewOpts[translators.Flag]().SetShortName('b'),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -275,7 +275,7 @@ func TestParserParseMissingRequiredArgs(t *testing.T) {
 		&res.B,
 		&b,
 		"bool",
-		NewOpts[bool, translators.Flag]().SetShortName('b').SetRequired(true),
+		NewOpts[translators.Flag]().SetShortName('b').SetRequired(true),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -289,11 +289,11 @@ func TestParserParseDefaultValue(t *testing.T) {
 	res := struct{ S string }{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('s').
 			SetDefaultVal("default"),
 	)
@@ -313,23 +313,23 @@ func TestParserParseWithComputedArgumentErr(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.L,
 		&b,
 		"left",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('l').
 			SetRequired(true),
 	)
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.R,
 		&b,
 		"right",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('r').
 			SetRequired(true),
 	)
-	AddComputedArg[int, computers.Stopper[int]](
+	AddComputedArg[computers.Stopper[int]](
 		&res.Res,
 		&b,
 		computers.Stopper[int]{Err: errors.New("ERROR")},
@@ -353,23 +353,23 @@ func TestParserParseWithComputedArgsSimple(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.L,
 		&b,
 		"left",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('l').
 			SetRequired(true),
 	)
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.R,
 		&b,
 		"right",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('r').
 			SetRequired(true),
 	)
-	AddComputedArg[int, computers.Add[int]](
+	AddComputedArg[computers.Add[int]](
 		&res.Res,
 		&b,
 		computers.Add[int]{L: &res.L, R: &res.R},
@@ -393,11 +393,11 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	}{}
 
 	b1 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.A,
 		&b1,
 		"aa",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('a').
 			SetRequired(true),
 	)
@@ -405,11 +405,11 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Nil(err, t)
 
 	b2 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.B,
 		&b2,
 		"bb",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('b').
 			SetRequired(true),
 	)
@@ -417,11 +417,11 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Nil(err, t)
 
 	b3 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.C,
 		&b3,
 		"cc",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('c').
 			SetRequired(true),
 	)
@@ -429,11 +429,11 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Nil(err, t)
 
 	b4 := ArgBuilder{}
-	AddArg[int, translators.BuiltinInt](
+	AddArg[translators.BuiltinInt](
 		&res.D,
 		&b4,
 		"dd",
-		NewOpts[int, translators.BuiltinInt]().
+		NewOpts[translators.BuiltinInt]().
 			SetShortName('d').
 			SetRequired(true),
 	)
@@ -441,7 +441,7 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Nil(err, t)
 
 	b5 := ArgBuilder{}
-	AddComputedArg[int, computers.Add[int]](
+	AddComputedArg[computers.Add[int]](
 		&res.E,
 		&b5,
 		computers.Add[int]{L: &res.A, R: &res.B},
@@ -450,7 +450,7 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Nil(err, t)
 
 	b6 := ArgBuilder{}
-	AddComputedArg[int, computers.Sub[int]](
+	AddComputedArg[computers.Sub[int]](
 		&res.F,
 		&b6,
 		computers.Sub[int]{L: &res.C, R: &res.D},
@@ -459,7 +459,7 @@ func TestParserParseWithComputedArgsComplex(t *testing.T) {
 	test.Nil(err, t)
 
 	b7 := ArgBuilder{}
-	AddComputedArg[int, computers.Mul[int]](
+	AddComputedArg[computers.Mul[int]](
 		&res.G,
 		&b7,
 		computers.Mul[int]{L: &res.E, R: &res.F},
@@ -494,11 +494,11 @@ func TestParserParseConditionallyRequiredArguments(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S1,
 		&b,
 		"str1",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetConditionallyRequired([]ArgConditionality[string]{
 				ArgConditionality[string]{
 					Requires: []string{"str2"},
@@ -506,11 +506,11 @@ func TestParserParseConditionallyRequiredArguments(t *testing.T) {
 				},
 			}),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S2,
 		&b,
 		"str2",
-		NewOpts[string, translators.BuiltinString]().SetDefaultVal("foobar"),
+		NewOpts[translators.BuiltinString]().SetDefaultVal("foobar"),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)
@@ -543,11 +543,11 @@ func TestParserParseUnrecognizedConditionallyRequiredArg(t *testing.T) {
 	res := ""
 	b := ArgBuilder{}
 
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res,
 		&b,
 		"str",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetShortName('t').
 			SetConditionallyRequired([]ArgConditionality[string]{
 				ArgConditionality[string]{
@@ -572,11 +572,11 @@ func TestParserParseConditionallyRequiredArgumentsWithDefaults(t *testing.T) {
 	}{}
 
 	b := ArgBuilder{}
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S1,
 		&b,
 		"str1",
-		NewOpts[string, translators.BuiltinString]().
+		NewOpts[translators.BuiltinString]().
 			SetDefaultVal("string1").
 			SetConditionallyRequired([]ArgConditionality[string]{
 				ArgConditionality[string]{
@@ -585,11 +585,11 @@ func TestParserParseConditionallyRequiredArgumentsWithDefaults(t *testing.T) {
 				},
 			}),
 	)
-	AddArg[string, translators.BuiltinString](
+	AddArg[translators.BuiltinString](
 		&res.S2,
 		&b,
 		"str2",
-		NewOpts[string, translators.BuiltinString]().SetDefaultVal("string2"),
+		NewOpts[translators.BuiltinString]().SetDefaultVal("string2"),
 	)
 	p, err := b.ToParser("", "")
 	test.Nil(err, t)

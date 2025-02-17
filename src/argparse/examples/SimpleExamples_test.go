@@ -18,7 +18,7 @@ func Example_ValueArgument_WithoutOptions() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](&vals.I, &b, "int", nil)
+	argparse.AddArg[translators.BuiltinInt](&vals.I, &b, "int", nil)
 
 	parser, err := b.ToParser("Prog name", "Prog description")
 	fmt.Println("Parser error:", err)
@@ -52,16 +52,16 @@ func Example_ValueArgument_WithOptions() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I, &b, "int",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('i').
 			SetRequired(true).
 			SetDescription("This is an integer"),
 	)
-	argparse.AddArg[uint, translators.BuiltinUint](
+	argparse.AddArg[translators.BuiltinUint](
 		&vals.U, &b, "uint",
-		argparse.NewOpts[uint, translators.BuiltinUint]().
+		argparse.NewOpts[translators.BuiltinUint]().
 			SetShortName('u').
 			SetDefaultVal(3).
 			SetDescription("This is an unsigned integer"),
@@ -94,7 +94,7 @@ func Example_FlagArgument() {
 	// Flags default value is "false"
 	argparse.AddFlag(
 		&vals.B, &b, "bool",
-		argparse.NewOpts[bool, translators.Flag]().
+		argparse.NewOpts[translators.Flag]().
 			SetShortName('b').
 			SetDescription("This is a flag argument"),
 	)
@@ -132,7 +132,7 @@ func Example_FlagCounterArgument() {
 	b := argparse.ArgBuilder{}
 	argparse.AddFlagCntr[int](
 		&vals.I, &b, "cntr",
-		argparse.NewOpts[int, *translators.FlagCntr[int]]().
+		argparse.NewOpts[*translators.FlagCntr[int]]().
 			SetShortName('c').
 			SetDescription("This is a counter flag argument"),
 	)
@@ -170,18 +170,15 @@ func Example_ListArgument() {
 	b := argparse.ArgBuilder{}
 	// The SetTranslator method must be called because the ListValues translator
 	// has state that needs to be initialized.
-	argparse.AddListArg[int, translators.BuiltinInt, widgets.BuiltinInt](
+	argparse.AddListArg[translators.BuiltinInt, widgets.BuiltinInt](
 		&vals.L, &b, "list",
-		argparse.NewOpts[
-			[]int,
-			*translators.ListValues[int, translators.BuiltinInt, widgets.BuiltinInt],
-		]().
+		argparse.NewOpts[*translators.ListValues[translators.BuiltinInt, widgets.BuiltinInt, int]]().
 			SetShortName('l').
 			SetDescription("This is a list flag argument").
 			SetTranslator(&translators.ListValues[
-				int,
 				translators.BuiltinInt,
 				widgets.BuiltinInt,
+				int,
 			]{
 				ValueTranslator: translators.BuiltinInt{},
 			}),
@@ -211,18 +208,15 @@ func Example_ListArgument_AllowedValsSet() {
 	b := argparse.ArgBuilder{}
 	// The SetTranslator method must be called because the ListValues translator
 	// has state that needs to be initialized.
-	argparse.AddListArg[int, translators.BuiltinInt, widgets.BuiltinInt](
+	argparse.AddListArg[translators.BuiltinInt, widgets.BuiltinInt](
 		&vals.L, &b, "list",
-		argparse.NewOpts[
-			[]int,
-			*translators.ListValues[int, translators.BuiltinInt, widgets.BuiltinInt],
-		]().
+		argparse.NewOpts[*translators.ListValues[translators.BuiltinInt, widgets.BuiltinInt, int]]().
 			SetShortName('l').
 			SetDescription("This is a list flag argument").
 			SetTranslator(&translators.ListValues[
-				int,
 				translators.BuiltinInt,
 				widgets.BuiltinInt,
+				int,
 			]{
 				ValueTranslator: translators.BuiltinInt{},
 				AllowedVals: containers.HashSetValInit[int, widgets.BuiltinInt](
@@ -257,18 +251,15 @@ func Example_SelectorArgument() {
 	b := argparse.ArgBuilder{}
 	// The SetTranslator method must be called because the Selector translator
 	// has state that needs to be initialized.
-	argparse.AddSelector[int, translators.BuiltinInt, widgets.BuiltinInt](
+	argparse.AddSelector[translators.BuiltinInt, widgets.BuiltinInt](
 		&vals.I, &b, "selector",
-		argparse.NewOpts[
-			int,
-			translators.Selector[int, translators.BuiltinInt, widgets.BuiltinInt],
-		]().
+		argparse.NewOpts[translators.Selector[translators.BuiltinInt, widgets.BuiltinInt, int]]().
 			SetShortName('s').
 			SetDescription("This is a selector argument").
 			SetTranslator(translators.Selector[
-				int,
 				translators.BuiltinInt,
 				widgets.BuiltinInt,
+				int,
 			]{
 				ValueTranslator: translators.BuiltinInt{},
 				AllowedVals: containers.HashSetValInit[int, widgets.BuiltinInt](
@@ -299,12 +290,9 @@ func Example_EnumSelectorArgument() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddEnum[testenum.TestEnum, *testenum.TestEnum](
+	argparse.AddEnum[*testenum.TestEnum](
 		&vals.E, &b, "selector",
-		argparse.NewOpts[
-			testenum.TestEnum,
-			translators.Enum[testenum.TestEnum, *testenum.TestEnum],
-		]().
+		argparse.NewOpts[translators.Enum[*testenum.TestEnum, testenum.TestEnum]]().
 			SetShortName('s').
 			SetDescription("This is a enum selector argument"),
 	)
@@ -335,21 +323,21 @@ func Example_ComputedArgument() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I1, &b, "int1",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('1').
 			SetRequired(true).
 			SetDescription("This is an integer"),
 	)
-	argparse.AddArg[int, translators.BuiltinInt](
+	argparse.AddArg[translators.BuiltinInt](
 		&vals.I2, &b, "int2",
-		argparse.NewOpts[int, translators.BuiltinInt]().
+		argparse.NewOpts[translators.BuiltinInt]().
 			SetShortName('2').
 			SetDefaultVal(3).
 			SetDescription("This is an integer"),
 	)
-	argparse.AddComputedArg[int, computers.Add[int]](
+	argparse.AddComputedArg[computers.Add[int]](
 		&vals.Res, &b,
 		computers.Add[int]{L: &vals.I1, R: &vals.I2},
 	)
@@ -393,9 +381,9 @@ func Example_FileArgument() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[string, translators.File](
+	argparse.AddArg[translators.File](
 		&vals.F, &b, "file",
-		argparse.NewOpts[string, translators.File]().
+		argparse.NewOpts[translators.File]().
 			SetShortName('f').
 			SetDescription("This is a file argument"),
 	)
@@ -422,9 +410,9 @@ func Example_DirArgument() {
 	}{}
 
 	b := argparse.ArgBuilder{}
-	argparse.AddArg[string, translators.Dir](
+	argparse.AddArg[translators.Dir](
 		&vals.D, &b, "dir",
-		argparse.NewOpts[string, translators.Dir]().
+		argparse.NewOpts[translators.Dir]().
 			SetShortName('d').
 			SetDescription("This is a dir argument"),
 	)
@@ -453,9 +441,9 @@ func Example_OpenFileArgument() {
 	b := argparse.ArgBuilder{}
 	// The SetTranslator method must be called because the OpenFile translator
 	// has state that needs to be initialized.
-	argparse.AddArg[*os.File, *translators.OpenFile](
+	argparse.AddArg[*translators.OpenFile](
 		&vals.F, &b, "file",
-		argparse.NewOpts[*os.File, *translators.OpenFile]().
+		argparse.NewOpts[*translators.OpenFile]().
 			SetShortName('f').
 			SetDescription("This is a file argument").
 			SetTranslator(
@@ -490,9 +478,9 @@ func Example_MkdirArgument() {
 	b := argparse.ArgBuilder{}
 	// The SetTranslator method must be called because the OpenFile translator
 	// has state that needs to be initialized.
-	argparse.AddArg[string, *translators.Mkdir](
+	argparse.AddArg[*translators.Mkdir](
 		&vals.D, &b, "dir",
-		argparse.NewOpts[string, *translators.Mkdir]().
+		argparse.NewOpts[*translators.Mkdir]().
 			SetShortName('d').
 			SetDescription("This is a mkdir argument").
 			SetTranslator(translators.NewMkdir().SetPermissions(0777)),
