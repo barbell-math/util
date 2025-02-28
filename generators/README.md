@@ -32,6 +32,7 @@ generator readme that pertains to your needs.
 
 1. [enum](./enum/README.md)
 1. [flags](./flags/README.md)
+1. [ifaceImplChec](./ifaceImplCheck/README.md)
 1. [passThroughWidget](./passThroughWidget/README.md)
 1. [structBaseWidget](./structBaseWidget/README.md)
 1. [structDefaultInit](./structDefaultInit/README.md)
