@@ -44,4 +44,31 @@ func TestGeneratedCodeMatchesExpected(t *testing.T) {
 		t.Logf("Testing file: %s == %s\n", iterExpFile, iterGenFile)
 		test.True(bytes.Equal(genFileContents, expFileContents), t)
 	}
+
+	generatedFiles, _ = filepath.Glob("./*.gen_test.go")
+	expFiles, _ = filepath.Glob("./exp/*.gen_test.go.exp")
+
+	slices.Sort[[]string](generatedFiles)
+	slices.Sort[[]string](expFiles)
+	test.True(
+		slices.EqualFunc[[]string](
+			generatedFiles, expFiles,
+			func(gen string, exp string) bool {
+				return fmt.Sprintf("exp/%s.exp", gen) == exp
+			},
+		),
+		t,
+	)
+
+	for i, iterGenFile := range generatedFiles {
+		iterExpFile := expFiles[i]
+
+		genFileContents, err := os.ReadFile(iterGenFile)
+		test.Nil(err, t)
+		expFileContents, err := os.ReadFile(iterExpFile)
+		test.Nil(err, t)
+
+		t.Logf("Testing file: %s == %s\n", iterExpFile, iterGenFile)
+		test.True(bytes.Equal(genFileContents, expFileContents), t)
+	}
 }

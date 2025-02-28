@@ -151,7 +151,7 @@ import (
 func main() {
 	common.InlineArgs(&INLINE_ARGS, os.Args)
 
-	optionsStructFound := false
+	requestedStructFound := false
 
 	common.IterateOverAST(
 		".",
@@ -160,18 +160,18 @@ func main() {
 			switch node.(type) {
 			case *ast.GenDecl:
 				gdNode := node.(*ast.GenDecl)
-				if gdNode.Tok == token.TYPE && !optionsStructFound {
+				if gdNode.Tok == token.TYPE && !requestedStructFound {
 					for _, spec := range gdNode.Specs {
-						optionsStructFound = parseTypeSpec(
+						requestedStructFound = parseTypeSpec(
 							fSet,
 							srcFile,
 							spec.(*ast.TypeSpec),
 						)
-						if optionsStructFound {
+						if requestedStructFound {
 							break
 						}
 					}
-					if optionsStructFound {
+					if requestedStructFound {
 						PROG_STATE._package = file.Name.Name
 					}
 					return false
@@ -185,7 +185,7 @@ func main() {
 		},
 	)
 
-	if !optionsStructFound {
+	if !requestedStructFound {
 		common.PrintRunningError(
 			"The supplied type was not found or was not a struct but is required to be.",
 		)
