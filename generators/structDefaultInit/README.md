@@ -66,7 +66,7 @@ value in an external package. Every import will be automatically wrapped in
 quotes.
 
 Given the example used throughout this file, with the information from the 
-inline arguments and the struct tags the following code will be generated:
+inline arguments and the comment args the following code will be generated:
 
 ```
 package <package>
