@@ -2,10 +2,6 @@ package common
 
 import "strings"
 
-func CapitilizeName(name string) string {
-	return strings.ToUpper(name[0:1]) + name[1:]
-}
-
 func ParseImports(existingImports map[string]struct{}, rawImports string) {
 	for _, _import := range strings.Split(rawImports, " ") {
 		// The default value provided by the arg parser is a empty string, skip
