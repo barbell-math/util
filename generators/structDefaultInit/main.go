@@ -129,7 +129,7 @@ package {{ .Package }}
 {{template "autoGenComment" .}}
 import (
 	{{range .Imports -}}
-		"{{ . }}"
+		{{ . }}
 	{{end -}}
 )
 
@@ -410,10 +410,6 @@ func setFieldVals(
 			PROG_STATE.fieldPointerSetters = append(PROG_STATE.fieldPointerSetters, fieldName)
 		}
 
-		if len(structArgs.Imports) > 0 {
-			for _, i := range strings.Split(structArgs.Imports, " ") {
-				PROG_STATE.imports[i] = struct{}{}
-			}
-		}
+		common.ParseImports(PROG_STATE.imports, structArgs.Imports)
 	}
 }

@@ -32,7 +32,7 @@ type <struct type> struct {
     <field 2> <field 2 type> `default:"<default value 2>" setter:"t" getter:"t"`
     //gen:structDefaultInit default <default value 3>
     //gen:structDefaultInit setter
-    //gen:structDefaultInit imports <imported package 1> <imported package2>
+    //gen:structDefaultInit imports <imported package 1> <desired name>-><imported package2>
     <field 3> <field 3 type>
 
     //gen:structDefaultInit default <default value 3>
@@ -63,7 +63,8 @@ false to not add one
 1. imports (string) (optional): a space separated list of imports to include in 
 the generated code file. This is useful when the default value is derived from a
 value in an external package. Every import will be automatically wrapped in
-quotes.
+quotes. To import something under a different name use the following syntax: 
+`<desired name>-><import path>`
 
 Given the example used throughout this file, with the information from the 
 inline arguments and the comment args the following code will be generated:
@@ -73,7 +74,7 @@ package <package>
 
 import (
     "<imported package 1>"
-    "<imported package 2>"
+    <desired name> "<imported package 2>"
 )
 
 // returns a new <struct type> struct initialized with the default values.

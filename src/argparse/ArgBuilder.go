@@ -23,7 +23,7 @@ type (
 //
 // If opts is Nil then the opts will be populated with the default values from
 // calling NewOpts.
-func AddArg[T translators.Translater[U], U any](
+func AddArg[T translators.Translator[U], U any](
 	val *U,
 	builder *ArgBuilder,
 	longName string,
@@ -90,7 +90,7 @@ func AddFlagCntr[T mathBasic.Int | mathBasic.Uint](
 //
 // If opts is Nil then the opts will be populated with the default values from
 // calling NewOpts.
-func AddListArg[T translators.Translater[U], W widgets.BaseInterface[U], U any](
+func AddListArg[T translators.Translator[U], W widgets.BaseInterface[U], U any](
 	val *[]U,
 	builder *ArgBuilder,
 	longName string,
@@ -111,7 +111,7 @@ func AddListArg[T translators.Translater[U], W widgets.BaseInterface[U], U any](
 //
 // If opts is Nil then the opts will be populated with the default values from
 // calling NewOpts.
-func AddSelector[T translators.Translater[U], W widgets.BaseInterface[U], U any](
+func AddSelector[T translators.Translator[U], W widgets.BaseInterface[U], U any](
 	val *U,
 	builder *ArgBuilder,
 	longName string,

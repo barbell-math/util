@@ -6,9 +6,15 @@ import (
 	"github.com/barbell-math/util/src/widgets"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=ListValues
+
 type (
 	// A translator that collects all supplied values into a slice.
-	ListValues[T Translater[U], W widgets.BaseInterface[U], U any] struct {
+	//gen:ifaceImplCheck generics [BuiltinBool, widgets.BuiltinBool, bool]
+	//gen:ifaceImplCheck ifaceName Translator[[]bool]
+	//gen:ifaceImplCheck imports github.com/barbell-math/util/src/widgets
+	//gen:ifaceImplCheck valOrPntr pntr
+	ListValues[T Translator[U], W widgets.BaseInterface[U], U any] struct {
 		vals            []U
 		ValueTranslator T
 		AllowedVals     containers.HashSet[U, W]

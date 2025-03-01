@@ -6,6 +6,8 @@ import (
 	"github.com/barbell-math/util/src/customerr"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Bits
+
 type (
 	// Represents a cmd line argument that is expected to be a sequence of bits.
 	// The bits will be stored in a byte slice. The number of bits does not need
@@ -17,6 +19,8 @@ type (
 	//   1 1010 1110 -> []byte{0b0001, 0b1010, 0b1110}
 	//  10 1010 1110 -> []byte{0b0010, 0b1010, 0b1110}
 	// 100 1010 1110 -> []byte{0b0100, 0b1010, 0b1110}
+	//gen:ifaceImplCheck ifaceName Translator[[]byte]
+	//gen:ifaceImplCheck valOrPntr both
 	Bits struct{}
 )
 

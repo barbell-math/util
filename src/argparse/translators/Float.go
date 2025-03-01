@@ -2,11 +2,18 @@ package translators
 
 import "strconv"
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinFloat32
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinFloat64
+
 type (
 	// Represents a cmd line argument that will be translated to a float32 type.
+	//gen:ifaceImplCheck ifaceName Translator[float32]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinFloat32 struct{}
 
 	// Represents a cmd line argument that will be translated to a floa64 type.
+	//gen:ifaceImplCheck ifaceName Translator[float64]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinFloat64 struct{}
 )
 

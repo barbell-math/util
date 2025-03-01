@@ -1,8 +1,13 @@
 package translators
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Noop
+
 type (
 	// Used to represent a cmd line argument that will always be the default
 	// zero-value initilized T type.
+	//gen:ifaceImplCheck generics [bool]
+	//gen:ifaceImplCheck ifaceName Translator[bool]
+	//gen:ifaceImplCheck valOrPntr both
 	Noop[T any] struct{}
 )
 

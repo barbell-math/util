@@ -6,12 +6,18 @@ import (
 	"github.com/barbell-math/util/src/widgets"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Selector
+
 type (
 	// A translator that imposes a set of specific values on a cmd line
 	// argument.
-	Selector[T Translater[U], W widgets.BaseInterface[U], U any] struct {
+	//gen:ifaceImplCheck generics [BuiltinBool, widgets.BuiltinBool, bool]
+	//gen:ifaceImplCheck ifaceName Translator[bool]
+	//gen:ifaceImplCheck imports github.com/barbell-math/util/src/widgets
+	//gen:ifaceImplCheck valOrPntr both
+	Selector[T Translator[U], W widgets.BaseInterface[U], U any] struct {
 		AllowedVals     containers.HashSet[U, W]
-		ValueTranslator Translater[U]
+		ValueTranslator Translator[U]
 	}
 )
 
