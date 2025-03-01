@@ -6,13 +6,13 @@ import (
 	stdTime "time"
 )
 
-func TesttimeValueImplementsTranslator_stdTime_Time_(t *testing.T) {
+func TestTimeValueImplementsTranslator_stdTime_Time_(t *testing.T) {
 	var typeThing time
 	var iFaceThing Translator[stdTime.Time] = typeThing
 	_ = iFaceThing
 }
 
-func TesttimePntrImplementsTranslator_stdTime_Time_(t *testing.T) {
+func TestTimePntrImplementsTranslator_stdTime_Time_(t *testing.T) {
 	var typeThing time
 	var iFaceThing Translator[stdTime.Time] = &typeThing
 	_ = iFaceThing

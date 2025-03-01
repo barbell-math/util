@@ -128,15 +128,19 @@ func main() {
 	}
 
 	templateData := TemplateVals{
-		Package:           PROG_STATE.Package,
-		Imports:           make([]string, len(PROG_STATE.Imports)),
-		IfaceName:         COMMENT_ARGS.IfaceName,
-		FuncNameIfaceName: common.CleanName(COMMENT_ARGS.IfaceName),
-		TypeName:          INLINE_ARGS.TypeToCheck + COMMENT_ARGS.Generics,
-		FuncNameTypeName:  common.CleanName(INLINE_ARGS.TypeToCheck),
-		ValOfType:         PROG_STATE.ValOfType,
-		PntrToType:        PROG_STATE.PntrToType,
-		GeneratorName:     os.Args[0],
+		Package:   PROG_STATE.Package,
+		Imports:   make([]string, len(PROG_STATE.Imports)),
+		IfaceName: COMMENT_ARGS.IfaceName,
+		FuncNameIfaceName: common.CapitilizeName(common.CleanName(
+			COMMENT_ARGS.IfaceName,
+		)),
+		TypeName: INLINE_ARGS.TypeToCheck + COMMENT_ARGS.Generics,
+		FuncNameTypeName: common.CapitilizeName(common.CleanName(
+			INLINE_ARGS.TypeToCheck,
+		)),
+		ValOfType:     PROG_STATE.ValOfType,
+		PntrToType:    PROG_STATE.PntrToType,
+		GeneratorName: os.Args[0],
 	}
 
 	cntr := 0
