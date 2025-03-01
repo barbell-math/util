@@ -26,7 +26,7 @@ type (
 
 	// The optional values that are associated with an argument.
 	//gen:structDefaultInit newReturns pntr
-	opts[T translators.Translater[U], U any] struct {
+	opts[T translators.Translator[U], U any] struct {
 		// The type of argument. This value will affect how the parser expects
 		// values, so make sure it is the right value. See [ArgType] for
 		// descriptions of available types.
@@ -125,7 +125,7 @@ func (o *opts[T, U]) SetDefaultVal(v U) *opts[T, U] {
 	return o
 }
 
-func newArg[T translators.Translater[U], U any](
+func newArg[T translators.Translator[U], U any](
 	val *U,
 	longName string,
 	opts *opts[T, U],

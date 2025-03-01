@@ -195,7 +195,7 @@ func main() {
 	}
 
 	if err := TEMPLATES.WriteToFile(
-		common.CleanFileName(fmt.Sprintf("%sWidget", INLINE_ARGS.Type)),
+		common.CleanName(fmt.Sprintf("%sWidget", INLINE_ARGS.Type)),
 		common.GeneratedSrcFileExt,
 		"file",
 		templateData,

@@ -5,9 +5,15 @@ import (
 	"github.com/barbell-math/util/src/math/basic"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=FlagCntr
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=LimitedFlagCntr
+
 type (
 	// Used to represent a flag that can be supplied many times, with a counter
 	// incrementing each time the flag is encountered.
+	//gen:ifaceImplCheck generics [int]
+	//gen:ifaceImplCheck ifaceName Translator[int]
+	//gen:ifaceImplCheck valOrPntr pntr
 	FlagCntr[T basic.Int | basic.Uint] struct {
 		cntr T
 	}
@@ -15,6 +21,9 @@ type (
 	// Used to represent a flag that can be supplied many times up to the
 	// provided maximum number of times. A counter will be incremented each
 	// time the flag is encountered.
+	//gen:ifaceImplCheck generics [int]
+	//gen:ifaceImplCheck ifaceName Translator[int]
+	//gen:ifaceImplCheck valOrPntr pntr
 	LimitedFlagCntr[T basic.Int | basic.Uint] struct {
 		FlagCntr[T]
 		MaxTimes T

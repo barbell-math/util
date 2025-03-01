@@ -325,7 +325,7 @@ func main() {
 	}
 
 	if err := TEMPLATES.WriteToFile(
-		common.CleanFileName(fmt.Sprintf(
+		common.CleanName(fmt.Sprintf(
 			"TypeAliasPassThroughWidget_%s_to_%s",
 			INLINE_ARGS.Type,
 			PROG_STATE.baseType,

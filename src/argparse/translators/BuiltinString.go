@@ -1,7 +1,11 @@
 package translators
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinString
+
 type (
 	// Represents a cmd line argument that will be translated to a string type.
+	//gen:ifaceImplCheck ifaceName Translator[string]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinString struct{}
 )
 

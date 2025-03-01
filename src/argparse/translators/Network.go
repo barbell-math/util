@@ -5,25 +5,46 @@ import (
 	"net/netip"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Addr
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Port
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=AddrPort
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Prefix
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=MACAddr
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=CIDRTranslator
+
 type (
 	// Represents a cmd line argument that will be translated to a [netip.Addr]
 	// type.
+	//gen:ifaceImplCheck ifaceName Translator[netip.Addr]
+	//gen:ifaceImplCheck imports net/netip
+	//gen:ifaceImplCheck valOrPntr both
 	Addr struct{}
 
 	// Represents a cmd line argument that should be considered a port value.
 	// Nothing more than an alias for BuiltinUint16
+	//gen:ifaceImplCheck ifaceName Translator[uint16]
+	//gen:ifaceImplCheck valOrPntr both
 	Port = BuiltinUint16
 
 	// Represents a cmd line argument that will be translated to a
 	// [netip.AddrPort] type.
+	//gen:ifaceImplCheck ifaceName Translator[netip.AddrPort]
+	//gen:ifaceImplCheck imports net/netip
+	//gen:ifaceImplCheck valOrPntr both
 	AddrPort struct{}
 
 	// Represents a cmd line argument that will be translated to a
 	// [netip.Prefix] type.
+	//gen:ifaceImplCheck ifaceName Translator[netip.Prefix]
+	//gen:ifaceImplCheck imports net/netip
+	//gen:ifaceImplCheck valOrPntr both
 	Prefix struct{}
 
 	// Represents a cmd line argument that will be translated to a
 	// [net.MACAddr] type.
+	//gen:ifaceImplCheck ifaceName Translator[net.HardwareAddr]
+	//gen:ifaceImplCheck imports net
+	//gen:ifaceImplCheck valOrPntr both
 	MACAddr struct{}
 
 	CIDRVals struct {
@@ -33,6 +54,8 @@ type (
 	// Represents a cmd line argument that will be considered a network mask
 	// following the CIDR format. The string will be translated into a [net.IP]
 	// and [net.IPNet] values.
+	//gen:ifaceImplCheck ifaceName Translator[CIDRVals]
+	//gen:ifaceImplCheck valOrPntr both
 	CIDRTranslator struct{}
 )
 

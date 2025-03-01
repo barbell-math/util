@@ -2,11 +2,18 @@ package translators
 
 import "strconv"
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinComplex64
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinComplex128
+
 type (
 	// Represents a cmd line argument that will be translated to a complex64 type.
+	//gen:ifaceImplCheck ifaceName Translator[complex64]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinComplex64 struct{}
 
 	// Represents a cmd line argument that will be translated to a complex128 type.
+	//gen:ifaceImplCheck ifaceName Translator[complex128]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinComplex128 struct{}
 )
 

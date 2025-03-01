@@ -6,10 +6,14 @@ import (
 	"github.com/barbell-math/util/src/customerr"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=EnvVar
+
 type (
 	// Represents a cmd line argument that will be treated as an environment
 	// variable. The value of the environment variable will be returned as the
 	// value for the argument.
+	//gen:ifaceImplCheck ifaceName Translator[string]
+	//gen:ifaceImplCheck valOrPntr both
 	EnvVar struct{}
 )
 

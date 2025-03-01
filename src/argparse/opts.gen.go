@@ -7,7 +7,7 @@ import (
 )
 
 // Returns a new opts struct initialized with the default values.
-func NewOpts[T translators.Translater[U], U any]() *opts[T, U] {
+func NewOpts[T translators.Translator[U], U any]() *opts[T, U] {
 	return &opts[T, U]{
 		argType:               ValueArgType,
 		shortName:             byte(0),

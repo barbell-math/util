@@ -5,9 +5,14 @@ import (
 	"github.com/barbell-math/util/src/math/basic"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Range
+
 type (
 	// A translator that imposes a range on the supplied cmd line argument.
-	Range[T basic.Number, U Translater[T]] struct {
+	//gen:ifaceImplCheck generics [int, BuiltinInt]
+	//gen:ifaceImplCheck ifaceName Translator[int]
+	//gen:ifaceImplCheck valOrPntr both
+	Range[T basic.Number, U Translator[T]] struct {
 		// Inclusive min
 		Min T
 		// Exclusive max

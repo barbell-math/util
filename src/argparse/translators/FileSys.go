@@ -9,16 +9,26 @@ import (
 
 //go:generate ../../../bin/structDefaultInit -struct OpenFile
 //go:generate ../../../bin/structDefaultInit -struct Mkdir
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Dir
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=File
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=Mkdir
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=OpenFile
 
 type (
 	// A translator that checks that the supplied directory exists.
+	//gen:ifaceImplCheck ifaceName Translator[string]
+	//gen:ifaceImplCheck valOrPntr both
 	Dir struct{}
 	// A translator that checks that the supplied file exists.
+	//gen:ifaceImplCheck ifaceName Translator[string]
+	//gen:ifaceImplCheck valOrPntr both
 	File struct{}
 
 	// A translator that makes the supplied directory along with all necessary
 	// parent directories.
 	//gen:structDefaultInit newReturns pntr
+	//gen:ifaceImplCheck ifaceName Translator[string]
+	//gen:ifaceImplCheck valOrPntr both
 	Mkdir struct {
 		// The permissions used to create all dirs and sub-dirs. See
 		// [os.MkdirAll] for reference.
@@ -30,6 +40,9 @@ type (
 	}
 	// A translator that makes the supplied file.
 	//gen:structDefaultInit newReturns pntr
+	//gen:ifaceImplCheck ifaceName Translator[*os.File]
+	//gen:ifaceImplCheck imports os
+	//gen:ifaceImplCheck valOrPntr both
 	OpenFile struct {
 		// The flags used to determine the file mode. See [os.RDONLY] and
 		// friends.

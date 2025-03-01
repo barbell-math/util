@@ -4,28 +4,44 @@ import (
 	"strconv"
 )
 
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinUint
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinUint8
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinUint16
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinUint32
+//go:generate ../../../bin/ifaceImplCheck -typeToCheck=BuiltinUint64
+
 type (
 	// Represents a cmd line argument that will be translated to a uint type.
+	//gen:ifaceImplCheck ifaceName Translator[uint]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinUint struct {
 		Base int
 	}
 
 	// Represents a cmd line argument that will be translated to a uint8 type.
+	//gen:ifaceImplCheck ifaceName Translator[uint8]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinUint8 struct {
 		Base int
 	}
 
 	// Represents a cmd line argument that will be translated to a uint16 type.
+	//gen:ifaceImplCheck ifaceName Translator[uint16]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinUint16 struct {
 		Base int
 	}
 
 	// Represents a cmd line argument that will be translated to a uint32 type.
+	//gen:ifaceImplCheck ifaceName Translator[uint32]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinUint32 struct {
 		Base int
 	}
 
 	// Represents a cmd line argument that will be translated to a uint64 type.
+	//gen:ifaceImplCheck ifaceName Translator[uint64]
+	//gen:ifaceImplCheck valOrPntr both
 	BuiltinUint64 struct {
 		Base int
 	}
